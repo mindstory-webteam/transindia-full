@@ -48,8 +48,8 @@ export default function AboutHero() {
               { value: "₹7000Cr", label: "Claims Settled" },
             ].map((s) => (
               <div key={s.label} className="about-stat">
-                <div className="about-stat-value">{s.value}<span>+</span></div>
-                <div className="about-stat-label">{s.label}</div>
+                <p className="about-stat-value">{s.value}<span>+</span></p>
+                <p className="about-stat-label">{s.label}</p>
               </div>
             ))}
           </div>
@@ -201,9 +201,9 @@ const CSS = `
   }
 
   .about-stat-value {
-    font-size: 28px;
-    font-weight: 800;
-    color: #0a1f6e;
+    font-size: 30px;
+    font-weight: bold;
+    color: #000;
     line-height: 1;
     margin-bottom: 6px;
   }
