@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'matterregular';
+    src: url('/matter-regular.woff2') format('woff2'),
+        url('/matter-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'matterregular', sans-serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-sora), "Sora", sans-serif;
+}
