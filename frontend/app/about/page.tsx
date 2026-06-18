@@ -1,5 +1,5 @@
 import InsurerPartners from "@/components/about/InsurerPartners";
-import OurMembers from "@/components/about/OurMembers";
+// import OurMembers from "@/components/about/OurMembers";
 import OurStory from "@/components/about/OurStory";
 import WhyChooseUs from "@/components/about/WhyChooseUs";
 import Navbar from "@/components/Navbar";
@@ -14,7 +14,7 @@ export default function Home() {
     <AboutHero />
     <OurStory/>
     <WhyChooseUs/>
-    <OurMembers/>
+    {/* <OurMembers/> */}
     <InsurerPartners/>
      <ConsultationCTA/>
      <TransindiaFooter />

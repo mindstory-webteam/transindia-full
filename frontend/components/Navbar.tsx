@@ -16,7 +16,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Services",          hasDropdown: true , href: "/our-services" },
   { label: "Renew existing policy",      },
-  { label: "Become an advisor" },
   { label: "About us",              href: "/about"     },
   { label: "Contact us",   href: "/contact-us"  },
 ];
@@ -74,7 +73,7 @@ export default function Navbar() {
 
           {/* ── CTA Buttons ── */}
           <div className="nav-actions">
-            <a href="https://www.transindiainsurance.com/partner/posp-home" className="btn-outline">Become a PoSP</a>
+            <a href="#" className="btn-outline">Become an advisor</a>
             <a href="/claims" className="btn-fill">Make a claim</a>
           </div>
 
