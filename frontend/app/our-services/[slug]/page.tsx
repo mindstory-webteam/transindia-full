@@ -1,25 +1,47 @@
 // FILE LOCATION: app/our-services/[slug]/page.tsx
-// insuranceData.ts is ONE level up at:  app/our-services/insuranceData.ts
-// InsuranceDetailPage.tsx is SAME folder: app/our-services/[slug]/InsuranceDetailPage.tsx
 
 import { notFound } from "next/navigation";
-import { INSURANCE_DATA } from "../insuranceData";          // ← ONE level up
-import InsuranceDetailPage from "./InsuranceDetailPage";    // ← same folder
+import { InsuranceDetailData } from "../insuranceData";
+import InsuranceDetailPage from "./InsuranceDetailPage";
 
-// ── Next.js 15: params is now a Promise ──────────────────────────────────
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.API_URL ||
+  "http://localhost:5000/api";
+
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// ── Static params for SSG ─────────────────────────────────────────────────
-export function generateStaticParams() {
-  return Object.keys(INSURANCE_DATA).map((slug) => ({ slug }));
+async function fetchServiceBySlug(slug: string): Promise<InsuranceDetailData | null> {
+  try {
+    const res = await fetch(`${API_BASE}/services/${slug}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    // API returns { success: true, data: { ...service } }
+    return (json?.data ?? null) as InsuranceDetailData | null;
+  } catch {
+    return null;
+  }
 }
 
-// ── SEO metadata ──────────────────────────────────────────────────────────
+export async function generateStaticParams() {
+  try {
+    const res = await fetch(`${API_BASE}/services`, { cache: "no-store" });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const list: Array<{ slug: string }> = Array.isArray(json?.data) ? json.data : [];
+    return list.map((s) => ({ slug: s.slug }));
+  } catch {
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
-  const data = INSURANCE_DATA[slug];
+  const data = await fetchServiceBySlug(slug);
   if (!data) return {};
   return {
     title: `${data.heroBadgeText} | TransIndia Insurance`,
@@ -27,10 +49,9 @@ export async function generateMetadata({ params }: Props) {
   };
 }
 
-// ── Page ──────────────────────────────────────────────────────────────────
 export default async function Page({ params }: Props) {
   const { slug } = await params;
-  const data = INSURANCE_DATA[slug];
+  const data = await fetchServiceBySlug(slug);
   if (!data) notFound();
   return <InsuranceDetailPage data={data} slug={slug} />;
 }

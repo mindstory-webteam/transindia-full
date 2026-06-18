@@ -1,160 +1,128 @@
-const Service = require("../models/Service");
-const path = require("path");
-const fs = require("fs");
+const Service    = require("../models/Service");
+const cloudinary = require("../config/cloudinary");
 
-// helper — build full image URL
-const imageUrl = (req, filename) =>
-  filename ? `${req.protocol}://${req.get("host")}/uploads/${filename}` : "";
+// ── Helper: delete a Cloudinary image by URL ─────────────────────────────────
+function extractPublicId(url) {
+  if (!url || !url.includes("cloudinary.com")) return null;
+  try {
+    const parts = url.split("/upload/");
+    if (parts.length < 2) return null;
+    const afterUpload = parts[1].replace(/^v\d+\//, "");
+    return afterUpload.replace(/\.[^/.]+$/, "");
+  } catch { return null; }
+}
 
-// ── GET /api/services  (public — all active, sorted) ─────────────────────
+async function deleteFromCloudinary(url) {
+  const publicId = extractPublicId(url);
+  if (!publicId) return;
+  try { await cloudinary.uploader.destroy(publicId); }
+  catch (err) { console.warn("Cloudinary delete:", err.message); }
+}
+
+// ── Shared body parser ───────────────────────────────────────────────────────
+function parseBody(rawBody) {
+  const body = { ...rawBody };
+  const jsonFields = ["heroStats","benefits","stages","faqs","calcFields","features","whyBody","withoutItems","withItems"];
+  jsonFields.forEach((f) => {
+    if (body[f] && typeof body[f] === "string") {
+      try { body[f] = JSON.parse(body[f]); } catch (_) {}
+    }
+  });
+  if (body.sortOrder !== undefined) body.sortOrder = Number(body.sortOrder);
+  if (body.isActive  !== undefined) body.isActive  = body.isActive === "true" || body.isActive === true;
+  return body;
+}
+
+// ── GET /api/services ────────────────────────────────────────────────────────
 exports.getServices = async (req, res) => {
   try {
     const filter = { isActive: true };
     if (req.query.type) filter.serviceType = req.query.type;
-
-    const services = await Service.find(filter)
-      .sort({ sortOrder: 1, createdAt: 1 })
-      .select("-__v");
-
+    const services = await Service.find(filter).sort({ sortOrder: 1, createdAt: 1 }).select("-__v");
     res.json({ success: true, count: services.length, data: services });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
 
-// ── GET /api/services/all  (admin — includes inactive) ───────────────────
+// ── GET /api/services/admin/all ──────────────────────────────────────────────
 exports.getAllServices = async (req, res) => {
   try {
     const services = await Service.find().sort({ sortOrder: 1, createdAt: 1 }).select("-__v");
     res.json({ success: true, count: services.length, data: services });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
 
-// ── GET /api/services/:slug ───────────────────────────────────────────────
+// ── GET /api/services/:slug ──────────────────────────────────────────────────
 exports.getServiceBySlug = async (req, res) => {
   try {
     const service = await Service.findOne({ slug: req.params.slug });
-    if (!service)
-      return res.status(404).json({ success: false, message: "Service not found" });
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
     res.json({ success: true, data: service });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
 
-// ── POST /api/services  (admin) ───────────────────────────────────────────
+// ── POST /api/services ───────────────────────────────────────────────────────
+// Images are uploaded directly from the browser to Cloudinary.
+// The body just contains the Cloudinary URL string in body.image (and icon fields).
+// No multer / file handling needed here.
 exports.createService = async (req, res) => {
   try {
-    const body = { ...req.body };
-
-    // Parse JSON arrays/objects sent as strings from FormData
-    const jsonFields = [
-      "heroStats","benefits","stages","faqs","calcFields",
-      "features","whyBody","withoutItems","withItems",
-    ];
-    jsonFields.forEach((f) => {
-      if (body[f] && typeof body[f] === "string") {
-        try { body[f] = JSON.parse(body[f]); } catch (_) {}
-      }
-    });
-
-    // If image uploaded via multer
-    if (req.file) body.image = `/uploads/${req.file.filename}`;
-
+    const body = parseBody(req.body);
     const service = await Service.create(body);
     res.status(201).json({ success: true, data: service });
   } catch (err) {
+    console.error("createService error:", err.message);
     res.status(400).json({ success: false, message: err.message });
   }
 };
 
-// ── PUT /api/services/:id  (admin) ────────────────────────────────────────
+// ── PUT /api/services/:id ────────────────────────────────────────────────────
 exports.updateService = async (req, res) => {
   try {
-    const body = { ...req.body };
+    const body = parseBody(req.body);
 
-    const jsonFields = [
-      "heroStats","benefits","stages","faqs","calcFields",
-      "features","whyBody","withoutItems","withItems",
-    ];
-    jsonFields.forEach((f) => {
-      if (body[f] && typeof body[f] === "string") {
-        try { body[f] = JSON.parse(body[f]); } catch (_) {}
-      }
-    });
-
-    if (req.file) {
-      // Delete old image if exists
+    // If the main image changed, delete the old one from Cloudinary
+    if (body.image !== undefined) {
       const old = await Service.findById(req.params.id);
-      if (old?.image) {
-        const oldPath = path.join(__dirname, "../", old.image);
-        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      if (old?.image && old.image !== body.image && old.image.includes("cloudinary.com")) {
+        await deleteFromCloudinary(old.image);
       }
-      body.image = `/uploads/${req.file.filename}`;
     }
 
-    const service = await Service.findByIdAndUpdate(req.params.id, body, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!service)
-      return res.status(404).json({ success: false, message: "Service not found" });
-
+    const service = await Service.findByIdAndUpdate(req.params.id, body, { new: true, runValidators: true });
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
     res.json({ success: true, data: service });
   } catch (err) {
+    console.error("updateService error:", err.message);
     res.status(400).json({ success: false, message: err.message });
   }
 };
 
-// ── DELETE /api/services/:id  (admin) ────────────────────────────────────
+// ── DELETE /api/services/:id ─────────────────────────────────────────────────
 exports.deleteService = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id);
-    if (!service)
-      return res.status(404).json({ success: false, message: "Service not found" });
-
-    // Remove uploaded image
-    if (service.image) {
-      const imgPath = path.join(__dirname, "../", service.image);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-    }
-
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
+    if (service.image) await deleteFromCloudinary(service.image);
     await service.deleteOne();
     res.json({ success: true, message: "Service deleted" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
 
-// ── PATCH /api/services/:id/toggle  (admin — toggle active) ──────────────
+// ── PATCH /api/services/:id/toggle ──────────────────────────────────────────
 exports.toggleActive = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id);
-    if (!service)
-      return res.status(404).json({ success: false, message: "Service not found" });
+    if (!service) return res.status(404).json({ success: false, message: "Service not found" });
     service.isActive = !service.isActive;
     await service.save();
     res.json({ success: true, data: service });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };
 
-// ── PATCH /api/services/reorder  (admin — update sort orders) ────────────
+// ── PATCH /api/services/admin/reorder ───────────────────────────────────────
 exports.reorderServices = async (req, res) => {
-  // body: [{ id, sortOrder }, ...]
   try {
-    const updates = req.body;
-    await Promise.all(
-      updates.map(({ id, sortOrder }) =>
-        Service.findByIdAndUpdate(id, { sortOrder })
-      )
-    );
+    await Promise.all(req.body.map(({ id, sortOrder }) => Service.findByIdAndUpdate(id, { sortOrder })));
     res.json({ success: true, message: "Order updated" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 };

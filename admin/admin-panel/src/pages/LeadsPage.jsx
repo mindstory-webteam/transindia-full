@@ -10,42 +10,388 @@ import {
   Sparkles,
   PhoneCall,
   CheckCircle2,
-  XCircle,
   Loader2,
+  Inbox,
 } from "lucide-react";
 
 const STATUS_OPTIONS = ["new", "contacted", "converted", "closed"];
 
-const STATUS_STYLES = {
-  new: "bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-200",
-  contacted: "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-200",
-  converted: "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200",
-  closed: "bg-slate-100 text-slate-600 ring-1 ring-inset ring-slate-200",
-};
+const styles = `
+  .leads-page {
+    padding: 4px;
+  }
+
+  .leads-header {
+    margin-bottom: 32px;
+  }
+
+  .leads-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+  }
+
+  .leads-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  @media (min-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .stat-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 12px;
+  }
+
+  .stat-icon.blue   { background: #eff6ff; color: #1d4ed8; }
+  .stat-icon.sky    { background: #f0f9ff; color: #0369a1; }
+  .stat-icon.amber  { background: #fffbeb; color: #b45309; }
+  .stat-icon.emerald{ background: #ecfdf5; color: #047857; }
+
+  .stat-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 0 0 4px 0;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 1024px) {
+    .toolbar {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .search-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .search-wrapper {
+      max-width: 300px;
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    padding: 10px 12px 10px 36px;
+    font-size: 14px;
+    color: #334155;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .search-input::placeholder { color: #94a3b8; }
+
+  .search-input:focus {
+    border-color: #60a5fa;
+    background: #ffffff;
+    box-shadow: 0 0 0 2px rgba(96,165,250,0.2);
+  }
+
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-btn {
+    border-radius: 9999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    cursor: pointer;
+    border: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .filter-btn.active {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .filter-btn.inactive {
+    background: #f1f5f9;
+    color: #475569;
+  }
+
+  .filter-btn.inactive:hover {
+    background: #e2e8f0;
+  }
+
+  /* Table */
+  .table-container {
+    overflow: hidden;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  .leads-table {
+    width: 100%;
+    min-width: 720px;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+  }
+
+  .leads-table thead {
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+  }
+
+  .leads-table thead th {
+    padding: 14px 20px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+  }
+
+  .leads-table thead th.text-right { text-align: right; }
+
+  .leads-table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.1s;
+  }
+
+  .leads-table tbody tr:last-child { border-bottom: none; }
+
+  .leads-table tbody tr:hover { background: #f8fafc; }
+
+  .leads-table td {
+    padding: 14px 20px;
+    color: #475569;
+    vertical-align: middle;
+  }
+
+  .td-name {
+    font-weight: 500;
+    color: #1e293b;
+  }
+
+  .td-email { color: #475569; }
+
+  .td-phone {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .td-message {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #64748b;
+  }
+
+  .td-actions { text-align: right; }
+
+  .actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #64748b;
+    transition: background 0.15s, color 0.15s;
+    text-decoration: none;
+  }
+
+  .action-btn:hover { background: #f1f5f9; color: #1d4ed8; }
+
+  .action-btn.delete:hover { background: #fff1f2; color: #dc2626; }
+
+  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Status select */
+  .status-select {
+    cursor: pointer;
+    border-radius: 9999px;
+    border: none;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .status-select:focus {
+    box-shadow: 0 0 0 2px rgba(96,165,250,0.4);
+  }
+
+  .status-new       { background: #eff6ff; color: #1d4ed8; box-shadow: inset 0 0 0 1px #bfdbfe; }
+  .status-contacted { background: #fffbeb; color: #b45309; box-shadow: inset 0 0 0 1px #fde68a; }
+  .status-converted { background: #ecfdf5; color: #047857; box-shadow: inset 0 0 0 1px #a7f3d0; }
+  .status-closed    { background: #f1f5f9; color: #475569; box-shadow: inset 0 0 0 1px #cbd5e1; }
+
+  /* Empty / Loading states */
+  .table-state-cell {
+    padding: 64px 20px;
+    text-align: center;
+    color: #94a3b8;
+  }
+
+  .table-state-cell .state-icon {
+    display: block;
+    margin: 0 auto 12px;
+  }
+
+  .table-state-cell .state-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    margin: 0 0 4px;
+  }
+
+  .table-state-cell .state-sub {
+    font-size: 12px;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .spin { animation: spin 0.8s linear infinite; }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #e2e8f0;
+    padding: 14px 20px;
+  }
+
+  .page-btn {
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #475569;
+    background: #ffffff;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .page-btn:hover:not(:disabled) { background: #f8fafc; }
+  .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .page-info {
+    font-size: 14px;
+    color: #64748b;
+  }
+`;
+
+function getStatusClass(status) {
+  const map = {
+    new: "status-new",
+    contacted: "status-contacted",
+    converted: "status-converted",
+    closed: "status-closed",
+  };
+  return map[status] || "status-new";
+}
 
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${accent}`}>
-        <Icon size={18} />
+    <div className="stat-card">
+      <div className={`stat-icon ${accent}`}>
+        <Icon size={20} />
       </div>
       <div>
-        <p className="text-xs font-medium text-slate-500">{label}</p>
-        <p className="text-xl font-semibold text-slate-900">{value ?? "—"}</p>
+        <p className="stat-label">{label}</p>
+        <p className="stat-value">{value ?? 0}</p>
       </div>
     </div>
-  );
-}
-
-function StatusBadge({ status }) {
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
-        STATUS_STYLES[status] || STATUS_STYLES.new
-      }`}
-    >
-      {status}
-    </span>
   );
 }
 
@@ -66,7 +412,6 @@ export default function LeadsPage() {
       const params = { page, limit };
       if (search.trim()) params.search = search.trim();
       if (statusFilter) params.status = statusFilter;
-
       const { data } = await api.get("/leads", { params });
       const list = data?.leads ?? data?.data ?? (Array.isArray(data) ? data : []);
       setLeads(list);
@@ -83,16 +428,14 @@ export default function LeadsPage() {
       const { data } = await api.get("/leads/stats");
       setStats(data?.stats ?? data ?? {});
     } catch {
-      // Stats are non-critical; fail silently
+      // non-critical
     }
   }, []);
 
-  useEffect(() => {
-    fetchStats();
-  }, [fetchStats]);
+  useEffect(() => { fetchStats(); }, [fetchStats]);
 
   useEffect(() => {
-    const t = setTimeout(fetchLeads, 300); // debounce search
+    const t = setTimeout(fetchLeads, 300);
     return () => clearTimeout(t);
   }, [fetchLeads]);
 
@@ -125,199 +468,151 @@ export default function LeadsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold text-slate-900">Leads</h1>
-        <p className="text-sm text-slate-500">Track and manage incoming quote requests.</p>
-      </div>
-
-      {/* Stats */}
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard
-          icon={Users}
-          label="Total Leads"
-          value={stats?.total}
-          accent="bg-indigo-50 text-indigo-600"
-        />
-        <StatCard
-          icon={Sparkles}
-          label="New"
-          value={stats?.new}
-          accent="bg-blue-50 text-blue-600"
-        />
-        <StatCard
-          icon={PhoneCall}
-          label="Contacted"
-          value={stats?.contacted}
-          accent="bg-amber-50 text-amber-600"
-        />
-        <StatCard
-          icon={CheckCircle2}
-          label="Converted"
-          value={stats?.converted}
-          accent="bg-emerald-50 text-emerald-600"
-        />
-      </div>
-
-      {/* Filters */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative w-full sm:max-w-xs">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setPage(1);
-              setSearch(e.target.value);
-            }}
-            placeholder="Search name, email, phone…"
-            className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-          />
+    <>
+      <style>{styles}</style>
+      <div className="leads-page">
+        <div className="leads-header">
+          <h1>Leads</h1>
+          <p>Track and manage incoming quote requests.</p>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => {
-              setPage(1);
-              setStatusFilter("");
-            }}
-            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-              statusFilter === ""
-                ? "bg-slate-900 text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            All
-          </button>
-          {STATUS_OPTIONS.map((s) => (
+        <div className="stats-grid">
+          <StatCard icon={Users}        label="Total Leads" value={stats?.total}     accent="blue" />
+          <StatCard icon={Sparkles}     label="New"         value={stats?.new}       accent="sky" />
+          <StatCard icon={PhoneCall}    label="Contacted"   value={stats?.contacted} accent="amber" />
+          <StatCard icon={CheckCircle2} label="Converted"   value={stats?.converted} accent="emerald" />
+        </div>
+
+        <div className="toolbar">
+          <div className="search-wrapper">
+            <span className="search-icon"><Search size={16} /></span>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+              placeholder="Search name, email, phone…"
+              className="search-input"
+            />
+          </div>
+
+          <div className="filter-buttons">
             <button
-              key={s}
-              onClick={() => {
-                setPage(1);
-                setStatusFilter(s);
-              }}
-              className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
-                statusFilter === s
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              onClick={() => { setPage(1); setStatusFilter(""); }}
+              className={`filter-btn ${statusFilter === "" ? "active" : "inactive"}`}
             >
-              {s}
+              All
             </button>
-          ))}
+            {STATUS_OPTIONS.map((s) => (
+              <button
+                key={s}
+                onClick={() => { setPage(1); setStatusFilter(s); }}
+                className={`filter-btn ${statusFilter === s ? "active" : "inactive"}`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Table */}
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-slate-200 bg-slate-50 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-4 py-3">Name</th>
-                <th className="px-4 py-3">Contact</th>
-                <th className="px-4 py-3">Message</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Date</th>
-                <th className="px-4 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {loading ? (
+        <div className="table-container">
+          <div className="table-scroll">
+            <table className="leads-table">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-slate-400">
-                    <Loader2 size={20} className="mx-auto mb-2 animate-spin" />
-                    Loading leads…
-                  </td>
+                  <th>Name</th>
+                  <th>Contact</th>
+                  <th>Message</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th className="text-right">Actions</th>
                 </tr>
-              ) : leads.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-slate-400">
-                    No leads found.
-                  </td>
-                </tr>
-              ) : (
-                leads.map((lead) => (
-                  <tr key={lead._id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium text-slate-800">{lead.name}</td>
-                    <td className="px-4 py-3 text-slate-600">
-                      <div>{lead.email}</div>
-                      <div className="text-xs text-slate-400">{lead.phone}</div>
-                    </td>
-                    <td className="max-w-xs truncate px-4 py-3 text-slate-500">
-                      {lead.message || "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <select
-                        value={lead.status || "new"}
-                        onChange={(e) => handleStatusChange(lead._id, e.target.value)}
-                        className={`cursor-pointer rounded-full border-none px-2.5 py-1 text-xs font-medium capitalize focus:outline-none focus:ring-1 focus:ring-indigo-400 ${
-                          STATUS_STYLES[lead.status] || STATUS_STYLES.new
-                        }`}
-                      >
-                        {STATUS_OPTIONS.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—"}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          to={`/leads/${lead._id}`}
-                          className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-indigo-600"
-                          title="View details"
-                        >
-                          <Eye size={16} />
-                        </Link>
-                        <button
-                          onClick={() => handleDelete(lead._id)}
-                          disabled={deletingId === lead._id}
-                          className="rounded-lg p-2 text-slate-500 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
-                          title="Delete lead"
-                        >
-                          {deletingId === lead._id ? (
-                            <Loader2 size={16} className="animate-spin" />
-                          ) : (
-                            <Trash2 size={16} />
-                          )}
-                        </button>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="table-state-cell">
+                        <Loader2 size={22} className="state-icon spin" />
+                        Loading leads…
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 disabled:opacity-40 hover:bg-slate-50"
-            >
-              Previous
-            </button>
-            <span className="text-sm text-slate-500">
-              Page {page} of {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm text-slate-600 disabled:opacity-40 hover:bg-slate-50"
-            >
-              Next
-            </button>
+                ) : leads.length === 0 ? (
+                  <tr>
+                    <td colSpan={6}>
+                      <div className="table-state-cell">
+                        <Inbox size={28} className="state-icon" style={{ color: "#cbd5e1" }} />
+                        <p className="state-title">No leads found</p>
+                        <p className="state-sub">New quote requests will show up here.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  leads.map((lead) => (
+                    <tr key={lead._id}>
+                      <td className="td-name">{lead.name}</td>
+                      <td>
+                        <div className="td-email">{lead.email}</div>
+                        <div className="td-phone">{lead.phone}</div>
+                      </td>
+                      <td className="td-message">{lead.message || "—"}</td>
+                      <td>
+                        <select
+                          value={lead.status || "new"}
+                          onChange={(e) => handleStatusChange(lead._id, e.target.value)}
+                          className={`status-select ${getStatusClass(lead.status)}`}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—"}</td>
+                      <td className="td-actions">
+                        <div className="actions-group">
+                          <Link to={`/leads/${lead._id}`} className="action-btn" title="View details">
+                            <Eye size={16} />
+                          </Link>
+                          <button
+                            onClick={() => handleDelete(lead._id)}
+                            disabled={deletingId === lead._id}
+                            className="action-btn delete"
+                            title="Delete lead"
+                          >
+                            {deletingId === lead._id
+                              ? <Loader2 size={16} className="spin" />
+                              : <Trash2 size={16} />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        )}
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="page-btn"
+              >
+                Previous
+              </button>
+              <span className="page-info">Page {page} of {totalPages}</span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                className="page-btn"
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
-}
+} 

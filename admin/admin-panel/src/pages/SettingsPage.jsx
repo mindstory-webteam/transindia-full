@@ -4,6 +4,168 @@ import { getMe, changePassword as apiChangePassword } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Loader2, User, Lock, Save, Mail, ShieldCheck } from "lucide-react";
 
+const styles = `
+  .settings-page {
+    max-width: 768px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  @media (min-width: 640px) {
+    .settings-page { padding: 24px; }
+  }
+
+  @media (min-width: 1024px) {
+    .settings-page { padding: 32px; }
+  }
+
+  .settings-header {
+    margin-bottom: 24px;
+  }
+
+  .settings-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0 0 4px 0;
+  }
+
+  .settings-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .settings-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  /* Card */
+  .settings-card {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+
+  .card-heading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: #4f46e5;
+  }
+
+  .card-heading h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  /* Loading */
+  .loading-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #94a3b8;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .spin { animation: spin 0.8s linear infinite; }
+
+  /* Account grid */
+  .account-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .account-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .account-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin-bottom: 6px;
+  }
+
+  .account-field p {
+    font-size: 14px;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  /* Password form */
+  .password-grid {
+    display: grid;
+    gap: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .password-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .field-full { grid-column: 1 / -1; }
+
+  .form-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .form-input:focus {
+    border-color: #818cf8;
+    box-shadow: 0 0 0 2px rgba(129,140,248,0.2);
+  }
+
+  /* Submit button */
+  .save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .save-btn:hover:not(:disabled) { background: #1e293b; }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+
 export default function SettingsPage() {
   const { admin: adminFromContext } = useAuth();
   const [admin, setAdmin] = useState(adminFromContext || null);
@@ -29,9 +191,7 @@ export default function SettingsPage() {
         if (isMounted) setLoadingMe(false);
       }
     })();
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, []);
 
   const handlePasswordSubmit = async (e) => {
@@ -57,123 +217,96 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
-        <p className="text-sm text-slate-500">Manage your admin account.</p>
-      </div>
-
-      <div className="space-y-6">
-        {/* Account info (read-only — no edit-profile endpoint exists yet) */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="mb-5 flex items-center gap-2">
-            <User size={17} className="text-indigo-600" />
-            <h2 className="text-base font-semibold text-slate-900">Account</h2>
-          </div>
-
-          {loadingMe ? (
-            <div className="flex items-center gap-2 text-sm text-slate-400">
-              <Loader2 size={15} className="animate-spin" />
-              Loading account info…
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  <User size={12} />
-                  Name
-                </label>
-                <p className="text-sm text-slate-800">{admin?.name || "—"}</p>
-              </div>
-              <div>
-                <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  <Mail size={12} />
-                  Email
-                </label>
-                <p className="text-sm text-slate-800">{admin?.email || "—"}</p>
-              </div>
-              {admin?.role && (
-                <div>
-                  <label className="mb-1.5 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-                    <ShieldCheck size={12} />
-                    Role
-                  </label>
-                  <p className="text-sm capitalize text-slate-800">{admin.role}</p>
-                </div>
-              )}
-            </div>
-          )}
+    <>
+      <style>{styles}</style>
+      <div className="settings-page">
+        <div className="settings-header">
+          <h1>Settings</h1>
+          <p>Manage your admin account.</p>
         </div>
 
-        {/* Password */}
-        <form
-          onSubmit={handlePasswordSubmit}
-          className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
-        >
-          <div className="mb-5 flex items-center gap-2">
-            <Lock size={17} className="text-indigo-600" />
-            <h2 className="text-base font-semibold text-slate-900">Change Password</h2>
-          </div>
+        <div className="settings-stack">
+          {/* Account Info */}
+          <div className="settings-card">
+            <div className="card-heading">
+              <User size={17} />
+              <h2>Account</h2>
+            </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="sm:col-span-2">
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Current password
-              </label>
-              <input
-                type="password"
-                value={passwords.currentPassword}
-                onChange={(e) =>
-                  setPasswords((p) => ({ ...p, currentPassword: e.target.value }))
-                }
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                required
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                New password
-              </label>
-              <input
-                type="password"
-                value={passwords.newPassword}
-                onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                required
-                minLength={6}
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Confirm new password
-              </label>
-              <input
-                type="password"
-                value={passwords.confirmPassword}
-                onChange={(e) =>
-                  setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))
-                }
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-                required
-                minLength={6}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={savingPassword}
-            className="mt-5 inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-          >
-            {savingPassword ? (
-              <Loader2 size={15} className="animate-spin" />
+            {loadingMe ? (
+              <div className="loading-row">
+                <Loader2 size={15} className="spin" />
+                Loading account info…
+              </div>
             ) : (
-              <Save size={15} />
+              <div className="account-grid">
+                <div className="account-field">
+                  <label><User size={12} /> Name</label>
+                  <p>{admin?.name || "—"}</p>
+                </div>
+                <div className="account-field">
+                  <label><Mail size={12} /> Email</label>
+                  <p>{admin?.email || "—"}</p>
+                </div>
+                {admin?.role && (
+                  <div className="account-field">
+                    <label><ShieldCheck size={12} /> Role</label>
+                    <p style={{ textTransform: "capitalize" }}>{admin.role}</p>
+                  </div>
+                )}
+              </div>
             )}
-            Update password
-          </button>
-        </form>
+          </div>
+
+          {/* Change Password */}
+          <form onSubmit={handlePasswordSubmit} className="settings-card">
+            <div className="card-heading">
+              <Lock size={17} />
+              <h2>Change Password</h2>
+            </div>
+
+            <div className="password-grid">
+              <div className="form-field field-full">
+                <label>Current password</label>
+                <input
+                  type="password"
+                  value={passwords.currentPassword}
+                  onChange={(e) => setPasswords((p) => ({ ...p, currentPassword: e.target.value }))}
+                  className="form-input"
+                  required
+                />
+              </div>
+              <div className="form-field">
+                <label>New password</label>
+                <input
+                  type="password"
+                  value={passwords.newPassword}
+                  onChange={(e) => setPasswords((p) => ({ ...p, newPassword: e.target.value }))}
+                  className="form-input"
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="form-field">
+                <label>Confirm new password</label>
+                <input
+                  type="password"
+                  value={passwords.confirmPassword}
+                  onChange={(e) => setPasswords((p) => ({ ...p, confirmPassword: e.target.value }))}
+                  className="form-input"
+                  required
+                  minLength={6}
+                />
+              </div>
+            </div>
+
+            <button type="submit" disabled={savingPassword} className="save-btn">
+              {savingPassword ? <Loader2 size={15} className="spin" /> : <Save size={15} />}
+              Update password
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

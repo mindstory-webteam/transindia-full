@@ -1,25 +1,30 @@
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
-  },
+// ── IMPORTANT: params must be a function (not a plain object) in
+//    multer-storage-cloudinary v4+. Using a plain object silently breaks
+//    the upload and req.file ends up undefined or has no .path / .secure_url
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => ({
+    folder: "transindia/services",
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+    // SVG must be uploaded as "raw" resource type, not "image"
+    resource_type: file.mimetype === "image/svg+xml" ? "raw" : "image",
+    transformation: [{ width: 1200, crop: "limit" }],
+  }),
 });
 
 const fileFilter = (req, file, cb) => {
-  const allowed = /jpeg|jpg|png|gif|svg|webp/;
-  const ext = allowed.test(path.extname(file.originalname).toLowerCase());
-  const mime = allowed.test(file.mimetype);
-  if (ext && mime) cb(null, true);
-  else cb(new Error("Only image files are allowed"), false);
+  const allowed = /jpeg|jpg|png|gif|svg\+xml|webp/;
+  const mimeOk = allowed.test(file.mimetype);
+  if (mimeOk) cb(null, true);
+  else cb(new Error("Only image files (jpg, png, gif, webp, svg) are allowed"), false);
 };
 
-module.exports = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+module.exports = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+});

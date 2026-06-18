@@ -90,26 +90,21 @@ export async function getAllServices(params = {}) {
 
 /**
  * Admin — create a new service.
- * Pass a plain object; this builds the multipart form for the optional image file.
- * e.g. createService({ title, slug, description, price, image: fileObjectOrNull })
+ * Images are uploaded straight to Cloudinary from the browser, so the
+ * service object already contains plain URL strings (image, whyImage,
+ * benefits[].icon, stages[].icon). We send it as JSON — the backend route
+ * uses express.json() + parseBody, so no FormData / multipart is needed.
  */
 export async function createService(serviceData) {
-  const formData = buildServiceFormData(serviceData);
-  const { data } = await api.post("/services", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post("/services", serviceData);
   return data;
 }
 
 /**
- * Admin — update an existing service by id.
- * Same shape as createService; only include `image` if a new file was chosen.
+ * Admin — update an existing service by id. Same JSON shape as createService.
  */
 export async function updateService(id, serviceData) {
-  const formData = buildServiceFormData(serviceData);
-  const { data } = await api.put(`/services/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.put(`/services/${id}`, serviceData);
   return data;
 }
 
@@ -131,40 +126,9 @@ export async function toggleServiceActive(id) {
 
 /**
  * Admin — reorder services.
- * Pass an array of { id, order } (or whatever shape your reorderServices
- * controller expects) — adjust the payload key below to match it exactly.
+ * Pass an array of { id, sortOrder } to match the reorderServices controller.
  */
 export async function reorderServices(order) {
   const { data } = await api.patch("/services/admin/reorder", { order });
   return data;
-}
-
-/**
- * Builds a FormData object from a plain service object.
- * - Skips null/undefined values
- * - Only appends `image` if it's a File (so editing without changing
- *   the image won't overwrite it with an empty value)
- * - Arrays/objects (e.g. faqs) are JSON-stringified
- */
-function buildServiceFormData(serviceData = {}) {
-  const formData = new FormData();
-
-  Object.entries(serviceData).forEach(([key, value]) => {
-    if (value === null || value === undefined) return;
-
-    if (key === "image") {
-      if (value instanceof File) {
-        formData.append("image", value);
-      }
-      return;
-    }
-
-    if (typeof value === "object") {
-      formData.append(key, JSON.stringify(value));
-    } else {
-      formData.append(key, value);
-    }
-  });
-
-  return formData;
 }
