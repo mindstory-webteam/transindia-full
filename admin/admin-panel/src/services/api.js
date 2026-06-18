@@ -132,3 +132,36 @@ export async function reorderServices(order) {
   const { data } = await api.patch("/services/admin/reorder", { order });
   return data;
 }
+
+/**
+ * Contact Forms
+ */
+export async function getGeneralQueries() {
+  const { data } = await api.get("/contact/general-query");
+  return data;
+}
+
+export async function deleteGeneralQuery(id) {
+  const { data } = await api.delete(`/contact/general-query/${id}`);
+  return data;
+}
+
+export async function getClaimSupports() {
+  const { data } = await api.get("/contact/claim-support");
+  return data;
+}
+
+export async function deleteClaimSupport(id) {
+  const { data } = await api.delete(`/contact/claim-support/${id}`);
+  return data;
+}
+
+export async function getComplaints() {
+  const { data } = await api.get("/contact/complaint");
+  return data;
+}
+
+export async function deleteComplaint(id) {
+  const { data } = await api.delete(`/contact/complaint/${id}`);
+  return data;
+}

@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, ShieldCheck, Users, Settings,
-  LogOut, Menu, X, ChevronRight,
+  LogOut, Menu, X, ChevronRight, MessageSquare, ChevronDown
 } from "lucide-react";
 
 const NAV = [
@@ -17,6 +17,7 @@ export default function Layout() {
   const { admin, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [contactOpen, setContactOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate("/login"); };
 
@@ -74,6 +75,63 @@ export default function Layout() {
               <Icon size={18} /> {label}
             </NavLink>
           ))}
+
+          {/* Contact Dropdown */}
+          <div style={{ marginTop: 2 }}>
+            <button
+              onClick={() => setContactOpen(!contactOpen)}
+              style={{
+                width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                padding: "10px 12px", borderRadius: 8, background: "transparent", border: "none",
+                color: "#94A3B8", fontSize: 14, fontWeight: 500, cursor: "pointer",
+                transition: "all 0.15s"
+              }}
+              onMouseEnter={e => e.currentTarget.style.background="#1E293B"}
+              onMouseLeave={e => e.currentTarget.style.background="transparent"}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <MessageSquare size={18} /> Contacts
+              </div>
+              <ChevronDown size={16} style={{ transform: contactOpen ? "rotate(180deg)" : "none", transition: "0.2s" }} />
+            </button>
+            {contactOpen && (
+              <div style={{ paddingLeft: 30, display: "flex", flexDirection: "column", gap: 2, marginTop: 2 }}>
+                <NavLink
+                  to="/contact/general-queries"
+                  onClick={() => setOpen(false)}
+                  style={({ isActive }) => ({
+                    padding: "8px 12px", borderRadius: 8, color: isActive ? "#fff" : "#94A3B8", fontSize: 13, background: isActive ? "#1E40AF" : "transparent", textDecoration: "none", transition: "all 0.15s"
+                  })}
+                  onMouseEnter={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="#1E293B"; }}
+                  onMouseLeave={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="transparent"; }}
+                >
+                  General Queries
+                </NavLink>
+                <NavLink
+                  to="/contact/claim-support"
+                  onClick={() => setOpen(false)}
+                  style={({ isActive }) => ({
+                    padding: "8px 12px", borderRadius: 8, color: isActive ? "#fff" : "#94A3B8", fontSize: 13, background: isActive ? "#1E40AF" : "transparent", textDecoration: "none", transition: "all 0.15s"
+                  })}
+                  onMouseEnter={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="#1E293B"; }}
+                  onMouseLeave={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="transparent"; }}
+                >
+                  Claim Support
+                </NavLink>
+                <NavLink
+                  to="/contact/complaints"
+                  onClick={() => setOpen(false)}
+                  style={({ isActive }) => ({
+                    padding: "8px 12px", borderRadius: 8, color: isActive ? "#fff" : "#94A3B8", fontSize: 13, background: isActive ? "#1E40AF" : "transparent", textDecoration: "none", transition: "all 0.15s"
+                  })}
+                  onMouseEnter={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="#1E293B"; }}
+                  onMouseLeave={e => { if (!e.currentTarget.style.background.includes("1E40AF")) e.currentTarget.style.background="transparent"; }}
+                >
+                  Complaints
+                </NavLink>
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Admin info + logout */}

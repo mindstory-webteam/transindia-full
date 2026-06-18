@@ -25,24 +25,43 @@ export default function ContactFormSection() {
   const tabs: TabType[] = ["General Query", "Claim Support", "Complaint"];
 
   const submit = async (
+    endpoint: string,
+    payload: any,
     setLoading: (v: boolean) => void,
     setDone: (v: boolean) => void,
     e: React.FormEvent
   ) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${API_BASE}/contact/${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        setDone(true);
+      } else {
+        const errData = await res.json();
+        alert("Error: " + (errData.message || "Failed to submit"));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting form. Please try again.");
+    }
     setLoading(false);
-    setDone(true);
   };
 
   const SuccessBox = ({ msg, note }: { msg: string; note?: string }) => (
     <div className="success-box">
-      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-        <circle cx="22" cy="22" r="21" stroke="#2145d6" strokeWidth="2" />
-        <path d="M13 22l7 7 11-13" stroke="#2145d6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-      <p className="success-msg">{msg}</p>
+      <div className="success-box-inner">
+        <svg width="24" height="24" viewBox="0 0 44 44" fill="none" style={{ flexShrink: 0 }}>
+          <circle cx="22" cy="22" r="21" stroke="#2145d6" strokeWidth="2" />
+          <path d="M13 22l7 7 11-13" stroke="#2145d6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        <p className="success-msg">{msg}</p>
+      </div>
       {note && <p className="success-note">{note}</p>}
     </div>
   );
@@ -96,7 +115,7 @@ export default function ContactFormSection() {
             gqDone ? (
               <SuccessBox msg="Thanks! We'll get back to you soon." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit(setGqLoading, setGqDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, e)} noValidate>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
@@ -106,7 +125,7 @@ export default function ContactFormSection() {
                   <div className="cfs-group">
                     <label className="cfs-label">Mobile Number</label>
                     <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                      value={gq.mobile} onChange={(e) => setGq({ ...gq, mobile: e.target.value })} required />
+                      value={gq.mobile} onChange={(e) => setGq({ ...gq, mobile: e.target.value.replace(/\D/g, '') })} required />
                   </div>
                 </div>
 
@@ -159,7 +178,7 @@ export default function ContactFormSection() {
             csDone ? (
               <SuccessBox msg="Your claim request has been submitted!" note="Our claims team will contact you within 24 hours." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit(setCsLoading, setCsDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, e)} noValidate>
                 {/* Emergency notice */}
                 <div className="cfs-emergency">
                   <img src="/images/contact-us/contact-form-section/Siren.svg" alt="Siren" style={{ flexShrink: 0, width: "20px", height: "20px" }} />
@@ -182,7 +201,7 @@ export default function ContactFormSection() {
                 <div className="cfs-group">
                   <label className="cfs-label">Mobile Number</label>
                   <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                    value={cs.mobile} onChange={(e) => setCs({ ...cs, mobile: e.target.value })} required />
+                    value={cs.mobile} onChange={(e) => setCs({ ...cs, mobile: e.target.value.replace(/\D/g, '') })} required />
                 </div>
 
                 <div className="cfs-group">
@@ -219,7 +238,7 @@ export default function ContactFormSection() {
             cpDone ? (
               <SuccessBox msg="Your complaint has been submitted!" note="Complaints resolved within 15 days as per IRDAI norms." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit(setCpLoading, setCpDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, e)} noValidate>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
@@ -236,7 +255,7 @@ export default function ContactFormSection() {
                 <div className="cfs-group">
                   <label className="cfs-label">Mobile Number</label>
                   <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                    value={cp.mobile} onChange={(e) => setCp({ ...cp, mobile: e.target.value })} required />
+                    value={cp.mobile} onChange={(e) => setCp({ ...cp, mobile: e.target.value.replace(/\D/g, '') })} required />
                 </div>
 
                 <div className="cfs-group">
@@ -544,11 +563,20 @@ export default function ContactFormSection() {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           gap: 14px;
-          padding: 48px 24px;
+          padding: 60px 24px;
           background: #f0f4ff;
           border-radius: 12px;
           text-align: center;
+          min-height: 350px;
+        }
+
+        .success-box-inner {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
         }
 
         .success-msg {

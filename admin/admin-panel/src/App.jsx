@@ -10,6 +10,9 @@ import ServiceFormPage from "./pages/ServiceFormPage";
 import LeadsPage from "./pages/LeadsPage";
 import LeadDetailPage from "./pages/LeadDetailPage";
 import SettingsPage from "./pages/SettingsPage";
+import GeneralQueryPage from "./pages/GeneralQueryPage";
+import ClaimSupportPage from "./pages/ClaimSupportPage";
+import ComplaintPage from "./pages/ComplaintPage";
 
 function PrivateRoute({ children }) {
   const { admin, loading } = useAuth();
@@ -37,6 +40,9 @@ export default function App() {
             <Route path="leads" element={<LeadsPage />} />
             <Route path="leads/:id" element={<LeadDetailPage />} />
             <Route path="settings" element={<SettingsPage />} />
+            <Route path="contact/general-queries" element={<GeneralQueryPage />} />
+            <Route path="contact/claim-support" element={<ClaimSupportPage />} />
+            <Route path="contact/complaints" element={<ComplaintPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
