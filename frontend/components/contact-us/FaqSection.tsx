@@ -205,7 +205,7 @@ function FAQRow({
         }
 
         .faq-row--open .faq-question {
-          color: #2145d6;
+          color: #e84b2a;
           font-weight: 700;
         }
 
