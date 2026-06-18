@@ -132,10 +132,11 @@ const grid2 = { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 };
 const grid3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 };
 
 // ── Defaults ──────────────────────────────────────────────────────────────────
+// NOTE: The premium calculator is a frontend-only feature now, so there are no
+// calc fields here — the website defines them in InsuranceDetailPage.tsx.
 const emptyBenefit = { iconBg: "bg-blue-100", emoji: "🛡️", icon: "", title: "", description: "" };
 const emptyStage   = { emoji: "📋", icon: "", age: "", ageColor: "text-blue-600", title: "", description: "", linkText: "", linkColor: "text-blue-700", bg: "bg-gradient-to-br from-blue-50 to-white" };
 const emptyFaq     = { question: "", answer: "" };
-const emptyField   = { label: "", type: "select", options: [], stateKey: "", defaultValue: "" };
 const emptyStat    = { value: "", label: "" };
 
 const DEFAULTS = {
@@ -155,19 +156,16 @@ const DEFAULTS = {
   ctaHeading: "", ctaBody: "",
   faqBadge: "COMMON QUESTIONS", faqTitle: "", faqTitleAccent: "FAQs",
   faqTitleAccentColor: "#EA580C", faqs: [],
-  calcCardTitle: "Get a quote", calcSubmitLabel: "Get My Quote", calcSubmitBg: "#1B8A3A",
-  calcFields: [],
 };
 
 function sanitize(data) {
-  const arrayFields = ["features", "heroStats", "whyBody", "benefits", "stages", "withoutItems", "withItems", "faqs", "calcFields"];
+  const arrayFields = ["features", "heroStats", "whyBody", "benefits", "stages", "withoutItems", "withItems", "faqs"];
   const result = { ...DEFAULTS, ...data };
   arrayFields.forEach((key) => { if (!Array.isArray(result[key])) result[key] = []; });
   result.heroStats  = result.heroStats.map((s) => ({ ...emptyStat, ...s }));
   result.benefits   = result.benefits.map((b) => ({ ...emptyBenefit, ...b }));
   result.stages     = result.stages.map((s) => ({ ...emptyStage, ...s }));
   result.faqs       = result.faqs.map((f) => ({ ...emptyFaq, ...f }));
-  result.calcFields = result.calcFields.map((f) => ({ ...emptyField, ...f, options: Array.isArray(f.options) ? f.options : [] }));
   return result;
 }
 
@@ -500,51 +498,6 @@ export default function ServiceFormPage() {
           </div>
         ))}
         <button type="button" onClick={() => addArr("faqs", { ...emptyFaq })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add FAQ</button>
-      </Section>
-
-      {/* ── CALCULATOR ── */}
-      <Section title="🧮 Quote Calculator Card" defaultOpen={false}>
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Card Title" value={form.calcCardTitle} onChange={(e) => set("calcCardTitle", e.target.value)} />
-          <Input label="Submit Button Label" value={form.calcSubmitLabel} onChange={(e) => set("calcSubmitLabel", e.target.value)} />
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 5 }}>Submit Button Color</label>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <input type="color" value={form.calcSubmitBg} onChange={(e) => set("calcSubmitBg", e.target.value)} style={{ width: 40, height: 36, border: "none", borderRadius: 6, cursor: "pointer" }} />
-              <input value={form.calcSubmitBg} onChange={(e) => set("calcSubmitBg", e.target.value)}
-                style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-            </div>
-          </div>
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 8 }}>Form Fields</span>
-        {form.calcFields.map((f, i) => (
-          <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-              <input value={f.label} onChange={(e) => setArrObj("calcFields", i, "label", e.target.value)} placeholder="Field label"
-                style={{ flex: 2, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              <select value={f.type} onChange={(e) => setArrObj("calcFields", i, "type", e.target.value)}
-                style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }}>
-                <option value="select">Select</option>
-                <option value="date">Date</option>
-              </select>
-              <input value={f.stateKey} onChange={(e) => setArrObj("calcFields", i, "stateKey", e.target.value)} placeholder="stateKey"
-                style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              <input value={f.defaultValue} onChange={(e) => setArrObj("calcFields", i, "defaultValue", e.target.value)} placeholder="Default"
-                style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              <button type="button" onClick={() => removeArr("calcFields", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
-            </div>
-            {f.type === "select" && (
-              <div>
-                <span style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Options (comma-separated):</span>
-                <input value={(f.options || []).join(",")}
-                  onChange={(e) => setArrObj("calcFields", i, "options", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
-                  placeholder="Option 1,Option 2,Option 3"
-                  style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              </div>
-            )}
-          </div>
-        ))}
-        <button type="button" onClick={() => addArr("calcFields", { ...emptyField })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add field</button>
       </Section>
 
       <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 8 }}>
