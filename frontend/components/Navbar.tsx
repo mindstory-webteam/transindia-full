@@ -22,7 +22,7 @@ const NAV_ITEMS: NavItem[] = [
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 
-export default function Navbar() {
+export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean }) {
   const [scrolled,   setScrolled]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -43,7 +43,7 @@ export default function Navbar() {
     <>
       <style>{CSS}</style>
 
-      <nav className={`nav-root${scrolled || mobileOpen ? " nav-scrolled" : ""}`}>
+      <nav className={`nav-root${alwaysSolid || scrolled || mobileOpen ? " nav-scrolled" : ""}`}>
         <div className="nav-inner">
 
           {/* ── Logo ── */}
