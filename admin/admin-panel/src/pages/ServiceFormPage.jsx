@@ -134,6 +134,11 @@ const grid3 = { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 };
 // ── Defaults ──────────────────────────────────────────────────────────────────
 // NOTE: The premium calculator is a frontend-only feature now, so there are no
 // calc fields here — the website defines them in InsuranceDetailPage.tsx.
+//
+// IMPORTANT: All styling fields (CSS classes + color values) stay in DEFAULTS
+// even though they are NO LONGER editable in the admin panel. They are still
+// submitted to the backend (via `...form`) using these default values, so the
+// client/website keeps rendering buttons, badges and accent colors correctly.
 const emptyBenefit = { iconBg: "bg-blue-100", emoji: "🛡️", icon: "", title: "", description: "" };
 const emptyStage   = { emoji: "📋", icon: "", age: "", ageColor: "text-blue-600", title: "", description: "", linkText: "", linkColor: "text-blue-700", bg: "bg-gradient-to-br from-blue-50 to-white" };
 const emptyFaq     = { question: "", answer: "" };
@@ -202,7 +207,8 @@ export default function ServiceFormPage() {
   }));
 
   // ── All images are already Cloudinary URLs stored in form state ──
-  // No FormData needed — just send plain JSON
+  // No FormData needed — just send plain JSON. Styling fields (colors / CSS
+  // classes) are carried along from DEFAULTS even though they aren't editable.
   const handleSubmit = async (e) => {
     e.preventDefault();
     // Check no images still uploading
@@ -256,18 +262,14 @@ export default function ServiceFormPage() {
         <div style={{ marginBottom: 14 }}>
           <Textarea label="Short Description (card) *" value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} required />
         </div>
+        {/* Removed: Badge CSS Classes, Button CSS Classes, Icon Bg CSS — only text + select kept */}
         <div style={{ ...grid3, marginBottom: 14 }}>
           <Input label="Badge Text" value={form.badge} onChange={(e) => set("badge", e.target.value)} placeholder="Popular" />
-          <Input label="Badge CSS Classes" value={form.badgeColor} onChange={(e) => set("badgeColor", e.target.value)} />
+          <Input label="Button Text" value={form.buttonText} onChange={(e) => set("buttonText", e.target.value)} />
           <Select label="Service Type" value={form.serviceType} onChange={(e) => set("serviceType", e.target.value)}>
             <option value="personal">Personal</option>
             <option value="corporate">Corporate</option>
           </Select>
-        </div>
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Button Text" value={form.buttonText} onChange={(e) => set("buttonText", e.target.value)} />
-          <Input label="Button CSS Classes" value={form.buttonColor} onChange={(e) => set("buttonColor", e.target.value)} />
-          <Input label="Icon Bg CSS" value={form.iconBg} onChange={(e) => set("iconBg", e.target.value)} placeholder="bg-slate-100" />
         </div>
         <div style={{ ...grid2, marginBottom: 14 }}>
           <Input label="Sort Order" type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", Number(e.target.value))} />
@@ -322,15 +324,10 @@ export default function ServiceFormPage() {
         <div style={{ marginBottom: 14 }}>
           <Textarea label="Hero Subtitle" value={form.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} rows={2} />
         </div>
-        <div style={{ ...grid3, marginBottom: 14 }}>
+        {/* Removed: Badge Bg Color, Badge Text Color, CTA Button Color, Accent Color 1 — only text + label kept */}
+        <div style={{ ...grid2, marginBottom: 14 }}>
           <Input label="Badge Text" value={form.heroBadgeText} onChange={(e) => set("heroBadgeText", e.target.value)} />
-          <Input label="Badge Bg Color" type="color" value={form.heroBadgeBg} onChange={(e) => set("heroBadgeBg", e.target.value)} />
-          <Input label="Badge Text Color" type="color" value={form.heroBadgeColor} onChange={(e) => set("heroBadgeColor", e.target.value)} />
-        </div>
-        <div style={{ ...grid3, marginBottom: 14 }}>
           <Input label="CTA Button Label" value={form.heroCtaLabel} onChange={(e) => set("heroCtaLabel", e.target.value)} />
-          <Input label="CTA Button Color" type="color" value={form.heroCtaBg} onChange={(e) => set("heroCtaBg", e.target.value)} />
-          <Input label="Accent Color 1" type="color" value={form.heroAccentColor} onChange={(e) => set("heroAccentColor", e.target.value)} />
         </div>
         <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Hero Stats</span>
         {form.heroStats.map((s, i) => (
@@ -347,11 +344,9 @@ export default function ServiceFormPage() {
 
       {/* ── WHY ── */}
       <Section title="❓ Why Section" defaultOpen={false}>
-        <div style={{ ...grid2, marginBottom: 14 }}>
+        {/* Removed: Accent Color — only text fields kept */}
+        <div style={{ ...grid3, marginBottom: 14 }}>
           <Input label="Badge Text" value={form.whyBadge} onChange={(e) => set("whyBadge", e.target.value)} placeholder="WHY LIFE INSURANCE?" />
-          <Input label="Accent Color" type="color" value={form.whyTitleAccentColor} onChange={(e) => set("whyTitleAccentColor", e.target.value)} />
-        </div>
-        <div style={{ ...grid2, marginBottom: 14 }}>
           <Input label="Title" value={form.whyTitle} onChange={(e) => set("whyTitle", e.target.value)} />
           <Input label="Title Accent" value={form.whyTitleAccent} onChange={(e) => set("whyTitleAccent", e.target.value)} />
         </div>
@@ -397,13 +392,12 @@ export default function ServiceFormPage() {
                 size={52}
               />
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                {/* Removed: Icon Bg CSS (bg-blue-100) styling field */}
                 <div style={{ display: "flex", gap: 8 }}>
                   <input value={b.emoji} onChange={(e) => setArrObj("benefits", i, "emoji", e.target.value)} placeholder="🛡️"
                     style={{ width: 46, padding: "7px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 18, textAlign: "center" }} />
                   <input value={b.title} onChange={(e) => setArrObj("benefits", i, "title", e.target.value)} placeholder="Benefit title"
                     style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                  <input value={b.iconBg} onChange={(e) => setArrObj("benefits", i, "iconBg", e.target.value)} placeholder="bg-blue-100"
-                    style={{ width: 120, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 12, outline: "none" }} />
                   <button type="button" onClick={() => removeArr("benefits", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
                 </div>
                 <textarea value={b.description} onChange={(e) => setArrObj("benefits", i, "description", e.target.value)} rows={2} placeholder="Description"

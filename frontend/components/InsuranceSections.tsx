@@ -95,20 +95,30 @@ function ClaimSection() {
           <p style={s.cardHeading}>How our claim process works</p>
 
           <div style={{ display: "flex", flexDirection: "column" }}>
-            {claimSteps.map((step, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "flex-start" }}>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginRight: 16 }}>
-                  <div style={s.stepIconWrap}>
-                    <img src={STEP_ICONS[i]} alt={step.title} width={26} height={26} style={{ objectFit: "contain", display: "block" }} />
+            {claimSteps.map((step, i) => {
+              const isLast = i === claimSteps.length - 1;
+              return (
+                <div key={i} style={{ display: "flex", alignItems: "flex-start" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginRight: 16 }}>
+                    <div style={s.stepIconWrap}>
+                      <img src={STEP_ICONS[i]} alt={step.title} width={26} height={26} style={{ objectFit: "contain", display: "block" }} />
+                    </div>
+                    {!isLast && <div style={s.connector} />}
                   </div>
-                  {i < claimSteps.length - 1 && <div style={s.connector} />}
+                  {/* The last step sits next to the absolute advisor figure, so its
+                      text needs room on the right to wrap instead of running under it.
+                      `.is-step-last` adds that right padding (removed on mobile, where
+                      the figure is hidden). */}
+                  <div
+                    className={isLast ? "is-step-last" : undefined}
+                    style={{ paddingBottom: isLast ? 0 : 24, paddingTop: 6 }}
+                  >
+                    <p style={s.stepTitle}>{step.title}</p>
+                    <p style={s.stepDesc}>{step.desc}</p>
+                  </div>
                 </div>
-                <div style={{ paddingBottom: i < claimSteps.length - 1 ? 24 : 0, paddingTop: 6 }}>
-                  <p style={s.stepTitle}>{step.title}</p>
-                  <p style={s.stepDesc}>{step.desc}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Settlement badge */}
@@ -354,6 +364,13 @@ const RESPONSIVE_CSS = `
     align-items: center;
   }
 
+  /* Keep the last claim step clear of the advisor figure (130px wide, offset 12px
+     from the card edge) so its text wraps onto two lines instead of sliding under
+     the image. */
+  .is-step-last {
+    padding-right: 140px;
+  }
+
   /* On tablet/mobile, stack to single column */
   @media (max-width: 860px) {
     .is-inner {
@@ -367,10 +384,14 @@ const RESPONSIVE_CSS = `
     }
   }
 
-  /* Hide decorative figure on small cards to prevent overflow clipping issues */
+  /* Hide decorative figure on small cards to prevent overflow clipping issues.
+     With the figure gone, the last step no longer needs the right padding. */
   @media (max-width: 560px) {
     .is-claim-figure {
       display: none !important;
+    }
+    .is-step-last {
+      padding-right: 0;
     }
   }
 
