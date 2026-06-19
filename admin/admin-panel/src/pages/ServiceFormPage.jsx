@@ -4,6 +4,20 @@ import { createService, updateService, getAllServices } from "../services/api";
 import toast from "react-hot-toast";
 import { Save, ArrowLeft, Plus, Trash2, ChevronDown, ChevronUp, X, Upload, Image as ImageIcon } from "lucide-react";
 
+// ── Brand-scoped styling (focus rings + primary button hover). Scoped to
+// .svc-form so it can't affect any other page. ───────────────────────────────
+const FORM_STYLES = `
+  .svc-form input:focus,
+  .svc-form textarea:focus,
+  .svc-form select:focus {
+    border-color: #F8B4A4 !important;
+    box-shadow: 0 0 0 3px rgba(241,90,62,0.15);
+  }
+  .svc-save { transition: background .15s ease, opacity .15s ease; }
+  .svc-save:hover:not(:disabled) { background: #DC4426 !important; }
+  .svc-add:hover { color: #DC4426 !important; }
+`;
+
 // ── Cloudinary unsigned upload ────────────────────────────────────────────────
 // Go to Cloudinary dashboard → Settings → Upload → Upload presets → Add unsigned preset
 // Set folder to "transindia/services" and copy the preset name here
@@ -70,7 +84,7 @@ function ImagePicker({ value, onChange, label = "Image", size = 80 }) {
           <>
             <img src={value} alt="preview" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
             {uploading && (
-              <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#2563EB", fontWeight: 700 }}>
+              <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#F15A3E", fontWeight: 700 }}>
                 Uploading…
               </div>
             )}
@@ -78,7 +92,7 @@ function ImagePicker({ value, onChange, label = "Image", size = 80 }) {
         ) : (
           <>
             {uploading
-              ? <span style={{ fontSize: 10, color: "#2563EB", fontWeight: 700 }}>Uploading…</span>
+              ? <span style={{ fontSize: 10, color: "#F15A3E", fontWeight: 700 }}>Uploading…</span>
               : <><Upload size={16} color="#94A3B8" /><span style={{ fontSize: 10, color: "#94A3B8", marginTop: 3 }}>Upload</span></>
             }
           </>
@@ -236,270 +250,273 @@ export default function ServiceFormPage() {
   );
 
   return (
-    <form onSubmit={handleSubmit}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <button type="button" onClick={() => navigate("/services")}
-          style={{ padding: "8px", background: "#fff", border: "1px solid var(--border)", borderRadius: 8, display: "flex" }}>
-          <ArrowLeft size={16} />
-        </button>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800 }}>{isEdit ? "Edit Service" : "Add Service"}</h1>
-          <p style={{ fontSize: 12, color: "#64748B" }}>Fill in all sections — they power the detail page on the website</p>
-        </div>
-        <button type="submit" disabled={saving}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 20px", background: "#1E40AF", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, opacity: saving ? 0.7 : 1 }}>
-          <Save size={15} /> {saving ? "Saving…" : "Save Service"}
-        </button>
-      </div>
-
-      {/* ── BASIC INFO ── */}
-      <Section title="🏷️ Basic Info">
-        <div style={{ ...grid2, marginBottom: 14 }}>
-          <Input label="Service Title *" value={form.title} onChange={(e) => set("title", e.target.value)} required placeholder="e.g. Life Insurance" />
-          <Input label="Slug *" value={form.slug} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} required placeholder="life-insurance" />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <Textarea label="Short Description (card) *" value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} required />
-        </div>
-        {/* Removed: Badge CSS Classes, Button CSS Classes, Icon Bg CSS — only text + select kept */}
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Badge Text" value={form.badge} onChange={(e) => set("badge", e.target.value)} placeholder="Popular" />
-          <Input label="Button Text" value={form.buttonText} onChange={(e) => set("buttonText", e.target.value)} />
-          <Select label="Service Type" value={form.serviceType} onChange={(e) => set("serviceType", e.target.value)}>
-            <option value="personal">Personal</option>
-            <option value="corporate">Corporate</option>
-          </Select>
-        </div>
-        <div style={{ ...grid2, marginBottom: 14 }}>
-          <Input label="Sort Order" type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", Number(e.target.value))} />
-          <Select label="Status" value={form.isActive ? "true" : "false"} onChange={(e) => set("isActive", e.target.value === "true")}>
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
-          </Select>
+    <>
+      <style>{FORM_STYLES}</style>
+      <form onSubmit={handleSubmit} className="svc-form">
+        {/* Header */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
+          <button type="button" onClick={() => navigate("/services")}
+            style={{ padding: "8px", background: "#fff", border: "1px solid var(--border)", borderRadius: 8, display: "flex" }}>
+            <ArrowLeft size={16} />
+          </button>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: 20, fontWeight: 800 }}>{isEdit ? "Edit Service" : "Add Service"}</h1>
+            <p style={{ fontSize: 12, color: "#64748B" }}>Fill in all sections — they power the detail page on the website</p>
+          </div>
+          <button type="submit" disabled={saving} className="svc-save"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "10px 20px", background: "#F15A3E", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 700, opacity: saving ? 0.7 : 1, boxShadow: "0 8px 18px rgba(241,90,62,0.24)" }}>
+            <Save size={15} /> {saving ? "Saving…" : "Save Service"}
+          </button>
         </div>
 
-        {/* Features */}
-        <div style={{ marginBottom: 16 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Features (card bullets)</span>
-          {form.features.map((f, i) => (
+        {/* ── BASIC INFO ── */}
+        <Section title="🏷️ Basic Info">
+          <div style={{ ...grid2, marginBottom: 14 }}>
+            <Input label="Service Title *" value={form.title} onChange={(e) => set("title", e.target.value)} required placeholder="e.g. Life Insurance" />
+            <Input label="Slug *" value={form.slug} onChange={(e) => set("slug", e.target.value.toLowerCase().replace(/\s+/g, "-"))} required placeholder="life-insurance" />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <Textarea label="Short Description (card) *" value={form.description} onChange={(e) => set("description", e.target.value)} rows={2} required />
+          </div>
+          {/* Removed: Badge CSS Classes, Button CSS Classes, Icon Bg CSS — only text + select kept */}
+          <div style={{ ...grid3, marginBottom: 14 }}>
+            <Input label="Badge Text" value={form.badge} onChange={(e) => set("badge", e.target.value)} placeholder="Popular" />
+            <Input label="Button Text" value={form.buttonText} onChange={(e) => set("buttonText", e.target.value)} />
+            <Select label="Service Type" value={form.serviceType} onChange={(e) => set("serviceType", e.target.value)}>
+              <option value="personal">Personal</option>
+              <option value="corporate">Corporate</option>
+            </Select>
+          </div>
+          <div style={{ ...grid2, marginBottom: 14 }}>
+            <Input label="Sort Order" type="number" value={form.sortOrder} onChange={(e) => set("sortOrder", Number(e.target.value))} />
+            <Select label="Status" value={form.isActive ? "true" : "false"} onChange={(e) => set("isActive", e.target.value === "true")}>
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </Select>
+          </div>
+
+          {/* Features */}
+          <div style={{ marginBottom: 16 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Features (card bullets)</span>
+            {form.features.map((f, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                <input value={f} onChange={(e) => setArr("features", i, e.target.value)} placeholder={`Feature ${i + 1}`}
+                  style={{ flex: 1, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                <button type="button" onClick={() => removeArr("features", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+              </div>
+            ))}
+            <button type="button" onClick={() => addArr("features", "")} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add feature</button>
+          </div>
+
+          {/* ── Main service image ── */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 20, padding: 14, background: "#F8FAFC", borderRadius: 10, border: "1px solid var(--border)" }}>
+            <ImagePicker
+              label="Service Card Image"
+              value={form.image}
+              onChange={(url) => set("image", url)}
+              size={100}
+            />
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Or paste image URL</span>
+              <input
+                value={form.image && !form.image.startsWith("blob:") ? form.image : ""}
+                onChange={(e) => set("image", e.target.value)}
+                placeholder="https://res.cloudinary.com/... or /images/life.svg"
+                style={{ width: "100%", padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }}
+              />
+              <p style={{ fontSize: 11, color: "#94A3B8", marginTop: 4 }}>
+                Upload via the picker (goes to Cloudinary) or paste an existing URL
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── HERO ── */}
+        <Section title="🦸 Hero Section">
+          <div style={{ ...grid2, marginBottom: 14 }}>
+            <Input label="Hero Title (rest)" value={form.heroRestTitle} onChange={(e) => set("heroRestTitle", e.target.value)} placeholder="Protect the people" />
+            <Input label="Hero Accent Word" value={form.heroAccentWord} onChange={(e) => set("heroAccentWord", e.target.value)} placeholder="who matter" />
+          </div>
+          <div style={{ marginBottom: 14 }}>
+            <Textarea label="Hero Subtitle" value={form.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} rows={2} />
+          </div>
+          {/* Removed: Badge Bg Color, Badge Text Color, CTA Button Color, Accent Color 1 — only text + label kept */}
+          <div style={{ ...grid2, marginBottom: 14 }}>
+            <Input label="Badge Text" value={form.heroBadgeText} onChange={(e) => set("heroBadgeText", e.target.value)} />
+            <Input label="CTA Button Label" value={form.heroCtaLabel} onChange={(e) => set("heroCtaLabel", e.target.value)} />
+          </div>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Hero Stats</span>
+          {form.heroStats.map((s, i) => (
             <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-              <input value={f} onChange={(e) => setArr("features", i, e.target.value)} placeholder={`Feature ${i + 1}`}
+              <input value={s.value} onChange={(e) => setArrObj("heroStats", i, "value", e.target.value)} placeholder="98.7%"
                 style={{ flex: 1, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              <button type="button" onClick={() => removeArr("features", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+              <input value={s.label} onChange={(e) => setArrObj("heroStats", i, "label", e.target.value)} placeholder="Claims Settled"
+                style={{ flex: 2, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+              <button type="button" onClick={() => removeArr("heroStats", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
             </div>
           ))}
-          <button type="button" onClick={() => addArr("features", "")} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add feature</button>
-        </div>
+          <button type="button" onClick={() => addArr("heroStats", { ...emptyStat })} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add stat</button>
+        </Section>
 
-        {/* ── Main service image ── */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 20, padding: 14, background: "#F8FAFC", borderRadius: 10, border: "1px solid var(--border)" }}>
-          <ImagePicker
-            label="Service Card Image"
-            value={form.image}
-            onChange={(url) => set("image", url)}
-            size={100}
-          />
-          <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 4 }}>Or paste image URL</span>
-            <input
-              value={form.image && !form.image.startsWith("blob:") ? form.image : ""}
-              onChange={(e) => set("image", e.target.value)}
-              placeholder="https://res.cloudinary.com/... or /images/life.svg"
-              style={{ width: "100%", padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }}
-            />
-            <p style={{ fontSize: 11, color: "#94A3B8", marginTop: 4 }}>
-              Upload via the picker (goes to Cloudinary) or paste an existing URL
-            </p>
+        {/* ── WHY ── */}
+        <Section title="❓ Why Section" defaultOpen={false}>
+          {/* Removed: Accent Color — only text fields kept */}
+          <div style={{ ...grid3, marginBottom: 14 }}>
+            <Input label="Badge Text" value={form.whyBadge} onChange={(e) => set("whyBadge", e.target.value)} placeholder="WHY LIFE INSURANCE?" />
+            <Input label="Title" value={form.whyTitle} onChange={(e) => set("whyTitle", e.target.value)} />
+            <Input label="Title Accent" value={form.whyTitleAccent} onChange={(e) => set("whyTitleAccent", e.target.value)} />
           </div>
-        </div>
-      </Section>
+          <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Body Paragraphs</span>
+          {form.whyBody.map((p, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+              <textarea value={p} onChange={(e) => setArr("whyBody", i, e.target.value)} rows={2}
+                style={{ flex: 1, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
+              <button type="button" onClick={() => removeArr("whyBody", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex", alignSelf: "flex-start" }}><Trash2 size={13} /></button>
+            </div>
+          ))}
+          <button type="button" onClick={() => addArr("whyBody", "")} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, marginBottom: 14, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add paragraph</button>
+          {/* Why section illustration image */}
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: 12, background: "#F8FAFC", borderRadius: 8, border: "1px solid var(--border)" }}>
+            <ImagePicker label="Why Section Image" value={form.whyImage} onChange={(url) => set("whyImage", url)} size={80} />
+            <div style={{ flex: 1 }}>
+              <span style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Shown beside the why-section text on the detail page</span>
+              <input value={form.whyImage && !form.whyImage.startsWith("blob:") ? form.whyImage : ""}
+                onChange={(e) => set("whyImage", e.target.value)} placeholder="Or paste URL"
+                style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+            </div>
+          </div>
+        </Section>
 
-      {/* ── HERO ── */}
-      <Section title="🦸 Hero Section">
-        <div style={{ ...grid2, marginBottom: 14 }}>
-          <Input label="Hero Title (rest)" value={form.heroRestTitle} onChange={(e) => set("heroRestTitle", e.target.value)} placeholder="Protect the people" />
-          <Input label="Hero Accent Word" value={form.heroAccentWord} onChange={(e) => set("heroAccentWord", e.target.value)} placeholder="who matter" />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <Textarea label="Hero Subtitle" value={form.heroSubtitle} onChange={(e) => set("heroSubtitle", e.target.value)} rows={2} />
-        </div>
-        {/* Removed: Badge Bg Color, Badge Text Color, CTA Button Color, Accent Color 1 — only text + label kept */}
-        <div style={{ ...grid2, marginBottom: 14 }}>
-          <Input label="Badge Text" value={form.heroBadgeText} onChange={(e) => set("heroBadgeText", e.target.value)} />
-          <Input label="CTA Button Label" value={form.heroCtaLabel} onChange={(e) => set("heroCtaLabel", e.target.value)} />
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Hero Stats</span>
-        {form.heroStats.map((s, i) => (
-          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-            <input value={s.value} onChange={(e) => setArrObj("heroStats", i, "value", e.target.value)} placeholder="98.7%"
-              style={{ flex: 1, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-            <input value={s.label} onChange={(e) => setArrObj("heroStats", i, "label", e.target.value)} placeholder="Claims Settled"
-              style={{ flex: 2, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-            <button type="button" onClick={() => removeArr("heroStats", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+        {/* ── BENEFITS ── */}
+        <Section title="✅ Benefits" defaultOpen={false}>
+          <div style={{ ...grid3, marginBottom: 14 }}>
+            <Input label="Section Badge" value={form.benefitsBadge} onChange={(e) => set("benefitsBadge", e.target.value)} />
+            <Input label="Title" value={form.benefitsTitle} onChange={(e) => set("benefitsTitle", e.target.value)} />
+            <Input label="Title Accent" value={form.benefitsTitleAccent} onChange={(e) => set("benefitsTitleAccent", e.target.value)} />
           </div>
-        ))}
-        <button type="button" onClick={() => addArr("heroStats", { ...emptyStat })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add stat</button>
-      </Section>
-
-      {/* ── WHY ── */}
-      <Section title="❓ Why Section" defaultOpen={false}>
-        {/* Removed: Accent Color — only text fields kept */}
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Badge Text" value={form.whyBadge} onChange={(e) => set("whyBadge", e.target.value)} placeholder="WHY LIFE INSURANCE?" />
-          <Input label="Title" value={form.whyTitle} onChange={(e) => set("whyTitle", e.target.value)} />
-          <Input label="Title Accent" value={form.whyTitleAccent} onChange={(e) => set("whyTitleAccent", e.target.value)} />
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: "#374151", display: "block", marginBottom: 6 }}>Body Paragraphs</span>
-        {form.whyBody.map((p, i) => (
-          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-            <textarea value={p} onChange={(e) => setArr("whyBody", i, e.target.value)} rows={2}
-              style={{ flex: 1, padding: "8px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
-            <button type="button" onClick={() => removeArr("whyBody", i)} style={{ padding: "8px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex", alignSelf: "flex-start" }}><Trash2 size={13} /></button>
+          <div style={{ marginBottom: 14 }}>
+            <Textarea label="Subtitle" value={form.benefitsSubtitle} onChange={(e) => set("benefitsSubtitle", e.target.value)} rows={2} />
           </div>
-        ))}
-        <button type="button" onClick={() => addArr("whyBody", "")} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, marginBottom: 14 }}><Plus size={12} />Add paragraph</button>
-        {/* Why section illustration image */}
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 16, padding: 12, background: "#F8FAFC", borderRadius: 8, border: "1px solid var(--border)" }}>
-          <ImagePicker label="Why Section Image" value={form.whyImage} onChange={(url) => set("whyImage", url)} size={80} />
-          <div style={{ flex: 1 }}>
-            <span style={{ fontSize: 11, color: "#64748B", display: "block", marginBottom: 4 }}>Shown beside the why-section text on the detail page</span>
-            <input value={form.whyImage && !form.whyImage.startsWith("blob:") ? form.whyImage : ""}
-              onChange={(e) => set("whyImage", e.target.value)} placeholder="Or paste URL"
-              style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-          </div>
-        </div>
-      </Section>
-
-      {/* ── BENEFITS ── */}
-      <Section title="✅ Benefits" defaultOpen={false}>
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Section Badge" value={form.benefitsBadge} onChange={(e) => set("benefitsBadge", e.target.value)} />
-          <Input label="Title" value={form.benefitsTitle} onChange={(e) => set("benefitsTitle", e.target.value)} />
-          <Input label="Title Accent" value={form.benefitsTitleAccent} onChange={(e) => set("benefitsTitleAccent", e.target.value)} />
-        </div>
-        <div style={{ marginBottom: 14 }}>
-          <Textarea label="Subtitle" value={form.benefitsSubtitle} onChange={(e) => set("benefitsSubtitle", e.target.value)} rows={2} />
-        </div>
-        {form.benefits.map((b, i) => (
-          <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
-            <div style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
-              {/* Icon image picker */}
-              <ImagePicker
-                label="Icon"
-                value={b.icon || ""}
-                onChange={(url) => setArrObj("benefits", i, "icon", url)}
-                size={52}
-              />
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                {/* Removed: Icon Bg CSS (bg-blue-100) styling field */}
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input value={b.emoji} onChange={(e) => setArrObj("benefits", i, "emoji", e.target.value)} placeholder="🛡️"
-                    style={{ width: 46, padding: "7px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 18, textAlign: "center" }} />
-                  <input value={b.title} onChange={(e) => setArrObj("benefits", i, "title", e.target.value)} placeholder="Benefit title"
-                    style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                  <button type="button" onClick={() => removeArr("benefits", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+          {form.benefits.map((b, i) => (
+            <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                {/* Icon image picker */}
+                <ImagePicker
+                  label="Icon"
+                  value={b.icon || ""}
+                  onChange={(url) => setArrObj("benefits", i, "icon", url)}
+                  size={52}
+                />
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  {/* Removed: Icon Bg CSS (bg-blue-100) styling field */}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={b.emoji} onChange={(e) => setArrObj("benefits", i, "emoji", e.target.value)} placeholder="🛡️"
+                      style={{ width: 46, padding: "7px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 18, textAlign: "center" }} />
+                    <input value={b.title} onChange={(e) => setArrObj("benefits", i, "title", e.target.value)} placeholder="Benefit title"
+                      style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                    <button type="button" onClick={() => removeArr("benefits", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+                  </div>
+                  <textarea value={b.description} onChange={(e) => setArrObj("benefits", i, "description", e.target.value)} rows={2} placeholder="Description"
+                    style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
                 </div>
-                <textarea value={b.description} onChange={(e) => setArrObj("benefits", i, "description", e.target.value)} rows={2} placeholder="Description"
-                  style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
               </div>
             </div>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArr("benefits", { ...emptyBenefit })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add benefit</button>
-      </Section>
+          ))}
+          <button type="button" onClick={() => addArr("benefits", { ...emptyBenefit })} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add benefit</button>
+        </Section>
 
-      {/* ── STAGES ── */}
-      <Section title="📅 Life Stages" defaultOpen={false}>
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Section Badge" value={form.stagesBadge} onChange={(e) => set("stagesBadge", e.target.value)} />
-          <Input label="Title" value={form.stagesTitle} onChange={(e) => set("stagesTitle", e.target.value)} />
-          <Input label="Title Accent" value={form.stagesTitleAccent} onChange={(e) => set("stagesTitleAccent", e.target.value)} />
-        </div>
-        {form.stages.map((s, i) => (
-          <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
-            <div style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
-              <ImagePicker label="Icon" value={s.icon || ""} onChange={(url) => setArrObj("stages", i, "icon", url)} size={52} />
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <input value={s.emoji} onChange={(e) => setArrObj("stages", i, "emoji", e.target.value)} placeholder="🎓"
-                    style={{ width: 46, padding: "7px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 18, textAlign: "center" }} />
-                  <input value={s.age} onChange={(e) => setArrObj("stages", i, "age", e.target.value)} placeholder="AGE 20-30"
-                    style={{ width: 100, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                  <input value={s.title} onChange={(e) => setArrObj("stages", i, "title", e.target.value)} placeholder="Stage title"
-                    style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                  <input value={s.linkText} onChange={(e) => setArrObj("stages", i, "linkText", e.target.value)} placeholder="Link text"
-                    style={{ width: 120, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                  <button type="button" onClick={() => removeArr("stages", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+        {/* ── STAGES ── */}
+        <Section title="📅 Life Stages" defaultOpen={false}>
+          <div style={{ ...grid3, marginBottom: 14 }}>
+            <Input label="Section Badge" value={form.stagesBadge} onChange={(e) => set("stagesBadge", e.target.value)} />
+            <Input label="Title" value={form.stagesTitle} onChange={(e) => set("stagesTitle", e.target.value)} />
+            <Input label="Title Accent" value={form.stagesTitleAccent} onChange={(e) => set("stagesTitleAccent", e.target.value)} />
+          </div>
+          {form.stages.map((s, i) => (
+            <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <div style={{ display: "flex", gap: 10, marginBottom: 8, alignItems: "flex-start" }}>
+                <ImagePicker label="Icon" value={s.icon || ""} onChange={(url) => setArrObj("stages", i, "icon", url)} size={52} />
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <input value={s.emoji} onChange={(e) => setArrObj("stages", i, "emoji", e.target.value)} placeholder="🎓"
+                      style={{ width: 46, padding: "7px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 18, textAlign: "center" }} />
+                    <input value={s.age} onChange={(e) => setArrObj("stages", i, "age", e.target.value)} placeholder="AGE 20-30"
+                      style={{ width: 100, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                    <input value={s.title} onChange={(e) => setArrObj("stages", i, "title", e.target.value)} placeholder="Stage title"
+                      style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                    <input value={s.linkText} onChange={(e) => setArrObj("stages", i, "linkText", e.target.value)} placeholder="Link text"
+                      style={{ width: 120, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                    <button type="button" onClick={() => removeArr("stages", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+                  </div>
+                  <textarea value={s.description} onChange={(e) => setArrObj("stages", i, "description", e.target.value)} rows={2} placeholder="Description"
+                    style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
                 </div>
-                <textarea value={s.description} onChange={(e) => setArrObj("stages", i, "description", e.target.value)} rows={2} placeholder="Description"
-                  style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
               </div>
             </div>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArr("stages", { ...emptyStage })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add stage</button>
-      </Section>
+          ))}
+          <button type="button" onClick={() => addArr("stages", { ...emptyStage })} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add stage</button>
+        </Section>
 
-      {/* ── WITH / WITHOUT ── */}
-      <Section title="⚖️ With / Without Comparison" defaultOpen={false}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-          <div>
-            <Input label="Without Title" value={form.withoutTitle} onChange={(e) => set("withoutTitle", e.target.value)} style={{ marginBottom: 8 }} />
-            {form.withoutItems.map((item, i) => (
-              <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-                <input value={item} onChange={(e) => setArr("withoutItems", i, e.target.value)} placeholder={`Item ${i + 1}`}
-                  style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                <button type="button" onClick={() => removeArr("withoutItems", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={12} /></button>
-              </div>
-            ))}
-            <button type="button" onClick={() => addArr("withoutItems", "")} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add</button>
-          </div>
-          <div>
-            <Input label="With Title" value={form.withTitle} onChange={(e) => set("withTitle", e.target.value)} style={{ marginBottom: 8 }} />
-            {form.withItems.map((item, i) => (
-              <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
-                <input value={item} onChange={(e) => setArr("withItems", i, e.target.value)} placeholder={`Item ${i + 1}`}
-                  style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-                <button type="button" onClick={() => removeArr("withItems", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={12} /></button>
-              </div>
-            ))}
-            <button type="button" onClick={() => addArr("withItems", "")} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add</button>
-          </div>
-        </div>
-        <div style={{ ...grid2, marginTop: 14 }}>
-          <Input label="CTA Heading" value={form.ctaHeading} onChange={(e) => set("ctaHeading", e.target.value)} />
-          <Input label="CTA Body" value={form.ctaBody} onChange={(e) => set("ctaBody", e.target.value)} />
-        </div>
-      </Section>
-
-      {/* ── FAQ ── */}
-      <Section title="❔ FAQs" defaultOpen={false}>
-        <div style={{ ...grid3, marginBottom: 14 }}>
-          <Input label="Badge" value={form.faqBadge} onChange={(e) => set("faqBadge", e.target.value)} />
-          <Input label="Title" value={form.faqTitle} onChange={(e) => set("faqTitle", e.target.value)} />
-          <Input label="Accent" value={form.faqTitleAccent} onChange={(e) => set("faqTitleAccent", e.target.value)} />
-        </div>
-        {form.faqs.map((f, i) => (
-          <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
-            <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
-              <input value={f.question} onChange={(e) => setArrObj("faqs", i, "question", e.target.value)} placeholder="Question"
-                style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
-              <button type="button" onClick={() => removeArr("faqs", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+        {/* ── WITH / WITHOUT ── */}
+        <Section title="⚖️ With / Without Comparison" defaultOpen={false}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+            <div>
+              <Input label="Without Title" value={form.withoutTitle} onChange={(e) => set("withoutTitle", e.target.value)} style={{ marginBottom: 8 }} />
+              {form.withoutItems.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                  <input value={item} onChange={(e) => setArr("withoutItems", i, e.target.value)} placeholder={`Item ${i + 1}`}
+                    style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                  <button type="button" onClick={() => removeArr("withoutItems", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={12} /></button>
+                </div>
+              ))}
+              <button type="button" onClick={() => addArr("withoutItems", "")} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add</button>
             </div>
-            <textarea value={f.answer} onChange={(e) => setArrObj("faqs", i, "answer", e.target.value)} rows={2} placeholder="Answer"
-              style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
+            <div>
+              <Input label="With Title" value={form.withTitle} onChange={(e) => set("withTitle", e.target.value)} style={{ marginBottom: 8 }} />
+              {form.withItems.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 6 }}>
+                  <input value={item} onChange={(e) => setArr("withItems", i, e.target.value)} placeholder={`Item ${i + 1}`}
+                    style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                  <button type="button" onClick={() => removeArr("withItems", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={12} /></button>
+                </div>
+              ))}
+              <button type="button" onClick={() => addArr("withItems", "")} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add</button>
+            </div>
           </div>
-        ))}
-        <button type="button" onClick={() => addArr("faqs", { ...emptyFaq })} style={{ fontSize: 12, color: "#2563EB", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4 }}><Plus size={12} />Add FAQ</button>
-      </Section>
+          <div style={{ ...grid2, marginTop: 14 }}>
+            <Input label="CTA Heading" value={form.ctaHeading} onChange={(e) => set("ctaHeading", e.target.value)} />
+            <Input label="CTA Body" value={form.ctaBody} onChange={(e) => set("ctaBody", e.target.value)} />
+          </div>
+        </Section>
 
-      <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 8 }}>
-        <button type="submit" disabled={saving}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "12px 28px", background: "#1E40AF", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, opacity: saving ? 0.7 : 1 }}>
-          <Save size={16} /> {saving ? "Saving…" : "Save Service"}
-        </button>
-      </div>
-    </form>
+        {/* ── FAQ ── */}
+        <Section title="❔ FAQs" defaultOpen={false}>
+          <div style={{ ...grid3, marginBottom: 14 }}>
+            <Input label="Badge" value={form.faqBadge} onChange={(e) => set("faqBadge", e.target.value)} />
+            <Input label="Title" value={form.faqTitle} onChange={(e) => set("faqTitle", e.target.value)} />
+            <Input label="Accent" value={form.faqTitleAccent} onChange={(e) => set("faqTitleAccent", e.target.value)} />
+          </div>
+          {form.faqs.map((f, i) => (
+            <div key={i} style={{ background: "#F8FAFC", borderRadius: 8, padding: 12, marginBottom: 8 }}>
+              <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                <input value={f.question} onChange={(e) => setArrObj("faqs", i, "question", e.target.value)} placeholder="Question"
+                  style={{ flex: 1, padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none" }} />
+                <button type="button" onClick={() => removeArr("faqs", i)} style={{ padding: "7px", background: "none", border: "1px solid #FEE2E2", borderRadius: 6, color: "#DC2626", display: "flex" }}><Trash2 size={13} /></button>
+              </div>
+              <textarea value={f.answer} onChange={(e) => setArrObj("faqs", i, "answer", e.target.value)} rows={2} placeholder="Answer"
+                style={{ width: "100%", padding: "7px 10px", border: "1.5px solid var(--border)", borderRadius: 7, fontSize: 13, outline: "none", resize: "vertical" }} />
+            </div>
+          ))}
+          <button type="button" onClick={() => addArr("faqs", { ...emptyFaq })} className="svc-add" style={{ fontSize: 12, color: "#F15A3E", background: "none", border: "none", display: "flex", alignItems: "center", gap: 4, fontWeight: 600, cursor: "pointer" }}><Plus size={12} />Add FAQ</button>
+        </Section>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: 8 }}>
+          <button type="submit" disabled={saving} className="svc-save"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "12px 28px", background: "#F15A3E", color: "#fff", border: "none", borderRadius: 8, fontSize: 14, fontWeight: 700, opacity: saving ? 0.7 : 1, boxShadow: "0 8px 18px rgba(241,90,62,0.24)" }}>
+            <Save size={16} /> {saving ? "Saving…" : "Save Service"}
+          </button>
+        </div>
+      </form>
+    </>
   );
 }

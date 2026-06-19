@@ -25,7 +25,8 @@ const styles = `
 
   .settings-header h1 {
     font-size: 22px;
-    font-weight: 600;
+    font-weight: 800;
+    letter-spacing: -0.02em;
     color: #0f172a;
     margin: 0 0 4px 0;
   }
@@ -44,11 +45,11 @@ const styles = `
 
   /* Card */
   .settings-card {
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    border: 1px solid #e8edf3;
     background: #ffffff;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
   }
 
   .card-heading {
@@ -56,12 +57,12 @@ const styles = `
     align-items: center;
     gap: 8px;
     margin-bottom: 20px;
-    color: #4f46e5;
+    color: #F15A3E;
   }
 
   .card-heading h2 {
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 700;
     color: #0f172a;
     margin: 0;
   }
@@ -131,7 +132,7 @@ const styles = `
   .form-input {
     width: 100%;
     border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e8edf3;
     padding: 8px 12px;
     font-size: 14px;
     color: #1e293b;
@@ -141,8 +142,8 @@ const styles = `
   }
 
   .form-input:focus {
-    border-color: #818cf8;
-    box-shadow: 0 0 0 2px rgba(129,140,248,0.2);
+    border-color: #F8B4A4;
+    box-shadow: 0 0 0 3px rgba(241,90,62,0.18);
   }
 
   /* Submit button */
@@ -151,18 +152,19 @@ const styles = `
     align-items: center;
     gap: 8px;
     margin-top: 20px;
-    border-radius: 8px;
-    background: #0f172a;
+    border-radius: 10px;
+    background: #F15A3E;
     color: #ffffff;
-    padding: 8px 16px;
+    padding: 9px 18px;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
     border: none;
     cursor: pointer;
+    box-shadow: 0 8px 18px rgba(241,90,62,0.24);
     transition: background 0.15s;
   }
 
-  .save-btn:hover:not(:disabled) { background: #1e293b; }
+  .save-btn:hover:not(:disabled) { background: #DC4426; }
   .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 
