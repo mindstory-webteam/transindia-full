@@ -202,7 +202,7 @@ const styles = `
 
   .leads-table {
     width: 100%;
-    min-width: 720px;
+    min-width: 860px;
     border-collapse: collapse;
     font-size: 14px;
     text-align: left;
@@ -251,6 +251,8 @@ const styles = `
     color: #94a3b8;
   }
 
+  .td-city { color: #475569; }
+
   .td-message {
     max-width: 200px;
     white-space: nowrap;
@@ -260,6 +262,24 @@ const styles = `
   }
 
   .td-actions { text-align: right; }
+
+  .dash { color: #cbd5e1; }
+
+  /* BMI badge */
+  .bmi-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .bmi-underweight { background: #fffbeb; color: #b45309; box-shadow: inset 0 0 0 1px #fde68a; }
+  .bmi-normal      { background: #ecfdf5; color: #047857; box-shadow: inset 0 0 0 1px #a7f3d0; }
+  .bmi-overweight  { background: #fff7ed; color: #c2410c; box-shadow: inset 0 0 0 1px #fed7aa; }
+  .bmi-obesity     { background: #fef2f2; color: #dc2626; box-shadow: inset 0 0 0 1px #fecaca; }
+  .bmi-none        { background: #f1f5f9; color: #94a3b8; box-shadow: inset 0 0 0 1px #e2e8f0; }
 
   .actions-group {
     display: flex;
@@ -381,6 +401,16 @@ function getStatusClass(status) {
   return map[status] || "status-new";
 }
 
+function getBmiBadgeClass(category) {
+  const map = {
+    Underweight: "bmi-underweight",
+    Normal: "bmi-normal",
+    Overweight: "bmi-overweight",
+    Obesity: "bmi-obesity",
+  };
+  return map[category] || "bmi-none";
+}
+
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
     <div className="stat-card">
@@ -412,7 +442,7 @@ export default function LeadsPage() {
       const params = { page, limit };
       if (search.trim()) params.search = search.trim();
       if (statusFilter) params.status = statusFilter;
-      const { data } = await api.get("/leads", { params });
+      const { data } = await api.get("/bmileads", { params });
       const list = data?.leads ?? data?.data ?? (Array.isArray(data) ? data : []);
       setLeads(list);
       setTotalPages(data?.totalPages ?? data?.pages ?? 1);
@@ -425,7 +455,7 @@ export default function LeadsPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const { data } = await api.get("/leads/stats");
+      const { data } = await api.get("/bmileads/stats");
       setStats(data?.stats ?? data ?? {});
     } catch {
       // non-critical
@@ -443,7 +473,7 @@ export default function LeadsPage() {
     const prev = leads;
     setLeads((curr) => curr.map((l) => (l._id === id ? { ...l, status: newStatus } : l)));
     try {
-      await api.patch(`/leads/${id}`, { status: newStatus });
+      await api.patch(`/bmileads/${id}`, { status: newStatus });
       toast.success("Status updated");
       fetchStats();
     } catch (err) {
@@ -456,7 +486,7 @@ export default function LeadsPage() {
     if (!window.confirm("Delete this lead? This action cannot be undone.")) return;
     setDeletingId(id);
     try {
-      await api.delete(`/leads/${id}`);
+      await api.delete(`/bmileads/${id}`);
       toast.success("Lead deleted");
       setLeads((curr) => curr.filter((l) => l._id !== id));
       fetchStats();
@@ -521,6 +551,8 @@ export default function LeadsPage() {
                 <tr>
                   <th>Name</th>
                   <th>Contact</th>
+                  <th>City</th>
+                  <th>BMI</th>
                   <th>Message</th>
                   <th>Status</th>
                   <th>Date</th>
@@ -530,7 +562,7 @@ export default function LeadsPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={8}>
                       <div className="table-state-cell">
                         <Loader2 size={22} className="state-icon spin" />
                         Loading leads…
@@ -539,7 +571,7 @@ export default function LeadsPage() {
                   </tr>
                 ) : leads.length === 0 ? (
                   <tr>
-                    <td colSpan={6}>
+                    <td colSpan={8}>
                       <div className="table-state-cell">
                         <Inbox size={28} className="state-icon" style={{ color: "#cbd5e1" }} />
                         <p className="state-title">No leads found</p>
@@ -554,6 +586,16 @@ export default function LeadsPage() {
                       <td>
                         <div className="td-email">{lead.email}</div>
                         <div className="td-phone">{lead.phone}</div>
+                      </td>
+                      <td className="td-city">{lead.city || <span className="dash">—</span>}</td>
+                      <td>
+                        {lead.bmi != null ? (
+                          <span className={`bmi-badge ${getBmiBadgeClass(lead.bmiCategory)}`}>
+                            {lead.bmi}{lead.bmiCategory ? ` · ${lead.bmiCategory}` : ""}
+                          </span>
+                        ) : (
+                          <span className="dash">—</span>
+                        )}
                       </td>
                       <td className="td-message">{lead.message || "—"}</td>
                       <td>
@@ -615,4 +657,4 @@ export default function LeadsPage() {
       </div>
     </>
   );
-} 
+}

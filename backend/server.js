@@ -30,6 +30,7 @@ app.use("/api/services", require("./src/routes/services"));
 app.use("/api/leads",    require("./src/routes/leads"));
 app.use("/api/faqs",     require("./src/routes/faqs"));
 app.use("/api/contact",  require("./src/routes/contact"));
+app.use("/api/bmileads", require("./src/routes/bmiLeads"));
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ message: "TransIndia API running ✅" }));
