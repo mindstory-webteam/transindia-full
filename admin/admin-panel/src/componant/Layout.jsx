@@ -10,7 +10,6 @@ const NAV = [
   { to: "/",         icon: LayoutDashboard, label: "Dashboard" },
   { to: "/services", icon: ShieldCheck,     label: "Services" },
   { to: "/leads",    icon: Users,           label: "Leads" },
-  { to: "/settings", icon: Settings,        label: "Settings" },
 ];
 
 export default function Layout() {
@@ -136,14 +135,20 @@ export default function Layout() {
 
         {/* Admin info + logout */}
         <div style={{ padding:"16px 12px", borderTop:"1px solid #1E293B" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12 }}>
-            <div style={{ width:36, height:36, borderRadius:"50%", background:"#1E40AF", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:700, fontSize:14 }}>
-              {admin?.name?.[0]?.toUpperCase()}
+          <div style={{ display:"flex", alignItems:"center", justifyContent: "space-between", marginBottom:12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, overflow: "hidden" }}>
+              <div style={{ flexShrink: 0, width:36, height:36, borderRadius:"50%", background:"#1E40AF", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontWeight:700, fontSize:14 }}>
+                {admin?.name?.[0]?.toUpperCase()}
+              </div>
+              <div style={{ overflow:"hidden" }}>
+                <p style={{ color:"#F1F5F9", fontSize:13, fontWeight:600, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{admin?.name}</p>
+                <p style={{ color:"#64748B", fontSize:11 }}>{admin?.role}</p>
+              </div>
             </div>
-            <div style={{ overflow:"hidden" }}>
-              <p style={{ color:"#F1F5F9", fontSize:13, fontWeight:600, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{admin?.name}</p>
-              <p style={{ color:"#64748B", fontSize:11 }}>{admin?.role}</p>
-            </div>
+            <NavLink to="/settings" onClick={() => setOpen(false)} style={({ isActive }) => ({ display: "flex", color: isActive ? "#fff" : "#94A3B8", flexShrink: 0, padding: 6, borderRadius: 6, background: isActive ? "#1E293B" : "transparent" })}
+                     onMouseEnter={e => e.currentTarget.style.color="#fff"} onMouseLeave={e => { if(!e.currentTarget.style.background.includes("1E293B")) e.currentTarget.style.color="#94A3B8" }}>
+              <Settings size={18} />
+            </NavLink>
           </div>
           <button
             onClick={handleLogout}
