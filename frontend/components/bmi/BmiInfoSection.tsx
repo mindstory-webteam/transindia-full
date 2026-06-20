@@ -44,7 +44,7 @@ export default function BmiInfoSection() {
                   Basically, BMI is the ratio of your weight to your height, indicating your overall health status. It serves as a quick and effective initial assessment to identify potential health risks associated with being outside the optimal weight range.
                 </p>
                 <p>
-                  A BMI of 25.0 or more is considered overweight, while the healthy range is 18.5 to 24.9. Maintaining your BMI within this healthy optimal range is critical for your well-being, as it significantly lowers the risk of chronic conditions such as heart disease, high blood pressure.
+                  A BMI of 25.0 or more is considered overweight, while the healthy range is 18.5 to 24.9. Maintaining your BMI within this healthy optimal range is critical for your well-being.
                 </p>
               </div>
             </div>
@@ -64,10 +64,10 @@ export default function BmiInfoSection() {
           </div>
 
           {/* BOTTOM: Split Section — Table Left, Calculation Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-start mt-4 sm:mt-6 lg:mt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-stretch mt-4 sm:mt-6 lg:mt-8">
 
             {/* LEFT: Table & Yellow card */}
-            <div className="w-full flex flex-col gap-3 sm:gap-4">
+            <div className="w-full flex flex-col h-full justify-between gap-4">
               <div className="rounded-2xl bg-white shadow-[0_4px_20px_-5px_rgba(0,0,0,0.05)] overflow-hidden border border-slate-200">
                 <table className="w-full text-sm text-[#1B2A4A] table-fixed">
                   <colgroup>
@@ -101,26 +101,26 @@ export default function BmiInfoSection() {
                 </table>
               </div>
 
-              {/* Yellow card */}
-              <div className="flex p-3 sm:p-4 rounded-xl bg-[#FFFBEB]">
-                <div className="text-[13px] sm:text-[14px] lg:text-[15px] text-[#5B6478] leading-snug">
-                  Alternatively, you can use a body mass index calculator online to know your BMI instantly.
-                </div>
-              </div>
+              {/* View Plan Button */}
+              <button className="w-full py-3.5 sm:py-4 px-6 rounded-xl bg-[#ec4f34] hover:bg-[#d6452d] text-white font-bold text-[15px] sm:text-[16px] transition-colors shadow-sm">
+                View Plan
+              </button>
             </div>
 
             {/* RIGHT: How BMI is Calculated */}
-            <div className="w-full flex flex-col gap-3 sm:gap-4">
-              <h2
-                className="text-[20px] sm:text-[22px] lg:text-[26px] font-extrabold text-[#1A1A2E] tracking-tight leading-tight"
-                style={{ fontFamily: 'var(--font-sora), "Sora", sans-serif' }}
-              >
-                How is BMI Calculated?
-              </h2>
+            <div className="w-full flex flex-col h-full justify-between gap-4">
+              <div>
+                <h2
+                  className="text-[20px] sm:text-[22px] lg:text-[26px] font-extrabold text-[#1A1A2E] tracking-tight leading-tight mb-3"
+                  style={{ fontFamily: 'var(--font-sora), "Sora", sans-serif' }}
+                >
+                  How is BMI Calculated?
+                </h2>
 
-              <p className="text-[#5B6478] text-[14px] sm:text-[15px] leading-snug text-justify">
-                BMI is calculated by dividing the weight of a person (in Kg) by the square of their height (in meters). Take a look at the BMI formula below:
-              </p>
+                <p className="text-[#5B6478] text-[14px] sm:text-[15px] leading-snug">
+                  BMI is calculated by dividing your weight (in Kg) by the square of your height (in meters):
+                </p>
+              </div>
 
               <div className="flex flex-col gap-3">
                 {/* Formula card */}
@@ -133,8 +133,14 @@ export default function BmiInfoSection() {
                 {/* Example card */}
                 <div className="flex p-3 sm:p-4 rounded-xl bg-[#F2FBF5]">
                   <div className="text-[13px] sm:text-[14px] lg:text-[15px] text-[#5B6478] leading-snug">
-                    Let&apos;s understand the BMI formula with the following example: Suppose your weight is 55 Kg and your height is 1.65m. In this case, you can calculate your BMI by entering your height and weight into the BMI formula, i.e.{" "}
-                    <span className="font-semibold text-[#1B2A4A]">BMI = 55 / (1.65 x 1.65) = 55 / 2.72 = 20.2</span>.
+                    For example: If your weight is 55 Kg and height is 1.65m, your BMI is: <span className="font-semibold text-[#1B2A4A]">55 / (1.65 x 1.65) = 20.2</span>.
+                  </div>
+                </div>
+
+                {/* Yellow card */}
+                <div className="flex p-3 sm:p-4 rounded-xl bg-[#FFFBEB]">
+                  <div className="text-[13px] sm:text-[14px] lg:text-[15px] text-[#5B6478] leading-snug">
+                    Alternatively, you can use a body mass index calculator online to know your BMI instantly.
                   </div>
                 </div>
               </div>

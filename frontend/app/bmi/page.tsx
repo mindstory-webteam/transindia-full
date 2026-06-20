@@ -3,6 +3,7 @@ import TransindiaFooter from "@/components/Transindiafooter";
 import BmiCalculator from "@/components/bmi/BmiCalculator";
 import WellnessTips from "@/components/bmi/Wellnesstips";
 import BmiFaq from "@/components/bmi/BmiFaq";
+import ConsultationCTA from "@/components/about/ConsultationCTA";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <BmiCalculator />
       <WellnessTips />
       <BmiFaq />
+      <ConsultationCTA/>
       <TransindiaFooter/>
     </div>
   );

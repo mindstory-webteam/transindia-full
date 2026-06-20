@@ -932,7 +932,7 @@ export default function BmiCalculator() {
   }
 
   return (
-    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-28 sm:pt-22 lg:pt-6 pb-10 sm:pb-16 lg:pb-[50px]">
+    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-18 sm:pt-22 lg:pt-6 pb-10 sm:pb-16 lg:pb-[50px]">
       
       {/* UNIFIED CONTAINER: Intro + Calculator + Meter all left-aligned */}
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-5 lg:py-20">
