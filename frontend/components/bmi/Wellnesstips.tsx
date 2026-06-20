@@ -12,7 +12,8 @@ import {
 
 interface TipCard {
   icon: LucideIcon;
-  iconBg: string;
+  iconBg: string;    // richer pastel - the actual icon box bg
+  zoneBg: string;    // lighter pastel - the whole top section bg
   iconColor: string;
   title: string;
   description: string;
@@ -21,7 +22,8 @@ interface TipCard {
 const tips: TipCard[] = [
   {
     icon: Salad,
-    iconBg: "bg-[#FFE4D6]",
+    zoneBg: "bg-[#FFF0E6]",
+    iconBg: "bg-[#FFC7A1]",
     iconColor: "text-[#1B2A4A]",
     title: "Embrace Healthy Habits",
     description:
@@ -29,7 +31,8 @@ const tips: TipCard[] = [
   },
   {
     icon: Activity,
-    iconBg: "bg-[#FFE4D6]",
+    zoneBg: "bg-[#E6FAF0]",
+    iconBg: "bg-[#A3F1C4]",
     iconColor: "text-[#1B2A4A]",
     title: "Stay Active",
     description:
@@ -37,7 +40,8 @@ const tips: TipCard[] = [
   },
   {
     icon: GlassWater,
-    iconBg: "bg-[#D1FADF]",
+    zoneBg: "bg-[#F0EBFE]",
+    iconBg: "bg-[#CDB4F6]",
     iconColor: "text-[#1B2A4A]",
     title: "Stay Hydrated and Sleep Well",
     description:
@@ -45,7 +49,8 @@ const tips: TipCard[] = [
   },
   {
     icon: HeartHandshake,
-    iconBg: "bg-[#D1FADF]",
+    zoneBg: "bg-[#FFF8E1]",
+    iconBg: "bg-[#FFE082]",
     iconColor: "text-[#1B2A4A]",
     title: "Explore Wellness Programs",
     description:
@@ -53,7 +58,8 @@ const tips: TipCard[] = [
   },
   {
     icon: Target,
-    iconBg: "bg-[#EBE2FB]",
+    zoneBg: "bg-[#E6F4FF]",
+    iconBg: "bg-[#93C5FD]",
     iconColor: "text-[#1B2A4A]",
     title: "Set Realistic Goals",
     description:
@@ -61,7 +67,8 @@ const tips: TipCard[] = [
   },
   {
     icon: LineChart,
-    iconBg: "bg-[#EBE2FB]",
+    zoneBg: "bg-[#FFF0F5]",
+    iconBg: "bg-[#F9A8C9]",
     iconColor: "text-[#1B2A4A]",
     title: "Monitor Your Progress",
     description:
@@ -71,9 +78,9 @@ const tips: TipCard[] = [
 
 export default function WellnessTips() {
   return (
-    <section className="w-full bg-white py-10">
-      <div className="mx-auto max-w-6xl px-4">
-        <h2 className="mb-6 text-xl font-bold text-gray-900 sm:text-2xl">
+    <section className="w-full bg-[#ECF3FE] pt-2 pb-10 sm:pb-16 lg:pb-20">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <h2 className="mb-6 sm:mb-8 text-2xl sm:text-3xl lg:text-[32px] font-extrabold text-[#1B2A4A] tracking-tight">
           Tips to Improve Your BMI
         </h2>
 
@@ -83,19 +90,26 @@ export default function WellnessTips() {
             return (
               <div
                 key={tip.title}
-                className="flex flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md"
               >
-                <div
-                  className={`mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ${tip.iconBg}`}
-                >
-                  <Icon className={`h-8 w-8 ${tip.iconColor}`} strokeWidth={1.5} />
+                {/* TOP: pastel zone inset 10px from card edges */}
+                <div className={`m-[10px] rounded-[14px] p-3 ${tip.zoneBg}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`p-[10px] rounded-[12px] ${tip.iconBg}`}>
+                      <Icon className={`h-8 w-8 ${tip.iconColor}`} strokeWidth={1.5} />
+                    </div>
+                    <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900 leading-snug">
+                      {tip.title}
+                    </h3>
+                  </div>
                 </div>
-                <h3 className="mb-2 text-base font-semibold text-gray-900">
-                  {tip.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-gray-500">
-                  {tip.description}
-                </p>
+
+                {/* BOTTOM: plain white content */}
+                <div className="bg-white px-6 py-5">
+                  <p className="text-sm leading-relaxed text-gray-500">
+                    {tip.description}
+                  </p>
+                </div>
               </div>
             );
           })}

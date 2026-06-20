@@ -665,7 +665,7 @@ function BmiGaugeSection({ bmi }: { bmi: number | null }) {
   const needleAngle = bmi !== null ? bmiToAngle(bmi) : 0;
 
   return (
-    <div className="relative w-full max-w-[432px] mx-auto h-[217px] mb-8 overflow-visible">
+    <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[432px] mx-auto h-[140px] sm:h-[180px] md:h-[190px] lg:h-[217px] mb-6 sm:mb-8 overflow-visible">
       <Image 
         src="/images/bmi/bmi-calculator-image.svg" 
         alt="BMI Gauge Track" 
@@ -729,8 +729,8 @@ function BmiFormSection({
   setIsCm
 }: BmiFormSectionProps) {
   return (
-    <section className="w-full max-w-md rounded-2xl bg-white p-10 ">
-      <h1 className="mb-8 text-3xl font-extrabold text-[#1B2A4A]">Calculate your BMI</h1>
+    <section className="w-full max-w-md rounded-2xl bg-white p-6 sm:p-8 lg:p-10">
+      <h1 className="mb-6 sm:mb-8 text-2xl sm:text-3xl font-extrabold text-[#1B2A4A]">Calculate your BMI</h1>
 
       {/* Gender selector */}
       <div className="mb-6 flex items-center gap-8">
@@ -849,7 +849,7 @@ interface BmiResultsSectionProps {
 
 function BmiResultsSection({ result, actionLabel }: BmiResultsSectionProps) {
   return (
-    <section className="flex w-full max-w-xl flex-col items-center">
+    <section className="flex w-full max-w-xl lg:max-w-lg flex-col items-center">
       {!result ? (
         <div className="mb-12 text-center flex flex-col items-center">
           <h2 className="text-2xl font-extrabold text-[#1B2A4A]">
@@ -932,59 +932,63 @@ export default function BmiCalculator() {
   }
 
   return (
-    <div className="min-h-[80vh] w-full bg-white relative overflow-hidden pt-32 pb-10">
+    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-28 sm:pt-22 lg:pt-6 pb-10 sm:pb-16 lg:pb-[50px]">
       
-      {/* TOP SECTION: BREADCRUMB & INTRO */}
-      <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12">
-        <nav className="mb-8 flex items-center gap-2 text-[13px] font-medium text-[#5B6478]">
+      {/* UNIFIED CONTAINER: Intro + Calculator + Meter all left-aligned */}
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-5 lg:py-20">
+
+        {/* Breadcrumb */}
+        <nav className="mb-6 hidden lg:flex items-center gap-2 text-[13px]  font-medium text-[#5B6478]">
           <a href="/" className="hover:text-[#2C6FE8] hover:underline">Home</a>
           <span className="text-[#8E97A6]">&gt;</span>
           <span className="text-[#1B2A4A] font-semibold">BMI Calculator</span>
         </nav>
-        
-        <div className="max-w-3xl">
+
+        {/* Heading & Description */}
+        <div className="mb-8 sm:mb-10">
           <h1 
-            className="mb-5 text-3xl font-extrabold text-[#1B2A4A] md:text-4xl lg:text-[42px] leading-tight" 
+            className="mb-4 text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold text-[#1B2A4A] leading-tight" 
             style={{ fontFamily: 'var(--font-sora), "Sora", sans-serif' }}
           >
             BMI Calculator
           </h1>
-          <p className="text-[17px] text-[#535862] leading-relaxed">
+          <p className="text-[15px] sm:text-[17px] text-[#535862] leading-relaxed max-w-2xl">
             Body Mass Index (BMI) is a simple tool that is generally used to estimate the total amount of body fat. Calculate your BMI to determine if you are at a healthy weight.
           </p>
         </div>
-      </div>
 
-      <div className="relative z-10 flex w-full flex-col items-center justify-center gap-12 lg:flex-row lg:items-start lg:gap-20 px-6">
-        {/* LEFT COLUMN: FORM or RESULT CARD */}
-        {!result ? (
-          <BmiFormSection
-            gender={gender}
-            setGender={setGender}
-            height={height}
-            setHeight={setHeight}
-            heightInch={heightInch}
-            setHeightInch={setHeightInch}
-            weight={weight}
-            setWeight={setWeight}
-            error={error}
-            onCalculate={handleCalculate}
-            isCm={isCm}
-            setIsCm={setIsCm}
-          />
-        ) : (
-          <BmiResultCard
-            result={result}
-            onRecalculate={() => setResult(null)}
-            onViewPlans={() => setShowPlans(true)}
-          />
-        )}
+        {/* Form + Meter side by side */}
+        <div className="flex flex-col items-start gap-8 pt-8 lg:pt-12 md:flex-row md:items-start md:gap-16 lg:gap-20">
+          {/* LEFT: FORM or RESULT CARD */}
+          {!result ? (
+            <BmiFormSection
+              gender={gender}
+              setGender={setGender}
+              height={height}
+              setHeight={setHeight}
+              heightInch={heightInch}
+              setHeightInch={setHeightInch}
+              weight={weight}
+              setWeight={setWeight}
+              error={error}
+              onCalculate={handleCalculate}
+              isCm={isCm}
+              setIsCm={setIsCm}
+            />
+          ) : (
+            <BmiResultCard
+              result={result}
+              onRecalculate={() => setResult(null)}
+              onViewPlans={() => setShowPlans(true)}
+            />
+          )}
 
-        {/* RIGHT COLUMN: GAUGE AND RESULTS */}
-        <BmiResultsSection 
-          result={result} 
-          actionLabel={actionLabel} 
-        />
+          {/* RIGHT: GAUGE AND RESULTS */}
+          <BmiResultsSection 
+            result={result} 
+            actionLabel={actionLabel} 
+          />
+        </div>
       </div>
 
       {/* BOTTOM INFO SECTION */}
