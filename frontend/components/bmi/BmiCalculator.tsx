@@ -729,7 +729,7 @@ function BmiFormSection({
   setIsCm
 }: BmiFormSectionProps) {
   return (
-    <section className="w-full max-w-md rounded-2xl bg-white p-10 shadow-[0_20px_60px_-15px_rgba(30,41,82,0.25)]">
+    <section className="w-full max-w-md rounded-2xl bg-white p-10 ">
       <h1 className="mb-8 text-3xl font-extrabold text-[#1B2A4A]">Calculate your BMI</h1>
 
       {/* Gender selector */}
@@ -851,11 +851,16 @@ function BmiResultsSection({ result, actionLabel }: BmiResultsSectionProps) {
   return (
     <section className="flex w-full max-w-xl flex-col items-center">
       {!result ? (
-        <h2 className="mb-6 text-center text-2xl font-extrabold text-[#1B2A4A]">
-          Take the first step towards better health!
-        </h2>
+        <div className="mb-12 text-center flex flex-col items-center">
+          <h2 className="text-2xl font-extrabold text-[#1B2A4A]">
+            Take the first step towards better health!
+          </h2>
+          <p className="mt-2 text-[15px] text-[#5B6478] max-w-sm">
+            Calculate your BMI to understand your fitness level and find the perfect health plan.
+          </p>
+        </div>
       ) : (
-        <div className="mb-6 rounded-xl bg-[#F0F4FA] px-12 py-3 text-center">
+        <div className="mb-12 rounded-xl bg-[#F0F4FA] px-12 py-3 text-center">
           <h2 className="text-2xl font-extrabold text-[#1B2A4A]">
             Your BMI = {result.bmi}
           </h2>
@@ -927,7 +932,7 @@ export default function BmiCalculator() {
   }
 
   return (
-    <div className="min-h-[80vh] w-full bg-gradient-to-br from-[#EAF3FB] via-[#EEF2FB] to-[#F1EEFB] relative overflow-hidden pt-32 pb-10">
+    <div className="min-h-[80vh] w-full bg-white relative overflow-hidden pt-32 pb-10">
       
       {/* TOP SECTION: BREADCRUMB & INTRO */}
       <div className="relative z-10 mx-auto max-w-6xl px-6 pb-12">

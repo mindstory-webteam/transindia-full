@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 // ── Types ───────────────────────────────────────────────────────────────────
 
 interface Feature {
@@ -409,9 +411,9 @@ export default function BmiSection() {
               </p>
             </div>
 
-            <button className="bmi-learn" type="button">
+            <Link href="/bmi" className="bmi-learn">
               Learn more <ArrowRightIcon />
-            </button>
+            </Link>
           </div>
 
         </div>

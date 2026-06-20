@@ -1,5 +1,5 @@
 import Banner from "@/components/Banner";
-import BmiSection from "@/components/BmiSection";
+import BmiSection from "@/components/bmi/BmiSection";
 import CtaSection from "@/components/Ctasection";
 import ExploreToolsSection from "@/components/ExploreTools";
 import InsurancePlansSection from "@/components/InsurancePlansSection";

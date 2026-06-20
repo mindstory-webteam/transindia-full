@@ -139,16 +139,10 @@ export default function Layout() {
           <div style={{ padding: "22px 18px 16px", borderBottom: "1px solid var(--ti-line)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
               <div style={{
-                width: 38, height: 38, borderRadius: 11,
-                background: "linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                boxShadow: "0 6px 14px rgba(241,90,62,0.32)", flexShrink: 0,
+                flexShrink: 0,
               }}>
-                <ShieldCheck size={21} color="#fff" />
-              </div>
-              <div>
-                <p style={{ color: "var(--ti-ink)", fontWeight: 800, fontSize: 15, letterSpacing: "-0.01em" }}>TransIndia</p>
-                <p style={{ color: "var(--ti-muted)", fontSize: 11, fontWeight: 500 }}>Admin Panel</p>
+                <img src="/logo/transindia.png" alt="TransIndia Logo" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
               </div>
             </div>
           </div>
