@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -9,6 +9,13 @@ interface NavItem {
   label: string;
   hasDropdown?: boolean;
   href?: string;
+}
+
+interface Service {
+  _id: string;
+  name: string;
+  slug: string;
+  isActive: boolean;
 }
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
@@ -25,6 +32,27 @@ const NAV_ITEMS: NavItem[] = [
 export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean }) {
   const [scrolled,   setScrolled]   = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [services, setServices] = useState<Service[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch services on mount
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch("/api/services");
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch services:", error);
+      }
+    };
+
+    fetchServices();
+  }, []);
 
   // Switch from transparent → solid on scroll
   useEffect(() => {
@@ -38,6 +66,18 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <>
@@ -59,14 +99,49 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
           <ul className="nav-links">
             {NAV_ITEMS.map((item) => (
               <li key={item.label}>
-                <Link href={item.href || "#"} className="nav-link">
-                  {item.label}
-                  {item.hasDropdown && (
-                    <svg viewBox="0 0 20 20" fill="currentColor" width={13} height={13} style={{ opacity: 0.65, flexShrink: 0 }}>
-                      <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
-                    </svg>
-                  )}
-                </Link>
+                {item.hasDropdown ? (
+                  <div 
+                    className="nav-dropdown-wrapper"
+                    ref={dropdownRef}
+                    onMouseEnter={() => setDropdownOpen(true)}
+                    onMouseLeave={() => setDropdownOpen(false)}
+                  >
+                    <button 
+                      className="nav-link nav-dropdown-trigger"
+                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      aria-expanded={dropdownOpen}
+                    >
+                      {item.label}
+                      <svg viewBox="0 0 20 20" fill="currentColor" width={13} height={13} style={{ opacity: 0.65, flexShrink: 0, transition: "transform 0.2s" }}>
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+                      </svg>
+                    </button>
+
+                    {/* ── Dropdown Menu ── */}
+                    {dropdownOpen && (
+                      <div className="nav-dropdown-menu">
+                        {services.length > 0 ? (
+                          services.map((service) => (
+                            <Link
+                              key={service._id}
+                              href={`/our-services/${service.slug}`}
+                              className="dropdown-item"
+                              onClick={() => setDropdownOpen(false)}
+                            >
+                              {service.name}
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="dropdown-item disabled">No services available</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Link href={item.href || "#"} className="nav-link">
+                    {item.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -100,14 +175,47 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
         {mobileOpen && (
           <div className="nav-drawer">
             {NAV_ITEMS.map((item) => (
-              <Link key={item.label} href={item.href || "#"} className="drawer-link" onClick={() => setMobileOpen(false)}>
-                {item.label}
-                {item.hasDropdown && (
-                  <svg viewBox="0 0 20 20" fill="currentColor" width={14} height={14} style={{ opacity: 0.5 }}>
-                    <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
-                  </svg>
+              <div key={item.label}>
+                {item.hasDropdown ? (
+                  <>
+                    <button
+                      className="drawer-link drawer-dropdown-trigger"
+                      onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                      aria-expanded={mobileDropdownOpen}
+                    >
+                      {item.label}
+                      <svg viewBox="0 0 20 20" fill="currentColor" width={14} height={14} style={{ opacity: 0.5, transform: mobileDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+                      </svg>
+                    </button>
+                    {mobileDropdownOpen && (
+                      <div className="drawer-dropdown-menu">
+                        {services.length > 0 ? (
+                          services.map((service) => (
+                            <Link
+                              key={service._id}
+                              href={`/our-services/${service.slug}`}
+                              className="drawer-dropdown-item"
+                              onClick={() => {
+                                setMobileOpen(false);
+                                setMobileDropdownOpen(false);
+                              }}
+                            >
+                              {service.name}
+                            </Link>
+                          ))
+                        ) : (
+                          <div className="drawer-dropdown-item disabled">No services available</div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link href={item.href || "#"} className="drawer-link" onClick={() => setMobileOpen(false)}>
+                    {item.label}
+                  </Link>
                 )}
-              </Link>
+              </div>
             ))}
             <div className="drawer-actions">
               <a href="https://www.transindiainsurance.com/partner/posp-home" className="btn-outline drawer-btn">Become a PoSP</a>
@@ -132,7 +240,7 @@ const CSS = `
     left: 0;
     right: 0;
     z-index: 200;
-     font-family: var(--font-sora), "Sora", sans-serif;
+    font-family: var(--font-sora), "Sora", sans-serif;
 
     background: transparent;
     border-bottom: 1px solid transparent;
@@ -200,11 +308,80 @@ const CSS = `
     border-radius: 8px;
     white-space: nowrap;
     transition: background 0.18s, color 0.18s;
+    border: none;
+    background: none;
+    cursor: pointer;
   }
 
   .nav-link:hover {
     background: rgba(255,255,255,0.09);
     color: #fff;
+  }
+
+  /* ── Dropdown Wrapper ── */
+  .nav-dropdown-wrapper {
+    position: relative;
+  }
+
+  .nav-dropdown-trigger {
+    position: relative;
+  }
+
+  /* ── Dropdown Menu ── */
+  .nav-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #07174A;
+    border: 1px solid rgba(56,189,248,0.15);
+    border-radius: 8px;
+    min-width: 220px;
+    margin-top: 8px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: dropdown-open 0.2s ease forwards;
+    z-index: 300;
+  }
+
+  @keyframes dropdown-open {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .dropdown-item {
+    padding: 12px 16px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    transition: background 0.15s, color 0.15s;
+    display: block;
+    white-space: nowrap;
+    overflow: text-overflow;
+  }
+
+  .dropdown-item:last-child {
+    border-bottom: none;
+  }
+
+  .dropdown-item:hover {
+    background: rgba(56,189,248,0.12);
+    color: #fff;
+  }
+
+  .dropdown-item.disabled {
+    color: rgba(255,255,255,0.4);
+    cursor: default;
+    pointer-events: none;
   }
 
   /* ── CTA Buttons ── */
@@ -256,8 +433,6 @@ const CSS = `
     justify-content: center;
   }
 
- 
-
   /* ── Hamburger — hidden on desktop ── */
   .nav-hamburger {
     display: none;
@@ -285,7 +460,6 @@ const CSS = `
     padding: 8px 24px 24px;
     border-top: 1px solid rgba(255,255,255,0.08);
     background: #07174A;
-    /* Smooth open — max-height animation */
     animation: drawer-open 0.22s ease forwards;
   }
 
@@ -305,10 +479,57 @@ const CSS = `
     font-weight: 500;
     border-bottom: 1px solid rgba(255,255,255,0.06);
     font-family: 'matterregular', sans-serif;
+    border: none;
+    background: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: color 0.15s;
   }
 
   .drawer-link:last-of-type {
     border-bottom: none;
+  }
+
+  .drawer-link:hover {
+    color: #fff;
+  }
+
+  /* ── Mobile Dropdown Menu ── */
+  .drawer-dropdown-menu {
+    display: flex;
+    flex-direction: column;
+    background: rgba(56,189,248,0.08);
+    border-radius: 6px;
+    margin: 8px 0;
+    overflow: hidden;
+    animation: drawer-open 0.2s ease forwards;
+  }
+
+  .drawer-dropdown-item {
+    padding: 10px 16px;
+    padding-left: 32px;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    border: none;
+    background: none;
+    display: block;
+    transition: background 0.15s, color 0.15s;
+    text-align: left;
+    font-family: 'matterregular', sans-serif;
+  }
+
+  .drawer-dropdown-item:hover {
+    background: rgba(56,189,248,0.15);
+    color: #fff;
+  }
+
+  .drawer-dropdown-item.disabled {
+    color: rgba(255,255,255,0.4);
+    cursor: default;
+    pointer-events: none;
   }
 
   .drawer-actions {
@@ -351,7 +572,9 @@ const CSS = `
   /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
     .nav-drawer { animation: none; }
-    .nav-root, .btn-fill, .btn-outline, .nav-link, .nav-hamburger {
+    .nav-dropdown-menu { animation: none; }
+    .drawer-dropdown-menu { animation: none; }
+    .nav-root, .btn-fill, .btn-outline, .nav-link, .nav-hamburger, .dropdown-item {
       transition: none !important;
     }
   }
