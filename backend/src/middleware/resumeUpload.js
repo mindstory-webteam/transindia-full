@@ -7,8 +7,8 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: "transindia/resumes",
-      // PDF documents must be uploaded as 'raw' to avoid Cloudinary 403 restrictions on auto/image parsing
       resource_type: "raw", 
+      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}.pdf`,
     };
   },
 });
