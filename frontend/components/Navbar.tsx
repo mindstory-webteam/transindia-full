@@ -13,7 +13,8 @@ interface NavItem {
 
 interface Service {
   _id: string;
-  name: string;
+  title: string;  // matches MongoDB ServiceSchema field
+  name?: string;  // fallback in case some docs use name
   slug: string;
   isActive: boolean;
 }
@@ -21,81 +22,159 @@ interface Service {
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Services",          hasDropdown: true , href: "/our-services" },
-  { label: "Renew existing policy", href: "/renew" },
-  { label: "About us",              href: "/about"     },
-  { label: "Contact us",   href: "/contact-us"  },
+  { label: "Services",              hasDropdown: true, href: "/our-services" },
+  { label: "Renew existing policy", href: "/renew"      },
+  { label: "About us",              href: "/about"      },
+  { label: "Contact us",            href: "/contact-us" },
 ];
+
+const FALLBACK_SERVICES: Service[] = [
+  { _id: "1", title: "Life Insurance",   slug: "life-insurance",   isActive: true },
+  { _id: "2", title: "Health Insurance", slug: "health-insurance", isActive: true },
+  { _id: "3", title: "Motor Insurance",  slug: "motor-insurance",  isActive: true },
+  { _id: "4", title: "Travel Insurance", slug: "travel-insurance", isActive: true },
+  { _id: "5", title: "Home Insurance",   slug: "home-insurance",   isActive: true },
+];
+
+// ─── HELPER: drill into any backend shape and find the services array ─────────
+function extractServices(data: unknown): Service[] {
+  if (!data) return [];
+
+  // Already a plain array
+  if (Array.isArray(data)) return data as Service[];
+
+  if (typeof data === "object" && data !== null) {
+    const obj = data as Record<string, unknown>;
+
+    // Common envelope keys — try every one
+    for (const key of ["data", "services", "result", "results", "items", "payload"]) {
+      const val = obj[key];
+      if (Array.isArray(val) && val.length > 0) return val as Service[];
+    }
+
+    // Nested: { data: { services: [...] } }
+    if (obj.data && typeof obj.data === "object") {
+      const nested = obj.data as Record<string, unknown>;
+      for (const key of ["services", "items", "results"]) {
+        const val = nested[key];
+        if (Array.isArray(val) && val.length > 0) return val as Service[];
+      }
+    }
+  }
+
+  return [];
+}
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 
 export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean }) {
-  const [scrolled,   setScrolled]   = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [services, setServices] = useState<Service[]>([]);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled,           setScrolled]           = useState(false);
+  const [mobileOpen,         setMobileOpen]         = useState(false);
+  const [services,           setServices]           = useState<Service[]>(FALLBACK_SERVICES);
+  const [siteTitle,          setSiteTitle]          = useState<string>("");
+  const [dropdownOpen,       setDropdownOpen]       = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Fetch services on mount
+  // ── Fetch services ──────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        // ✅ FIX: Use full API URL from environment variable
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const fullUrl = `${apiUrl}/services`;
-        
-        console.log("📡 Fetching services from:", fullUrl);
-        
-        const response = await fetch(fullUrl, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+        const apiUrl  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res     = await fetch(`${apiUrl}/services`, {
+          method:  "GET",
+          headers: { "Content-Type": "application/json" },
         });
 
-        console.log("📊 Response status:", response.status);
+        if (!res.ok) return; // keep fallback
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log("✅ Services fetched successfully:", data);
-          setServices(Array.isArray(data) ? data : data.data || data.services || []);
-        } else {
-          console.error("❌ Failed to fetch services:", response.status, response.statusText);
-          setServices([]);
+        const raw      = await res.json();
+        const fetched  = extractServices(raw);
+
+        // Log the raw shape in dev so you can verify it once
+        if (process.env.NODE_ENV !== "production") {
+          console.log("[Navbar] raw /services response:", raw);
+          console.log("[Navbar] extracted services:", fetched);
         }
-      } catch (error) {
-        console.error("❌ Error fetching services:", error);
-        setServices([]);
+
+        if (fetched.length > 0) {
+          setServices(fetched.filter((s) => s.isActive !== false));
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[Navbar] services fetch error:", err);
+        }
       }
     };
 
     fetchServices();
   }, []);
 
-  // Switch from transparent → solid on scroll
+  // ── Fetch site title (navbar brand text) ───────────────────────────────────
+  useEffect(() => {
+    const fetchTitle = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
+        // Try common endpoints for site settings / branding
+        for (const path of ["/settings", "/site-settings", "/branding", "/config"]) {
+          const res = await fetch(`${apiUrl}${path}`, {
+            method:  "GET",
+            headers: { "Content-Type": "application/json" },
+          });
+
+          if (!res.ok) continue;
+
+          const data = await res.json();
+
+          // Drill for a title / siteName field
+          const obj  = (typeof data === "object" && data !== null) ? data as Record<string, unknown> : {};
+          const inner = (obj.data && typeof obj.data === "object") ? obj.data as Record<string, unknown> : obj;
+
+          const title =
+            (inner.siteName   as string) ||
+            (inner.siteTitle  as string) ||
+            (inner.title      as string) ||
+            (inner.name       as string) ||
+            (obj.siteName     as string) ||
+            (obj.siteTitle    as string) ||
+            "";
+
+          if (title) {
+            setSiteTitle(title);
+            break; // found it — stop trying endpoints
+          }
+        }
+      } catch {
+        // No title from API — logo image will show instead
+      }
+    };
+
+    fetchTitle();
+  }, []);
+
+  // ── Scroll listener ────────────────────────────────────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Lock body scroll when drawer is open
+  // ── Body scroll lock when drawer open ─────────────────────────────────────
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // Close dropdown when clicking outside
+  // ── Close desktop dropdown on outside click ────────────────────────────────
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
@@ -105,13 +184,17 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
       <nav className={`nav-root${alwaysSolid || scrolled || mobileOpen ? " nav-scrolled" : ""}`}>
         <div className="nav-inner">
 
-          {/* ── Logo ── */}
+          {/* ── Logo / Brand ── */}
           <Link href="/" className="nav-logo">
-            <img
-              src="/images/logo/transindia.png"
-              alt="TransIndia logo"
-              className="nav-logo-img"
-            />
+            {siteTitle ? (
+              <span className="nav-brand-text">{siteTitle}</span>
+            ) : (
+              <img
+                src="/images/logo/transindia.png"
+                alt="TransIndia logo"
+                className="nav-logo-img"
+              />
+            )}
           </Link>
 
           {/* ── Desktop Nav Links ── */}
@@ -119,42 +202,44 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
             {NAV_ITEMS.map((item) => (
               <li key={item.label}>
                 {item.hasDropdown ? (
-                  <div 
+                  <div
                     className="nav-dropdown-wrapper"
                     ref={dropdownRef}
                     onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => setDropdownOpen(false)}
                   >
-                    <button 
+                    <button
                       className="nav-link nav-dropdown-trigger"
-                      onClick={() => setDropdownOpen(!dropdownOpen)}
+                      onClick={() => setDropdownOpen((o) => !o)}
                       aria-expanded={dropdownOpen}
                     >
                       {item.label}
-                      <svg viewBox="0 0 20 20" fill="currentColor" width={13} height={13} style={{ opacity: 0.65, flexShrink: 0, transition: "transform 0.2s" }}>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        width={13}
+                        height={13}
+                        className={`chevron${dropdownOpen ? " chevron-open" : ""}`}
+                      >
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
                       </svg>
                     </button>
 
-                    {/* ── Dropdown Menu ── */}
-                    {dropdownOpen && (
-                      <div className="nav-dropdown-menu">
-                        {services.length > 0 ? (
-                          services.map((service) => (
-                            <Link
-                              key={service._id}
-                              href={`/our-services/${service.slug}`}
-                              className="dropdown-item"
-                              onClick={() => setDropdownOpen(false)}
-                            >
-                              {service.name}
-                            </Link>
-                          ))
-                        ) : (
-                          <div className="dropdown-item disabled">No services available</div>
-                        )}
-                      </div>
-                    )}
+                    {/* ── Dropdown Menu — always in DOM, animated via CSS ── */}
+                    <div className={`nav-dropdown-menu${dropdownOpen ? " dropdown-visible" : ""}`}
+                         aria-hidden={!dropdownOpen}>
+                      {services.map((service) => (
+                        <Link
+                          key={service._id}
+                          href={`/our-services/${service.slug}`}
+                          className="dropdown-item"
+                          onClick={() => setDropdownOpen(false)}
+                          tabIndex={dropdownOpen ? 0 : -1}
+                        >
+                          {service.title || service.name}
+                        </Link>
+                      ))}
+                    </div>
                   </div>
                 ) : (
                   <Link href={item.href || "#"} className="nav-link">
@@ -199,35 +284,38 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                   <>
                     <button
                       className="drawer-link drawer-dropdown-trigger"
-                      onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+                      onClick={() => setMobileDropdownOpen((o) => !o)}
                       aria-expanded={mobileDropdownOpen}
                     >
                       {item.label}
-                      <svg viewBox="0 0 20 20" fill="currentColor" width={14} height={14} style={{ opacity: 0.5, transform: mobileDropdownOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}>
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        width={14}
+                        height={14}
+                        className={`chevron${mobileDropdownOpen ? " chevron-open" : ""}`}
+                      >
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
                       </svg>
                     </button>
-                    {mobileDropdownOpen && (
-                      <div className="drawer-dropdown-menu">
-                        {services.length > 0 ? (
-                          services.map((service) => (
-                            <Link
-                              key={service._id}
-                              href={`/our-services/${service.slug}`}
-                              className="drawer-dropdown-item"
-                              onClick={() => {
-                                setMobileOpen(false);
-                                setMobileDropdownOpen(false);
-                              }}
-                            >
-                              {service.name}
-                            </Link>
-                          ))
-                        ) : (
-                          <div className="drawer-dropdown-item disabled">No services available</div>
-                        )}
-                      </div>
-                    )}
+
+                    <div className={`drawer-dropdown-menu${mobileDropdownOpen ? " dropdown-visible" : ""}`}
+                         aria-hidden={!mobileDropdownOpen}>
+                      {services.map((service) => (
+                        <Link
+                          key={service._id}
+                          href={`/our-services/${service.slug}`}
+                          className="drawer-dropdown-item"
+                          tabIndex={mobileDropdownOpen ? 0 : -1}
+                          onClick={() => {
+                            setMobileOpen(false);
+                            setMobileDropdownOpen(false);
+                          }}
+                        >
+                          {service.title || service.name}
+                        </Link>
+                      ))}
+                    </div>
                   </>
                 ) : (
                   <Link href={item.href || "#"} className="drawer-link" onClick={() => setMobileOpen(false)}>
@@ -252,33 +340,23 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
-  /* ── Root nav — floats over page content ── */
   .nav-root {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 200;
     font-family: var(--font-sora), "Sora", sans-serif;
-
     background: transparent;
     border-bottom: 1px solid transparent;
     box-shadow: none;
-
-    transition:
-      background 0.35s ease,
-      border-color 0.35s ease,
-      box-shadow 0.35s ease;
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
   }
 
-  /* ── Scrolled state (or drawer open) — theme dark blue ── */
   .nav-scrolled {
     background: #07174A;
     border-bottom: 1px solid rgba(56,189,248,0.12);
     box-shadow: 0 4px 32px rgba(0,0,0,0.45);
   }
 
-  /* ── Inner layout ── */
   .nav-inner {
     max-width: 1480px;
     margin: 0 auto;
@@ -289,29 +367,43 @@ const CSS = `
     gap: 32px;
   }
 
-  /* ── Logo ── */
+  /* ── Logo / Brand ── */
   .nav-logo {
     display: flex;
     align-items: center;
     text-decoration: none;
     flex-shrink: 0;
   }
-
   .nav-logo-img {
     height: 40px;
     width: auto;
     display: block;
     object-fit: contain;
   }
+  .nav-brand-text {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+  }
 
-  /* ── Nav links list ── */
+  /* ── Chevron ── */
+  .chevron {
+    opacity: 0.65;
+    flex-shrink: 0;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .chevron-open {
+    transform: rotate(180deg);
+  }
+
+  /* ── Nav links ── */
   .nav-links {
     display: flex;
     list-style: none;
-    margin: 0;
-    padding: 0;
-    gap: 0;
-    flex: 1;
+    margin: 0; padding: 0;
+    gap: 0; flex: 1;
     justify-content: flex-start;
   }
 
@@ -331,7 +423,6 @@ const CSS = `
     background: none;
     cursor: pointer;
   }
-
   .nav-link:hover {
     background: rgba(255,255,255,0.09);
     color: #fff;
@@ -342,66 +433,55 @@ const CSS = `
     position: relative;
   }
 
-  .nav-dropdown-trigger {
-    position: relative;
-  }
-
-  /* ── Dropdown Menu ── */
+  /* ── Dropdown Menu — CSS-animated, always in DOM ── */
   .nav-dropdown-menu {
     position: absolute;
-    top: 100%;
+    top: calc(100% + 8px);
     left: 0;
     background: #07174A;
     border: 1px solid rgba(56,189,248,0.15);
-    border-radius: 8px;
-    min-width: 220px;
-    margin-top: 8px;
-    box-shadow: 0 10px 32px rgba(0,0,0,0.35);
+    border-radius: 10px;
+    min-width: 230px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.25);
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    animation: dropdown-open 0.2s ease forwards;
     z-index: 300;
+    pointer-events: none;
+
+    /* ── Slow smooth animation ── */
+    opacity: 0;
+    transform: translateY(-12px) scaleY(0.94);
+    transform-origin: top center;
+    transition:
+      opacity    0.38s cubic-bezier(0.4, 0, 0.2, 1),
+      transform  0.38s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  @keyframes dropdown-open {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .nav-dropdown-menu.dropdown-visible {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    pointer-events: auto;
   }
 
   .dropdown-item {
-    padding: 12px 16px;
-    color: rgba(255,255,255,0.9);
+    padding: 13px 18px;
+    color: rgba(255,255,255,0.88);
     text-decoration: none;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 500;
     border-bottom: 1px solid rgba(255,255,255,0.06);
-    transition: background 0.15s, color 0.15s;
+    transition: background 0.2s, color 0.2s, padding-left 0.2s;
     display: block;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
-  .dropdown-item:last-child {
-    border-bottom: none;
-  }
-
+  .dropdown-item:last-child { border-bottom: none; }
   .dropdown-item:hover {
-    background: rgba(56,189,248,0.12);
+    background: rgba(56,189,248,0.13);
     color: #fff;
-  }
-
-  .dropdown-item.disabled {
-    color: rgba(255,255,255,0.4);
-    cursor: default;
-    pointer-events: none;
+    padding-left: 24px;
   }
 
   /* ── CTA Buttons ── */
@@ -429,7 +509,6 @@ const CSS = `
     align-items: center;
     justify-content: center;
   }
-
   .btn-outline:hover {
     border-color: #fff;
     background: rgba(255,255,255,0.08);
@@ -453,7 +532,7 @@ const CSS = `
     justify-content: center;
   }
 
-  /* ── Hamburger — hidden on desktop ── */
+  /* ── Hamburger ── */
   .nav-hamburger {
     display: none;
     align-items: center;
@@ -468,10 +547,7 @@ const CSS = `
     border-radius: 8px;
     transition: background 0.18s;
   }
-
-  .nav-hamburger:hover {
-    background: rgba(255,255,255,0.1);
-  }
+  .nav-hamburger:hover { background: rgba(255,255,255,0.1); }
 
   /* ── Mobile Drawer ── */
   .nav-drawer {
@@ -480,12 +556,12 @@ const CSS = `
     padding: 8px 24px 24px;
     border-top: 1px solid rgba(255,255,255,0.08);
     background: #07174A;
-    animation: drawer-open 0.22s ease forwards;
+    animation: drawer-open 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   @keyframes drawer-open {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0);    }
   }
 
   .drawer-link {
@@ -506,29 +582,32 @@ const CSS = `
     text-align: left;
     transition: color 0.15s;
   }
+  .drawer-link:hover { color: #fff; }
 
-  .drawer-link:last-of-type {
-    border-bottom: none;
-  }
-
-  .drawer-link:hover {
-    color: #fff;
-  }
-
-  /* ── Mobile Dropdown Menu ── */
+  /* ── Mobile Dropdown — CSS-animated ── */
   .drawer-dropdown-menu {
     display: flex;
     flex-direction: column;
-    background: rgba(56,189,248,0.08);
-    border-radius: 6px;
-    margin: 8px 0;
+    background: rgba(56,189,248,0.07);
+    border-radius: 8px;
     overflow: hidden;
-    animation: drawer-open 0.2s ease forwards;
+
+    /* Slow smooth height + fade animation */
+    max-height: 0;
+    opacity: 0;
+    transition:
+      max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity    0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .drawer-dropdown-menu.dropdown-visible {
+    max-height: 600px;   /* large enough for any service list */
+    opacity: 1;
+    margin: 6px 0 10px;
   }
 
   .drawer-dropdown-item {
-    padding: 10px 16px;
-    padding-left: 32px;
+    padding: 11px 18px 11px 32px;
     color: rgba(255,255,255,0.85);
     text-decoration: none;
     font-size: 14px;
@@ -542,16 +621,9 @@ const CSS = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
   .drawer-dropdown-item:hover {
     background: rgba(56,189,248,0.15);
     color: #fff;
-  }
-
-  .drawer-dropdown-item.disabled {
-    color: rgba(255,255,255,0.4);
-    cursor: default;
-    pointer-events: none;
   }
 
   .drawer-actions {
@@ -560,42 +632,33 @@ const CSS = `
     margin-top: 22px;
     flex-wrap: wrap;
   }
+  .drawer-btn { flex: 1 1 120px; text-align: center; }
 
-  /* Drawer CTA buttons stretch full-width on very small screens */
-  .drawer-btn {
-    flex: 1 1 120px;
-    text-align: center;
-  }
-
-  /* ── Responsive breakpoints ── */
-
-  /* Large screens: tighten gaps to fit all long links */
+  /* ── Responsive ── */
   @media (max-width: 1400px) {
-    .nav-inner { gap: 16px; padding: 0 24px; }
-    .nav-link { padding: 8px 10px; font-size: 13px; }
+    .nav-inner   { gap: 16px; padding: 0 24px; }
+    .nav-link    { padding: 8px 10px; font-size: 13px; }
     .nav-actions { gap: 8px; }
   }
 
-  /* Tablet/mobile: hide desktop nav, show hamburger earlier to avoid overlap */
   @media (max-width: 1150px) {
-    .nav-links   { display: none; }
-    .nav-actions { display: none; }
+    .nav-links     { display: none; }
+    .nav-actions   { display: none; }
     .nav-hamburger { display: flex; }
-    .nav-inner { gap: 0; }
+    .nav-inner     { gap: 0; }
   }
 
-  /* Small mobile: tighter padding */
   @media (max-width: 480px) {
-    .nav-inner { padding: 0 16px; }
+    .nav-inner      { padding: 0 16px; }
     .drawer-actions { flex-direction: column; gap: 10px; }
-    .drawer-btn { flex: unset; width: 100%; }
+    .drawer-btn     { flex: unset; width: 100%; }
   }
 
-  /* Reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .nav-drawer { animation: none; }
-    .nav-dropdown-menu { animation: none; }
-    .drawer-dropdown-menu { animation: none; }
+    .nav-drawer, .nav-dropdown-menu, .drawer-dropdown-menu {
+      animation: none !important;
+      transition: none !important;
+    }
     .nav-root, .btn-fill, .btn-outline, .nav-link, .nav-hamburger, .dropdown-item {
       transition: none !important;
     }
