@@ -122,12 +122,12 @@ const PersonalInsuranceServices = async () => {
                       </ul>
                     )}
 
-                    <Link
-                      href={`/our-services/${card.slug}`}
-                      className={`${card.buttonColor} text-white font-semibold rounded-xl py-3 mt-auto transition-colors text-center block`}
-                    >
-                      {card.buttonText}
-                    </Link>
+                  <Link
+  href={`/our-services/${card.slug}`}
+  className="bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl py-3 mt-auto transition-colors text-center block"
+>
+  Know More
+</Link>
                   </div>
                 </div>
               );
