@@ -41,10 +41,32 @@ app.use((req, res) => res.status(404).json({ success: false, message: "Route not
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error("Server error:", err.message);
+  // Log the full error (stack + name) so Render logs show the real cause,
+  // not just a stripped-down .message
+  console.error("Server error:", err);
+
+  // Multer file-size limit
   if (err.code === "LIMIT_FILE_SIZE") {
     return res.status(400).json({ success: false, message: "File too large. Max 10 MB." });
   }
+
+  // Mongoose validation errors (e.g. bad enum value for insuranceType/claimType)
+  if (err.name === "ValidationError") {
+    const messages = Object.values(err.errors).map((e) => e.message);
+    return res.status(400).json({ success: false, message: messages.join(", ") });
+  }
+
+  // Mongoose bad ObjectId (e.g. malformed :id param)
+  if (err.name === "CastError") {
+    return res.status(400).json({ success: false, message: `Invalid ${err.path}: ${err.value}` });
+  }
+
+  // Mongo duplicate key error
+  if (err.code === 11000) {
+    const field = Object.keys(err.keyPattern || {})[0];
+    return res.status(409).json({ success: false, message: `Duplicate value for ${field}` });
+  }
+
   res.status(err.statusCode || 500).json({
     success: false,
     message: err.message || "Server Error",
