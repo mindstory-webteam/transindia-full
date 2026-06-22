@@ -4,5 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-   allowedHosts: ['transindia-full-2.onrender.com'],
+  preview: {
+    allowedHosts: ['.onrender.com'],
+  },
 })
