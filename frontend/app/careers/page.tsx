@@ -25,9 +25,27 @@ const JOBS_PER_PAGE = 10;
 
 export default function CareersPage() {
   const [page, setPage] = useState(1);
+  const [selectedJob, setSelectedJob] = useState<typeof jobs[0] | null>(null);
+
   const totalPages = Math.ceil(jobs.length / JOBS_PER_PAGE);
   const start = (page - 1) * JOBS_PER_PAGE;
   const visibleJobs = jobs.slice(start, start + JOBS_PER_PAGE);
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // Frontend stub: collecting form data
+    const formData = new FormData(e.currentTarget);
+    console.log("Submitting application for:", selectedJob?.title);
+    console.log("Name:", formData.get("name"));
+    console.log("Email:", formData.get("email"));
+    console.log("Phone:", formData.get("phone"));
+    console.log("Message:", formData.get("message"));
+    console.log("Resume:", formData.get("resume"));
+    
+    // Close modal on success
+    setSelectedJob(null);
+    alert("Application submitted successfully!");
+  };
 
   return (
     <>
@@ -71,12 +89,12 @@ export default function CareersPage() {
                 <div className="job-top">
                   <h2 className="job-title">{job.title}</h2>
                   {/* Desktop Apply — hidden on mobile */}
-                  <a
-                    href={`mailto:care@transindia.com?subject=Application for ${job.title}`}
+                  <button
+                    onClick={() => setSelectedJob(job)}
                     className="job-apply job-apply-desktop"
                   >
                     Apply
-                  </a>
+                  </button>
                 </div>
                 <p className="job-desc">{job.description}</p>
                 <div className="job-tags">
@@ -94,12 +112,12 @@ export default function CareersPage() {
                     {job.tags[1]}
                   </span>
                   {/* Mobile Apply — shown only on mobile, sits next to tags */}
-                  <a
-                    href={`mailto:care@transindia.com?subject=Application for ${job.title}`}
+                  <button
+                    onClick={() => setSelectedJob(job)}
                     className="job-apply job-apply-mobile"
                   >
                     Apply
-                  </a>
+                  </button>
                 </div>
               </div>
             ))}
@@ -143,6 +161,55 @@ export default function CareersPage() {
 
         <TransindiaFooter />
       </div>
+
+      {/* Application Modal */}
+      {selectedJob && (
+        <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Apply for {selectedJob.title}</h3>
+              <button className="modal-close" onClick={() => setSelectedJob(null)}>
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="modal-form">
+              <div className="form-group">
+                <label htmlFor="name">Full Name *</label>
+                <input type="text" id="name" name="name" required placeholder="John Doe" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="email">Email Address *</label>
+                <input type="email" id="email" name="email" required placeholder="john@example.com" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="phone">Phone Number *</label>
+                <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210" />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="resume">Resume (PDF) *</label>
+                <input type="file" id="resume" name="resume" accept=".pdf" required className="file-input" />
+              </div>
+
+              <div className="form-group full-width">
+                <label htmlFor="message">Cover Letter / Message</label>
+                <textarea id="message" name="message" rows={3} placeholder="Tell us why you'd be a great fit..."></textarea>
+              </div>
+
+              <div className="modal-actions full-width">
+                <button type="button" className="btn-cancel" onClick={() => setSelectedJob(null)}>Cancel</button>
+                <button type="submit" className="btn-submit">Submit Application</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -308,6 +375,222 @@ const CSS = `
     flex-direction: column;
     align-items: center;
     gap: 12px;
+  }
+
+  @media (max-width: 360px) {
+    .job-top { flex-direction: column; align-items: flex-start; gap: 6px; }
+  }
+
+  /* ── Modal CSS ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  .modal-content {
+    background: #ffffff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    /* Hide scrollbar */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+  
+  .modal-content::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    background: #ffffff;
+    z-index: 10;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    margin: 0;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    color: #6b7280;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-close:hover {
+    background: #f3f4f6;
+    color: #111;
+  }
+
+  .modal-form {
+    padding: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .full-width {
+    grid-column: 1 / -1;
+  }
+
+  .form-group label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="email"],
+  .form-group input[type="tel"],
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-family: inherit;
+    color: #111;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #00b8c4;
+    box-shadow: 0 0 0 3px rgba(0, 184, 196, 0.15);
+  }
+
+  .file-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px dashed #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #4b5563;
+    background: #f9fafb;
+    cursor: pointer;
+  }
+
+  .file-input::file-selector-button {
+    background: #e5e7eb;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: #374151;
+    font-weight: 600;
+    cursor: pointer;
+    margin-right: 12px;
+    transition: background 0.2s;
+  }
+
+  .file-input::file-selector-button:hover {
+    background: #d1d5db;
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .btn-cancel {
+    background: #f3f4f6;
+    color: #4b5563;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-cancel:hover {
+    background: #e5e7eb;
+  }
+
+  .btn-submit {
+    background: #00b8c4;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14.5px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .btn-submit:hover {
+    background: #00a2ac;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @media (max-width: 600px) {
+    .modal-form {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .modal-content {
+      max-height: 100vh;
+      border-radius: 0;
+    }
+    .modal-overlay {
+      padding: 0;
+      align-items: flex-end;
+    }
+    .modal-content {
+      border-radius: 16px 16px 0 0;
+    }
   }
 
   .no-openings-icon {
