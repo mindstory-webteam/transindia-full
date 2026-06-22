@@ -13,10 +13,15 @@ import SettingsPage from "./pages/SettingsPage";
 import GeneralQueryPage from "./pages/GeneralQueryPage";
 import ClaimSupportPage from "./pages/ClaimSupportPage";
 import ComplaintPage from "./pages/ComplaintPage";
+import ClaimLeadsPage from "./pages/ClaimLeadsPage"; // ← NEW
 
 function PrivateRoute({ children }) {
   const { admin, loading } = useAuth();
-  if (loading) return <div style={{ display:"flex", alignItems:"center", justifyContent:"center", height:"100vh", fontSize:14, color:"#64748B" }}>Loading…</div>;
+  if (loading) return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontSize: 14, color: "#64748B" }}>
+      Loading…
+    </div>
+  );
   return admin ? children : <Navigate to="/login" replace />;
 }
 
@@ -43,6 +48,7 @@ export default function App() {
             <Route path="contact/general-queries" element={<GeneralQueryPage />} />
             <Route path="contact/claim-support" element={<ClaimSupportPage />} />
             <Route path="contact/complaints" element={<ComplaintPage />} />
+            <Route path="claimleads" element={<ClaimLeadsPage />} /> {/* ← NEW */}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

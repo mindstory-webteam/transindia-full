@@ -25,12 +25,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
-app.use("/api/auth",     require("./src/routes/auth"));
-app.use("/api/services", require("./src/routes/services"));
-app.use("/api/leads",    require("./src/routes/leads"));
-app.use("/api/faqs",     require("./src/routes/faqs"));
-app.use("/api/contact",  require("./src/routes/contact"));
-app.use("/api/bmileads", require("./src/routes/bmiLeads"));
+app.use("/api/auth",       require("./src/routes/auth"));
+app.use("/api/services",   require("./src/routes/services"));
+app.use("/api/leads",      require("./src/routes/leads"));
+app.use("/api/faqs",       require("./src/routes/faqs"));
+app.use("/api/contact",    require("./src/routes/contact"));
+app.use("/api/bmileads",   require("./src/routes/bmiLeads"));
+app.use("/api/claimleads", require("./src/routes/claimLeads")); // ← NEW
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ message: "TransIndia API running ✅" }));
@@ -41,9 +42,8 @@ app.use((req, res) => res.status(404).json({ success: false, message: "Route not
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
   console.error("Server error:", err.message);
-  // Multer errors (file too large, wrong type, etc.)
   if (err.code === "LIMIT_FILE_SIZE") {
-    return res.status(400).json({ success: false, message: "File too large. Max 5 MB." });
+    return res.status(400).json({ success: false, message: "File too large. Max 10 MB." });
   }
   res.status(err.statusCode || 500).json({
     success: false,

@@ -3,13 +3,14 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, ShieldCheck, Users, Settings,
-  LogOut, Menu, MessageSquare, ChevronDown
+  LogOut, Menu, MessageSquare, ChevronDown, FileText,
 } from "lucide-react";
 
 const NAV = [
   { to: "/",         icon: LayoutDashboard, label: "Dashboard" },
   { to: "/services", icon: ShieldCheck,     label: "Services" },
   { to: "/leads",    icon: Users,           label: "Leads" },
+  { to: "/claimleads", icon: FileText,      label: "Claim Leads" }, // ← NEW
 ];
 
 const CONTACT_LINKS = [
@@ -18,8 +19,6 @@ const CONTACT_LINKS = [
   { to: "/contact/complaints",      label: "Complaints" },
 ];
 
-// Brand styling injected once — keeps markup clean and gives reliable
-// hover/active states + resize-safe responsive sidebar.
 const STYLES = `
   :root {
     --ti-brand:#F15A3E;
@@ -123,14 +122,13 @@ export default function Layout() {
   const [contactOpen, setContactOpen] = useState(false);
 
   const handleLogout = () => { logout(); navigate("/login"); };
-  const closeMobile = () => setOpen(false);
+  const closeMobile  = () => setOpen(false);
 
   return (
     <>
       <style>{STYLES}</style>
 
       <div className="ti-shell">
-        {/* Overlay for mobile */}
         {open && <div className="ti-overlay" onClick={closeMobile} />}
 
         {/* Sidebar */}
@@ -138,10 +136,7 @@ export default function Layout() {
           {/* Logo */}
           <div style={{ padding: "22px 18px 16px", borderBottom: "1px solid var(--ti-line)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-              <div style={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0,
-              }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <img src="/logo/transindia.png" alt="TransIndia Logo" style={{ height: "38px", width: "auto", objectFit: "contain" }} />
               </div>
             </div>
@@ -230,7 +225,6 @@ export default function Layout() {
 
         {/* Main */}
         <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {/* Topbar */}
           <header className="ti-topbar">
             <button className="ti-menu-btn" onClick={() => setOpen(o => !o)} aria-label="Toggle menu">
               <Menu size={20} color="#64748B" />
@@ -240,7 +234,6 @@ export default function Layout() {
             </span>
           </header>
 
-          {/* Page content */}
           <main className="ti-main">
             <Outlet />
           </main>

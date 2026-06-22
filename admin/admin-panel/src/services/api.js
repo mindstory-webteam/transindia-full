@@ -90,10 +90,6 @@ export async function getAllServices(params = {}) {
 
 /**
  * Admin — create a new service.
- * Images are uploaded straight to Cloudinary from the browser, so the
- * service object already contains plain URL strings (image, whyImage,
- * benefits[].icon, stages[].icon). We send it as JSON — the backend route
- * uses express.json() + parseBody, so no FormData / multipart is needed.
  */
 export async function createService(serviceData) {
   const { data } = await api.post("/services", serviceData);
@@ -101,7 +97,7 @@ export async function createService(serviceData) {
 }
 
 /**
- * Admin — update an existing service by id. Same JSON shape as createService.
+ * Admin — update an existing service by id.
  */
 export async function updateService(id, serviceData) {
   const { data } = await api.put(`/services/${id}`, serviceData);
@@ -126,7 +122,6 @@ export async function toggleServiceActive(id) {
 
 /**
  * Admin — reorder services.
- * Pass an array of { id, sortOrder } to match the reorderServices controller.
  */
 export async function reorderServices(order) {
   const { data } = await api.patch("/services/admin/reorder", { order });
@@ -163,5 +158,49 @@ export async function getComplaints() {
 
 export async function deleteComplaint(id) {
   const { data } = await api.delete(`/contact/complaint/${id}`);
+  return data;
+}
+
+// ── Claim Leads ───────────────────────────────────────────────────────────────
+
+/**
+ * Admin — get all claim leads (newest first)
+ */
+export async function getClaimLeads() {
+  const { data } = await api.get("/claimleads");
+  return data.data;
+}
+
+/**
+ * Admin — get a single claim lead by id
+ */
+export async function getClaimLead(id) {
+  const { data } = await api.get(`/claimleads/${id}`);
+  return data.data;
+}
+
+/**
+ * Admin — update status of a claim lead
+ */
+export async function updateClaimLeadStatus(id, status) {
+  const { data } = await api.patch(`/claimleads/${id}/status`, { status });
+  return data.data;
+}
+
+/**
+ * Admin — delete a claim lead
+ */
+export async function deleteClaimLead(id) {
+  const { data } = await api.delete(`/claimleads/${id}`);
+  return data;
+}
+
+/**
+ * Public — submit a claim intimation form (multipart with documents)
+ */
+export async function submitClaimLead(formData) {
+  const { data } = await api.post("/claimleads", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
   return data;
 }
