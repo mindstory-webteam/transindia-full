@@ -1,50 +1,76 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-const jobs = [
-  { id: 1,  title: "Product Designer",          description: "We're looking for a mid-level product designer to join our team.",              tags: [" Remote", "Full-time"] },
-  { id: 2,  title: "Engineering Manager",        description: "We're looking for an experienced engineering manager to join our team.",        tags: [" Remote", "Full-time"] },
-  { id: 3,  title: "Customer Success Manager",   description: "We're looking for a customer success manager to join our team.",                tags: [" Remote", "Full-time"] },
-  { id: 4,  title: "Account Executive",          description: "We're looking for an account executive to join our team.",                      tags: [" Remote", "Full-time"] },
-  { id: 5,  title: "Marketing Specialist",       description: "We're looking for a creative marketing specialist to grow our brand.",          tags: [" Remote", "Full-time"] },
-  { id: 6,  title: "Sales Associate",            description: "We're looking for a driven sales associate to expand our reach.",               tags: [" Remote", "Full-time"] },
-  { id: 7,  title: "Data Analyst",               description: "We're looking for a data analyst to turn insights into decisions.",             tags: [" Remote", "Full-time"] },
-  { id: 8,  title: "HR Business Partner",        description: "We're looking for an HR partner to support our growing team.",                  tags: [" Remote", "Full-time"] },
-  { id: 9,  title: "Content Writer",             description: "We're looking for a content writer to craft compelling insurance narratives.",   tags: [" Remote", "Full-time"] },
-  { id: 10, title: "Operations Lead",            description: "We're looking for an operations lead to streamline our processes.",             tags: [" Remote", "Full-time"] },
-  { id: 11, title: "UX Researcher",              description: "We're looking for a UX researcher to understand our users deeply.",             tags: [" Remote", "Full-time"] },
-  { id: 12, title: "Finance Manager",            description: "We're looking for a finance manager to oversee our financial operations.",      tags: [" Remote", "Full-time"] },
-];
-
 const JOBS_PER_PAGE = 10;
 
+interface JobRole {
+  _id: string;
+  title: string;
+  description: string;
+  tags: string[];
+}
+
 export default function CareersPage() {
+  const [jobs, setJobs] = useState<JobRole[]>([]);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [selectedJob, setSelectedJob] = useState<typeof jobs[0] | null>(null);
+  const [selectedJob, setSelectedJob] = useState<JobRole | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(`${apiUrl}/careers/jobs`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success) setJobs(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch jobs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchJobs();
+  }, []);
 
   const totalPages = Math.ceil(jobs.length / JOBS_PER_PAGE);
   const start = (page - 1) * JOBS_PER_PAGE;
   const visibleJobs = jobs.slice(start, start + JOBS_PER_PAGE);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Frontend stub: collecting form data
+    if (!selectedJob) return;
+
+    setSubmitting(true);
     const formData = new FormData(e.currentTarget);
-    console.log("Submitting application for:", selectedJob?.title);
-    console.log("Name:", formData.get("name"));
-    console.log("Email:", formData.get("email"));
-    console.log("Phone:", formData.get("phone"));
-    console.log("Message:", formData.get("message"));
-    console.log("Resume:", formData.get("resume"));
     
-    // Close modal on success
-    setSelectedJob(null);
-    alert("Application submitted successfully!");
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+      const res = await fetch(`${apiUrl}/careers/jobs/${selectedJob._id}/apply`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        alert("Application submitted successfully!");
+        setSelectedJob(null);
+      } else {
+        alert(data.message || "Failed to submit application. Please try again.");
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("An error occurred while submitting your application.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -203,8 +229,10 @@ export default function CareersPage() {
               </div>
 
               <div className="modal-actions full-width">
-                <button type="button" className="btn-cancel" onClick={() => setSelectedJob(null)}>Cancel</button>
-                <button type="submit" className="btn-submit">Submit Application</button>
+                <button type="button" className="btn-cancel" onClick={() => setSelectedJob(null)} disabled={submitting}>Cancel</button>
+                <button type="submit" className="btn-submit" disabled={submitting}>
+                  {submitting ? "Submitting..." : "Submit Application"}
+                </button>
               </div>
             </form>
           </div>
