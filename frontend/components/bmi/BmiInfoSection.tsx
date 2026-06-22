@@ -103,7 +103,7 @@ export default function BmiInfoSection() {
 
               {/* View Plan Button */}
               <button className="w-full py-3.5 sm:py-4 px-6 rounded-xl bg-[#ec4f34] hover:bg-[#d6452d] text-white font-bold text-[15px] sm:text-[16px] transition-colors shadow-sm">
-                View Plan
+                View Plans
               </button>
             </div>
 
