@@ -1,18 +1,25 @@
 import React from "react";
 
 const partners = [
-  { id: 1,  name: "HDFC ERGO",         image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 2,  name: "ICICI Lombard",     image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 3,  name: "SBI Life",          image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 4,  name: "TATA AIA",          image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 5,  name: "Star Health",       image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 6,  name: "HDFC Life",         image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 7,  name: "Bajaj Allianz",     image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 8,  name: "Max Life",          image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 9,  name: "Niva Bupa",         image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 10, name: "Reliance General",  image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 11, name: "New India",         image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
-  { id: 12, name: "LIC",               image: "https://images.unsplash.com/photo-1780684594433-6e41dfafdf18?q=80&w=1334&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" },
+  { id: 1,  name: "iffcotokio",         image: "./images/partners/iffcotokio.webp" },
+  { id: 2,  name: "starhealthinsurance",     image: "./images/partners/starhealthinsurance.webp" },
+  { id: 3,  name: "TATAAIA",          image: "./images/partners/TATAAIA.webp" },
+  { id: 4,  name: "UnitedIndia",          image: "./images/partners/UnitedIndia.webp" },
+  { id: 5,  name: "TheOrientalInsurance",       image: "./images/partners/TheOrientalInsurance.png" },
+  { id: 6,  name: "Cholamandalam-MS-General-Insurance",         image: "./images/partners/cholams.png" },
+  { id: 7,  name: "SBILife",     image: "./images/partners/SBILife.webp" },
+  { id: 8,  name: "NivaLogo",          image: "./images/partners/NivaLogo.webp" },
+  { id: 9,  name: "partnerFutureGenerali",         image: "./images/partners/partnerFutureGenerali.webp" },
+  { id: 10, name: "Reliance General",  image: "./images/partners/partnerHDFCErgo.webp" },
+  { id: 11, name: "partnerIciciLombard",         image: "./images/partners/partnerICICILombard.webp" },
+  { id: 12, name: "newindia",               image: "./images/partners/newindia.png" },
+  { id: 13, name: "MAGMAHDI",               image: "./images/partners/MAGMAHDI.png" },
+  { id: 14, name: "digit",               image: "./images/partners/digit.png" },
+  { id: 15, name: "royalsundaram",               image: "./images/partners/royalsundaram.png" },
+  { id: 16, name: "Reliancegeneral",               image: "./images/partners/Reliancegeneral.png" },
+  { id: 17, name: "MAGMAHDI",               image: "./images/partners/AdityaBirla.png" },
+  { id: 18, name: "MAGMAHDI",               image: "./images/partners/HDFCLIFE.png" },
+  { id: 19, name: "MAGMAHDI",               image: "./images/partners/sbigeneralinsurance.png" },
 ];
 
 export default function InsurerPartners() {
@@ -28,14 +35,23 @@ export default function InsurerPartners() {
             <h2 className="ip-heading">20+ Insurer Partners</h2>
           </div>
 
-          {/* Logos grid  */}
+          {/* Logos marquee  */}
           <div className="ip-logos-box">
-            <div className="ip-grid">
-              {partners.map((p) => (
-                <div key={p.id} className="ip-logo-cell">
-                  <img src={p.image} alt={p.name} className="ip-logo" />
-                </div>
-              ))}
+            <div className="ip-marquee">
+              <div className="ip-marquee-row">
+                {[...partners.slice(0, 10), ...partners.slice(0, 10)].map((p, index) => (
+                  <div key={`r1-${index}`} className="ip-logo-cell">
+                    <img src={p.image} alt={p.name} className="ip-logo" />
+                  </div>
+                ))}
+              </div>
+              <div className="ip-marquee-row" style={{ animationDirection: "reverse" }}>
+                {[...partners.slice(10), ...partners.slice(10)].map((p, index) => (
+                  <div key={`r2-${index}`} className="ip-logo-cell">
+                    <img src={p.image} alt={p.name} className="ip-logo" />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -97,18 +113,33 @@ const CSS = `
     line-height: 1.2;
   }
 
-  /* ── Logos grid box with dashed teal border ── */
+  /* ── Logos marquee box ── */
   .ip-logos-box {
     width: 100%;
     border-radius: 16px;
     padding: 10px;
     box-sizing: border-box;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
   }
 
-  .ip-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 10px;
+  .ip-marquee {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .ip-marquee-row {
+    display: flex;
+    gap: 15px;
+    width: max-content;
+    animation: scrollMarquee 30s linear infinite;
+  }
+
+  @keyframes scrollMarquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 
   /* Each logo cell */
@@ -117,19 +148,11 @@ const CSS = `
     align-items: center;
     justify-content: center;
     padding: 20px 16px;
-    min-height: 90px;
+    width: 180px;
+    height: 90px;
     background-color: #EBEFF9;
     border-radius: 8px;
-  }
-
-  /* Remove right border on last column */
-  .ip-logo-cell:nth-child(6n) {
-    border-right: none;
-  }
-
-  /* Remove bottom border on last row */
-  .ip-logo-cell:nth-child(n+7) {
-    border-bottom: none;
+    flex-shrink: 0;
   }
 
   .ip-logo {
@@ -145,9 +168,7 @@ const CSS = `
   @media (max-width: 1100px) {
     .ip-container { padding: 0 48px; }
     .ip-heading-box { min-width: 360px; padding: 20px 40px 24px; }
-    .ip-grid { grid-template-columns: repeat(4, 1fr); }
-    .ip-logo-cell:nth-child(4n) { border-right: none; }
-    .ip-logo-cell:nth-child(n+9) { border-bottom: none; }
+    .ip-logo-cell { width: 160px; height: 80px; }
   }
 
   @media (max-width: 768px) {
@@ -155,15 +176,11 @@ const CSS = `
     .ip-container { padding: 0 24px; gap: 28px; }
     .ip-heading-box { min-width: unset; width: 100%; padding: 20px 24px 24px; }
     .ip-heading { font-size: 28px; }
-    .ip-logos-box { padding: 16px; }
-    .ip-grid { grid-template-columns: repeat(3, 1fr); }
-    .ip-logo-cell:nth-child(3n) { border-right: none; }
-    .ip-logo-cell:nth-child(n+10) { border-bottom: none; }
+    .ip-logos-box { padding: 0; }
+    .ip-logo-cell { width: 140px; height: 70px; padding: 10px; }
   }
 
   @media (max-width: 480px) {
-    .ip-grid { grid-template-columns: repeat(2, 1fr); }
-    .ip-logo-cell:nth-child(2n) { border-right: none; }
-    .ip-logo-cell:nth-child(n+11) { border-bottom: none; }
+    .ip-logo-cell { width: 120px; height: 60px; }
   }
 `;
