@@ -40,11 +40,16 @@ const supportLinks = [
   { label: "Contact us", href: "/contact-us" },
   { label: "Renew policy", href: "#" },
   { label: "FAQ", href: "#" },
-  { label: "Privacy policy", href: "#" },
-  { label: "Terms of use", href: "#" },
+  { label: "Privacy policy", href: "/privacy-policy" },
+  { label: "Terms of use", href: "/terms" },
 ];
 
-const bottomLinks = ["Terms", "Privacy", "Disclaimer", "Cookie policy"];
+const bottomLinks = [
+  { label: "Terms",         href: "/terms" },
+  { label: "Privacy",       href: "/privacy-policy" },
+  { label: "Disclaimer",    href: "#" },
+  { label: "Cookie policy", href: "#" },
+];
 
 const FooterColumn: React.FC<{ title: string; links: { label: string; href: string }[] }> = ({ title, links }) => (
   <div style={{ minWidth: 120 }}>
@@ -182,17 +187,17 @@ const TransindiaFooter: React.FC = () => {
           </p>
           <div className="tf-bottom-links">
             {bottomLinks.map((link) => (
-              <a
-                key={link}
-                href="#"
+              <Link
+                key={link.label}
+                href={link.href}
                 style={{
                   color: "#6b7280", fontSize: 11, textDecoration: "none", transition: "color 0.2s",
                 }}
                 onMouseEnter={(e) => ((e.target as HTMLAnchorElement).style.color = "#ffffff")}
                 onMouseLeave={(e) => ((e.target as HTMLAnchorElement).style.color = "#6b7280")}
               >
-                {link}
-              </a>
+                {link.label}
+              </Link>
             ))}
           </div>
         </div>

@@ -17,9 +17,9 @@ const partners = [
   { id: 14, name: "digit",               image: "./images/partners/digit.png" },
   { id: 15, name: "royalsundaram",               image: "./images/partners/royalsundaram.png" },
   { id: 16, name: "Reliancegeneral",               image: "./images/partners/Reliancegeneral.png" },
-  { id: 17, name: "MAGMAHDI",               image: "./images/partners/AdityaBirla.png" },
-  { id: 18, name: "MAGMAHDI",               image: "./images/partners/HDFCLIFE.png" },
-  { id: 19, name: "MAGMAHDI",               image: "./images/partners/sbigeneralinsurance.png" },
+  { id: 17, name: "AdityaBirla",               image: "./images/partners/AdityaBirla.png" },
+  { id: 18, name: "HDFCLIFE",               image: "./images/partners/HDFCLIFE.png" },
+  { id: 19, name: "sbigeneralinsurance",               image: "./images/partners/sbigeneralinsurance.png" },
 ];
 
 export default function InsurerPartners() {

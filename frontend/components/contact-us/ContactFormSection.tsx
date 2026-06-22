@@ -115,7 +115,7 @@ export default function ContactFormSection() {
             gqDone ? (
               <SuccessBox msg="Thanks! We'll get back to you soon." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, e)}>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
@@ -153,7 +153,7 @@ export default function ContactFormSection() {
                 <div className="cfs-group">
                   <label className="cfs-label">Your Query</label>
                   <textarea className="cfs-input cfs-textarea" placeholder="Tell us how we can help you..."
-                    value={gq.query} onChange={(e) => setGq({ ...gq, query: e.target.value })} rows={4} />
+                    value={gq.query} onChange={(e) => setGq({ ...gq, query: e.target.value })} rows={4} required />
                 </div>
 
                 <label className="cfs-checkbox-label" style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#4B5563", cursor: "pointer", marginBottom: "8px" }}>
@@ -178,7 +178,7 @@ export default function ContactFormSection() {
             csDone ? (
               <SuccessBox msg="Your claim request has been submitted!" note="Our claims team will contact you within 24 hours." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, e)}>
                 {/* Emergency notice */}
                 <div className="cfs-emergency">
                   <img src="/images/contact-us/contact-form-section/Siren.svg" alt="Siren" style={{ flexShrink: 0, width: "20px", height: "20px" }} />
@@ -223,7 +223,7 @@ export default function ContactFormSection() {
                   <label className="cfs-label">Describe the Incident</label>
                   <textarea className="cfs-input cfs-textarea"
                     placeholder="Please describe the incident briefly, including date and circumstances..."
-                    value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} />
+                    value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} required />
                 </div>
 
                 <button type="submit" className={`cfs-submit cfs-submit--green${csLoading ? " cfs-submit--loading" : ""}`} disabled={csLoading}>
@@ -238,7 +238,7 @@ export default function ContactFormSection() {
             cpDone ? (
               <SuccessBox msg="Your complaint has been submitted!" note="Complaints resolved within 15 days as per IRDAI norms." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, e)} noValidate>
+              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, e)}>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
@@ -278,7 +278,7 @@ export default function ContactFormSection() {
                   <label className="cfs-label">Complaint Details</label>
                   <textarea className="cfs-input cfs-textarea"
                     placeholder="Please describe your complaint in detail. The more specific you are, the faster we can resolve it."
-                    value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} />
+                    value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} required />
                 </div>
 
                 <button type="submit" className={`cfs-submit cfs-submit--red${cpLoading ? " cfs-submit--loading" : ""}`} disabled={cpLoading}>
