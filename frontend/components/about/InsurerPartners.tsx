@@ -11,7 +11,7 @@ const partners = [
   { id: 8,  name: "NivaLogo",          image: "./images/partners/NivaLogo.webp" },
   { id: 9,  name: "partnerFutureGenerali",         image: "./images/partners/partnerFutureGenerali.webp" },
   { id: 10, name: "Reliance General",  image: "./images/partners/partnerHDFCErgo.webp" },
-  { id: 11, name: "partnerIciciLombard",         image: "./images/partners/partnerIciciLombard.webp" },
+  { id: 11, name: "partnerIciciLombard",         image: "./images/partners/partnerICICILombard.webp" },
   { id: 12, name: "newindia",               image: "./images/partners/newindia.png" },
   { id: 13, name: "MAGMAHDI",               image: "./images/partners/MAGMAHDI.png" },
   { id: 14, name: "digit",               image: "./images/partners/digit.png" },
