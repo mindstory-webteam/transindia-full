@@ -1,17 +1,6 @@
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    return {
-      folder: "transindia/resumes",
-      resource_type: "raw", 
-      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}.pdf`,
-    };
-  },
-});
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ["application/pdf"];

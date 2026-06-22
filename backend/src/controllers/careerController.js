@@ -15,6 +15,9 @@ exports.getJobs = async (req, res, next) => {
   }
 };
 
+const cloudinary = require("../config/cloudinary");
+const { Readable } = require("stream");
+
 // @desc    Apply for a job
 // @route   POST /api/careers/jobs/:id/apply
 // @access  Public
@@ -32,13 +35,36 @@ exports.applyForJob = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Please upload your resume (PDF)" });
     }
 
+    // Direct stream upload to Cloudinary (bypassing multer-storage-cloudinary issues)
+    const streamUpload = (fileBuffer) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "transindia/resumes",
+            resource_type: "raw", // PDFs must be raw
+            public_id: `${Date.now()}-resume.pdf`,
+          },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        Readable.from(fileBuffer).pipe(stream);
+      });
+    };
+
+    const uploadResult = await streamUpload(req.file.buffer);
+
     const application = await JobApplication.create({
       jobId,
       name,
       email,
       phone,
       message,
-      resumeUrl: req.file.path, // Populated by multer-storage-cloudinary
+      resumeUrl: uploadResult.secure_url,
     });
 
     res.status(201).json({
