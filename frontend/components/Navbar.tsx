@@ -41,13 +41,32 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch("/api/services");
+        // ✅ FIX: Use full API URL from environment variable
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const fullUrl = `${apiUrl}/services`;
+        
+        console.log("📡 Fetching services from:", fullUrl);
+        
+        const response = await fetch(fullUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        console.log("📊 Response status:", response.status);
+
         if (response.ok) {
           const data = await response.json();
-          setServices(data);
+          console.log("✅ Services fetched successfully:", data);
+          setServices(Array.isArray(data) ? data : data.data || data.services || []);
+        } else {
+          console.error("❌ Failed to fetch services:", response.status, response.statusText);
+          setServices([]);
         }
       } catch (error) {
-        console.error("Failed to fetch services:", error);
+        console.error("❌ Error fetching services:", error);
+        setServices([]);
       }
     };
 
@@ -358,7 +377,7 @@ const CSS = `
 
   .dropdown-item {
     padding: 12px 16px;
-    color: rgba(255,255,255,0.85);
+    color: rgba(255,255,255,0.9);
     text-decoration: none;
     font-size: 13px;
     font-weight: 500;
@@ -366,7 +385,8 @@ const CSS = `
     transition: background 0.15s, color 0.15s;
     display: block;
     white-space: nowrap;
-    overflow: text-overflow;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .dropdown-item:last-child {
@@ -509,7 +529,7 @@ const CSS = `
   .drawer-dropdown-item {
     padding: 10px 16px;
     padding-left: 32px;
-    color: rgba(255,255,255,0.75);
+    color: rgba(255,255,255,0.85);
     text-decoration: none;
     font-size: 14px;
     font-weight: 400;
@@ -519,6 +539,8 @@ const CSS = `
     transition: background 0.15s, color 0.15s;
     text-align: left;
     font-family: 'matterregular', sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .drawer-dropdown-item:hover {

@@ -64,16 +64,21 @@ const LOGIN_STYLES = `
     padding: 40px;
   }
 
+  /* ── LOGO STYLING ── */
   .login-logo {
     display: inline-block;
     margin-bottom: 30px;
+    padding: 15px 20px;
+   
+   
   }
 
   .login-logo img {
-    height: 60px;
+    height: 70px;
     width: auto;
+    display: block;
     object-fit: contain;
-    filter: brightness(0) invert(1);
+    max-width: 250px;
   }
 
   .login-left h1 {
@@ -119,7 +124,7 @@ const LOGIN_STYLES = `
     flex-direction: column;
     justify-content: center;
     padding: 60px 40px;
-    background: linear-gradient(180deg, #F8FAFC 0%, #fff 100%);
+    background: #fff;
   }
 
   .login-form-wrapper {
@@ -192,6 +197,11 @@ const LOGIN_STYLES = `
     box-shadow: 0 0 0 4px rgba(241,90,62,0.08);
   }
 
+  .form-input:disabled {
+    background-color: #F8FAFC;
+    cursor: not-allowed;
+  }
+
   .form-input-icon {
     position: absolute;
     right: 14px;
@@ -210,6 +220,11 @@ const LOGIN_STYLES = `
 
   .form-input-icon:hover {
     color: #64748B;
+  }
+
+  .form-input-icon:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
   }
 
   .form-options {
@@ -235,6 +250,11 @@ const LOGIN_STYLES = `
     cursor: pointer;
     accent-color: #F15A3E;
     border-radius: 4px;
+  }
+
+  .form-remember input:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
   }
 
   .form-forgot {
@@ -325,13 +345,14 @@ const LOGIN_STYLES = `
     .login-left { padding: 40px 30px; }
     .login-right { padding: 40px 30px; }
     .login-left h1 { font-size: 32px; }
+    .login-logo img { height: 60px; }
   }
 
   @media (max-width: 768px) {
     .login-container { flex-direction: column; }
     
     .login-left {
-      min-height: 280px;
+      min-height: 300px;
       padding: 40px 24px;
       justify-content: center;
     }
@@ -354,11 +375,13 @@ const LOGIN_STYLES = `
     .benefit-item {
       justify-content: center;
     }
+
+    .login-logo img { height: 55px; }
   }
 
   @media (max-width: 480px) {
     .login-left {
-      min-height: 220px;
+      min-height: 250px;
       padding: 30px 16px;
     }
     
@@ -374,12 +397,28 @@ const LOGIN_STYLES = `
       margin-bottom: 20px; 
     }
     
-    .login-logo img { height: 50px; }
+    .login-logo {
+      padding: 10px 16px;
+      margin-bottom: 20px;
+    }
+
+    .login-logo img { 
+      height: 50px;
+      max-width: 200px;
+    }
     
     .login-form-header h2 { font-size: 24px; }
     .login-form { gap: 16px; }
     .form-options { font-size: 12px; }
     .login-footer { font-size: 11px; }
+
+    .login-benefits {
+      gap: 10px;
+    }
+
+    .benefit-item {
+      font-size: 12px;
+    }
   }
 
   /* ── REDUCED MOTION ── */
@@ -420,32 +459,45 @@ export default function LoginPageWithVideo() {
 
       {/* ── LEFT SIDE: Background Image/Video ── */}
       <div className="login-left">
-        {/* Option 1: Background Image */}
+        {/* Background Image - Change src to your image URL */}
         <img
           className="login-left-bg"
           src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=1200&h=1200&fit=crop"
-          alt="Insurance office"
+          alt="Insurance office background"
+          onError={(e) => {
+            // Fallback if image fails to load
+            e.target.style.display = "none";
+          }}
         />
 
-        {/* Option 2: Video Background (uncomment to use)
+        {/* Video Background (uncomment to use instead of image)
         <video
           className="login-left-video"
           autoPlay
           muted
           loop
-          src="https://your-video-url.mp4"
-        />
+          playsInline
+        >
+          <source src="https://your-video-url.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
         */}
 
-        {/* Overlay */}
+        {/* Gradient Overlay */}
         <div className="login-left-overlay"></div>
 
-        {/* Content */}
+        {/* Left Side Content */}
         <div className="login-left-content">
+          {/* Logo Image - Update the src path to match your logo location */}
           <div className="login-logo">
             <img
               src="/logo/transindia.png"
-              alt="TransIndia Insurance"
+              alt="TransIndia Insurance Logo"
+              onError={(e) => {
+                // Fallback: display text if image fails
+                e.target.style.display = "none";
+                e.target.parentElement.textContent = "TransIndia";
+              }}
             />
           </div>
 
@@ -472,17 +524,22 @@ export default function LoginPageWithVideo() {
       {/* ── RIGHT SIDE: Login Form ── */}
       <div className="login-right">
         <div className="login-form-wrapper">
+          {/* Form Header */}
           <div className="login-form-header">
             <h2>Sign In</h2>
             <p>Access your admin dashboard securely</p>
           </div>
 
+          {/* Login Form */}
           <form className="login-form" onSubmit={handleSubmit}>
             {/* Email Field */}
             <div className="form-group">
-              <label className="form-label">Email Address</label>
+              <label className="form-label" htmlFor="email">
+                Email Address
+              </label>
               <div className="form-input-wrapper">
                 <input
+                  id="email"
                   type="email"
                   className="form-input"
                   placeholder="admin@transindia.com"
@@ -491,15 +548,19 @@ export default function LoginPageWithVideo() {
                   required
                   disabled={loading}
                   autoComplete="email"
+                  aria-label="Email address"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="form-group">
-              <label className="form-label">Password</label>
+              <label className="form-label" htmlFor="password">
+                Password
+              </label>
               <div className="form-input-wrapper">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   className="form-input"
                   placeholder="••••••••"
@@ -509,6 +570,7 @@ export default function LoginPageWithVideo() {
                   disabled={loading}
                   autoComplete="current-password"
                   style={{ paddingRight: 40 }}
+                  aria-label="Password"
                 />
                 <button
                   type="button"
@@ -516,6 +578,7 @@ export default function LoginPageWithVideo() {
                   onClick={() => setShowPassword(!showPassword)}
                   disabled={loading}
                   aria-label={showPassword ? "Hide password" : "Show password"}
+                  tabIndex="0"
                 >
                   {showPassword ? (
                     <EyeOff size={18} />
@@ -526,7 +589,7 @@ export default function LoginPageWithVideo() {
               </div>
             </div>
 
-            {/* Remember & Forgot */}
+            {/* Remember & Forgot Options */}
             <div className="form-options">
               <label className="form-remember">
                 <input
@@ -534,6 +597,7 @@ export default function LoginPageWithVideo() {
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
                   disabled={loading}
+                  aria-label="Remember me"
                 />
                 Remember me
               </label>
@@ -559,11 +623,12 @@ export default function LoginPageWithVideo() {
             </button>
           </form>
 
-          {/* Footer */}
+          {/* Footer with Demo Credentials */}
           <div className="login-footer">
             <span className="login-footer-title">Demo Credentials</span>
             <div className="login-footer-creds">
-              admin@transindia.com<br/>
+              admin@transindia.com
+              <br />
               Admin@123
             </div>
           </div>
