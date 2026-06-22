@@ -22,7 +22,7 @@ interface Service {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Services",          hasDropdown: true , href: "/our-services" },
-  { label: "Renew existing policy",      },
+  { label: "Renew existing policy", href: "/renew" },
   { label: "About us",              href: "/about"     },
   { label: "Contact us",   href: "/contact-us"  },
 ];
