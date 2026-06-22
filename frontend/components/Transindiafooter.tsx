@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 
 const LOGO_SRC          = "/images/logo/transindia.png";
@@ -16,15 +16,41 @@ const socialIcons: { name: string; src: string; href: string }[] = [
   { name: "LinkedIn",    href: "#", src: "/images/Footer/linkedin logo.svg" },
 ];
 
-const productLinks = [
-  { label: "Health insurance", href: "#" },
-  { label: "Life insurance", href: "#" },
-  { label: "Car insurance", href: "#" },
-  { label: "Bike insurance", href: "#" },
-  { label: "Home insurance", href: "#" },
-  { label: "Marine insurance", href: "#" },
-  { label: "Travel insurance", href: "#" },
+interface Service {
+  _id: string;
+  title: string;
+  name?: string;
+  slug: string;
+  isActive: boolean;
+}
+
+const FALLBACK_SERVICES: Service[] = [
+  { _id: "1", title: "Life Insurance",   slug: "life-insurance",   isActive: true },
+  { _id: "2", title: "Health Insurance", slug: "health-insurance", isActive: true },
+  { _id: "3", title: "Motor Insurance",  slug: "motor-insurance",  isActive: true },
+  { _id: "4", title: "Travel Insurance", slug: "travel-insurance", isActive: true },
+  { _id: "5", title: "Home Insurance",   slug: "home-insurance",   isActive: true },
 ];
+
+function extractServices(data: unknown): Service[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data as Service[];
+  if (typeof data === "object" && data !== null) {
+    const obj = data as Record<string, unknown>;
+    for (const key of ["data", "services", "result", "results", "items", "payload"]) {
+      const val = obj[key];
+      if (Array.isArray(val) && val.length > 0) return val as Service[];
+    }
+    if (obj.data && typeof obj.data === "object") {
+      const nested = obj.data as Record<string, unknown>;
+      for (const key of ["services", "items", "results"]) {
+        const val = nested[key];
+        if (Array.isArray(val) && val.length > 0) return val as Service[];
+      }
+    }
+  }
+  return [];
+}
 
 const companyLinks = [
   { label: "About us", href: "/about" },
@@ -89,6 +115,40 @@ const FooterColumn: React.FC<{ title: string; links: { label: string; href: stri
 );
 
 const TransindiaFooter: React.FC = () => {
+  const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const apiUrl  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res     = await fetch(`${apiUrl}/services`, {
+          method:  "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!res.ok) return;
+
+        const raw      = await res.json();
+        const fetched  = extractServices(raw);
+
+        if (fetched.length > 0) {
+          setServices(fetched.filter((s) => s.isActive !== false));
+        }
+      } catch (err) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("[Footer] services fetch error:", err);
+        }
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  const productLinks = services.map(s => ({
+    label: s.title || s.name || "",
+    href: `/our-services/${s.slug}`
+  }));
+
   return (
     <>
       <style>{RESPONSIVE_CSS}</style>
