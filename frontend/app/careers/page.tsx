@@ -111,7 +111,7 @@ export default function CareersPage() {
           ) : (
           <div className="careers-jobs-grid">
             {visibleJobs.map((job) => (
-              <div key={job.id} className="job-item">
+              <div key={job._id} className="job-item">
                 <div className="job-top">
                   <h2 className="job-title">{job.title}</h2>
                   {/* Desktop Apply — hidden on mobile */}

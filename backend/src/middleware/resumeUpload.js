@@ -7,10 +7,8 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: "transindia/resumes",
-      // PDF documents are not considered images by cloudinary, so we must use 'raw' or 'auto'
-      resource_type: "auto", 
-      // Allowed formats could be restricted, but with resource_type: "auto",
-      // format verification is better handled by multer's fileFilter.
+      resource_type: "raw", 
+      public_id: `${Date.now()}-${file.originalname.replace(/\.[^/.]+$/, "")}.pdf`,
     };
   },
 });
