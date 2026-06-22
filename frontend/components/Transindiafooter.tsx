@@ -31,7 +31,7 @@ const companyLinks = [
   { label: "Our team", href: "#" },
   { label: "Become a PoSP", href: "#" },
   { label: "Corporate solutions", href: "#" },
-  { label: "Careers", href: "#" },
+  { label: "Careers", href: "/careers" },
 ];
 
 const supportLinks = [
