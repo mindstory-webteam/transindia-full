@@ -45,7 +45,7 @@ export default function LoginPage() {
             <ShieldCheck size={28} color="#fff" />
           </div> */}
           <img
-  src="/images/logo/transindia.png"
+  src="/logo/transindia.png"
   alt="TransIndia"
   style={{ height: 56, marginBottom: 12, objectFit: "contain" }}
 />
