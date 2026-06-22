@@ -7,10 +7,8 @@ const storage = new CloudinaryStorage({
   params: async (req, file) => {
     return {
       folder: "transindia/resumes",
-      // PDF documents are not considered images by cloudinary, so we must use 'raw' or 'auto'
-      resource_type: "auto", 
-      // Allowed formats could be restricted, but with resource_type: "auto",
-      // format verification is better handled by multer's fileFilter.
+      // PDF documents must be uploaded as 'raw' to avoid Cloudinary 403 restrictions on auto/image parsing
+      resource_type: "raw", 
     };
   },
 });
