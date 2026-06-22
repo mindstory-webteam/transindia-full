@@ -1,0 +1,31 @@
+const multer = require("multer");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
+
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    return {
+      folder: "transindia/resumes",
+      // PDF documents are not considered images by cloudinary, so we must use 'raw' or 'auto'
+      resource_type: "auto", 
+      // Allowed formats could be restricted, but with resource_type: "auto",
+      // format verification is better handled by multer's fileFilter.
+    };
+  },
+});
+
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = ["application/pdf"];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only PDF files are allowed for resumes"), false);
+  }
+};
+
+module.exports = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB limit
+});

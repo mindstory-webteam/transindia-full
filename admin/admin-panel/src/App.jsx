@@ -13,7 +13,8 @@ import SettingsPage from "./pages/SettingsPage";
 import GeneralQueryPage from "./pages/GeneralQueryPage";
 import ClaimSupportPage from "./pages/ClaimSupportPage";
 import ComplaintPage from "./pages/ComplaintPage";
-import ClaimLeadsPage from "./pages/ClaimLeadsPage"; // ← NEW
+import ClaimLeadsPage from "./pages/ClaimLeadsPage";
+import CareersPage from "./pages/CareersPage";
 
 function PrivateRoute({ children }) {
   const { admin, loading } = useAuth();
@@ -48,7 +49,8 @@ export default function App() {
             <Route path="contact/general-queries" element={<GeneralQueryPage />} />
             <Route path="contact/claim-support" element={<ClaimSupportPage />} />
             <Route path="contact/complaints" element={<ComplaintPage />} />
-            <Route path="claimleads" element={<ClaimLeadsPage />} /> {/* ← NEW */}
+            <Route path="claimleads" element={<ClaimLeadsPage />} />
+            <Route path="careers" element={<CareersPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
