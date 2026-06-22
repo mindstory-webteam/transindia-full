@@ -28,7 +28,7 @@ const PLANS = [
     desc:     "Build financial security for your loved ones and plan a retirement without worries.",
     cta:      "Explore plans",
     href:     "#",
-    imageSrc: "/images/section-2/Health insurance and healthcare.png",
+    imageSrc: "/images/section-2/life-bike.png",
     imageAlt: "Life Insurance illustration",
     imageBg:  "#F5F0FF",
   },
