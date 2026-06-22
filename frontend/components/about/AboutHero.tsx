@@ -61,7 +61,7 @@ export default function AboutHero() {
 
 const CSS = `
   .about-hero {
-    background: #001350;
+    background: #000d3a;
     position: relative;
     overflow: visible; 
     padding-top: 150px; 
@@ -231,7 +231,7 @@ const CSS = `
       display: none;
     }
     .about-hero {
-      background: #001250;
+      background: #000b37;
       padding-top: 110px;
       padding-bottom: 60px;
       overflow: visible;
@@ -285,7 +285,7 @@ const CSS = `
   }
 
   @media (max-width: 600px) {
-    .about-hero { background: #001250; padding-top: 100px; }
+    .about-hero { background: #000b37; padding-top: 100px; }
     .about-inner { 
       padding: 0 20px; 
       min-height: auto; 

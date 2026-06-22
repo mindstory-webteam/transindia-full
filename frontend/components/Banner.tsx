@@ -68,7 +68,7 @@ function QuoteBar() {
       }}>Get Insured Fast</div>
 
       <div className="ins-quote-col" style={colStyle}>
-        <span style={{fontSize:10,fontWeight:700,color:"#8A96B0",letterSpacing:1,textTransform:"uppercase"}}>Insurance Type</span>
+        <span style={{fontSize:10,fontWeight:400,color:"#838383",letterSpacing:1,textTransform:"uppercase"}}>Insurance Type</span>
         <div style={{position:"relative",display:"flex",alignItems:"center"}}>
           <select value={insType} onChange={e=>setInsType(e.target.value)} style={selectStyle}>
             {INSURANCE_TYPES.map(t=><option key={t}>{t}</option>)}
@@ -78,7 +78,7 @@ function QuoteBar() {
       </div>
 
       <div className="ins-quote-col" style={colStyle}>
-        <span style={{fontSize:10,fontWeight:700,color:"#8A96B0",letterSpacing:1,textTransform:"uppercase"}}>Sum Insured</span>
+        <span style={{fontSize:10,fontWeight:400,color:"#838383",letterSpacing:1,textTransform:"uppercase"}}>Sum Insured</span>
         <div style={{position:"relative",display:"flex",alignItems:"center"}}>
           <select value={sum} onChange={e=>setSum(e.target.value)} style={selectStyle}>
             {SUM_INSURED.map(s=><option key={s}>{s}</option>)}
@@ -88,7 +88,7 @@ function QuoteBar() {
       </div>
 
       <div className="ins-quote-col" style={{...colStyle,borderRight:"none"}}>
-        <span style={{fontSize:10,fontWeight:700,color:"#8A96B0",letterSpacing:1,textTransform:"uppercase"}}>Mobile Number</span>
+        <span style={{fontSize:10,fontWeight:400,color:"#838383",letterSpacing:1,textTransform:"uppercase"}}>Mobile Number</span>
         <input type="tel" value={mobile} onChange={e=>setMobile(e.target.value)} maxLength={10}
           style={{border:"none",outline:"none",background:"transparent",fontSize:17,
             fontWeight:600,color:"#0B2563",fontFamily:"inherit",width:"100%"}} />
@@ -98,17 +98,10 @@ function QuoteBar() {
           marginLeft:16, padding:"16px 32px", background:"#F25917",
           border:"none", borderRadius:12, color:"#fff", fontSize:16,
           fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center",
-          gap:10, whiteSpace:"nowrap", boxShadow:"0 4px 20px rgba(244,98,42,0.45)",
+          gap:10, whiteSpace:"nowrap",
           fontFamily:"inherit", transition:"transform 0.2s, box-shadow 0.2s",
         }}
-        onMouseEnter={e=>{
-          (e.currentTarget as HTMLButtonElement).style.transform="translateY(-2px)";
-          (e.currentTarget as HTMLButtonElement).style.boxShadow="0 8px 28px rgba(244,98,42,0.6)";
-        }}
-        onMouseLeave={e=>{
-          (e.currentTarget as HTMLButtonElement).style.transform="translateY(0)";
-          (e.currentTarget as HTMLButtonElement).style.boxShadow="0 4px 20px rgba(244,98,42,0.45)";
-        }}
+     
       >Get Quote <ArrowRight /></button>
     </div>
   );
@@ -291,153 +284,67 @@ export default function Banner() {
 
       <div className="ins-root">
         <section className="ins-section" style={{
-          background:"linear-gradient(160deg, #0B2080 0%, #0A1B6B 45%, #061448 100%)",
+          background:"#001a5a",
           position:"relative", overflow:"visible",
           paddingTop:88,
           paddingBottom:`${QUOTE_BAR_HALF}px`,
-          height:"100vh", minHeight:500,
+          minHeight:"100vh",
         }}>
-          {/* Background glows */}
-          <div style={{position:"absolute",top:"10%",right:"25%",width:700,height:900,
-            borderRadius:"50%",background:"radial-gradient(circle,rgba(56,189,248,0.09) 0%,transparent 65%)",
-            pointerEvents:"none"}} />
-          <div style={{position:"absolute",bottom:"15%",left:"5%",width:500,height:500,
-            borderRadius:"50%",background:"radial-gradient(circle,rgba(30,80,220,0.10) 0%,transparent 65%)",
-            pointerEvents:"none"}} />
+   
 
           {/* Main row */}
-          <div className="ins-inner" style={{
-            maxWidth:1280, margin:"0 auto", padding:"64px 0 0 48px",
-            display:"flex", alignItems:"center", justifyContent:"space-between",
-            gap:32, position:"relative", zIndex:1,
-          }}>
+          <div className="ins-inner max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-16 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-8 relative z-10">
             {/* LEFT */}
-            <div className="ins-left" style={{flex:"0 0 44%",maxWidth:530,paddingBottom:80}}>
-              <h1 style={{
-                fontSize:"clamp(28px,3.6vw,54px)", fontWeight:900, color:"#fff",
-                lineHeight:1.12, margin:"0 0 20px", letterSpacing:"-0.5px",
-              }}>
+            <div className="ins-left w-full lg:w-[44%] max-w-[530px] pb-10 lg:pb-20 text-center lg:text-left mx-auto lg:mx-0">
+              <h1 className="text-[clamp(32px,4vw,54px)] font-black text-white leading-tight mb-4 sm:mb-5 tracking-tight">
                 Protection for<br />
-                <span style={{color:"#F4622A",}}>Every </span>
-                <span style={{color:"#38BDF8"}}>stage of life.</span>
+                <span className="text-[#F15A40]">Every </span>
+                <span className="text-[#20BEC6]">stage of life.</span>
               </h1>
-              <p style={{fontSize:15,color:"rgba(255,255,255,0.64)",lineHeight:1.8,margin:"0 0 36px",maxWidth:460}}>
-                We help families find the right insurance coverage with easy
-                processes, trusted advisors, and dependable claim support
-                whenever you need it.
+              <p className="text-[13.5px] sm:text-[14px] text-white/70 leading-relaxed mb-6 sm:mb-9 max-w-[530px] mx-auto lg:mx-0">
+                We help families find the right insurance coverage with easy processes, <br className="hidden md:block" />
+                trusted advisors, and dependable claim support whenever you need it.
               </p>
-              <div className="ins-cta-row" style={{display:"flex",gap:14,flexWrap:"wrap",marginBottom:56}}>
-                <a href="#" style={{padding:"14px 36px",background:"#F4622A",borderRadius:10,
-                  color:"#fff",textDecoration:"none",fontSize:15,fontWeight:800,
-                  boxShadow:"0 4px 26px rgba(244,98,42,0.5)",whiteSpace:"nowrap"}}>
+              <div className="ins-cta-row flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap justify-center lg:justify-start mb-10 sm:mb-14">
+                <a href="#" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#EC4F34] rounded-xl text-white no-underline text-[14px] sm:text-[15px] font-extrabold  whitespace-nowrap">
                   Get your quote
                 </a>
-                <a href="#" style={{padding:"14px 36px",background:"rgba(255,255,255,0.06)",
-                  border:"1.5px solid rgba(255,255,255,0.4)",borderRadius:10,color:"#fff",
-                  textDecoration:"none",fontSize:15,fontWeight:800,
-                  backdropFilter:"blur(6px)",whiteSpace:"nowrap"}}>
+                <a href="#" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[14px] sm:text-[15px] font-extrabold backdrop-blur-md whitespace-nowrap">
                   Talk to an expert
                 </a>
               </div>
-              <div className="ins-stats" style={{display:"flex",alignItems:"flex-start",flexWrap:"wrap"}}>
+              <div className="ins-stats flex items-start flex-wrap justify-center lg:justify-start gap-4 sm:gap-0">
                 {STATS.map((s,i)=>(
-                  <div key={s.label} style={{display:"flex",alignItems:"flex-start",gap:18,paddingRight:18}}>
-                    {i!==0 && <div style={{width:1,height:40,background:"rgba(255,255,255,0.15)",flexShrink:0,marginTop:2}} />}
-                    <div>
-                      <div style={{fontSize:"clamp(17px,1.7vw,23px)",fontWeight:900,color:"#fff",lineHeight:1.1}}>{s.value}</div>
-                      <div style={{fontSize:11,color:"rgba(255,255,255,0.42)",marginTop:4,whiteSpace:"nowrap"}}>{s.label}</div>
+                  <div key={s.label} className="flex items-start gap-[10px] sm:gap-[18px] pr-2 sm:pr-[18px]">
+                    {i!==0 && <div className="hidden sm:block w-[1px] h-10 bg-white/15 shrink-0 mt-0.5" />}
+                    <div className="text-left">
+                      <div className="text-[clamp(17px,2vw,23px)] font-black text-white leading-tight">{s.value}</div>
+                      <div className="text-[11px] text-white/50 mt-1 whitespace-nowrap">{s.label}</div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* RIGHT: image + 4 floating cards */}
-            <div className="ins-right" style={{
-              flex:"0 0 52%", maxWidth:680,
-              display:"flex", flexDirection:"column", alignItems:"flex-end",
-            }}>
-              <div style={{position:"relative", width:"88%", marginRight:"-24px"}}>
-
-                {/* ── CARD 1: ₹50L Health Cover (top-left) ── */}
-                <FloatingCard style={{top:"30%", left:"-25%"}}>
-                  <IconBox>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="#00B3FB" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-                      <path d="M9 12h6"/><path d="M12 9v6"/>
-                    </svg>
-                  </IconBox>
-                  <div>
-                    <div style={{fontSize:18,fontWeight:900,color:"#fff",lineHeight:1.1}}>₹50L</div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:4,fontWeight:500}}>Lifetime Security</div>
-                  </div>
-                </FloatingCard>
-
-                {/* ── CARD 2: Advisor Online (top-right) ── */}
-                <FloatingCard style={{top:"30%", right:"-15%"}}>
-                  <div style={{position:"relative", flexShrink:0}}>
-                    <IconBox>
-                      <svg viewBox="0 0 24 24" width="32" height="32" fill="#00B3FB" stroke="#00B3FB" strokeWidth={1.8} xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="7" r="3" strokeLinecap="round"/>
-                        <path d="M6.5 10.5C6.5 7.46 9.02 5 12 5s5.5 2.46 5.5 5.5" strokeLinecap="round"/>
-                        <rect x="5" y="10.5" width="3" height="4.5" rx="1.5" fill="#38BDF8" stroke="none"/>
-                        <rect x="16" y="10.5" width="3" height="4.5" rx="1.5" fill="#38BDF8" stroke="none"/>
-                        <path d="M18 14v1a3 3 0 01-3 3h-2" strokeLinecap="round"/>
-                      </svg>
-                    </IconBox>
-                    <div className="pulse-dot" style={{
-                      position:"absolute", top:-2, right:-2,
-                      width:12, height:12, borderRadius:"50%", background:"#4ADE80",
-                      border:"2px solid rgba(5,18,80,0.9)",
-                    }} />
-                  </div>
-                  <div style={{fontSize:15,fontWeight:700,color:"#fff",lineHeight:1.1}}>Hassle-Free <br/> Claims</div>
-                </FloatingCard>
-
-                {/* ── CARD 3: 24 hrs Avg. Claim Time (bottom-left) ── */}
-                <FloatingCard style={{bottom:"18%", left:"-28%"}}>
-                  <IconBox>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32" fill="#00B3FB">
-                      <path fillRule="evenodd" d="M14.615 1.595a.75.75 0 0 1 .359.852L12.982 9.75h7.268a.75.75 0 0 1 .548 1.262l-10.5 11.25a.75.75 0 0 1-1.272-.71l1.992-7.302H3.75a.75.75 0 0 1-.548-1.262l10.5-11.25a.75.75 0 0 1 .913-.143Z" clipRule="evenodd" />
-                    </svg>
-                  </IconBox>
-                  <div>
-                    <div style={{fontSize:18,fontWeight:900,color:"#fff",lineHeight:1.1}}>24 hrs</div>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.55)",marginTop:4,fontWeight:500}}>Personalized Policy Guidance</div>
-                  </div>
-                </FloatingCard>
-
-                {/* ── CARD 4: Renjith Kumar – Insurance Expert (bottom-right) ── */}
-                <FloatingCard style={{bottom:"18%", right:"-12%"}}>
-                  <div style={{
-                    width:52, height:52, borderRadius:"50%",
-                    background:"#00B3FB",
-                    display:"flex", alignItems:"center", justifyContent:"center",
-                    flexShrink:0, fontSize:22, fontWeight:900, color:"#fff",
-                    letterSpacing:"-0.5px",
-                  }}>%</div>
-                  <div>
-                    <div style={{fontSize:14,fontWeight:700,color:"#fff",lineHeight:1.2}}>Trusted by <br /> Thousands</div>
-                    <div style={{fontSize:11,color:"#38BDF8",marginTop:4,fontWeight:600}}>Insurance Expert</div>
-                  </div>
-                </FloatingCard>
+            {/* RIGHT: image */}
+            <div className="ins-right w-full lg:w-[52%] max-w-[500px] lg:max-w-[680px] flex flex-col items-center lg:items-end mt-4 lg:mt-0 mx-auto lg:mx-0">
+              <div className="relative w-full lg:w-full lg:mr-[-18px]">
 
                 {/* Main banner image */}
                 <img
-                  src={FAMILY_IMAGE_SRC}
+                  src="/images/home/home-banner-rightimg.png"
                   alt="Insurance coverage"
-                  style={{width:"100%", height:"auto", display:"block", maxWidth:380, marginLeft:"70px"}}
+                  className="w-full h-auto object-contain max-w-full lg:max-w-[110%] mx-auto lg:ml-auto"
                 />
               </div>
             </div>
           </div>
 
           {/* Quote bar */}
-          <div className="ins-quote-wrap" style={{
-            position:"absolute", bottom:`-${QUOTE_BAR_HALF}px`,
-            left:0, right:0, zIndex:20, padding:"0 48px",
+          <div className="ins-quote-wrap absolute left-0 right-0 z-20 px-4 sm:px-8 lg:px-12" style={{
+            bottom: `-${QUOTE_BAR_HALF}px`,
           }}>
-            <div style={{maxWidth:1280,margin:"0 auto"}}>
+            <div className="max-w-7xl mx-auto">
               <QuoteBar />
             </div>
           </div>
