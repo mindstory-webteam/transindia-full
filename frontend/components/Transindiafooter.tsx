@@ -48,7 +48,7 @@ const bottomLinks = [
   { label: "Terms",         href: "/terms" },
   { label: "Privacy",       href: "/privacy-policy" },
   { label: "Disclaimer",    href: "#" },
-  { label: "Cookie policy", href: "#" },
+  { label: "Cookie policy", href: "/cookie-policy" },
 ];
 
 const FooterColumn: React.FC<{ title: string; links: { label: string; href: string }[] }> = ({ title, links }) => (
