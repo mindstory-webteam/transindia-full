@@ -54,15 +54,15 @@ function extractServices(data: unknown): Service[] {
 
 const companyLinks = [
   { label: "About us", href: "/about" },
-  { label: "Our team", href: "#" },
+  // { label: "Our team", href: "#" },
   { label: "Become a PoSP", href: "#" },
-  { label: "Corporate solutions", href: "#" },
+  // { label: "Corporate solutions", href: "#" },
   { label: "Careers", href: "/careers" },
 ];
 
 const supportLinks = [
   { label: "Make a claim", href: "/claims" },
-  { label: "Track claim", href: "#" },
+  // { label: "Track claim", href: "#" },
   { label: "Contact us", href: "/contact-us" },
   { label: "Renew policy", href: "#" },
   { label: "FAQ", href: "#" },
@@ -73,7 +73,7 @@ const supportLinks = [
 const bottomLinks = [
   { label: "Terms",         href: "/terms" },
   { label: "Privacy",       href: "/privacy-policy" },
-  { label: "Disclaimer",    href: "#" },
+  // { label: "Disclaimer",    href: "#" },
   { label: "Cookie policy", href: "/cookie-policy" },
 ];
 
