@@ -41,9 +41,14 @@ export default function LoginPage() {
       <div style={{ width:"100%", maxWidth:400 }}>
         {/* Logo */}
         <div style={{ textAlign:"center", marginBottom:32 }}>
-          <div style={{ width:56, height:56, borderRadius:14, background:"linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)", display:"inline-flex", alignItems:"center", justifyContent:"center", marginBottom:12, boxShadow:"0 10px 24px rgba(241,90,62,0.38)" }}>
+          {/* <div style={{ width:56, height:56, borderRadius:14, background:"linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)", display:"inline-flex", alignItems:"center", justifyContent:"center", marginBottom:12, boxShadow:"0 10px 24px rgba(241,90,62,0.38)" }}>
             <ShieldCheck size={28} color="#fff" />
-          </div>
+          </div> */}
+          <img
+  src="/images/logo/transindia.png"
+  alt="TransIndia"
+  style={{ height: 56, marginBottom: 12, objectFit: "contain" }}
+/>
           <h1 style={{ color:"#fff", fontSize:22, fontWeight:800, letterSpacing:"-0.02em" }}>TransIndia Admin</h1>
           <p style={{ color:"#64748B", fontSize:13, marginTop:4 }}>Sign in to manage your services</p>
         </div>
