@@ -52,7 +52,7 @@ const CALC_SUBMIT_BG = "#1B8A3A";
 
 function HeroCalcCard() {
   // Calculator is frontend-only: always use the fields defined above.
-  const fields = DEFAULT_CALC_FIELDS;
+  const fields = DEFAULT_CALC_FIELDS ?? [];
   const initialState: Record<string, string> = {};
   fields.forEach((f) => {
     initialState[f.stateKey] = f.defaultValue;
