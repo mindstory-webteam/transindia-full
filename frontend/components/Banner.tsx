@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png";
 
@@ -38,7 +38,7 @@ function ArrowRight() {
   );
 }
 
-function QuoteBar() {
+function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
   const [insType, setInsType] = useState("Health Insurance");
   const [sum,     setSum]     = useState("₹5 Lakhs");
   const [mobile,  setMobile]  = useState("7510715196");
@@ -56,7 +56,7 @@ function QuoteBar() {
   };
 
   return (
-    <div className="ins-quotebar" style={{
+    <div ref={innerRef} className="ins-quotebar" style={{
       background:"#fff", borderRadius:18,
       boxShadow:"0 8px 48px rgba(0,0,0,0.18)",
       padding:"20px 28px", display:"flex", alignItems:"center", gap:0,
@@ -147,6 +147,43 @@ function IconBox({ children }: { children: React.ReactNode }) {
 
 export default function Banner() {
   const QUOTE_BAR_HALF = 38;
+  const STACK_GAP = 28; // breathing room between content and card top on mobile/tablet
+
+  // Measure the quote card so it can straddle the banner edge (half in / half out)
+  const quoteRef = useRef<HTMLDivElement>(null);
+  const [quoteH, setQuoteH] = useState(0);
+  const [isStacked, setIsStacked] = useState(false);
+
+  // Track the stacked (≤960px) layout where the card becomes tall
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 960px)");
+    const onChange = () => setIsStacked(mq.matches);
+    onChange();
+    mq.addEventListener?.("change", onChange);
+    return () => mq.removeEventListener?.("change", onChange);
+  }, []);
+
+  // Measure the white card's height (and keep it in sync on resize)
+  useEffect(() => {
+    const el = quoteRef.current;
+    if (!el) return;
+    const measure = () => setQuoteH(el.offsetHeight);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  // On mobile/tablet: offset by half the measured card height so it straddles the edge.
+  // On desktop: keep the original small overlap.
+  const stacked = isStacked && quoteH > 0;
+  const half = stacked ? Math.round(quoteH / 2) : QUOTE_BAR_HALF;
+  const sectionPadB = stacked ? half + STACK_GAP : QUOTE_BAR_HALF;
+  const spacerH = stacked ? half : 0;
 
   return (
     <>
@@ -165,7 +202,6 @@ export default function Banner() {
           .ins-section{
             height:auto!important;
             min-height:auto!important;
-            padding-bottom:0!important;
             padding-top:80px!important;
           }
           .ins-inner{
@@ -197,11 +233,11 @@ export default function Banner() {
             margin:0 auto!important;
           }
           .floating-card{ display:none!important; }
+          /* Keep the bar ABSOLUTE so it overflows the banner edge (half in / half out).
+             Vertical offset (bottom) is set inline from the measured height. */
           .ins-quote-wrap{
-            position:relative!important;
-            bottom:0!important;
-            padding:24px 32px!important;
-            margin-top:0!important;
+            padding-left:32px!important;
+            padding-right:32px!important;
           }
           .ins-quotebar{
             flex-direction:column!important;
@@ -226,9 +262,6 @@ export default function Banner() {
             margin-top:16px!important;
             justify-content:center!important;
             width:100%!important;
-          }
-          .ins-spacer{
-            padding-top:${QUOTE_BAR_HALF + 32}px!important;
           }
         }
 
@@ -273,12 +306,12 @@ export default function Banner() {
             max-width:240px!important;
           }
           .ins-quote-wrap{
-            padding:20px 16px!important;
+            padding-left:16px!important;
+            padding-right:16px!important;
           }
           .ins-quotebar{
             border-radius:14px!important;
           }
-        
         }
       `}</style>
 
@@ -287,7 +320,7 @@ export default function Banner() {
           background:"#001a5a",
           position:"relative", overflow:"visible",
           paddingTop:88,
-          paddingBottom:`${QUOTE_BAR_HALF}px`,
+          paddingBottom:`${sectionPadB}px`,
           minHeight:"100vh",
         }}>
    
@@ -340,17 +373,19 @@ export default function Banner() {
             </div>
           </div>
 
-          {/* Quote bar */}
+          {/* Quote bar — absolutely positioned so it straddles the banner's bottom edge */}
           <div className="ins-quote-wrap absolute left-0 right-0 z-20 px-4 sm:px-8 lg:px-12" style={{
-            bottom: `-${QUOTE_BAR_HALF}px`,
+            bottom: `-${half}px`,
           }}>
             <div className="max-w-7xl mx-auto">
-              <QuoteBar />
+              <QuoteBar innerRef={quoteRef} />
             </div>
           </div>
         </section>
 
-    
+        {/* Reserves the space taken up by the half of the card that hangs below the banner */}
+        <div className="ins-quote-spacer" aria-hidden style={{ height: spacerH }} />
+
       </div>
     </>
   );
