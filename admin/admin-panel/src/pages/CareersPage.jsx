@@ -391,7 +391,7 @@ export default function CareersPage() {
                     type="number" 
                     id="order"
                     value={formData.order}
-                    onChange={(e) => setFormData({...formData, order: Number(e.target.value)})}
+                    onChange={(e) => setFormData({...formData, order: e.target.value === "" ? "" : Number(e.target.value)})}
                     style={{ width: "80px", padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 14 }}
                   />
                 </div>

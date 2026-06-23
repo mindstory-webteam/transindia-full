@@ -96,6 +96,13 @@ exports.getAdminJobs = async (req, res, next) => {
 // @access  Private (Admin)
 exports.createJob = async (req, res, next) => {
   try {
+    // Check if order is already used
+    if (req.body.order !== undefined) {
+      const existingJob = await JobRole.findOne({ order: req.body.order });
+      if (existingJob) {
+        return res.status(400).json({ success: false, message: "Order number must be unique. This number is already in use." });
+      }
+    }
     const job = await JobRole.create(req.body);
     res.status(201).json({ success: true, data: job });
   } catch (error) {
@@ -108,6 +115,13 @@ exports.createJob = async (req, res, next) => {
 // @access  Private (Admin)
 exports.updateJob = async (req, res, next) => {
   try {
+    // Check if order is already used
+    if (req.body.order !== undefined) {
+      const existingJob = await JobRole.findOne({ order: req.body.order });
+      if (existingJob && existingJob._id.toString() !== req.params.id) {
+        return res.status(400).json({ success: false, message: "Order number must be unique. This number is already in use." });
+      }
+    }
     const job = await JobRole.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
