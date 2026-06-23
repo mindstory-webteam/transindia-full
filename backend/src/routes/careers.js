@@ -9,6 +9,7 @@ const {
   updateJob,
   deleteJob,
   getApplications,
+  deleteApplication,
 } = require("../controllers/careerController");
 
 const resumeUpload = require("../middleware/resumeUpload");
@@ -25,5 +26,6 @@ router.put("/admin/jobs/:id", protect, updateJob);
 router.delete("/admin/jobs/:id", protect, deleteJob);
 
 router.get("/admin/applications", protect, getApplications);
+router.delete("/admin/applications/:id", protect, deleteApplication);
 
 module.exports = router;

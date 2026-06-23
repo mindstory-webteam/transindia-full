@@ -16,7 +16,8 @@ export default function CareersPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    tags: "",
+    location: "Remote",
+    jobType: "Full-time",
     isActive: true,
   });
 
@@ -57,12 +58,13 @@ export default function CareersPage() {
       setFormData({
         title: job.title,
         description: job.description,
-        tags: job.tags ? job.tags.join(", ") : "",
+        location: job.tags && job.tags[0] ? job.tags[0] : "Remote",
+        jobType: job.tags && job.tags[1] ? job.tags[1] : "Full-time",
         isActive: job.isActive,
       });
     } else {
       setEditingJob(null);
-      setFormData({ title: "", description: "", tags: "", isActive: true });
+      setFormData({ title: "", description: "", location: "Remote", jobType: "Full-time", isActive: true });
     }
     setIsJobModalOpen(true);
   };
@@ -77,7 +79,7 @@ export default function CareersPage() {
     try {
       const payload = {
         ...formData,
-        tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tags: [formData.location, formData.jobType],
       };
 
       if (editingJob) {
@@ -95,15 +97,72 @@ export default function CareersPage() {
     }
   };
 
-  const handleDeleteJob = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this role?")) return;
-    try {
-      await axios.delete(`/careers/admin/jobs/${id}`);
-      toast.success("Job deleted successfully");
-      fetchJobs();
-    } catch (err) {
-      toast.error("Failed to delete job");
-    }
+  const handleDeleteJob = (id) => {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Are you sure you want to delete this role?</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--ti-line)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await axios.delete(`/careers/admin/jobs/${id}`);
+                  toast.success("Job deleted successfully");
+                  fetchJobs();
+                } catch (err) {
+                  toast.error("Failed to delete job");
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
+  };
+
+  const handleDeleteApp = (id) => {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Are you sure you want to delete this application?</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--ti-line)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await axios.delete(`/careers/admin/applications/${id}`);
+                  toast.success("Application deleted successfully");
+                  fetchApplications();
+                } catch (err) {
+                  toast.error("Failed to delete application");
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
   };
 
   return (
@@ -221,7 +280,7 @@ export default function CareersPage() {
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
-                    <td style={{ padding: "16px 20px", textAlign: "right" }}>
+                    <td style={{ padding: "16px 20px", textAlign: "right", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 16 }}>
                       <a 
                         href={app.resumeUrl} 
                         target="_blank" 
@@ -230,6 +289,9 @@ export default function CareersPage() {
                       >
                         <FileText size={16} /> View PDF
                       </a>
+                      <button onClick={() => handleDeleteApp(app._id)} style={{ background: "none", border: "none", color: "#E1483B", cursor: "pointer", display: "flex", alignItems: "center" }} title="Delete Application">
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -264,15 +326,33 @@ export default function CareersPage() {
                 />
               </div>
 
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Tags (comma separated)</label>
-                <input 
-                  type="text" 
-                  placeholder="Remote, Full-time, Design"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15 }}
-                />
+              <div style={{ display: "flex", gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Location Type</label>
+                  <select 
+                    value={formData.location}
+                    onChange={(e) => setFormData({...formData, location: e.target.value})}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15, background: "#fff" }}
+                  >
+                    <option value="Remote">Remote</option>
+                    <option value="Onsite">Onsite</option>
+                    <option value="Hybrid">Hybrid</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Job Type</label>
+                  <select 
+                    value={formData.jobType}
+                    onChange={(e) => setFormData({...formData, jobType: e.target.value})}
+                    style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15, background: "#fff" }}
+                  >
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-Time">Part-Time</option>
+                    <option value="Freelance">Freelance</option>
+                    <option value="Internships">Internships</option>
+                    <option value="Contract/Temporary">Contract/Temporary</option>
+                  </select>
+                </div>
               </div>
 
               <div>

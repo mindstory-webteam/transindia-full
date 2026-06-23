@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getGeneralQueries, deleteGeneralQuery } from "../services/api";
-import { Trash2, Check, X as CloseIcon } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function GeneralQueryPage() {
@@ -19,28 +19,37 @@ export default function GeneralQueryPage() {
   useEffect(() => { load(); }, []);
 
   const handleDelete = (id) => {
-    toast((t) => (
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 14, fontWeight: 500, color: "#0F172A" }}>Delete this query?</span>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={async () => {
-            toast.dismiss(t.id);
-            try {
-              await deleteGeneralQuery(id);
-              toast.success("Deleted successfully");
-              load();
-            } catch (err) {
-              toast.error("Failed to delete");
-            }
-          }} style={{ background: "#16A34A", color: "white", border: "none", borderRadius: 4, padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }}>
-            <Check size={16} />
-          </button>
-          <button onClick={() => toast.dismiss(t.id)} style={{ background: "#DC2626", color: "white", border: "none", borderRadius: 4, padding: "4px", cursor: "pointer", display: "flex", alignItems: "center" }}>
-            <CloseIcon size={16} />
-          </button>
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Are you sure you want to delete this query?</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--border)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await deleteGeneralQuery(id);
+                  toast.success("Deleted successfully");
+                  load();
+                } catch (err) {
+                  toast.error("Failed to delete");
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
         </div>
-      </div>
-    ), { duration: 4000 });
+      ),
+      { duration: Infinity }
+    );
   };
 
   const totalPages = Math.ceil(queries.length / itemsPerPage);

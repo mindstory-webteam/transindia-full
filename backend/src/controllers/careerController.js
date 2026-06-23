@@ -151,3 +151,37 @@ exports.getApplications = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Delete an application and its resume
+// @route   DELETE /api/careers/admin/applications/:id
+// @access  Private (Admin)
+exports.deleteApplication = async (req, res, next) => {
+  try {
+    const application = await JobApplication.findById(req.params.id);
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Application not found" });
+    }
+
+    // Extract public_id from Cloudinary URL if it exists
+    if (application.resumeUrl) {
+      try {
+        const urlObj = new URL(application.resumeUrl);
+        const pathname = urlObj.pathname;
+        const publicIdMatch = pathname.match(/upload\/(?:v\d+\/)?(.+)/);
+        if (publicIdMatch && publicIdMatch[1]) {
+          const publicId = publicIdMatch[1];
+          // Delete from Cloudinary (resource_type: "raw" for PDFs)
+          await cloudinary.uploader.destroy(publicId, { resource_type: "raw" });
+        }
+      } catch (err) {
+        console.error("Error deleting resume from Cloudinary:", err);
+      }
+    }
+
+    await application.deleteOne();
+    res.status(200).json({ success: true, message: "Application deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
