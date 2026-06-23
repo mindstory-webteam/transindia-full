@@ -1,11 +1,27 @@
 import React, { useEffect, useState } from "react";
-import { getClaimSupports, deleteClaimSupport } from "../services/api";
-import { Trash2 } from "lucide-react";
+import { getClaimSupports, deleteClaimSupport, updateClaimSupportStatus } from "../services/api";
+import { Trash2, Search, X, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
+
+const STATUS_COLORS = {
+  "new":         { bg: "#FEF3C7", color: "#D97706" },
+  "in-progress": { bg: "#E0F7FA", color: "#0891B2" },
+  "resolved":    { bg: "#DCFCE7", color: "#16A34A" },
+  "closed":      { bg: "#FEE2E2", color: "#DC2626" },
+};
+
+const STATUSES = [
+  { value: "new", label: "New" },
+  { value: "in-progress", label: "In Progress" },
+  { value: "resolved", label: "Resolved" },
+  { value: "closed", label: "Closed" }
+];
 
 export default function ClaimSupportPage() {
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 7;
 
@@ -17,6 +33,16 @@ export default function ClaimSupportPage() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleStatusChange = async (id, status) => {
+    try {
+      await updateClaimSupportStatus(id, status);
+      setClaims(prev => prev.map(c => c._id === id ? { ...c, status } : c));
+      toast.success("Status updated");
+    } catch {
+      toast.error("Failed to update status");
+    }
+  };
 
   const handleDelete = (id) => {
     toast(
@@ -52,15 +78,68 @@ export default function ClaimSupportPage() {
     );
   };
 
-  const totalPages = Math.ceil(claims.length / itemsPerPage);
-  const currentClaims = claims.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const filtered = claims.filter(c => {
+    const matchStatus = filterStatus === "All" || c.status === filterStatus;
+    const q = search.toLowerCase();
+    const matchSearch =
+      c.policyHolder?.toLowerCase().includes(q) ||
+      c.mobile?.toLowerCase().includes(q) ||
+      c.policyNumber?.toLowerCase().includes(q) ||
+      c.claimType?.toLowerCase().includes(q);
+    return matchStatus && matchSearch;
+  });
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const currentClaims = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
+      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24, flexWrap: "wrap", gap: 16 }}>
         <div>
           <h1 style={{ fontSize:22, fontWeight:800 }}>Claim Support Requests</h1>
           <p style={{ color:"#64748B", fontSize:13 }}>Manage claim support submissions</p>
+        </div>
+
+        {/* Filters */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {/* Search */}
+          <div style={{ position: "relative", flex: "1 1 220px" }}>
+            <Search size={14} color="#94A3B8" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)" }} />
+            <input
+              value={search}
+              onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+              placeholder="Search claims..."
+              style={{
+                width: "100%", padding: "9px 12px 9px 32px",
+                border: "1px solid var(--border)", borderRadius: 10,
+                fontSize: 13, color: "#0F172A", background: "#fff",
+                outline: "none", boxSizing: "border-box",
+              }}
+            />
+            {search && (
+              <button onClick={() => { setSearch(""); setCurrentPage(1); }} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", border: "none", background: "none", cursor: "pointer", display: "flex" }}>
+                <X size={13} color="#94A3B8" />
+              </button>
+            )}
+          </div>
+
+          {/* Status filter */}
+          <div style={{ position: "relative" }}>
+            <select
+              value={filterStatus}
+              onChange={e => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+              style={{
+                padding: "9px 32px 9px 12px", border: "1px solid var(--border)",
+                borderRadius: 10, fontSize: 13, color: "#0F172A",
+                background: "#fff", outline: "none", cursor: "pointer",
+                appearance: "none",
+              }}
+            >
+              <option value="All">All Statuses</option>
+              {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+            </select>
+            <ChevronDown size={13} color="#94A3B8" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+          </div>
         </div>
       </div>
 
@@ -69,7 +148,7 @@ export default function ClaimSupportPage() {
       ) : (
         <div style={{ background:"#fff", borderRadius:12, border:"1px solid var(--border)", overflow:"hidden" }}>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth: 800 }}>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth: 900 }}>
               <thead>
               <tr style={{ background:"#F8FAFC", borderBottom:"1px solid var(--border)" }}>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Date</th>
@@ -78,6 +157,7 @@ export default function ClaimSupportPage() {
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Claim Type</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Mobile</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Incident</th>
+                <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Status</th>
                 <th style={{ padding:"12px 16px", textAlign:"right", fontWeight:600, color:"#64748B" }}>Actions</th>
               </tr>
             </thead>
@@ -99,8 +179,27 @@ export default function ClaimSupportPage() {
                   <td style={{ padding:"12px 16px", color:"#475569" }}>
                     {c.mobile}
                   </td>
-                  <td style={{ padding:"12px 16px", color:"#475569", maxWidth: "250px" }}>
+                  <td style={{ padding:"12px 16px", color:"#475569", maxWidth: "200px" }}>
                     {c.incident || "-"}
+                  </td>
+                  <td style={{ padding:"12px 16px" }}>
+                    <div style={{ position: "relative", width: "fit-content" }}>
+                      <select
+                        value={c.status || "new"}
+                        onChange={e => handleStatusChange(c._id, e.target.value)}
+                        style={{
+                          padding: "4px 24px 4px 9px",
+                          border: `1.5px solid ${STATUS_COLORS[c.status || "new"]?.color || "var(--border)"}`,
+                          borderRadius: 8, fontSize: 12, fontWeight: 700,
+                          color: STATUS_COLORS[c.status || "new"]?.color || "#334155",
+                          background: STATUS_COLORS[c.status || "new"]?.bg || "#fff",
+                          outline: "none", cursor: "pointer", appearance: "none",
+                        }}
+                      >
+                        {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                      <ChevronDown size={11} color={STATUS_COLORS[c.status || "new"]?.color || "#94A3B8"} style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                    </div>
                   </td>
                   <td style={{ padding:"12px 16px" }}>
                     <div style={{ display:"flex", justifyContent:"flex-end" }}>
@@ -112,8 +211,8 @@ export default function ClaimSupportPage() {
                   </td>
                 </tr>
               ))}
-              {claims.length === 0 && (
-                <tr><td colSpan={7} style={{ padding:32, textAlign:"center", color:"#94A3B8" }}>No claim support requests yet.</td></tr>
+              {filtered.length === 0 && (
+                <tr><td colSpan={8} style={{ padding:32, textAlign:"center", color:"#94A3B8" }}>No claim support requests found.</td></tr>
               )}
             </tbody>
             </table>

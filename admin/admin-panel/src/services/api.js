@@ -141,6 +141,11 @@ export async function deleteGeneralQuery(id) {
   return data;
 }
 
+export async function updateGeneralQueryStatus(id, status) {
+  const { data } = await api.patch(`/contact/general-query/${id}/status`, { status });
+  return data.data;
+}
+
 export async function getClaimSupports() {
   const { data } = await api.get("/contact/claim-support");
   return data;
@@ -151,6 +156,11 @@ export async function deleteClaimSupport(id) {
   return data;
 }
 
+export async function updateClaimSupportStatus(id, status) {
+  const { data } = await api.patch(`/contact/claim-support/${id}/status`, { status });
+  return data.data;
+}
+
 export async function getComplaints() {
   const { data } = await api.get("/contact/complaint");
   return data;
@@ -159,6 +169,11 @@ export async function getComplaints() {
 export async function deleteComplaint(id) {
   const { data } = await api.delete(`/contact/complaint/${id}`);
   return data;
+}
+
+export async function updateComplaintStatus(id, status) {
+  const { data } = await api.patch(`/contact/complaint/${id}/status`, { status });
+  return data.data;
 }
 
 // ── Claim Leads ───────────────────────────────────────────────────────────────

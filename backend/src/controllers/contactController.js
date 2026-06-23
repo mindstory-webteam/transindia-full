@@ -82,3 +82,33 @@ exports.deleteComplaint = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.updateGeneralQueryStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const data = await GeneralQuery.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.updateClaimSupportStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const data = await ClaimSupport.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+exports.updateComplaintStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    const data = await Complaint.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    res.status(200).json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
