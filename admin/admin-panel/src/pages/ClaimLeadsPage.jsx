@@ -193,18 +193,41 @@ export default function ClaimLeadsPage() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Delete this claim lead? This cannot be undone.")) return;
-    try {
-      setDeletingId(id);
-      await deleteClaimLead(id);
-      setClaims(prev => prev.filter(c => c._id !== id));
-      toast.success("Claim deleted");
-    } catch {
-      toast.error("Failed to delete claim");
-    } finally {
-      setDeletingId(null);
-    }
+  function handleDelete(id) {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Delete this claim lead? This cannot be undone.</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--border)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  setDeletingId(id);
+                  await deleteClaimLead(id);
+                  setClaims(prev => prev.filter(c => c._id !== id));
+                  toast.success("Claim deleted");
+                } catch {
+                  toast.error("Failed to delete claim");
+                } finally {
+                  setDeletingId(null);
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
   }
 
   const filtered = claims.filter(c => {

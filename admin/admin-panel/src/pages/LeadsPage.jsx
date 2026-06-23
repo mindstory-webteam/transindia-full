@@ -482,19 +482,42 @@ export default function LeadsPage() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this lead? This action cannot be undone.")) return;
-    setDeletingId(id);
-    try {
-      await api.delete(`/bmileads/${id}`);
-      toast.success("Lead deleted");
-      setLeads((curr) => curr.filter((l) => l._id !== id));
-      fetchStats();
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to delete lead");
-    } finally {
-      setDeletingId(null);
-    }
+  const handleDelete = (id) => {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Delete this lead? This action cannot be undone.</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid #e2e8f0", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                setDeletingId(id);
+                try {
+                  await api.delete(`/bmileads/${id}`);
+                  toast.success("Lead deleted");
+                  setLeads((curr) => curr.filter((l) => l._id !== id));
+                  fetchStats();
+                } catch (err) {
+                  toast.error(err?.response?.data?.message || "Failed to delete lead");
+                } finally {
+                  setDeletingId(null);
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity }
+    );
   };
 
   return (
