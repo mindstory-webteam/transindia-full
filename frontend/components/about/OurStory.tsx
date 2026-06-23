@@ -65,9 +65,9 @@ export default function OurStory() {
           </div>
 
           {/* Mission & Vision Cards */}
-          <div className="cards-grid">
+          {/* <div className="cards-grid"> */}
             {/* Our Mission Card */}
-            <div className="card mission-card">
+            {/* <div className="card mission-card">
               <div className="card-icon mission-icon">
                 <img src="/images/about/ourstory/target.svg" alt="Our Mission Target" />
               </div>
@@ -78,10 +78,10 @@ export default function OurStory() {
                   Indian family with the right cover at the right price.
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* Our Vision Card */}
-            <div className="card vision-card">
+            {/* <div className="card vision-card">
               <div className="card-icon vision-icon">
                 <img src="/images/about/ourstory/binoculars with eyes.svg" alt="Our Vision Binoculars" />
               </div>
@@ -92,8 +92,8 @@ export default function OurStory() {
                   proper insurance coverage.
                 </p>
               </div>
-            </div>
-          </div>
+            </div> */}
+          {/* </div> */}
           <CoreValuesSection />
         </div>
       </section>
