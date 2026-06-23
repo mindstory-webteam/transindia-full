@@ -163,13 +163,14 @@ export default function ContactFormSection() {
                   I&apos;d like a callback from an expert
                 </label>
 
+                {gqStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {gqStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit${gqStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={gqStatus !== "idle"}
-                  style={{ backgroundColor: gqStatus === "success" ? "#16A34A" : gqStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={gqStatus === "loading"}
                 >
-                  {gqStatus === "loading" ? <span className="cfs-spinner" /> : gqStatus === "success" ? "Sent Successfully" : gqStatus === "error" ? "Failed to send" : "Send message"}
+                  {gqStatus === "loading" ? <span className="cfs-spinner" /> : "Send message"}
                 </button>
               </form>
           )}
@@ -226,13 +227,14 @@ export default function ContactFormSection() {
                     value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} minLength={10} maxLength={500} required />
                 </div>
 
+                {csStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {csStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit cfs-submit--green${csStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={csStatus !== "idle"}
-                  style={{ backgroundColor: csStatus === "success" ? "#16A34A" : csStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={csStatus === "loading"}
                 >
-                  {csStatus === "loading" ? <span className="cfs-spinner" /> : csStatus === "success" ? "Sent Successfully" : csStatus === "error" ? "Failed to send" : "Submit Claim Request"}
+                  {csStatus === "loading" ? <span className="cfs-spinner" /> : "Submit Claim Request"}
                 </button>
               </form>
           )}
@@ -282,13 +284,14 @@ export default function ContactFormSection() {
                     value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} minLength={10} maxLength={500} required />
                 </div>
 
+                {cpStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {cpStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit cfs-submit--red${cpStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={cpStatus !== "idle"}
-                  style={{ backgroundColor: cpStatus === "success" ? "#16A34A" : cpStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={cpStatus === "loading"}
                 >
-                  {cpStatus === "loading" ? <span className="cfs-spinner" /> : cpStatus === "success" ? "Sent Successfully" : cpStatus === "error" ? "Failed to send" : "Submit Complaint"}
+                  {cpStatus === "loading" ? <span className="cfs-spinner" /> : "Submit Complaint"}
                 </button>
                 <p className="cfs-irdai-note">Complaints resolved within 15 days as per IRDAI norms</p>
               </form>
