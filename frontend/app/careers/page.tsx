@@ -22,6 +22,8 @@ export default function CareersPage() {
   const [page, setPage] = useState(1);
   const [selectedJob, setSelectedJob] = useState<JobRole | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -50,6 +52,7 @@ export default function CareersPage() {
     if (!selectedJob) return;
 
     setSubmitting(true);
+    setErrorMsg("");
     const formData = new FormData(e.currentTarget);
     
     try {
@@ -61,14 +64,17 @@ export default function CareersPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        alert("Application submitted successfully!");
-        setSelectedJob(null);
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          setSelectedJob(null);
+        }, 1000);
       } else {
-        alert(data.message || "Failed to submit application. Please try again.");
+        setErrorMsg(data.message || "Failed to submit application. Please try again.");
       }
     } catch (err) {
       console.error("Submission error:", err);
-      alert("An error occurred while submitting your application.");
+      setErrorMsg("An error occurred while submitting your application.");
     } finally {
       setSubmitting(false);
     }
@@ -209,11 +215,11 @@ export default function CareersPage() {
 
       {/* Application Modal */}
       {selectedJob && (
-        <div className="modal-overlay" onClick={() => setSelectedJob(null)}>
+        <div className="modal-overlay" onClick={() => { setSelectedJob(null); setErrorMsg(""); }}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">Apply for {selectedJob.title}</h3>
-              <button className="modal-close" onClick={() => setSelectedJob(null)}>
+              <button className="modal-close" onClick={() => { setSelectedJob(null); setErrorMsg(""); }}>
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -221,39 +227,57 @@ export default function CareersPage() {
               </button>
             </div>
             
-            <form onSubmit={handleSubmit} className="modal-form">
-              <div className="form-group">
-                <label htmlFor="name">Full Name *</label>
-                <input type="text" id="name" name="name" required placeholder="John Doe" />
+            {showSuccess ? (
+              <div style={{ padding: "60px 20px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#DCFCE7", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                  <svg viewBox="0 0 24 24" width="32" height="32" stroke="#16A34A" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                </div>
+                <h3 style={{ fontSize: 24, fontWeight: 700, color: "#1E293B", marginBottom: 8, marginTop: 0 }}>Sent Successfully</h3>
+                <p style={{ fontSize: 16, color: "#475569", margin: 0 }}>Thank you.</p>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="modal-form">
+                <div className="form-group">
+                  <label htmlFor="name">Full Name *</label>
+                  <input type="text" id="name" name="name" required placeholder="John Doe" />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email Address *</label>
-                <input type="email" id="email" name="email" required placeholder="john@example.com" />
-              </div>
+                <div className="form-group">
+                  <label htmlFor="email">Email Address *</label>
+                  <input type="email" id="email" name="email" required placeholder="john@example.com" />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="phone">Phone Number *</label>
-                <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210" />
-              </div>
+                <div className="form-group">
+                  <label htmlFor="phone">Phone Number *</label>
+                  <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210" />
+                </div>
 
-              <div className="form-group">
-                <label htmlFor="resume">Resume (PDF) *</label>
-                <input type="file" id="resume" name="resume" accept=".pdf" required className="file-input" />
-              </div>
+                <div className="form-group">
+                  <label htmlFor="resume">Resume (PDF) *</label>
+                  <input type="file" id="resume" name="resume" accept=".pdf" required className="file-input" />
+                </div>
 
-              <div className="form-group full-width">
-                <label htmlFor="message">Cover Letter / Message</label>
-                <textarea id="message" name="message" rows={3} placeholder="Tell us why you'd be a great fit..."></textarea>
-              </div>
+                <div className="form-group full-width">
+                  <label htmlFor="message">Cover Letter / Message</label>
+                  <textarea id="message" name="message" rows={3} placeholder="Tell us why you'd be a great fit..."></textarea>
+                </div>
 
-              <div className="modal-actions full-width">
-                <button type="button" className="btn-cancel" onClick={() => setSelectedJob(null)} disabled={submitting}>Cancel</button>
-                <button type="submit" className="btn-submit" disabled={submitting}>
-                  {submitting ? "Submitting..." : "Submit Application"}
-                </button>
-              </div>
-            </form>
+                {errorMsg && (
+                  <div className="form-group full-width">
+                    <p style={{ color: "#DC2626", fontSize: 14, margin: 0, padding: "10px", background: "#FEE2E2", borderRadius: "6px" }}>{errorMsg}</p>
+                  </div>
+                )}
+
+                <div className="modal-actions full-width">
+                  <button type="button" className="btn-cancel" onClick={() => { setSelectedJob(null); setErrorMsg(""); }} disabled={submitting}>Cancel</button>
+                  <button type="submit" className="btn-submit" disabled={submitting}>
+                    {submitting ? "Submitting..." : "Submit Application"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
