@@ -193,18 +193,41 @@ export default function ClaimLeadsPage() {
     }
   }
 
-  async function handleDelete(id) {
-    if (!window.confirm("Delete this claim lead? This cannot be undone.")) return;
-    try {
-      setDeletingId(id);
-      await deleteClaimLead(id);
-      setClaims(prev => prev.filter(c => c._id !== id));
-      toast.success("Claim deleted");
-    } catch {
-      toast.error("Failed to delete claim");
-    } finally {
-      setDeletingId(null);
-    }
+  function handleDelete(id) {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Delete this claim lead? This cannot be undone.</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--border)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  setDeletingId(id);
+                  await deleteClaimLead(id);
+                  setClaims(prev => prev.filter(c => c._id !== id));
+                  toast.success("Claim deleted");
+                } catch {
+                  toast.error("Failed to delete claim");
+                } finally {
+                  setDeletingId(null);
+                }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 5000 }
+    );
   }
 
   const filtered = claims.filter(c => {
@@ -233,14 +256,6 @@ export default function ClaimLeadsPage() {
         gap: 16, flexWrap: "wrap",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
-            width: 46, height: 46, borderRadius: 13, flexShrink: 0,
-            background: "linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 8px 18px rgba(241,90,62,0.3)",
-          }}>
-            <FileText size={22} color="#fff" />
-          </div>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>
               Claim Leads

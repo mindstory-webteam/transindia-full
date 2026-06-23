@@ -31,13 +31,36 @@ export default function ServicesPage() {
     } catch { toast.error("Failed to toggle"); }
   };
 
-  const handleDelete = async (svc) => {
-    if (!confirm(`Delete "${svc.title}"? This cannot be undone.`)) return;
-    try {
-      await deleteService(svc._id);
-      toast.success("Service deleted");
-      load();
-    } catch { toast.error("Delete failed"); }
+  const handleDelete = (svc) => {
+    toast(
+      (t) => (
+        <div>
+          <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Delete "{svc.title}"? This cannot be undone.</p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button 
+              onClick={() => toast.dismiss(t.id)} 
+              style={{ padding: "6px 12px", border: "1px solid var(--border)", background: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={async () => {
+                toast.dismiss(t.id);
+                try {
+                  await deleteService(svc._id);
+                  toast.success("Service deleted");
+                  load();
+                } catch { toast.error("Delete failed"); }
+              }}
+              style={{ padding: "6px 12px", border: "none", background: "#E1483B", color: "#fff", borderRadius: 4, cursor: "pointer" }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: 5000 }
+    );
   };
 
   return (

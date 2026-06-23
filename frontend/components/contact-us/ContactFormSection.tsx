@@ -114,19 +114,19 @@ export default function ContactFormSection() {
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
                     <input className="cfs-input" type="text" placeholder="Your Full Name"
-                      value={gq.name} onChange={(e) => setGq({ ...gq, name: e.target.value })} required />
+                      value={gq.name} onChange={(e) => setGq({ ...gq, name: e.target.value })} minLength={3} maxLength={50} required />
                   </div>
                   <div className="cfs-group">
                     <label className="cfs-label">Mobile Number</label>
-                    <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                      value={gq.mobile} onChange={(e) => setGq({ ...gq, mobile: e.target.value.replace(/\D/g, '') })} required />
+                    <input className="cfs-input" type="tel" placeholder="0000000000"
+                      value={gq.mobile} onChange={(e) => setGq({ ...gq, mobile: e.target.value.replace(/\D/g, '') })} minLength={10} maxLength={10} pattern="[6-9][0-9]{9}" title="Mobile number must start with 6-9 and be 10 digits" required />
                   </div>
                 </div>
 
                 <div className="cfs-group">
                   <label className="cfs-label">Email Address</label>
                   <input className="cfs-input" type="email" placeholder="youremail@gmail.com"
-                    value={gq.email} onChange={(e) => setGq({ ...gq, email: e.target.value })} required />
+                    value={gq.email} onChange={(e) => setGq({ ...gq, email: e.target.value })} pattern="[a-zA-Z0-9._%+\-]+@gmail\.com" title="Please enter a valid @gmail.com address" required />
                 </div>
 
                 <div className="cfs-group">
@@ -150,7 +150,7 @@ export default function ContactFormSection() {
                 <div className="cfs-group">
                   <label className="cfs-label">Your Query</label>
                   <textarea className="cfs-input cfs-textarea" placeholder="Tell us how we can help you..."
-                    value={gq.query} onChange={(e) => setGq({ ...gq, query: e.target.value })} rows={4} required />
+                    value={gq.query} onChange={(e) => setGq({ ...gq, query: e.target.value })} rows={4} minLength={10} maxLength={500} required />
                 </div>
 
                 <label className="cfs-checkbox-label" style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "13px", color: "#4B5563", cursor: "pointer", marginBottom: "8px" }}>
@@ -163,13 +163,14 @@ export default function ContactFormSection() {
                   I&apos;d like a callback from an expert
                 </label>
 
+                {gqStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {gqStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit${gqStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={gqStatus !== "idle"}
-                  style={{ backgroundColor: gqStatus === "success" ? "#16A34A" : gqStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={gqStatus === "loading"}
                 >
-                  {gqStatus === "loading" ? <span className="cfs-spinner" /> : gqStatus === "success" ? "Sent Successfully" : gqStatus === "error" ? "Failed to send" : "Send message"}
+                  {gqStatus === "loading" ? <span className="cfs-spinner" /> : "Send message"}
                 </button>
               </form>
           )}
@@ -187,19 +188,19 @@ export default function ContactFormSection() {
                   <div className="cfs-group">
                     <label className="cfs-label">Policy Number</label>
                     <input className="cfs-input" type="text" placeholder="0000000000"
-                      value={cs.policyNumber} onChange={(e) => setCs({ ...cs, policyNumber: e.target.value })} required />
+                      value={cs.policyNumber} onChange={(e) => setCs({ ...cs, policyNumber: e.target.value })} minLength={5} maxLength={20} required />
                   </div>
                   <div className="cfs-group">
                     <label className="cfs-label">Policy Holder Name</label>
                     <input className="cfs-input" type="text" placeholder="Full Name"
-                      value={cs.policyHolder} onChange={(e) => setCs({ ...cs, policyHolder: e.target.value })} required />
+                      value={cs.policyHolder} onChange={(e) => setCs({ ...cs, policyHolder: e.target.value })} minLength={3} maxLength={50} required />
                   </div>
                 </div>
 
                 <div className="cfs-group">
                   <label className="cfs-label">Mobile Number</label>
-                  <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                    value={cs.mobile} onChange={(e) => setCs({ ...cs, mobile: e.target.value.replace(/\D/g, '') })} required />
+                  <input className="cfs-input" type="tel" placeholder="0000000000"
+                    value={cs.mobile} onChange={(e) => setCs({ ...cs, mobile: e.target.value.replace(/\D/g, '') })} minLength={10} maxLength={10} pattern="[6-9][0-9]{9}" title="Mobile number must start with 6-9 and be 10 digits" required />
                 </div>
 
                 <div className="cfs-group">
@@ -223,16 +224,17 @@ export default function ContactFormSection() {
                   <label className="cfs-label">Describe the Incident</label>
                   <textarea className="cfs-input cfs-textarea"
                     placeholder="Please describe the incident briefly, including date and circumstances..."
-                    value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} required />
+                    value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} minLength={10} maxLength={500} required />
                 </div>
 
+                {csStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {csStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit cfs-submit--green${csStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={csStatus !== "idle"}
-                  style={{ backgroundColor: csStatus === "success" ? "#16A34A" : csStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={csStatus === "loading"}
                 >
-                  {csStatus === "loading" ? <span className="cfs-spinner" /> : csStatus === "success" ? "Sent Successfully" : csStatus === "error" ? "Failed to send" : "Submit Claim Request"}
+                  {csStatus === "loading" ? <span className="cfs-spinner" /> : "Submit Claim Request"}
                 </button>
               </form>
           )}
@@ -244,19 +246,19 @@ export default function ContactFormSection() {
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
                     <input className="cfs-input" type="text" placeholder="Your Full Name"
-                      value={cp.name} onChange={(e) => setCp({ ...cp, name: e.target.value })} required />
+                      value={cp.name} onChange={(e) => setCp({ ...cp, name: e.target.value })} minLength={3} maxLength={50} required />
                   </div>
                   <div className="cfs-group">
                     <label className="cfs-label">Policy / Ref Number</label>
                     <input className="cfs-input" type="text" placeholder="0000000000"
-                      value={cp.policyRef} onChange={(e) => setCp({ ...cp, policyRef: e.target.value })} required />
+                      value={cp.policyRef} onChange={(e) => setCp({ ...cp, policyRef: e.target.value })} minLength={5} maxLength={20} required />
                   </div>
                 </div>
 
                 <div className="cfs-group">
                   <label className="cfs-label">Mobile Number</label>
-                  <input className="cfs-input" type="tel" placeholder="+91 0000000000"
-                    value={cp.mobile} onChange={(e) => setCp({ ...cp, mobile: e.target.value.replace(/\D/g, '') })} required />
+                  <input className="cfs-input" type="tel" placeholder="0000000000"
+                    value={cp.mobile} onChange={(e) => setCp({ ...cp, mobile: e.target.value.replace(/\D/g, '') })} minLength={10} maxLength={10} pattern="[6-9][0-9]{9}" title="Mobile number must start with 6-9 and be 10 digits" required />
                 </div>
 
                 <div className="cfs-group">
@@ -279,16 +281,17 @@ export default function ContactFormSection() {
                   <label className="cfs-label">Complaint Details</label>
                   <textarea className="cfs-input cfs-textarea"
                     placeholder="Please describe your complaint in detail. The more specific you are, the faster we can resolve it."
-                    value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} required />
+                    value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} minLength={10} maxLength={500} required />
                 </div>
 
+                {cpStatus === "success" && <div style={{ color: "#16A34A", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Sent Successfully!</div>}
+                {cpStatus === "error" && <div style={{ color: "#DC2626", fontSize: "14px", fontWeight: "600", marginBottom: "8px", textAlign: "left" }}>Failed to send. Please try again.</div>}
                 <button 
                   type="submit" 
                   className={`cfs-submit cfs-submit--red${cpStatus === "loading" ? " cfs-submit--loading" : ""}`} 
-                  disabled={cpStatus !== "idle"}
-                  style={{ backgroundColor: cpStatus === "success" ? "#16A34A" : cpStatus === "error" ? "#DC2626" : undefined }}
+                  disabled={cpStatus === "loading"}
                 >
-                  {cpStatus === "loading" ? <span className="cfs-spinner" /> : cpStatus === "success" ? "Sent Successfully" : cpStatus === "error" ? "Failed to send" : "Submit Complaint"}
+                  {cpStatus === "loading" ? <span className="cfs-spinner" /> : "Submit Complaint"}
                 </button>
                 <p className="cfs-irdai-note">Complaints resolved within 15 days as per IRDAI norms</p>
               </form>
@@ -304,8 +307,8 @@ export default function ContactFormSection() {
 
           <div className="cfs-map-wrap">
             <iframe
-              title="Head Office Kochi"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3929.0!2d76.2998!3d9.9312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0872626fb99f93%3A0xe2d9c0bd7e9e6c62!2sErnakulam%2C%20Kochi%2C%20Kerala!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+              title="Indel Corporate Office"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3734.294322649695!2d76.3173602!3d10.043057899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b080dcb2aa099af%3A0x2284420553f1c1b1!2sIndel%20Corporate%20Office!5e1!3m2!1sen!2sin!4v1782210089879!5m2!1sen!2sin"
               width="100%"
               height="220"
               style={{ border: 0 }}

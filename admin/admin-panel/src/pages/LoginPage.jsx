@@ -601,9 +601,9 @@ export default function LoginPageWithVideo() {
                 />
                 Remember me
               </label>
-              <a href="/forgot-password" className="form-forgot">
+              {/* <a href="/forgot-password" className="form-forgot">
                 Forgot password?
-              </a>
+              </a> */}
             </div>
 
             {/* Submit Button */}
@@ -629,7 +629,7 @@ export default function LoginPageWithVideo() {
             <div className="login-footer-creds">
               admin@transindia.com
               <br />
-              Admin@123
+              1234567
             </div>
           </div>
         </div>
