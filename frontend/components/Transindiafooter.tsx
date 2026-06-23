@@ -55,7 +55,7 @@ function extractServices(data: unknown): Service[] {
 const companyLinks = [
   { label: "About us", href: "/about" },
   // { label: "Our team", href: "#" },
-  { label: "Become a PoSP", href: "#" },
+  { label: "Become an advisor", href: "#" },
   // { label: "Corporate solutions", href: "#" },
   { label: "Careers", href: "/careers" },
 ];
@@ -64,8 +64,6 @@ const supportLinks = [
   { label: "Make a claim", href: "/claims" },
   // { label: "Track claim", href: "#" },
   { label: "Contact us", href: "/contact-us" },
-  { label: "Renew policy", href: "#" },
-  { label: "FAQ", href: "#" },
   { label: "Privacy policy", href: "/privacy-policy" },
   { label: "Terms of use", href: "/terms" },
 ];

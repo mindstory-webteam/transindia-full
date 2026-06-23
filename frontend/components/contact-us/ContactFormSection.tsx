@@ -56,10 +56,6 @@ export default function ContactFormSection() {
   const SuccessBox = ({ msg, note }: { msg: string; note?: string }) => (
     <div className="success-box">
       <div className="success-box-inner">
-        <svg width="24" height="24" viewBox="0 0 44 44" fill="none" style={{ flexShrink: 0 }}>
-          <circle cx="22" cy="22" r="21" stroke="#2145d6" strokeWidth="2" />
-          <path d="M13 22l7 7 11-13" stroke="#2145d6" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
         <p className="success-msg">{msg}</p>
       </div>
       {note && <p className="success-note">{note}</p>}
@@ -213,10 +209,12 @@ export default function ContactFormSection() {
                     <select className="cfs-input cfs-select" value={cs.claimType}
                       onChange={(e) => setCs({ ...cs, claimType: e.target.value })}>
                       <option>Death Claim</option>
-                      <option>Maturity Claim</option>
-                      <option>Health Claim</option>
-                      <option>Motor Claim</option>
-                      <option>Property Claim</option>
+                      <option>Hospitalization Claim</option>
+                      <option>Accident Damage Claim</option>
+                      <option>Property Damage Claim</option>
+                      <option>Fire Damage Claim</option>
+                      <option>Cargo Loss Claim</option>
+                      <option>Event Cancellation Claim</option>
                     </select>
                     <SelectArrow />
                   </div>
