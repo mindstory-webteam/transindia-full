@@ -179,8 +179,10 @@ const CSS = `
     .ip-heading { font-size: 28px; }
     .ip-logos-box { 
       padding: 0; 
-      width: 100vw; 
-      margin-left: -16px; /* Negate the container padding */
+      width: calc(100% + 32px); 
+      margin-left: -16px; /* Negate left padding */
+      margin-right: -16px; /* Negate right padding */
+      border-radius: 0; /* Remove rounded corners to fit edge-to-edge cleanly */
     }
     .ip-logo-cell { width: 140px; height: 70px; padding: 10px; }
   }
