@@ -9,31 +9,27 @@ export default function ContactFormSection() {
 
   /* ── General Query state ── */
   const [gq, setGq] = useState({ name: "", mobile: "", email: "", insuranceType: "Life Insurance", query: "", callback: false });
-  const [gqLoading, setGqLoading] = useState(false);
-  const [gqDone, setGqDone] = useState(false);
+  const [gqStatus, setGqStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   /* ── Claim Support state ── */
   const [cs, setCs] = useState({ policyNumber: "", policyHolder: "", mobile: "", claimType: "Death Claim", incident: "" });
-  const [csLoading, setCsLoading] = useState(false);
-  const [csDone, setCsDone] = useState(false);
+  const [csStatus, setCsStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   /* ── Complaint state ── */
   const [cp, setCp] = useState({ name: "", policyRef: "", mobile: "", category: "Policy Servicing Issue", details: "" });
-  const [cpLoading, setCpLoading] = useState(false);
-  const [cpDone, setCpDone] = useState(false);
+  const [cpStatus, setCpStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
   const tabs: TabType[] = ["General Query", "Claim Support", "Complaint"];
 
   const submit = async (
     endpoint: string,
     payload: any,
-    setLoading: (v: boolean) => void,
-    setDone: (v: boolean) => void,
+    setStatus: (v: "idle" | "loading" | "success" | "error") => void,
     resetForm: () => void,
     e: React.FormEvent
   ) => {
     e.preventDefault();
-    setLoading(true);
+    setStatus("loading");
     try {
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
       const res = await fetch(`${API_BASE}/contact/${endpoint}`, {
@@ -42,20 +38,20 @@ export default function ContactFormSection() {
         body: JSON.stringify(payload),
       });
       if (res.ok) {
-        setDone(true);
+        setStatus("success");
         setTimeout(() => {
-          setDone(false);
+          setStatus("idle");
           resetForm();
         }, 1000);
       } else {
-        const errData = await res.json();
-        alert("Error: " + (errData.message || "Failed to submit"));
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 1000);
       }
     } catch (err) {
       console.error(err);
-      alert("Error submitting form. Please try again.");
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 1000);
     }
-    setLoading(false);
   };
 
   const SuccessBox = ({ msg, note }: { msg: string; note?: string }) => (
@@ -113,11 +109,8 @@ export default function ContactFormSection() {
 
           {/* ── GENERAL QUERY ── */}
           {activeTab === "General Query" && (
-            gqDone ? (
-              <SuccessBox msg="Thanks! We'll get back to you soon." />
-            ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, () => setGq({ name: "", mobile: "", email: "", insuranceType: "Life Insurance", query: "", callback: false }), e)}>
-                <div className="cfs-row">
+            <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqStatus, () => setGq({ name: "", mobile: "", email: "", insuranceType: "Life Insurance", query: "", callback: false }), e)}>
+              <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
                     <input className="cfs-input" type="text" placeholder="Your Full Name"
@@ -170,20 +163,21 @@ export default function ContactFormSection() {
                   I&apos;d like a callback from an expert
                 </label>
 
-                <button type="submit" className={`cfs-submit${gqLoading ? " cfs-submit--loading" : ""}`} disabled={gqLoading}>
-                  {gqLoading ? <span className="cfs-spinner" /> : "Send message"}
+                <button 
+                  type="submit" 
+                  className={`cfs-submit${gqStatus === "loading" ? " cfs-submit--loading" : ""}`} 
+                  disabled={gqStatus !== "idle"}
+                  style={{ backgroundColor: gqStatus === "success" ? "#16A34A" : gqStatus === "error" ? "#DC2626" : undefined }}
+                >
+                  {gqStatus === "loading" ? <span className="cfs-spinner" /> : gqStatus === "success" ? "Sent Successfully" : gqStatus === "error" ? "Failed to send" : "Send message"}
                 </button>
               </form>
-            )
           )}
 
           {/* ── CLAIM SUPPORT ── */}
           {activeTab === "Claim Support" && (
-            csDone ? (
-              <SuccessBox msg="Thanks! We'll get back to you soon." />
-            ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, () => setCs({ policyNumber: "", policyHolder: "", mobile: "", claimType: "Death Claim", incident: "" }), e)}>
-                {/* Emergency notice */}
+            <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsStatus, () => setCs({ policyNumber: "", policyHolder: "", mobile: "", claimType: "Death Claim", incident: "" }), e)}>
+              {/* Emergency notice */}
                 <div className="cfs-emergency">
                   <img src="/images/contact-us/contact-form-section/Siren.svg" alt="Siren" style={{ flexShrink: 0, width: "20px", height: "20px" }} />
                   <p><strong>Emergency Claims?</strong> Call our 24/7 claims hotline: <strong className="cfs-phone">1800 - 456 - 7890</strong> for immediate assistance</p>
@@ -232,20 +226,21 @@ export default function ContactFormSection() {
                     value={cs.incident} onChange={(e) => setCs({ ...cs, incident: e.target.value })} rows={4} required />
                 </div>
 
-                <button type="submit" className={`cfs-submit cfs-submit--green${csLoading ? " cfs-submit--loading" : ""}`} disabled={csLoading}>
-                  {csLoading ? <span className="cfs-spinner" /> : "Submit Claim Request"}
+                <button 
+                  type="submit" 
+                  className={`cfs-submit cfs-submit--green${csStatus === "loading" ? " cfs-submit--loading" : ""}`} 
+                  disabled={csStatus !== "idle"}
+                  style={{ backgroundColor: csStatus === "success" ? "#16A34A" : csStatus === "error" ? "#DC2626" : undefined }}
+                >
+                  {csStatus === "loading" ? <span className="cfs-spinner" /> : csStatus === "success" ? "Sent Successfully" : csStatus === "error" ? "Failed to send" : "Submit Claim Request"}
                 </button>
               </form>
-            )
           )}
 
           {/* ── COMPLAINT ── */}
           {activeTab === "Complaint" && (
-            cpDone ? (
-              <SuccessBox msg="Thanks! We'll get back to you soon." />
-            ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, () => setCp({ name: "", policyRef: "", mobile: "", category: "Policy Servicing Issue", details: "" }), e)}>
-                <div className="cfs-row">
+            <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpStatus, () => setCp({ name: "", policyRef: "", mobile: "", category: "Policy Servicing Issue", details: "" }), e)}>
+              <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
                     <input className="cfs-input" type="text" placeholder="Your Full Name"
@@ -287,12 +282,16 @@ export default function ContactFormSection() {
                     value={cp.details} onChange={(e) => setCp({ ...cp, details: e.target.value })} rows={4} required />
                 </div>
 
-                <button type="submit" className={`cfs-submit cfs-submit--red${cpLoading ? " cfs-submit--loading" : ""}`} disabled={cpLoading}>
-                  {cpLoading ? <span className="cfs-spinner" /> : "Submit Complaint"}
+                <button 
+                  type="submit" 
+                  className={`cfs-submit cfs-submit--red${cpStatus === "loading" ? " cfs-submit--loading" : ""}`} 
+                  disabled={cpStatus !== "idle"}
+                  style={{ backgroundColor: cpStatus === "success" ? "#16A34A" : cpStatus === "error" ? "#DC2626" : undefined }}
+                >
+                  {cpStatus === "loading" ? <span className="cfs-spinner" /> : cpStatus === "success" ? "Sent Successfully" : cpStatus === "error" ? "Failed to send" : "Submit Complaint"}
                 </button>
                 <p className="cfs-irdai-note">Complaints resolved within 15 days as per IRDAI norms</p>
               </form>
-            )
           )}
         </div>
 
