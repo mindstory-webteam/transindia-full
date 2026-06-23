@@ -145,6 +145,9 @@ export default function ContactFormSection() {
                       <option>Motor Insurance</option>
                       <option>Travel Insurance</option>
                       <option>Home Insurance</option>
+                      <option>Fire Insurance</option>
+                      <option>Miscellaneous Insurance</option>
+                      <option>Entertainment  Insurance</option>
                     </select>
                     <SelectArrow />
                   </div>

@@ -1,5 +1,6 @@
 "use client"
 import { useState } from "react";
+import Link from "next/link";
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 const CheckIcon = () => (
@@ -152,10 +153,12 @@ function ClaimSection() {
           </p>
           <BulletList items={advisorBullets} />
           <div>
-            <button style={s.btnOrange}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-            >Make a claim</button>
+            <Link href="/claims">
+              <button style={s.btnOrange}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >Make a claim</button>
+            </Link>
           </div>
         </div>
 

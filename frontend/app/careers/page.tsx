@@ -89,13 +89,17 @@ export default function CareersPage() {
             <span className="bc-current">Careers</span>
           </nav>
 
-          <h1 className="careers-title">
-            Be part of <span className="careers-title-accent">our mission</span>
-          </h1>
-          <p className="careers-subtitle">
-            We're looking for passionate people to join us on our mission. We value
-            flat hierarchies, clear communication, and full ownership and responsibility.
-          </p>
+          {jobs.length > 0 && (
+            <>
+              <h1 className="careers-title">
+                Be part of <span className="careers-title-accent">our mission</span>
+              </h1>
+              <p className="careers-subtitle">
+                We're looking for passionate people to join us on our mission. We value
+                flat hierarchies, clear communication, and full ownership and responsibility.
+              </p>
+            </>
+          )}
         </section>
 
         {/* Job listings */}
