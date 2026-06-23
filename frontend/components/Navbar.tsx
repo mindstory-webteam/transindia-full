@@ -21,6 +21,11 @@ interface Service {
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
+// NOTE: NEXT_PUBLIC_API_URL already includes the "/api" suffix
+// (e.g. https://transindia-full-2.onrender.com/api), so endpoints are built as
+// `${API_BASE}/services`, NOT `${API_BASE}/api/services`.
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
+
 const NAV_ITEMS: NavItem[] = [
   { label: "Services",              hasDropdown: true, href: "/our-services" },
   { label: "Renew existing policy", href: "/renew"      },
@@ -78,79 +83,75 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
 
   // ── Fetch services ──────────────────────────────────────────────────────────
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchServices = async () => {
       try {
-        const apiUrl  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res     = await fetch(`${apiUrl}/services`, {
+        // API_BASE already ends with /api → final URL is .../api/services
+        const res = await fetch(`${API_BASE}/services`, {
           method:  "GET",
           headers: { "Content-Type": "application/json" },
+          signal:  controller.signal,
         });
 
         if (!res.ok) return; // keep fallback
 
-        const raw      = await res.json();
-        const fetched  = extractServices(raw);
+        const raw     = await res.json();
+        const fetched = extractServices(raw);
 
-        // Log the raw shape in dev so you can verify it once
         if (process.env.NODE_ENV !== "production") {
-          console.log("[Navbar] raw /services response:", raw);
-          console.log("[Navbar] extracted services:", fetched);
+          console.log("[Navbar] extracted services:", fetched.length);
         }
 
         if (fetched.length > 0) {
           setServices(fetched.filter((s) => s.isActive !== false));
         }
-      } catch (err) {
+      } catch (err: any) {
+        if (err?.name === "AbortError") return;
         if (process.env.NODE_ENV !== "production") {
-          console.error("[Navbar] services fetch error:", err);
+          console.warn("[Navbar] services fetch failed — using fallback.");
         }
       }
     };
 
     fetchServices();
+    return () => controller.abort();
   }, []);
 
-  // ── Fetch site title (navbar brand text) ───────────────────────────────────
+  // ── Optional: dynamic brand title ───────────────────────────────────────────
+  // Disabled by default. Your backend currently has no settings endpoint, so
+  // probing for one only produces 404 noise. To enable, set a FULL endpoint URL
+  // in NEXT_PUBLIC_SETTINGS_URL (e.g. https://.../api/settings). When unset, no
+  // request is made and the logo image is shown.
   useEffect(() => {
-    const fetchTitle = async () => {
+    const endpoint = process.env.NEXT_PUBLIC_SETTINGS_URL;
+    if (!endpoint) return;
+
+    const controller = new AbortController();
+
+    (async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+        const res = await fetch(endpoint, { signal: controller.signal });
+        if (!res.ok) return;
 
-        // Try common endpoints for site settings / branding
-        for (const path of ["/settings", "/site-settings", "/branding", "/config"]) {
-          const res = await fetch(`${apiUrl}${path}`, {
-            method:  "GET",
-            headers: { "Content-Type": "application/json" },
-          });
+        const data  = await res.json();
+        const obj   = (typeof data === "object" && data !== null) ? data as Record<string, unknown> : {};
+        const inner = (obj.data && typeof obj.data === "object") ? obj.data as Record<string, unknown> : obj;
 
-          if (!res.ok) continue;
+        const title =
+          (inner.siteName  as string) ||
+          (inner.siteTitle as string) ||
+          (inner.title     as string) ||
+          (inner.name      as string) ||
+          "";
 
-          const data = await res.json();
-
-          // Drill for a title / siteName field
-          const obj  = (typeof data === "object" && data !== null) ? data as Record<string, unknown> : {};
-          const inner = (obj.data && typeof obj.data === "object") ? obj.data as Record<string, unknown> : obj;
-
-          const title =
-            (inner.siteName   as string) ||
-            (inner.siteTitle  as string) ||
-            (inner.title      as string) ||
-            (inner.name       as string) ||
-            (obj.siteName     as string) ||
-            (obj.siteTitle    as string) ||
-            "";
-
-          if (title) {
-            setSiteTitle(title);
-            break; // found it — stop trying endpoints
-          }
-        }
+        if (title) setSiteTitle(title);
       } catch {
-        // No title from API — logo image will show instead
+        /* ignore — logo image fallback */
       }
-    };
+    })();
 
-    fetchTitle();
+    return () => controller.abort();
   }, []);
 
   // ── Scroll listener ────────────────────────────────────────────────────────
@@ -208,10 +209,13 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                     onMouseEnter={() => setDropdownOpen(true)}
                     onMouseLeave={() => setDropdownOpen(false)}
                   >
-                    <button
+                    {/* Clicking "Services" navigates to /our-services;
+                        hovering opens the dropdown below. */}
+                    <Link
+                      href={item.href || "/our-services"}
                       className="nav-link nav-dropdown-trigger"
-                      onClick={() => setDropdownOpen((o) => !o)}
                       aria-expanded={dropdownOpen}
+                      onClick={() => setDropdownOpen(false)}
                     >
                       {item.label}
                       <svg
@@ -223,7 +227,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                       >
                         <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
                       </svg>
-                    </button>
+                    </Link>
 
                     {/* ── Dropdown Menu — always in DOM, animated via CSS ── */}
                     <div className={`nav-dropdown-menu${dropdownOpen ? " dropdown-visible" : ""}`}
@@ -456,6 +460,19 @@ const CSS = `
     transition:
       opacity    0.38s cubic-bezier(0.4, 0, 0.2, 1),
       transform  0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Invisible bridge that fills the 8px gap between the trigger and the menu,
+     so moving the cursor from "Services" down to the list never crosses dead
+     space (which would otherwise fire mouseleave and close the dropdown). */
+  .nav-dropdown-menu::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -12px;
+    height: 12px;
+    background: transparent;
   }
 
   .nav-dropdown-menu.dropdown-visible {

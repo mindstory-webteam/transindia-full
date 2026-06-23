@@ -1,12 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-// Adjust the base URL via env, and the path if your services router is mounted
-// somewhere other than /api/services.
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
-const SERVICES_ENDPOINT = `${API_BASE}/api/services`;
+// Set this to your DEPLOYED Express server origin in .env.local, e.g.
+//   NEXT_PUBLIC_API_URL=https://your-api.onrender.com
+// (No trailing slash needed — it's stripped below.)
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+
+// Services router is mounted at /api/services.
+const SERVICE_ENDPOINTS = [`${API_BASE}/services`];
+
+// Base path of your service detail page (the [slug] route).
+// Must match the navbar, which links to /our-services/<slug>.
+// A card linking to "Health Insurance" with slug "health-insurance"
+// will navigate to:  /our-services/health-insurance
+const SERVICE_DETAIL_BASE = "/our-services";
 
 // Background tints cycled across however many services the API returns.
 const CARD_TINTS = ["#FFF0F0", "#F0F8FF", "#F5F0FF", "#FFFBF0"];
@@ -16,19 +26,23 @@ type Plan = {
   label: string;
   desc: string;
   cta: string;
-  href: string;
+  href: string; // resolved detail-page URL (built from slug)
+  slug: string; // kept around in case you need it elsewhere
   imageSrc: string;
   imageAlt: string;
   imageBg: string;
 };
 
 // ─── FALLBACK DATA (used if the API call fails) ───────────────────────────────
+// Each fallback now has a real slug so the "Know more" button still
+// navigates to /services/<slug> even when the API is unreachable.
 const FALLBACK_PLANS: Plan[] = [
   {
     label:    "Health Insurance",
     desc:     "Cover medical expenses, hospitalisation, and critical illnesses for individuals and families.",
-    cta:      "Explore plans",
-    href:     "#",
+    cta:      "Know more",
+    slug:     "health-insurance",
+    href:     `${SERVICE_DETAIL_BASE}/health-insurance`, // → /our-services/health-insurance
     imageSrc: "/images/section-2/Health insurance and healthcare.png",
     imageAlt: "Health Insurance illustration",
     imageBg:  "#FFF0F0",
@@ -36,8 +50,9 @@ const FALLBACK_PLANS: Plan[] = [
   {
     label:    "Motor Insurance",
     desc:     "Protect your vehicle against damage, theft, and third-party liability with comprehensive motor coverage.",
-    cta:      "Explore plans",
-    href:     "#",
+    cta:      "Know more",
+    slug:     "motor-insurance",
+    href:     `${SERVICE_DETAIL_BASE}/motor-insurance`,
     imageSrc: "/images/section-2/Group.png",
     imageAlt: "Motor Insurance illustration",
     imageBg:  "#F0F8FF",
@@ -45,8 +60,9 @@ const FALLBACK_PLANS: Plan[] = [
   {
     label:    "Life Insurance",
     desc:     "Build financial security for your loved ones and plan a retirement without worries.",
-    cta:      "Explore plans",
-    href:     "#",
+    cta:      "Know more",
+    slug:     "life-insurance",
+    href:     `${SERVICE_DETAIL_BASE}/life-insurance`,
     imageSrc: "/images/section-2/life-bike.png",
     imageAlt: "Life Insurance illustration",
     imageBg:  "#F5F0FF",
@@ -54,8 +70,9 @@ const FALLBACK_PLANS: Plan[] = [
   {
     label:    "Home Insurance",
     desc:     "Insure your home structure and household property against damage, fire, and natural disasters.",
-    cta:      "Explore plans",
-    href:     "#",
+    cta:      "Know more",
+    slug:     "home-insurance",
+    href:     `${SERVICE_DETAIL_BASE}/home-insurance`,
     imageSrc: "/images/section-2/House insurance or property insurance.png",
     imageAlt: "Home Insurance illustration",
     imageBg:  "#FFFBF0",
@@ -111,13 +128,33 @@ function getImageSrc(s: any): string {
   return img.url ?? img.secure_url ?? img.src ?? "";
 }
 
+// Turn an arbitrary name into a URL-safe slug.
+// Used only as a last-resort fallback when the API gives us no slug/id.
+function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-") // non-alphanumerics → hyphen
+    .replace(/^-+|-+$/g, "");    // trim leading/trailing hyphens
+}
+
+// Resolve the slug for a service: prefer an explicit slug, then an id,
+// then fall back to a slugified name so the link is never dead.
+function getSlug(s: any): string {
+  const raw =
+    s.slug ?? s._id ?? s.id ?? s.serviceId ?? slugify(s.title ?? s.name ?? s.label ?? "");
+  return String(raw);
+}
+
 function mapServiceToPlan(s: any, i: number): Plan {
   const name = s.title ?? s.name ?? s.label ?? "Service";
+  const slug = getSlug(s);
   return {
     label:    name,
     desc:     s.description ?? s.desc ?? s.shortDescription ?? s.summary ?? "",
-    cta:      "Explore plans",
-    href:     s.slug ? `/services/${s.slug}` : "#",
+    cta:      "Know more",
+    slug,
+    href:     slug ? `${SERVICE_DETAIL_BASE}/${slug}` : "#",
     imageSrc: getImageSrc(s),
     imageAlt: `${name} illustration`,
     imageBg:  CARD_TINTS[i % CARD_TINTS.length],
@@ -131,26 +168,43 @@ export default function InsurancePlansSection() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch services from the API
+  // Fetch services from the API.
+  // Note: a failed request (404 / network error) must NOT crash the page — we
+  // warn and fall back to FALLBACK_PLANS so the section always renders.
   useEffect(() => {
     const controller = new AbortController();
 
     (async () => {
-      try {
-        const res = await fetch(SERVICES_ENDPOINT, { signal: controller.signal });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = await res.json();
+      let json: any = null;
+
+      for (const url of SERVICE_ENDPOINTS) {
+        try {
+          const res = await fetch(url, { signal: controller.signal });
+          if (res.ok) {
+            json = await res.json();
+            break;
+          }
+          // non-OK (e.g. 404): just try the next candidate
+        } catch (err: any) {
+          if (err?.name === "AbortError") return; // unmounted — stop quietly
+          // network error: try the next candidate
+        }
+      }
+
+      if (json) {
         const list = extractList(json);
         const mapped = list.map(mapServiceToPlan);
         setPlans(mapped.length ? mapped : FALLBACK_PLANS);
-      } catch (err: any) {
-        if (err?.name !== "AbortError") {
-          console.error("Failed to load services:", err);
-          setPlans(FALLBACK_PLANS);   // graceful fallback
-        }
-      } finally {
-        setLoading(false);
+      } else {
+        console.warn(
+          "[InsurancePlansSection] Could not reach the services API " +
+          `(tried: ${SERVICE_ENDPOINTS.join(", ")}). Showing fallback content. ` +
+          "Set NEXT_PUBLIC_API_URL and/or fix the path in SERVICE_ENDPOINTS."
+        );
+        setPlans(FALLBACK_PLANS);
       }
+
+      setLoading(false);
     })();
 
     return () => controller.abort();
@@ -194,7 +248,8 @@ export default function InsurancePlansSection() {
                 your life and business.
               </p>
             </div>
-            <a href="#" className="ips-view-all">View all plans</a>
+            {/* "View all plans" → list page */}
+            <Link href={SERVICE_DETAIL_BASE} className="ips-view-all">View all plans</Link>
           </div>
 
           {/* ── CARDS GRID ── */}
@@ -214,33 +269,42 @@ export default function InsurancePlansSection() {
                 ))
               : plans.map((plan, i) => (
                   <div
-                    key={i}
+                    key={plan.slug || i}
                     className="ips-card fade-up"
                     style={{ "--d": `${0.1 + i * 0.1}s` } as React.CSSProperties}
                   >
-                    {/* Image zone — each card has its own bg tint */}
-                    <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
-                      {plan.imageSrc ? (
-                        <img
-                          src={plan.imageSrc}
-                          alt={plan.imageAlt}
-                          className="ips-card-img"
-                        />
-                      ) : null}
-                    </div>
+                    {/* Image zone — each card has its own bg tint.
+                        Wrapping it in the Link too means the whole image is
+                        clickable and leads to the same detail page. */}
+                    <Link
+                      href={plan.href}
+                      className="ips-card-img-link"
+                      aria-label={`Explore ${plan.label} plans`}
+                    >
+                      <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
+                        {plan.imageSrc ? (
+                          <img
+                            src={plan.imageSrc}
+                            alt={plan.imageAlt}
+                            className="ips-card-img"
+                          />
+                        ) : null}
+                      </div>
+                    </Link>
 
                     {/* White body */}
                     <div className="ips-card-body">
                       <h3 className="ips-card-title">{plan.label}</h3>
                       <p className="ips-card-desc">{plan.desc}</p>
-                      <a href={plan.href} className="ips-card-cta">
+                      {/* Know more → navigates to /our-services/<slug> */}
+                      <Link href={plan.href} className="ips-card-cta">
                         {plan.cta}
                         <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                           <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
                             stroke="currentColor" strokeWidth="1.8"
                             strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -430,6 +494,12 @@ const CSS = `
       transform: none;
       box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     }
+  }
+
+  /* Make the image link behave like a block so the tint zone is clickable */
+  .ips-card-img-link {
+    display: block;
+    text-decoration: none;
   }
 
   /* Image zone */
