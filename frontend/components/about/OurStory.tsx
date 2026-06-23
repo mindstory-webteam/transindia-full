@@ -279,7 +279,12 @@ const CSS = `
   }
 
   /* Responsive */
+  @media (max-width: 1366px) {
+    .our-story-section { padding-top: 180px; }
+  }
+
   @media (max-width: 1024px) {
+    .our-story-section { padding-top: 180px; }
     .our-story-container { padding: 0 40px; }
     .heading-dark, .heading-primary { font-size: 42px; }
     .check-items-grid { gap: 20px 40px; }
