@@ -40,7 +40,8 @@ function resolveImageUrl(image: string): string {
 }
 
 // ─── Server-side fetch ────────────────────────────────────────────────────────
-async function fetchPersonalServices(): Promise<ServiceCard[]> {
+// NOTE: no longer filters by serviceType — returns every service from the API.
+async function fetchAllServices(): Promise<ServiceCard[]> {
   const API_BASE =
     process.env.NEXT_PUBLIC_API_URL ||
     process.env.API_URL ||
@@ -51,7 +52,7 @@ async function fetchPersonalServices(): Promise<ServiceCard[]> {
     if (!res.ok) return [];
     const json = await res.json();
     const all: ServiceCard[] = Array.isArray(json?.data) ? json.data : [];
-    return all.filter((s) => s.serviceType === "personal");
+    return all; // ← was: all.filter((s) => s.serviceType === "personal")
   } catch {
     return [];
   }
@@ -59,7 +60,7 @@ async function fetchPersonalServices(): Promise<ServiceCard[]> {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 const PersonalInsuranceServices = async () => {
-  const cards = await fetchPersonalServices();
+  const cards = await fetchAllServices();
 
   return (
     <section className="bg-slate-50 py-16 px-6 md:px-12 pt-40">
@@ -122,12 +123,12 @@ const PersonalInsuranceServices = async () => {
                       </ul>
                     )}
 
-                  <Link
-  href={`/our-services/${card.slug}`}
-  className="bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl py-3 mt-auto transition-colors text-center block"
->
-  Know More
-</Link>
+                    <Link
+                      href={`/our-services/${card.slug}`}
+                      className="bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-xl py-3 mt-auto transition-colors text-center block"
+                    >
+                      Know More
+                    </Link>
                   </div>
                 </div>
               );
