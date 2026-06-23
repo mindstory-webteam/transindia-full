@@ -35,8 +35,18 @@ const CONTACT_HREF = "/contact-us";
 // in the admin panel, so every service page shows the premium calculator
 // (mirrors the seeded life-insurance setup). If a service has its own
 // calcFields, those win.
-const DEFAULT_CALC_FIELDS: InsuranceDetailData["calcFields"] = [
+//
+// Contact details (name, email, phone, address, marital status) are collected
+// here too. They are NOT used in the premium math — they only flow into the
+// quote/lead. The estimator's regex auto-detection ignores them, so the numbers
+// stay exactly the same as before.
+const DEFAULT_CALC_FIELDS = [
+  { label: "Full Name", type: "text", options: [], stateKey: "name", defaultValue: "" },
+  { label: "Email Address", type: "email", options: [], stateKey: "email", defaultValue: "" },
+  { label: "Phone Number", type: "tel", options: [], stateKey: "phone", defaultValue: "" },
   { label: "Date of Birth", type: "date", options: [], stateKey: "dob", defaultValue: "" },
+  { label: "Marital Status", type: "select", options: ["Married", "Unmarried"], stateKey: "marital", defaultValue: "Unmarried" },
+  { label: "Address", type: "textarea", options: [], stateKey: "address", defaultValue: "" },
   { label: "Gender", type: "select", options: ["Male", "Female"], stateKey: "gender", defaultValue: "Male" },
   { label: "Smoker", type: "select", options: ["No", "Yes"], stateKey: "smoker", defaultValue: "No" },
   { label: "Sum Assured Required", type: "select", options: ["₹25 Lakh", "₹50 Lakh", "₹1 crore", "₹2 crore", "₹5 crore"], stateKey: "sumAssured", defaultValue: "₹1 crore" },
@@ -50,6 +60,10 @@ const CALC_CARD_TITLE = "Calculate your premium";
 const CALC_SUBMIT_LABEL = "Get My Quote";
 const CALC_SUBMIT_BG = "#1B8A3A";
 
+// Which fields belong to STEP 1 (personal / contact details). Everything else
+// (smoker, sum assured, term, income) belongs to STEP 2 (the calculator).
+const STEP1_KEYS = ["name", "email", "phone", "dob", "marital", "address", "gender"];
+
 function HeroCalcCard() {
   // Calculator is frontend-only: always use the fields defined above.
   const fields = DEFAULT_CALC_FIELDS ?? [];
@@ -58,18 +72,26 @@ function HeroCalcCard() {
     initialState[f.stateKey] = f.defaultValue;
   });
 
+  // Split the fields into the two steps (order preserved).
+  const step1Fields = fields.filter((f) => STEP1_KEYS.includes(f.stateKey));
+  const step2Fields = fields.filter((f) => !STEP1_KEYS.includes(f.stateKey));
+
+  const [step, setStep] = useState<1 | 2>(1);
   const [values, setValues] = useState<Record<string, string>>(initialState);
+  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
     coverageLabel: string;
     monthly: string;
     yearly: string;
     total: string;
     note?: string;
+    to?: string;
   } | null>(null);
 
   const handleChange = (key: string, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
     setResult(null); // inputs changed → clear stale estimate
+    setError(null);  // and clear any validation message
   };
 
   // ── helpers ─────────────────────────────────────────────────────────────────
@@ -109,8 +131,43 @@ function HeroCalcCard() {
   const fmt = (n: number, symbol: string) =>
     symbol + Math.round(n).toLocaleString("en-IN");
 
-  // ── estimate ─────────────────────────────────────────────────────────────────
+  // ── Step 1 validation (contact / lead info) ──────────────────────────────────
+  // Returns true when name + email + phone are valid; otherwise sets an error.
+  const validateContact = (): boolean => {
+    const name = (findValue(/name/i) || "").trim();
+    const email = (findValue(/email/i) || "").trim();
+    const phoneDigits = (findValue(/phone|mobile/i) || "").replace(/\D/g, "");
+
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    setError(null);
+    return true;
+  };
+
+  // Step 1 → Step 2.
+  const handleContinue = () => {
+    if (validateContact()) setStep(2);
+  };
+
+  // ── estimate (Step 2) ────────────────────────────────────────────────────────
   const calculate = () => {
+    // Re-check contact details; if invalid, bounce back to step 1.
+    if (!validateContact()) {
+      setResult(null);
+      setStep(1);
+      return;
+    }
+
     // ── Step 0: read inputs from whatever fields exist ──
     const covField = fields.find(
       (f) =>
@@ -181,73 +238,199 @@ function HeroCalcCard() {
       yearly: fmt(yearly, symbol),
       total: fmt(total, symbol),
       note,
+      to: (findValue(/email/i) || "").trim(),
     });
   };
 
   if (!fields.length) return null;
 
-  return (
-    <div className="li-card">
-      <h2 className="li-card-title">{CALC_CARD_TITLE}</h2>
-
-      {fields.map((field) => {
-        if (field.type === "date") {
-          return (
-            <label className="li-field" key={field.stateKey}>
-              <span className="li-label">{field.label}</span>
-              <div className="li-input-wrap">
-                <input
-                  type="date"
-                  value={values[field.stateKey]}
-                  onChange={(e) => handleChange(field.stateKey, e.target.value)}
-                  className="li-input"
-                />
-                <svg
-                  className="li-calendar-icon"
-                  viewBox="0 0 24 24"
-                  width="18"
-                  height="18"
-                  fill="none"
-                  stroke="#6B7280"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <line x1="16" y1="2" x2="16" y2="6" />
-                  <line x1="8" y1="2" x2="8" y2="6" />
-                  <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-              </div>
-            </label>
-          );
-        }
-        return (
-          <label className="li-field" key={field.stateKey}>
-            <span className="li-label">{field.label}</span>
-            <select
+  // Shared field renderer (same markup as before, just reused for both steps).
+  const renderField = (field: (typeof fields)[number]) => {
+    // Date picker (e.g. Date of Birth)
+    if (field.type === "date") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <div className="li-input-wrap">
+            <input
+              type="date"
               value={values[field.stateKey]}
               onChange={(e) => handleChange(field.stateKey, e.target.value)}
-              className="li-select"
+              className="li-input"
+            />
+            <svg
+              className="li-calendar-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="#6B7280"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              {field.options?.map((o, oi) => (
-                <option key={`${field.stateKey}-${oi}`}>{o}</option>
-              ))}
-            </select>
-          </label>
-        );
-      })}
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </div>
+        </label>
+      );
+    }
 
-      <button
-        className="li-submit"
-        style={{ background: CALC_SUBMIT_BG }}
-        onClick={calculate}
-        type="button"
-      >
-        {CALC_SUBMIT_LABEL}
-      </button>
+    // Dropdown (Gender, Smoker, Marital Status, Sum Assured, Term, Income)
+    if (field.type === "select") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <select
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-select"
+          >
+            {field.options?.map((o, oi) => (
+              <option key={`${field.stateKey}-${oi}`}>{o}</option>
+            ))}
+          </select>
+        </label>
+      );
+    }
 
-      {result && (
+    // Multi-line free text (Address)
+    if (field.type === "textarea") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <textarea
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-textarea"
+            rows={2}
+            placeholder="House no, street, city, pincode"
+          />
+        </label>
+      );
+    }
+
+    // Single-line text inputs (Full Name, Email, Phone Number)
+    return (
+      <label className="li-field" key={field.stateKey}>
+        <span className="li-label">{field.label}</span>
+        <input
+          type={
+            field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"
+          }
+          inputMode={field.type === "tel" ? "tel" : undefined}
+          value={values[field.stateKey]}
+          onChange={(e) => handleChange(field.stateKey, e.target.value)}
+          className="li-textfield"
+          placeholder={field.label}
+        />
+      </label>
+    );
+  };
+
+  return (
+    <div className="li-card">
+      {/* ── Step indicator (inline-styled so the shared CSS stays untouched) ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+        <span
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 12, fontWeight: 700,
+            color: step >= 1 ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap",
+          }}
+        >
+          <span
+            style={{
+              width: 22, height: 22, borderRadius: "50%",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 800,
+              background: step >= 1 ? CALC_SUBMIT_BG : "#E5E7EB",
+              color: step >= 1 ? "#fff" : "#6B7280",
+            }}
+          >
+            1
+          </span>
+          Your details
+        </span>
+
+        <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
+
+        <span
+          style={{
+            display: "inline-flex", alignItems: "center", gap: 6,
+            fontSize: 12, fontWeight: 700,
+            color: step >= 2 ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap",
+          }}
+        >
+          <span
+            style={{
+              width: 22, height: 22, borderRadius: "50%",
+              display: "inline-flex", alignItems: "center", justifyContent: "center",
+              fontSize: 11, fontWeight: 800,
+              background: step >= 2 ? CALC_SUBMIT_BG : "#E5E7EB",
+              color: step >= 2 ? "#fff" : "#6B7280",
+            }}
+          >
+            2
+          </span>
+          Premium
+        </span>
+      </div>
+
+      <h2 className="li-card-title">
+        {step === 1 ? "Tell us about yourself" : CALC_CARD_TITLE}
+      </h2>
+
+      {/* Fields for the current step */}
+      {(step === 1 ? step1Fields : step2Fields).map(renderField)}
+
+      {/* ── Actions ── */}
+      {step === 1 ? (
+        <button
+          className="li-submit"
+          style={{ background: CALC_SUBMIT_BG }}
+          onClick={handleContinue}
+          type="button"
+        >
+          Continue
+        </button>
+      ) : (
+        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+          <button
+            type="button"
+            onClick={() => setStep(1)}
+            style={{
+              flexShrink: 0,
+              padding: "16px 22px",
+              background: "transparent",
+              color: "#0B1F4D",
+              border: "1.5px solid #0B1F4D",
+              borderRadius: 8,
+              fontSize: 15,
+              fontWeight: 800,
+              fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
+              cursor: "pointer",
+            }}
+          >
+            Back
+          </button>
+          <button
+            className="li-submit"
+            style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
+            onClick={calculate}
+            type="button"
+          >
+            {CALC_SUBMIT_LABEL}
+          </button>
+        </div>
+      )}
+
+      {error && <p className="li-error">{error}</p>}
+
+      {step === 2 && result && (
         <div className="li-result">
           <div className="li-result-cov">
             <span className="li-result-cov-label">Your coverage</span>
@@ -270,6 +453,9 @@ function HeroCalcCard() {
           <p className="li-result-note">
             Estimated premium incl. 18% GST. Final price depends on underwriting &amp; medical checks.
           </p>
+          {result.to && (
+            <p className="li-result-note">We&apos;ll share this estimate with you at {result.to}.</p>
+          )}
         </div>
       )}
 
@@ -399,16 +585,16 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
                   ))}
                 </div>
               </div>
-              <div className="flex-1 flex justify-center items-center">
+              <div className="flex-1 flex justify-center items-center h-96">
                 {data.whyImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={data.whyImage}
                     alt={data.whyTitle || "illustration"}
-                    className="w-full max-w-md h-72 object-contain rounded-3xl shadow-sm"
+                    className="w-full h-full object-cover rounded-3xl shadow-sm"
                   />
                 ) : (
-                  <div className="w-full max-w-md h-72 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-6xl">
+                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-6xl">
                     {data.benefits[0]?.emoji ?? "🛡️"}
                   </div>
                 )}
@@ -576,14 +762,19 @@ const CSS = `
   .li-field{ display: block; margin-bottom: 18px; }
   .li-label{ display: block; font-size: 13px; font-weight: 700; color: #1F2937; margin-bottom: 8px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
   .li-input-wrap{ position: relative; display: flex; align-items: center; }
-  .li-input, .li-select{ width: 100%; padding: 12px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #1F2937; background: #fff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.15s; }
-  .li-input:focus, .li-select:focus{ border-color: #38BDF8; }
+  .li-input, .li-select, .li-textfield, .li-textarea{ width: 100%; padding: 12px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #1F2937; background: #fff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.15s; }
+  .li-input:focus, .li-select:focus, .li-textfield:focus, .li-textarea:focus{ border-color: #38BDF8; }
   .li-input{ padding-right: 40px; }
+  .li-textfield::placeholder, .li-textarea::placeholder{ color: #9CA3AF; }
+  .li-textarea{ resize: vertical; min-height: 64px; line-height: 1.5; }
   .li-calendar-icon{ position: absolute; right: 14px; pointer-events: none; }
   .li-select{ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='5 8 10 13 15 8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
   .li-submit{ width: 100%; padding: 16px; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; margin-top: 6px; transition: filter 0.2s; }
   .li-submit:hover{ filter: brightness(0.9); }
   .li-disclaimer{ text-align: center; font-size: 12px; color: #9CA3AF; margin: 12px 0 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+  /* ── inline validation message ── */
+  .li-error{ margin: 12px 0 0; padding: 10px 12px; font-size: 12.5px; font-weight: 600; color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; text-align: center; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
 
   /* ── premium estimate result panel ── */
   .li-result{ margin-top: 18px; padding: 18px; border-radius: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; animation: li-result-in 0.25s ease; }
