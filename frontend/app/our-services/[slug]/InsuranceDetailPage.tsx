@@ -405,7 +405,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
                   <img
                     src={data.whyImage}
                     alt={data.whyTitle || "illustration"}
-                    className="w-full max-w-md h-72 object-cover rounded-3xl shadow-sm"
+                    className="w-full max-w-md h-72 object-contain rounded-3xl shadow-sm"
                   />
                 ) : (
                   <div className="w-full max-w-md h-72 bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-6xl">
