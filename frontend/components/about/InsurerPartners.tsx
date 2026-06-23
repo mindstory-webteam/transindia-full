@@ -156,8 +156,8 @@ const CSS = `
   }
 
   .ip-logo {
-    max-width: 130px;
-    max-height: 52px;
+    max-width: 100%;
+    max-height: 100%;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -166,21 +166,29 @@ const CSS = `
 
   /* ── Responsive ── */
   @media (max-width: 1100px) {
+    .ip-section { padding: 60px 0; }
     .ip-container { padding: 0 48px; }
     .ip-heading-box { min-width: 360px; padding: 20px 40px 24px; }
     .ip-logo-cell { width: 160px; height: 80px; }
   }
 
   @media (max-width: 768px) {
-    .ip-section { padding: 56px 20px 64px; }
-    .ip-container { padding: 0 24px; gap: 28px; }
-    .ip-heading-box { min-width: unset; width: 100%; padding: 20px 24px 24px; }
+    .ip-section { padding: 48px 0; overflow: hidden; width: 100%; box-sizing: border-box; }
+    .ip-container { padding: 0 16px; gap: 24px; }
+    .ip-heading-box { min-width: 100%; padding: 0; }
     .ip-heading { font-size: 28px; }
-    .ip-logos-box { padding: 0; }
+    .ip-logos-box { 
+      padding: 0; 
+      width: 100vw; 
+      margin-left: -16px; /* Negate the container padding */
+    }
     .ip-logo-cell { width: 140px; height: 70px; padding: 10px; }
   }
 
   @media (max-width: 480px) {
+    .ip-heading { font-size: 24px; }
     .ip-logo-cell { width: 120px; height: 60px; }
+    .ip-marquee { gap: 10px; }
+    .ip-marquee-row { gap: 10px; }
   }
 `;

@@ -68,8 +68,9 @@ export default function ComplaintPage() {
         <p style={{ color:"#64748B" }}>Loading…</p>
       ) : (
         <div style={{ background:"#fff", borderRadius:12, border:"1px solid var(--border)", overflow:"hidden" }}>
-          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13 }}>
-            <thead>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth: 800 }}>
+              <thead>
               <tr style={{ background:"#F8FAFC", borderBottom:"1px solid var(--border)" }}>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Date</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Name</th>
@@ -115,7 +116,8 @@ export default function ComplaintPage() {
                 <tr><td colSpan={7} style={{ padding:32, textAlign:"center", color:"#94A3B8" }}>No complaints yet.</td></tr>
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
           {totalPages > 1 && (
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 16px", borderTop: "1px solid var(--border)", background: "#fff" }}>
               <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} style={{ padding: "6px 12px", border: "1px solid var(--border)", borderRadius: 6, background: "#fff", cursor: currentPage === 1 ? "not-allowed" : "pointer" }}>Previous</button>

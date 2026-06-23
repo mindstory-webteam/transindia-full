@@ -216,8 +216,9 @@ export default function CareersPage() {
           ) : jobs.length === 0 ? (
             <div style={{ padding: 40, textAlign: "center", color: "var(--ti-muted)" }}>No job roles found. Create one above.</div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
                 <tr>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Title</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Tags</th>
@@ -246,7 +247,8 @@ export default function CareersPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
         </div>
       )}
@@ -259,8 +261,9 @@ export default function CareersPage() {
           ) : applications.length === 0 ? (
             <div style={{ padding: 40, textAlign: "center", color: "var(--ti-muted)" }}>No applications received yet.</div>
           ) : (
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}>
+                <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
                 <tr>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Applicant</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Role</th>
@@ -296,7 +299,8 @@ export default function CareersPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
         </div>
       )}
