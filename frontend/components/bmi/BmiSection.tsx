@@ -347,7 +347,7 @@ export default function BmiSection() {
               </p>
              
 
-<Link href="/bmi-calculator">
+<Link href="/bmi">
   <button className="bmi-cta" type="button">
     Calculate your BMI
   </button>

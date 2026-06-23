@@ -4,111 +4,61 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-// Set this to your DEPLOYED Express server origin in .env.local, e.g.
-//   NEXT_PUBLIC_API_URL=https://your-api.onrender.com
-// (No trailing slash needed — it's stripped below.)
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-
-// Services router is mounted at /api/services.
 const SERVICE_ENDPOINTS = [`${API_BASE}/services`];
-
-// Base path of your service detail page (the [slug] route).
-// Must match the navbar, which links to /our-services/<slug>.
-// A card linking to "Health Insurance" with slug "health-insurance"
-// will navigate to:  /our-services/health-insurance
 const SERVICE_DETAIL_BASE = "/our-services";
-
-// Background tints cycled across however many services the API returns.
 const CARD_TINTS = ["#FFF0F0", "#F0F8FF", "#F5F0FF", "#FFFBF0"];
+
+// Carousel settings
+const CAROUSEL_SETTINGS = {
+  autoPlayInterval: 5000,  // 5 seconds
+  transitionDuration: 0.6, // 600ms
+};
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type Plan = {
   label: string;
   desc: string;
   cta: string;
-  href: string; // resolved detail-page URL (built from slug)
-  slug: string; // kept around in case you need it elsewhere
+  href: string;
+  slug: string;
   imageSrc: string;
   imageAlt: string;
   imageBg: string;
 };
 
-// ─── FALLBACK DATA (used if the API call fails) ───────────────────────────────
-// Each fallback now has a real slug so the "Know more" button still
-// navigates to /services/<slug> even when the API is unreachable.
-const FALLBACK_PLANS: Plan[] = [
-  {
-    label:    "Health Insurance",
-    desc:     "Cover medical expenses, hospitalisation, and critical illnesses for individuals and families.",
-    cta:      "Know more",
-    slug:     "health-insurance",
-    href:     `${SERVICE_DETAIL_BASE}/health-insurance`, // → /our-services/health-insurance
-    imageSrc: "/images/section-2/Health insurance and healthcare.png",
-    imageAlt: "Health Insurance illustration",
-    imageBg:  "#FFF0F0",
-  },
-  {
-    label:    "Motor Insurance",
-    desc:     "Protect your vehicle against damage, theft, and third-party liability with comprehensive motor coverage.",
-    cta:      "Know more",
-    slug:     "motor-insurance",
-    href:     `${SERVICE_DETAIL_BASE}/motor-insurance`,
-    imageSrc: "/images/section-2/Group.png",
-    imageAlt: "Motor Insurance illustration",
-    imageBg:  "#F0F8FF",
-  },
-  {
-    label:    "Life Insurance",
-    desc:     "Build financial security for your loved ones and plan a retirement without worries.",
-    cta:      "Know more",
-    slug:     "life-insurance",
-    href:     `${SERVICE_DETAIL_BASE}/life-insurance`,
-    imageSrc: "/images/section-2/life-bike.png",
-    imageAlt: "Life Insurance illustration",
-    imageBg:  "#F5F0FF",
-  },
-  {
-    label:    "Home Insurance",
-    desc:     "Insure your home structure and household property against damage, fire, and natural disasters.",
-    cta:      "Know more",
-    slug:     "home-insurance",
-    href:     `${SERVICE_DETAIL_BASE}/home-insurance`,
-    imageSrc: "/images/section-2/House insurance or property insurance.png",
-    imageAlt: "Home Insurance illustration",
-    imageBg:  "#FFFBF0",
-  },
-];
+// ─── NO FALLBACK DATA ─────────────────────────────────────────────────────────
+// All data is fetched from the backend API only.
 
 const TRUST_ITEMS = [
   {
     label:    "24/7\nClaim Assistance",
     imageSrc: "/images/section-3/customer-support.svg",
     imageAlt: "24/7 Claim Assistance",
-    iconBg:   "#E6F2FB",   // light blue
+    iconBg:   "#E6F2FB",
   },
   {
     label:    "Trusted\nCoverage",
     imageSrc: "/images/section-3/knight-shield.svg",
     imageAlt: "Trusted Coverage",
-    iconBg:   "#E7F6EC",   // light green
+    iconBg:   "#E7F6EC",
   },
   {
     label:    "Fast\nApprovals",
     imageSrc: "/images/section-3/timer-02.svg",
     imageAlt: "Fast Approvals",
-    iconBg:   "#ECE9FB",   // light purple
+    iconBg:   "#ECE9FB",
   },
   {
     label:    "Personalized\nPlans",
     imageSrc: "/images/section-3/user.svg",
     imageAlt: "Personalized Plans",
-    iconBg:   "#FCEEE4",   // light peach
+    iconBg:   "#FCEEE4",
   },
 ];
 
-// ─── HELPERS: normalise the API response ──────────────────────────────────────
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
 
-// Accepts the many shapes a backend might return and returns a flat array.
 function extractList(json: any): any[] {
   if (Array.isArray(json)) return json;
   if (Array.isArray(json?.data)) return json.data;
@@ -118,7 +68,6 @@ function extractList(json: any): any[] {
   return [];
 }
 
-// Image may be a plain URL string or a Cloudinary-style object { url } / { secure_url }.
 function getImageSrc(s: any): string {
   const img =
     s.image ?? s.imageUrl ?? s.imageSrc ?? s.thumbnail ??
@@ -128,18 +77,14 @@ function getImageSrc(s: any): string {
   return img.url ?? img.secure_url ?? img.src ?? "";
 }
 
-// Turn an arbitrary name into a URL-safe slug.
-// Used only as a last-resort fallback when the API gives us no slug/id.
 function slugify(str: string): string {
   return str
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, "-") // non-alphanumerics → hyphen
-    .replace(/^-+|-+$/g, "");    // trim leading/trailing hyphens
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-// Resolve the slug for a service: prefer an explicit slug, then an id,
-// then fall back to a slugified name so the link is never dead.
 function getSlug(s: any): string {
   const raw =
     s.slug ?? s._id ?? s.id ?? s.serviceId ?? slugify(s.title ?? s.name ?? s.label ?? "");
@@ -165,17 +110,21 @@ function mapServiceToPlan(s: any, i: number): Plan {
 
 export default function InsurancePlansSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch services from the API.
-  // Note: a failed request (404 / network error) must NOT crash the page — we
-  // warn and fall back to FALLBACK_PLANS so the section always renders.
+  // Fetch services from the API only — no fallback data
   useEffect(() => {
     const controller = new AbortController();
 
     (async () => {
       let json: any = null;
+      let fetchError: string | null = null;
 
       for (const url of SERVICE_ENDPOINTS) {
         try {
@@ -183,25 +132,30 @@ export default function InsurancePlansSection() {
           if (res.ok) {
             json = await res.json();
             break;
+          } else {
+            fetchError = `API returned ${res.status}`;
           }
-          // non-OK (e.g. 404): just try the next candidate
         } catch (err: any) {
-          if (err?.name === "AbortError") return; // unmounted — stop quietly
-          // network error: try the next candidate
+          if (err?.name === "AbortError") return;
+          fetchError = err?.message || "Network error";
         }
       }
 
       if (json) {
         const list = extractList(json);
-        const mapped = list.map(mapServiceToPlan);
-        setPlans(mapped.length ? mapped : FALLBACK_PLANS);
+        if (list.length > 0) {
+          const mapped = list.map(mapServiceToPlan);
+          setPlans(mapped);
+          setError(null);
+        } else {
+          setError("No services available from the API.");
+          setPlans([]);
+        }
       } else {
-        console.warn(
-          "[InsurancePlansSection] Could not reach the services API " +
-          `(tried: ${SERVICE_ENDPOINTS.join(", ")}). Showing fallback content. ` +
-          "Set NEXT_PUBLIC_API_URL and/or fix the path in SERVICE_ENDPOINTS."
-        );
-        setPlans(FALLBACK_PLANS);
+        const errorMsg = `Failed to fetch services from API (${SERVICE_ENDPOINTS.join(", ")}). ${fetchError || "Unknown error"}`;
+        console.error("[InsurancePlansSection]", errorMsg);
+        setError(errorMsg);
+        setPlans([]);
       }
 
       setLoading(false);
@@ -210,25 +164,40 @@ export default function InsurancePlansSection() {
     return () => controller.abort();
   }, []);
 
-  // Scroll-reveal animation — re-attach whenever the rendered content changes
-  // (the fetched cards mount after the first paint, so the observer must re-run).
+  const cardsPerRow = 4;
+  const totalSlides = Math.ceil(plans.length / cardsPerRow);
+
+  // Auto-play carousel
   useEffect(() => {
-    const els = sectionRef.current?.querySelectorAll<HTMLElement>(".fade-up");
-    if (!els || els.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            (entry.target as HTMLElement).style.animationPlayState = "running";
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [plans, loading]);
+    if (!isAutoPlay || plans.length === 0) return;
+
+    autoPlayTimerRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, CAROUSEL_SETTINGS.autoPlayInterval);
+
+    return () => {
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    };
+  }, [isAutoPlay, plans.length, totalSlides]);
+
+  const handleDotClick = (index: number) => {
+    setCurrentSlide(index);
+    setIsAutoPlay(false);
+    // Resume autoplay after 10 seconds of inactivity
+    if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    autoPlayTimerRef.current = setTimeout(() => {
+      setIsAutoPlay(true);
+    }, 10000);
+  };
+
+  const handleMouseEnter = () => {
+    setIsAutoPlay(false);
+    if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+  };
+
+  const handleMouseLeave = () => {
+    setIsAutoPlay(true);
+  };
 
   return (
     <>
@@ -236,8 +205,8 @@ export default function InsurancePlansSection() {
       <section className="ips-section" ref={sectionRef}>
         <div className="ips-container">
 
-          {/* ── TOP ROW: heading left + button right ── */}
-          <div className="ips-toprow fade-up" style={{ "--d": "0s" } as React.CSSProperties}>
+          {/* ── TOP ROW: heading + button ── */}
+          <div className="ips-toprow fade-up">
             <div className="ips-heading">
               <h2 className="ips-title">
                 Every risk, <span className="ips-orange">covered.</span><br />
@@ -248,72 +217,100 @@ export default function InsurancePlansSection() {
                 your life and business.
               </p>
             </div>
-            {/* "View all plans" → list page */}
             <Link href={SERVICE_DETAIL_BASE} className="ips-view-all">View all plans</Link>
           </div>
 
-          {/* ── CARDS GRID ── */}
-          <div className="ips-cards">
-            {loading
-              ? /* Skeleton placeholders while fetching */
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={`skel-${i}`} className="ips-skel">
-                    <div className="ips-skel-img" />
-                    <div className="ips-skel-body">
-                      <div className="ips-skel-line title" />
-                      <div className="ips-skel-line" />
-                      <div className="ips-skel-line short" />
-                      <div className="ips-skel-line cta" />
-                    </div>
-                  </div>
-                ))
-              : plans.map((plan, i) => (
-                  <div
-                    key={plan.slug || i}
-                    className="ips-card fade-up"
-                    style={{ "--d": `${0.1 + i * 0.1}s` } as React.CSSProperties}
-                  >
-                    {/* Image zone — each card has its own bg tint.
-                        Wrapping it in the Link too means the whole image is
-                        clickable and leads to the same detail page. */}
-                    <Link
-                      href={plan.href}
-                      className="ips-card-img-link"
-                      aria-label={`Explore ${plan.label} plans`}
-                    >
-                      <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
-                        {plan.imageSrc ? (
-                          <img
-                            src={plan.imageSrc}
-                            alt={plan.imageAlt}
-                            className="ips-card-img"
-                          />
-                        ) : null}
+          {/* ── CAROUSEL ── */}
+          {error ? (
+            <div className="ips-error-state">
+              <p className="ips-error-message">{error}</p>
+              <p className="ips-error-hint">Please check your API configuration and ensure it's properly connected.</p>
+            </div>
+          ) : plans.length === 0 && !loading ? (
+            <div className="ips-empty-state">
+              <p className="ips-empty-message">No services available at the moment.</p>
+            </div>
+          ) : (
+          <div
+            className="ips-carousel-wrapper"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="ips-carousel-track" ref={carouselRef} style={{
+              transform: `translateX(calc(-${currentSlide * 100}%))`
+            }}>
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={`skel-${i}`} className="ips-carousel-item">
+                      <div className="ips-skel">
+                        <div className="ips-skel-img" />
+                        <div className="ips-skel-body">
+                          <div className="ips-skel-line title" />
+                          <div className="ips-skel-line" />
+                          <div className="ips-skel-line short" />
+                          <div className="ips-skel-line cta" />
+                        </div>
                       </div>
-                    </Link>
-
-                    {/* White body */}
-                    <div className="ips-card-body">
-                      <h3 className="ips-card-title">{plan.label}</h3>
-                      <p className="ips-card-desc">{plan.desc}</p>
-                      {/* Know more → navigates to /our-services/<slug> */}
-                      <Link href={plan.href} className="ips-card-cta">
-                        {plan.cta}
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                          <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
-                            stroke="currentColor" strokeWidth="1.8"
-                            strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </Link>
                     </div>
-                  </div>
+                  ))
+                : plans.map((plan, i) => (
+                    <div
+                      key={plan.slug || i}
+                      className="ips-carousel-item"
+                    >
+                      <div className="ips-card fade-in">
+                        <Link
+                          href={plan.href}
+                          className="ips-card-img-link"
+                          aria-label={`Explore ${plan.label} plans`}
+                        >
+                          <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
+                            {plan.imageSrc ? (
+                              <img
+                                src={plan.imageSrc}
+                                alt={plan.imageAlt}
+                                className="ips-card-img"
+                              />
+                            ) : null}
+                          </div>
+                        </Link>
+
+                        <div className="ips-card-body">
+                          <h3 className="ips-card-title">{plan.label}</h3>
+                          <p className="ips-card-desc">{plan.desc}</p>
+                          <Link href={plan.href} className="ips-card-cta">
+                            {plan.cta}
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                              <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
+                                stroke="currentColor" strokeWidth="1.8"
+                                strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+            </div>
+
+            {/* ── NAVIGATION DOTS ── */}
+            {!loading && totalSlides > 1 && (
+              <div className="ips-carousel-dots">
+                {Array.from({ length: totalSlides }).map((_, index) => (
+                  <button
+                    key={index}
+                    className={`ips-dot ${currentSlide === index ? "active" : ""}`}
+                    onClick={() => handleDotClick(index)}
+                    aria-label={`Go to row ${index + 1}`}
+                    aria-current={currentSlide === index}
+                  />
                 ))}
+              </div>
+            )}
           </div>
+          )}
 
           {/* ── TRUST BANNER ── */}
-          <div className="ips-banner fade-up" style={{ "--d": "0.5s" } as React.CSSProperties}>
-
-            {/* Left: shield image + text */}
+          <div className="ips-banner fade-up">
             <div className="ips-banner-left">
               <img
                 src="/images/section-3/magnific_create-a-clean-3d-shield-_cDOaj6u0eP.png"
@@ -332,10 +329,8 @@ export default function InsurancePlansSection() {
               </div>
             </div>
 
-            {/* Vertical divider (desktop only) */}
             <div className="ips-banner-divider" />
 
-            {/* Right: 4 icon stats — icons are images */}
             <div className="ips-banner-stats">
               {TRUST_ITEMS.map((item, i) => (
                 <div key={i} className="ips-banner-stat">
@@ -370,7 +365,7 @@ const CSS = `
   .ips-section {
     background: linear-gradient(109deg, #FFE9E5 0%, #B2F6FF 150%);
     padding: clamp(60px, 8vw, 100px) 0 clamp(64px, 9vw, 108px);
-     font-family: var(--font-sora), "Sora", sans-serif;
+    font-family: var(--font-sora), "Sora", sans-serif;
   }
 
   .ips-container {
@@ -392,7 +387,7 @@ const CSS = `
   .ips-heading { flex: 1; min-width: 260px; }
 
   .ips-title {
-    font-size:38px;
+    font-size: 38px;
     font-weight: 900;
     color: #111827;
     line-height: 1.15;
@@ -414,7 +409,6 @@ const CSS = `
   .ips-br { display: none; }
   @media(min-width:640px){ .ips-br { display: inline; } }
 
-  /* "View all plans" button */
   .ips-view-all {
     flex-shrink: 0;
     padding: 13px 28px;
@@ -429,6 +423,7 @@ const CSS = `
     transition: background 0.2s, color 0.2s;
     align-self: flex-start;
     margin-top: 4px;
+    cursor: pointer;
   }
 
   .ips-view-all:hover {
@@ -436,7 +431,6 @@ const CSS = `
     color: #fff;
   }
 
-  /* On mobile, "View all" stretches full width below the heading */
   @media(max-width: 540px) {
     .ips-toprow {
       flex-direction: column;
@@ -448,31 +442,78 @@ const CSS = `
     }
   }
 
-  /* ── Cards grid — 4 equal-height columns ── */
-  .ips-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+  /* ── CAROUSEL ── */
+  .ips-carousel-wrapper {
+    position: relative;
+    margin-bottom: clamp(36px, 5vw, 56px);
+    overflow: hidden;
+  }
+
+  /* Error and empty states */
+  .ips-error-state,
+  .ips-empty-state {
+    background: #fff;
+    border-radius: 16px;
+    padding: clamp(32px, 5vw, 48px) clamp(24px, 5vw, 40px);
+    text-align: center;
+    margin-bottom: clamp(36px, 5vw, 56px);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .ips-error-state {
+    border-left: 4px solid #EF4444;
+    background: #FEF2F2;
+  }
+
+  .ips-error-message {
+    font-size: 16px;
+    font-weight: 600;
+    color: #DC2626;
+    margin: 0 0 12px;
+  }
+
+  .ips-error-hint {
+    font-size: 14px;
+    color: #B91C1C;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ips-empty-message {
+    font-size: 16px;
+    font-weight: 600;
+    color: #6B7280;
+    margin: 0;
+  }
+
+  .ips-carousel-track {
+    display: flex;
     gap: clamp(12px, 1.8vw, 20px);
-    margin-bottom: clamp(24px, 3.5vw, 40px);
-    align-items: stretch;
+    transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
+  }
+
+  .ips-carousel-item {
+    flex: 0 0 calc(25% - clamp(9px, 1.35vw, 15px));
+    min-width: calc(25% - clamp(9px, 1.35vw, 15px));
   }
 
   /* Tablet: 2 columns */
   @media(max-width: 960px) {
-    .ips-cards { grid-template-columns: repeat(2, 1fr); }
+    .ips-carousel-item {
+      flex: 0 0 calc(50% - clamp(6px, 0.9vw, 10px));
+      min-width: calc(50% - clamp(6px, 0.9vw, 10px));
+    }
   }
 
   /* Mobile: 1 column */
   @media(max-width: 520px) {
-    .ips-cards {
-      grid-template-columns: 1fr;
-      max-width: 400px;
-      margin-inline: auto;
-      margin-bottom: clamp(24px, 3.5vw, 40px);
+    .ips-carousel-item {
+      flex: 0 0 100%;
+      min-width: 100%;
     }
   }
 
-  /* ── Single card ── */
+  /* Single card ── */
   .ips-card {
     background: #fff;
     border-radius: 18px;
@@ -496,13 +537,11 @@ const CSS = `
     }
   }
 
-  /* Make the image link behave like a block so the tint zone is clickable */
   .ips-card-img-link {
     display: block;
     text-decoration: none;
   }
 
-  /* Image zone */
   .ips-card-img-wrap {
     width: 100%;
     height: clamp(110px, 12vw, 130px);
@@ -521,7 +560,6 @@ const CSS = `
     display: block;
   }
 
-  /* White body */
   .ips-card-body {
     padding: clamp(16px, 2vw, 20px) clamp(16px, 2vw, 22px) clamp(20px, 2.5vw, 26px);
     display: flex;
@@ -561,7 +599,7 @@ const CSS = `
 
   .ips-card-cta:hover { gap: 10px; }
 
-  /* ── Skeleton (loading) cards ── */
+  /* ── Skeleton (loading) ── */
   .ips-skel {
     background: #fff;
     border-radius: 18px;
@@ -604,6 +642,37 @@ const CSS = `
     100% { background-position: 0 0; }
   }
 
+  /* ── NAVIGATION DOTS ── */
+  .ips-carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: clamp(20px, 3vw, 32px);
+  }
+
+  .ips-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(17, 24, 39, 0.2);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+
+  .ips-dot:hover {
+    background: rgba(17, 24, 39, 0.4);
+    transform: scale(1.15);
+  }
+
+  .ips-dot.active {
+    background: #F15A3E;
+    width: 28px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(241, 90, 62, 0.3);
+  }
+
   /* ── Trust Banner ── */
   .ips-banner {
     background: linear-gradient(135deg, #EBF5FF 0%, #EEF8FF 100%);
@@ -616,7 +685,6 @@ const CSS = `
     box-shadow: 0 2px 20px rgba(0,0,0,0.05);
   }
 
-  /* Left: shield + text */
   .ips-banner-left {
     display: flex;
     align-items: center;
@@ -647,7 +715,6 @@ const CSS = `
     margin: 0;
   }
 
-  /* Vertical divider */
   .ips-banner-divider {
     width: 1px;
     height: 72px;
@@ -658,7 +725,6 @@ const CSS = `
 
   @media(max-width: 720px) { .ips-banner-divider { display: none; } }
 
-  /* Right: stats with image icons */
   .ips-banner-stats {
     display: flex;
     gap: clamp(12px, 3.5vw, 44px);
@@ -676,12 +742,11 @@ const CSS = `
     min-width: 60px;
   }
 
-  /* Circular icon container */
   .ips-stat-icon-wrap {
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: #fff;            /* overridden per-item via inline style */
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -702,11 +767,6 @@ const CSS = `
     line-height: 1.45;
   }
 
-  /* ──────────────────────────────────────────────────────────────────────
-     MOBILE BANNER  (≤ 640px)
-     Shield centered on top → heading/desc → each stat stacked vertically
-     with a thin divider line between them (matches the mobile mockup).
-     ────────────────────────────────────────────────────────────────────── */
   @media(max-width: 640px) {
     .ips-banner {
       flex-direction: column;
@@ -715,7 +775,6 @@ const CSS = `
       padding: 28px 22px;
     }
 
-    /* shield on top (centered), text below (left-aligned) */
     .ips-banner-left {
       flex-direction: column;
       align-items: center;
@@ -733,7 +792,6 @@ const CSS = `
       text-align: left;
     }
 
-    /* stats become a vertical list */
     .ips-banner-stats {
       flex-direction: column;
       width: 100%;
@@ -748,12 +806,16 @@ const CSS = `
     }
   }
 
-  /* ── Scroll animation ── */
+  /* ── Animations ── */
   .fade-up {
     opacity: 0;
     transform: translateY(24px);
-    animation: ips-fadein 0.6s cubic-bezier(0.22,1,0.36,1) var(--d, 0s) forwards;
-    animation-play-state: paused;
+    animation: ips-fadein 0.6s cubic-bezier(0.22,1,0.36,1) forwards;
+  }
+
+  .fade-in {
+    opacity: 1;
+    animation: none;
   }
 
   @keyframes ips-fadein {
@@ -761,7 +823,6 @@ const CSS = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* ── Reduced motion ── */
   @media(prefers-reduced-motion: reduce) {
     .fade-up {
       animation: none;
