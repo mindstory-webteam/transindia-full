@@ -26,6 +26,11 @@ interface Service {
 // `${API_BASE}/services`, NOT `${API_BASE}/api/services`.
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
 
+// How long (ms) the dropdown waits before closing after the cursor leaves.
+// This grace period lets you move from "Services" down onto the menu without it
+// snapping shut. Increase if you still find it hard to catch.
+const DROPDOWN_CLOSE_DELAY = 240;
+
 const NAV_ITEMS: NavItem[] = [
   { label: "Services",              hasDropdown: true, href: "/our-services" },
   { label: "Renew existing policy", href: "/renew"      },
@@ -80,6 +85,36 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   const [dropdownOpen,       setDropdownOpen]       = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const closeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Hover-intent handlers for the desktop dropdown ──────────────────────────
+  // Opening is immediate; closing is delayed so the cursor can travel from the
+  // trigger to the menu (across the small gap) without the menu disappearing.
+  const openDropdown = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setDropdownOpen(true);
+  };
+
+  const scheduleCloseDropdown = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setDropdownOpen(false), DROPDOWN_CLOSE_DELAY);
+  };
+
+  const closeDropdownNow = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+    setDropdownOpen(false);
+  };
+
+  // Clear any pending timer on unmount
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }, []);
 
   // ── Fetch services ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -171,7 +206,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setDropdownOpen(false);
+        closeDropdownNow();
       }
     };
     document.addEventListener("mousedown", handler);
@@ -206,8 +241,8 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                   <div
                     className="nav-dropdown-wrapper"
                     ref={dropdownRef}
-                    onMouseEnter={() => setDropdownOpen(true)}
-                    onMouseLeave={() => setDropdownOpen(false)}
+                    onMouseEnter={openDropdown}
+                    onMouseLeave={scheduleCloseDropdown}
                   >
                     {/* Clicking "Services" navigates to /our-services;
                         hovering opens the dropdown below. */}
@@ -215,7 +250,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                       href={item.href || "/our-services"}
                       className="nav-link nav-dropdown-trigger"
                       aria-expanded={dropdownOpen}
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={closeDropdownNow}
                     >
                       {item.label}
                       <svg
@@ -237,7 +272,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                           key={service._id}
                           href={`/our-services/${service.slug}`}
                           className="dropdown-item"
-                          onClick={() => setDropdownOpen(false)}
+                          onClick={closeDropdownNow}
                           tabIndex={dropdownOpen ? 0 : -1}
                         >
                           {service.title || service.name}
@@ -396,7 +431,7 @@ const CSS = `
   .chevron {
     opacity: 0.65;
     flex-shrink: 0;
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
   .chevron-open {
     transform: rotate(180deg);
@@ -453,25 +488,26 @@ const CSS = `
     z-index: 300;
     pointer-events: none;
 
-    /* ── Slow smooth animation ── */
+    /* ── Slow, smooth open/close animation ── */
     opacity: 0;
-    transform: translateY(-12px) scaleY(0.94);
+    transform: translateY(-14px) scaleY(0.92);
     transform-origin: top center;
     transition:
-      opacity    0.38s cubic-bezier(0.4, 0, 0.2, 1),
-      transform  0.38s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity    0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      transform  0.55s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   /* Invisible bridge that fills the 8px gap between the trigger and the menu,
      so moving the cursor from "Services" down to the list never crosses dead
-     space (which would otherwise fire mouseleave and close the dropdown). */
+     space (which would otherwise fire mouseleave). Paired with the JS close
+     delay, this makes the menu easy to "catch". */
   .nav-dropdown-menu::before {
     content: "";
     position: absolute;
     left: 0;
     right: 0;
-    top: -12px;
-    height: 12px;
+    top: -14px;
+    height: 16px;
     background: transparent;
   }
 
@@ -601,7 +637,7 @@ const CSS = `
   }
   .drawer-link:hover { color: #fff; }
 
-  /* ── Mobile Dropdown — CSS-animated ── */
+  /* ── Mobile Dropdown — CSS-animated (slower) ── */
   .drawer-dropdown-menu {
     display: flex;
     flex-direction: column;
@@ -613,8 +649,8 @@ const CSS = `
     max-height: 0;
     opacity: 0;
     transition:
-      max-height 0.45s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity    0.35s cubic-bezier(0.4, 0, 0.2, 1);
+      max-height 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity    0.5s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .drawer-dropdown-menu.dropdown-visible {
