@@ -87,10 +87,10 @@ const CSS = `
     background: linear-gradient(160deg, #0B2080 0%, #0A1B6B 45%, #061448 100%);
     position: relative;
     overflow: visible;
-    padding-top: 104px;
+    padding-top: 140px;
     padding-bottom: 0;
     font-family: 'matterregular', sans-serif;
-        height: 700px;
+    height: 700px;
   }
 
   .svc-glow{
@@ -268,7 +268,9 @@ const CSS = `
   /* ── TABLET (≤960px) ── */
   @media(max-width: 960px){
     .svc-section{
-      padding-top: 56px;
+      padding-top: 100px;
+      height: auto;
+      padding-bottom: 80px;
     }
     .svc-inner{
       padding: 0 32px 140px;
@@ -314,10 +316,14 @@ const CSS = `
   /* ── MOBILE (≤600px) ── */
   @media(max-width: 600px){
     .svc-section{
-      padding-top: 48px;
+      padding-top: 88px;
+      padding-bottom: 0;
     }
     .svc-inner{
-      padding: 0 16px 180px;
+      padding: 0 16px 220px;
+    }
+    .svc-trail-wrapper{
+      display: none;
     }
     .svc-title{
       font-size: clamp(26px, 7.5vw, 38px);
@@ -335,7 +341,7 @@ const CSS = `
       text-align: center;
     }
     .svc-right{
-      max-width: 240px;
+      max-width: 220px;
     }
 
     .svc-stats-bar{
@@ -343,22 +349,57 @@ const CSS = `
     }
     .svc-stats-inner{
       grid-template-columns: 1fr;
-      padding: 24px 20px;
-      gap: 18px;
-      border-radius: 12px;
+      padding: 28px 24px;
+      gap: 22px;
+      border-radius: 16px;
     }
     .svc-stat{
-      flex-direction: row;
+      flex-direction: column;
       justify-content: center;
-      text-align: left;
-      gap: 16px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #E5E9F2;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
     }
-    .svc-stat:last-child{
-      border-bottom: none;
-      padding-bottom: 0;
+    .svc-stat-divider{
+      display: none;
     }
-    .svc-stat-value{ font-size: 22px; }
+    .svc-stat-value{
+      font-size: 24px;
+      white-space: normal;
+    }
+    .svc-stat-label{
+      font-size: 13px;
+      margin-top: 2px;
+      white-space: normal;
+    }
+  }
+
+  /* ── SMALL MOBILE (≤380px) ── */
+  @media(max-width: 380px){
+    .svc-inner{
+      padding: 0 12px 200px;
+    }
+    .svc-title{
+      font-size: clamp(22px, 8vw, 30px);
+    }
+    .svc-desc{
+      font-size: 13px;
+    }
+    .svc-btn-orange, .svc-btn-ghost{
+      padding: 12px 20px;
+      font-size: 13px;
+    }
+    .svc-right{
+      max-width: 180px;
+    }
+    .svc-stats-bar{
+      width: calc(100% - 24px);
+    }
+    .svc-stats-inner{
+      padding: 22px 18px;
+      gap: 18px;
+    }
+    .svc-stat-value{ font-size: 21px; }
+    .svc-stat-label{ font-size: 12px; }
   }
 `;

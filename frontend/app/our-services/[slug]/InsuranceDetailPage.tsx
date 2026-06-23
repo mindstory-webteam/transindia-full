@@ -613,15 +613,7 @@ const CSS = `
     .li-desc{ font-size: 14px; }
     .li-btn-cta{ width: 100%; justify-content: center; margin-bottom: 28px; }
     .li-stats{ display: none; }
-    .li-card{ padding: 24px 20px; }
-  }
-    @media(max-width: 600px){
-    .li-hero{ padding: 40px 16px; }
-    .li-title{ font-size: clamp(26px, 8vw, 36px); }
-    .li-desc{ font-size: 14px; }
-    .li-btn-cta{ width: 100%; justify-content: center; margin-bottom: 28px; }
-    .li-stats{ display: none; }
-    .li-trail{ display: none; }   /* ← add this line */
+    .li-trail{ display: none; }
     .li-card{ padding: 24px 20px; }
   }
 `;

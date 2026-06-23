@@ -15,7 +15,7 @@ export const metadata = {
 
 export default function OurServicesPage() {
   return (
-    <div style={{ overflowX: "hidden", width: "100%" }}>
+    <div style={{ overflowX: "hidden", width: "100%", }}>
       <Navbar />
       <ServicesHero />
       <PersonalInsuranceServices />
