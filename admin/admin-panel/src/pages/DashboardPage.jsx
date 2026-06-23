@@ -86,14 +86,6 @@ export default function DashboardPage() {
         gap: 16, flexWrap: "wrap",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{
-            width: 46, height: 46, borderRadius: 13,
-            background: "linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 8px 18px rgba(241,90,62,0.3)", flexShrink: 0,
-          }}>
-            <Sparkles size={22} color="#fff" />
-          </div>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>Dashboard</h1>
             <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Overview of your insurance services and leads</p>

@@ -256,14 +256,6 @@ export default function ClaimLeadsPage() {
         gap: 16, flexWrap: "wrap",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{
-            width: 46, height: 46, borderRadius: 13, flexShrink: 0,
-            background: "linear-gradient(135deg, #F15A3E 0%, #FB7E54 100%)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 8px 18px rgba(241,90,62,0.3)",
-          }}>
-            <FileText size={22} color="#fff" />
-          </div>
           <div>
             <h1 style={{ fontSize: 20, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>
               Claim Leads
