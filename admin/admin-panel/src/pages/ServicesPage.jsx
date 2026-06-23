@@ -59,7 +59,7 @@ export default function ServicesPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   };
 

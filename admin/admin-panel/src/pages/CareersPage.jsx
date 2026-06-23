@@ -129,7 +129,7 @@ export default function CareersPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   };
 
@@ -163,7 +163,7 @@ export default function CareersPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   };
 

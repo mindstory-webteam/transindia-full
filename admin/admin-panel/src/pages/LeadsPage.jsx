@@ -516,7 +516,7 @@ export default function LeadsPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   };
 

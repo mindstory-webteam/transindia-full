@@ -226,7 +226,7 @@ export default function ClaimLeadsPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   }
 

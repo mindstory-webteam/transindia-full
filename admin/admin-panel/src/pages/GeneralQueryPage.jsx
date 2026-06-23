@@ -72,7 +72,7 @@ export default function GeneralQueryPage() {
           </div>
         </div>
       ),
-      { duration: Infinity }
+      { duration: 5000 }
     );
   };
 
