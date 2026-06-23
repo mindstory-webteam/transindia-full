@@ -93,15 +93,16 @@ export default function GeneralQueryPage() {
   return (
     <div>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24, flexWrap: "wrap", gap: 16 }}>
-        <div>
+        {/* LEFT: Title */}
+        <div style={{ flex: "1 1 200px" }}>
           <h1 style={{ fontSize:22, fontWeight:800 }}>General Queries</h1>
           <p style={{ color:"#64748B", fontSize:13 }}>Manage general query form submissions</p>
         </div>
 
-        {/* Filters */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {/* CENTER: Filters */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "1 1 300px", justifyContent: "center" }}>
           {/* Search */}
-          <div style={{ position: "relative", flex: "1 1 220px" }}>
+          <div style={{ position: "relative", flex: "1 1 200px" }}>
             <Search size={14} color="#94A3B8" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)" }} />
             <input
               value={search}
@@ -111,7 +112,7 @@ export default function GeneralQueryPage() {
                 width: "100%", padding: "9px 12px 9px 32px",
                 border: "1px solid var(--border)", borderRadius: 10,
                 fontSize: 13, color: "#0F172A", background: "#fff",
-                outline: "none", boxSizing: "border-box",
+                outline: "none", boxSizing: "border-box", height: "100%",
               }}
             />
             {search && (
@@ -130,7 +131,7 @@ export default function GeneralQueryPage() {
                 padding: "9px 32px 9px 12px", border: "1px solid var(--border)",
                 borderRadius: 10, fontSize: 13, color: "#0F172A",
                 background: "#fff", outline: "none", cursor: "pointer",
-                appearance: "none",
+                appearance: "none", height: "100%",
               }}
             >
               <option value="All">All Statuses</option>
@@ -138,6 +139,20 @@ export default function GeneralQueryPage() {
             </select>
             <ChevronDown size={13} color="#94A3B8" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
           </div>
+        </div>
+
+        {/* RIGHT: Stats Chips (Bricks) */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "1 1 200px", justifyContent: "flex-end" }}>
+          {STATUSES.map(s => {
+            const count = queries.filter(q => (q.status || "new") === s.value).length;
+            const st = STATUS_COLORS[s.value];
+            return (
+              <div key={s.value} style={{ background: st.bg, borderRadius: 10, padding: "6px 14px", textAlign: "center" }}>
+                <p style={{ fontSize: 16, fontWeight: 800, color: st.color, margin: 0, lineHeight: 1 }}>{count}</p>
+                <p style={{ fontSize: 10, color: st.color, margin: "2px 0 0", fontWeight: 600 }}>{s.label}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 

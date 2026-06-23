@@ -8,7 +8,7 @@ const JobApplication = require("../models/JobApplication");
 // @access  Public
 exports.getJobs = async (req, res, next) => {
   try {
-    const jobs = await JobRole.find({ isActive: true }).sort({ createdAt: -1 });
+    const jobs = await JobRole.find({ isActive: true }).sort({ order: 1, createdAt: -1 });
     res.status(200).json({ success: true, count: jobs.length, data: jobs });
   } catch (error) {
     next(error);
@@ -84,7 +84,7 @@ exports.applyForJob = async (req, res, next) => {
 // @access  Private (Admin)
 exports.getAdminJobs = async (req, res, next) => {
   try {
-    const jobs = await JobRole.find().sort({ createdAt: -1 });
+    const jobs = await JobRole.find().sort({ order: 1, createdAt: -1 });
     res.status(200).json({ success: true, count: jobs.length, data: jobs });
   } catch (error) {
     next(error);

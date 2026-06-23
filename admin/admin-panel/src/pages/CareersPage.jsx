@@ -18,6 +18,7 @@ export default function CareersPage() {
     description: "",
     location: "Remote",
     jobType: "Full-time",
+    order: 0,
     isActive: true,
   });
 
@@ -60,11 +61,12 @@ export default function CareersPage() {
         description: job.description,
         location: job.tags && job.tags[0] ? job.tags[0] : "Remote",
         jobType: job.tags && job.tags[1] ? job.tags[1] : "Full-time",
+        order: job.order || 0,
         isActive: job.isActive,
       });
     } else {
       setEditingJob(null);
-      setFormData({ title: "", description: "", location: "Remote", jobType: "Full-time", isActive: true });
+      setFormData({ title: "", description: "", location: "Remote", jobType: "Full-time", order: 0, isActive: true });
     }
     setIsJobModalOpen(true);
   };
@@ -222,6 +224,7 @@ export default function CareersPage() {
                 <tr>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Title</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Tags</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Order</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Status</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}></th>
                 </tr>
@@ -231,6 +234,7 @@ export default function CareersPage() {
                   <tr key={job._id} style={{ borderBottom: "1px solid var(--ti-line)" }}>
                     <td style={{ padding: "16px 20px", fontWeight: 600 }}>{job.title}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.join(", ")}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.order || 0}</td>
                     <td style={{ padding: "16px 20px" }}>
                       <span style={{ 
                         background: job.isActive ? "#DEF7EC" : "#FDE8E8", 
@@ -370,14 +374,27 @@ export default function CareersPage() {
                 />
               </div>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <input 
-                  type="checkbox" 
-                  id="isActive"
-                  checked={formData.isActive}
-                  onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
-                />
-                <label htmlFor="isActive" style={{ fontWeight: 600, fontSize: 14 }}>Active (Visible on Website)</label>
+              <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <input 
+                    type="checkbox" 
+                    id="isActive"
+                    checked={formData.isActive}
+                    onChange={(e) => setFormData({...formData, isActive: e.target.checked})}
+                  />
+                  <label htmlFor="isActive" style={{ fontWeight: 600, fontSize: 14 }}>Active (Visible)</label>
+                </div>
+                
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <label htmlFor="order" style={{ fontWeight: 600, fontSize: 14 }}>Order:</label>
+                  <input 
+                    type="number" 
+                    id="order"
+                    value={formData.order}
+                    onChange={(e) => setFormData({...formData, order: Number(e.target.value)})}
+                    style={{ width: "80px", padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 14 }}
+                  />
+                </div>
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 10 }}>
