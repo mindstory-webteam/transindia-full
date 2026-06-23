@@ -217,7 +217,7 @@ export default function InsurancePlansSection() {
                 your life and business.
               </p>
             </div>
-            <Link href={SERVICE_DETAIL_BASE} className="ips-view-all">View all plans</Link>
+            <Link href={SERVICE_DETAIL_BASE} className="ips-view-all">View all</Link>
           </div>
 
           {/* ── CAROUSEL ── */}

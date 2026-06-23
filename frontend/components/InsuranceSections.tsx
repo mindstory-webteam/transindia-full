@@ -187,11 +187,13 @@ function AdvisorSection() {
           </p>
           <BulletList items={expertBullets} />
           <div>
-            <button
-              style={{ ...s.btnOrange, background: "#00BCD4" }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
-              onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
-            >Speak to an expert</button>
+            <Link href="/contact-us">
+              <button
+                style={{ ...s.btnOrange, background: "#00BCD4" }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = "0.88")}
+                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+              >Speak to an expert</button>
+            </Link>
           </div>
         </div>
 
