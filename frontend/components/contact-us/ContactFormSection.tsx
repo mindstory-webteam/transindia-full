@@ -29,6 +29,7 @@ export default function ContactFormSection() {
     payload: any,
     setLoading: (v: boolean) => void,
     setDone: (v: boolean) => void,
+    resetForm: () => void,
     e: React.FormEvent
   ) => {
     e.preventDefault();
@@ -42,6 +43,10 @@ export default function ContactFormSection() {
       });
       if (res.ok) {
         setDone(true);
+        setTimeout(() => {
+          setDone(false);
+          resetForm();
+        }, 1000);
       } else {
         const errData = await res.json();
         alert("Error: " + (errData.message || "Failed to submit"));
@@ -111,7 +116,7 @@ export default function ContactFormSection() {
             gqDone ? (
               <SuccessBox msg="Thanks! We'll get back to you soon." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, e)}>
+              <form className="cfs-form" onSubmit={(e) => submit("general-query", gq, setGqLoading, setGqDone, () => setGq({ name: "", mobile: "", email: "", insuranceType: "Life Insurance", query: "", callback: false }), e)}>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
@@ -175,9 +180,9 @@ export default function ContactFormSection() {
           {/* ── CLAIM SUPPORT ── */}
           {activeTab === "Claim Support" && (
             csDone ? (
-              <SuccessBox msg="Your claim request has been submitted!" note="Our claims team will contact you within 24 hours." />
+              <SuccessBox msg="Thanks! We'll get back to you soon." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, e)}>
+              <form className="cfs-form" onSubmit={(e) => submit("claim-support", cs, setCsLoading, setCsDone, () => setCs({ policyNumber: "", policyHolder: "", mobile: "", claimType: "Death Claim", incident: "" }), e)}>
                 {/* Emergency notice */}
                 <div className="cfs-emergency">
                   <img src="/images/contact-us/contact-form-section/Siren.svg" alt="Siren" style={{ flexShrink: 0, width: "20px", height: "20px" }} />
@@ -237,9 +242,9 @@ export default function ContactFormSection() {
           {/* ── COMPLAINT ── */}
           {activeTab === "Complaint" && (
             cpDone ? (
-              <SuccessBox msg="Your complaint has been submitted!" note="Complaints resolved within 15 days as per IRDAI norms." />
+              <SuccessBox msg="Thanks! We'll get back to you soon." />
             ) : (
-              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, e)}>
+              <form className="cfs-form" onSubmit={(e) => submit("complaint", cp, setCpLoading, setCpDone, () => setCp({ name: "", policyRef: "", mobile: "", category: "Policy Servicing Issue", details: "" }), e)}>
                 <div className="cfs-row">
                   <div className="cfs-group">
                     <label className="cfs-label">Your Name</label>
