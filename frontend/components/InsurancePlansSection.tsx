@@ -575,6 +575,12 @@ const CSS = `
     color: #111827;
     margin: 0;
     letter-spacing: -0.01em;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ips-card-desc {
@@ -583,6 +589,12 @@ const CSS = `
     line-height: 1.72;
     margin: 0;
     flex: 1;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .ips-card-cta {
