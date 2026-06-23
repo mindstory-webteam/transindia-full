@@ -345,9 +345,13 @@ export default function BmiSection() {
                 premium — so knowing your number helps you understand your
                 policy better and take charge of your health.
               </p>
-              <button className="bmi-cta" type="button">
-                Calculate your BMI
-              </button>
+             
+
+<Link href="/bmi-calculator">
+  <button className="bmi-cta" type="button">
+    Calculate your BMI
+  </button>
+</Link>
             </div>
 
             {/* Right: IMAGE AREA — replace src with your illustration */}

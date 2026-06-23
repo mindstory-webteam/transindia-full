@@ -154,9 +154,9 @@ export default function Banner() {
   const [quoteH, setQuoteH] = useState(0);
   const [isStacked, setIsStacked] = useState(false);
 
-  // Track the stacked (≤960px) layout where the card becomes tall
+  // Track the stacked (≤1024px → includes iPad Pro portrait) layout where the card becomes tall
   useEffect(() => {
-    const mq = window.matchMedia("(max-width: 960px)");
+    const mq = window.matchMedia("(max-width: 1024px)");
     const onChange = () => setIsStacked(mq.matches);
     onChange();
     mq.addEventListener?.("change", onChange);
@@ -197,8 +197,8 @@ export default function Banner() {
         }
         .pulse-dot{animation:pulseDot 2s ease-in-out infinite}
 
-        /* ── TABLET (≤960px) ── */
-        @media(max-width:960px){
+        /* ── TABLET (≤1024px → includes iPad Pro portrait) ── */
+        @media(max-width:1024px){
           .ins-section{
             height:auto!important;
             min-height:auto!important;
@@ -216,7 +216,21 @@ export default function Banner() {
             padding-bottom:40px!important;
             text-align:center!important;
           }
-          .ins-left > div[style]{justify-content:center!important;}
+          /* Center the headline + paragraph block */
+          .ins-left h1,
+          .ins-left p{
+            margin-left:auto!important;
+            margin-right:auto!important;
+            text-align:center!important;
+          }
+          /* Force the button row + stats to center (overrides Tailwind lg:justify-start,
+             which is active at exactly 1024px on the iPad Pro) */
+          .ins-cta-row{
+            justify-content:center!important;
+          }
+          .ins-stats{
+            justify-content:center!important;
+          }
           .ins-right{
             flex:unset!important;
             max-width:100%!important;
@@ -229,7 +243,7 @@ export default function Banner() {
             margin-right:0!important;
           }
           .ins-right img{
-            max-width:280px!important;
+            max-width:320px!important;
             margin:0 auto!important;
           }
           .floating-card{ display:none!important; }
@@ -250,6 +264,7 @@ export default function Banner() {
             border-bottom:1.5px solid #E5E9F2!important;
             padding:0 0 16px 0!important;
             min-width:0!important;
+            text-align:center!important;
           }
           .ins-quote-col{
             padding:14px 0!important;
@@ -285,6 +300,7 @@ export default function Banner() {
           .ins-cta-row{
             flex-direction:column!important;
             align-items:center!important;
+            justify-content:center!important;
             gap:10px!important;
           }
           .ins-cta-row a{

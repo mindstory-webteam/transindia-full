@@ -1,10 +1,29 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// Adjust the base URL via env, and the path if your services router is mounted
+// somewhere other than /api/services.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+const SERVICES_ENDPOINT = `${API_BASE}/api/services`;
 
-const PLANS = [
+// Background tints cycled across however many services the API returns.
+const CARD_TINTS = ["#FFF0F0", "#F0F8FF", "#F5F0FF", "#FFFBF0"];
+
+// ─── TYPES ────────────────────────────────────────────────────────────────────
+type Plan = {
+  label: string;
+  desc: string;
+  cta: string;
+  href: string;
+  imageSrc: string;
+  imageAlt: string;
+  imageBg: string;
+};
+
+// ─── FALLBACK DATA (used if the API call fails) ───────────────────────────────
+const FALLBACK_PLANS: Plan[] = [
   {
     label:    "Health Insurance",
     desc:     "Cover medical expenses, hospitalisation, and critical illnesses for individuals and families.",
@@ -48,32 +67,100 @@ const TRUST_ITEMS = [
     label:    "24/7\nClaim Assistance",
     imageSrc: "/images/section-3/customer-support.svg",
     imageAlt: "24/7 Claim Assistance",
+    iconBg:   "#E6F2FB",   // light blue
   },
   {
     label:    "Trusted\nCoverage",
     imageSrc: "/images/section-3/knight-shield.svg",
     imageAlt: "Trusted Coverage",
+    iconBg:   "#E7F6EC",   // light green
   },
   {
     label:    "Fast\nApprovals",
     imageSrc: "/images/section-3/timer-02.svg",
     imageAlt: "Fast Approvals",
+    iconBg:   "#ECE9FB",   // light purple
   },
   {
     label:    "Personalized\nPlans",
     imageSrc: "/images/section-3/user.svg",
     imageAlt: "Personalized Plans",
+    iconBg:   "#FCEEE4",   // light peach
   },
 ];
+
+// ─── HELPERS: normalise the API response ──────────────────────────────────────
+
+// Accepts the many shapes a backend might return and returns a flat array.
+function extractList(json: any): any[] {
+  if (Array.isArray(json)) return json;
+  if (Array.isArray(json?.data)) return json.data;
+  if (Array.isArray(json?.services)) return json.services;
+  if (Array.isArray(json?.results)) return json.results;
+  if (Array.isArray(json?.data?.services)) return json.data.services;
+  return [];
+}
+
+// Image may be a plain URL string or a Cloudinary-style object { url } / { secure_url }.
+function getImageSrc(s: any): string {
+  const img =
+    s.image ?? s.imageUrl ?? s.imageSrc ?? s.thumbnail ??
+    (Array.isArray(s.images) ? s.images[0] : null);
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  return img.url ?? img.secure_url ?? img.src ?? "";
+}
+
+function mapServiceToPlan(s: any, i: number): Plan {
+  const name = s.title ?? s.name ?? s.label ?? "Service";
+  return {
+    label:    name,
+    desc:     s.description ?? s.desc ?? s.shortDescription ?? s.summary ?? "",
+    cta:      "Explore plans",
+    href:     s.slug ? `/services/${s.slug}` : "#",
+    imageSrc: getImageSrc(s),
+    imageAlt: `${name} illustration`,
+    imageBg:  CARD_TINTS[i % CARD_TINTS.length],
+  };
+}
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function InsurancePlansSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch services from the API
+  useEffect(() => {
+    const controller = new AbortController();
+
+    (async () => {
+      try {
+        const res = await fetch(SERVICES_ENDPOINT, { signal: controller.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const list = extractList(json);
+        const mapped = list.map(mapServiceToPlan);
+        setPlans(mapped.length ? mapped : FALLBACK_PLANS);
+      } catch (err: any) {
+        if (err?.name !== "AbortError") {
+          console.error("Failed to load services:", err);
+          setPlans(FALLBACK_PLANS);   // graceful fallback
+        }
+      } finally {
+        setLoading(false);
+      }
+    })();
+
+    return () => controller.abort();
+  }, []);
+
+  // Scroll-reveal animation — re-attach whenever the rendered content changes
+  // (the fetched cards mount after the first paint, so the observer must re-run).
   useEffect(() => {
     const els = sectionRef.current?.querySelectorAll<HTMLElement>(".fade-up");
-    if (!els) return;
+    if (!els || els.length === 0) return;
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -87,7 +174,7 @@ export default function InsurancePlansSection() {
     );
     els.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [plans, loading]);
 
   return (
     <>
@@ -112,36 +199,51 @@ export default function InsurancePlansSection() {
 
           {/* ── CARDS GRID ── */}
           <div className="ips-cards">
-            {PLANS.map((plan, i) => (
-              <div
-                key={i}
-                className="ips-card fade-up"
-                style={{ "--d": `${0.1 + i * 0.1}s` } as React.CSSProperties}
-              >
-                {/* Image zone — each card has its own bg tint */}
-                <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
-                  <img
-                    src={plan.imageSrc}
-                    alt={plan.imageAlt}
-                    className="ips-card-img"
-                  />
-                </div>
+            {loading
+              ? /* Skeleton placeholders while fetching */
+                Array.from({ length: 4 }).map((_, i) => (
+                  <div key={`skel-${i}`} className="ips-skel">
+                    <div className="ips-skel-img" />
+                    <div className="ips-skel-body">
+                      <div className="ips-skel-line title" />
+                      <div className="ips-skel-line" />
+                      <div className="ips-skel-line short" />
+                      <div className="ips-skel-line cta" />
+                    </div>
+                  </div>
+                ))
+              : plans.map((plan, i) => (
+                  <div
+                    key={i}
+                    className="ips-card fade-up"
+                    style={{ "--d": `${0.1 + i * 0.1}s` } as React.CSSProperties}
+                  >
+                    {/* Image zone — each card has its own bg tint */}
+                    <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
+                      {plan.imageSrc ? (
+                        <img
+                          src={plan.imageSrc}
+                          alt={plan.imageAlt}
+                          className="ips-card-img"
+                        />
+                      ) : null}
+                    </div>
 
-                {/* White body */}
-                <div className="ips-card-body">
-                  <h3 className="ips-card-title">{plan.label}</h3>
-                  <p className="ips-card-desc">{plan.desc}</p>
-                  <a href={plan.href} className="ips-card-cta">
-                    {plan.cta}
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
-                        stroke="currentColor" strokeWidth="1.8"
-                        strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </a>
-                </div>
-              </div>
-            ))}
+                    {/* White body */}
+                    <div className="ips-card-body">
+                      <h3 className="ips-card-title">{plan.label}</h3>
+                      <p className="ips-card-desc">{plan.desc}</p>
+                      <a href={plan.href} className="ips-card-cta">
+                        {plan.cta}
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
+                            stroke="currentColor" strokeWidth="1.8"
+                            strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                ))}
           </div>
 
           {/* ── TRUST BANNER ── */}
@@ -166,14 +268,14 @@ export default function InsurancePlansSection() {
               </div>
             </div>
 
-            {/* Vertical divider */}
+            {/* Vertical divider (desktop only) */}
             <div className="ips-banner-divider" />
 
             {/* Right: 4 icon stats — icons are images */}
             <div className="ips-banner-stats">
               {TRUST_ITEMS.map((item, i) => (
                 <div key={i} className="ips-banner-stat">
-                  <div className="ips-stat-icon-wrap">
+                  <div className="ips-stat-icon-wrap" style={{ background: item.iconBg }}>
                     <img
                       src={item.imageSrc}
                       alt={item.imageAlt}
@@ -389,6 +491,49 @@ const CSS = `
 
   .ips-card-cta:hover { gap: 10px; }
 
+  /* ── Skeleton (loading) cards ── */
+  .ips-skel {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 260px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .ips-skel-img {
+    height: clamp(110px, 12vw, 130px);
+    background: #eef1f5;
+    flex-shrink: 0;
+  }
+
+  .ips-skel-body {
+    padding: 20px 22px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .ips-skel-line {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #eef1f5 25%, #e2e7ee 37%, #eef1f5 63%);
+    background-size: 400% 100%;
+    animation: ips-shimmer 1.4s ease infinite;
+  }
+
+  .ips-skel-line.title { height: 18px; width: 60%; }
+  .ips-skel-line.short { width: 80%; }
+  .ips-skel-line.cta   { width: 40%; margin-top: auto; }
+
+  @keyframes ips-shimmer {
+    0%   { background-position: 100% 0; }
+    100% { background-position: 0 0; }
+  }
+
   /* ── Trust Banner ── */
   .ips-banner {
     background: linear-gradient(135deg, #EBF5FF 0%, #EEF8FF 100%);
@@ -399,15 +544,6 @@ const CSS = `
     gap: clamp(16px, 3vw, 40px);
     flex-wrap: wrap;
     box-shadow: 0 2px 20px rgba(0,0,0,0.05);
-  }
-
-  /* On mobile, banner stacks vertically */
-  @media(max-width: 640px) {
-    .ips-banner {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 24px;
-    }
   }
 
   /* Left: shield + text */
@@ -461,15 +597,6 @@ const CSS = `
     justify-content: center;
   }
 
-  /* On mobile, stats fill width evenly */
-  @media(max-width: 640px) {
-    .ips-banner-stats {
-      width: 100%;
-      justify-content: space-around;
-      gap: 16px;
-    }
-  }
-
   .ips-banner-stat {
     display: flex;
     flex-direction: column;
@@ -484,11 +611,10 @@ const CSS = `
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: #fff;
+    background: #fff;            /* overridden per-item via inline style */
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
     flex-shrink: 0;
   }
 
@@ -504,6 +630,52 @@ const CSS = `
     font-weight: 700;
     color: #374151;
     line-height: 1.45;
+  }
+
+  /* ──────────────────────────────────────────────────────────────────────
+     MOBILE BANNER  (≤ 640px)
+     Shield centered on top → heading/desc → each stat stacked vertically
+     with a thin divider line between them (matches the mobile mockup).
+     ────────────────────────────────────────────────────────────────────── */
+  @media(max-width: 640px) {
+    .ips-banner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 18px;
+      padding: 28px 22px;
+    }
+
+    /* shield on top (centered), text below (left-aligned) */
+    .ips-banner-left {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .ips-banner-shield {
+      width: 120px;
+    }
+
+    .ips-banner-text {
+      width: 100%;
+      text-align: left;
+    }
+
+    /* stats become a vertical list */
+    .ips-banner-stats {
+      flex-direction: column;
+      width: 100%;
+      gap: 0;
+      flex-wrap: nowrap;
+    }
+
+    .ips-banner-stat {
+      width: 100%;
+      padding: 22px 0;
+      border-top: 1px solid rgba(0,0,0,0.08);
+    }
   }
 
   /* ── Scroll animation ── */
