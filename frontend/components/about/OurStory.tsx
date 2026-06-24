@@ -1,5 +1,20 @@
-import React from "react";
+"use client"
+
+import React, {
+  Children,
+  cloneElement,
+  forwardRef,
+  isValidElement,
+  ReactElement,
+  ReactNode,
+  RefObject,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import Image from "next/image";
+import gsap from 'gsap';
 
 const checkItems = [
   { id: 1, text: "IRDAI-licensed for both Life & General insurance broking" },
@@ -64,36 +79,6 @@ export default function OurStory() {
             ))}
           </div>
 
-          {/* Mission & Vision Cards */}
-          {/* <div className="cards-grid"> */}
-            {/* Our Mission Card */}
-            {/* <div className="card mission-card">
-              <div className="card-icon mission-icon">
-                <img src="/images/about/ourstory/target.svg" alt="Our Mission Target" />
-              </div>
-              <div className="card-content">
-                <h3>Our Mission</h3>
-                <p>
-                  To be the most trusted insurance broker, protecting every
-                  Indian family with the right cover at the right price.
-                </p>
-              </div>
-            </div> */}
-
-            {/* Our Vision Card */}
-            {/* <div className="card vision-card">
-              <div className="card-icon vision-icon">
-                <img src="/images/about/ourstory/binoculars with eyes.svg" alt="Our Vision Binoculars" />
-              </div>
-              <div className="card-content">
-                <h3>Our Vision</h3>
-                <p>
-                  A nation where no family faces financial ruin due to lack of
-                  proper insurance coverage.
-                </p>
-              </div>
-            </div> */}
-          {/* </div> */}
           <CoreValuesSection />
         </div>
       </section>
@@ -179,12 +164,31 @@ const CSS = `
     grid-template-columns: 1fr 1fr;
     gap: 20px 80px;
     max-width: 900px;
+    margin-bottom: 60px;
   }
 
   .check-item {
     display: flex;
     align-items: flex-start;
     gap: 12px;
+    animation: slideInLeft 0.6s ease-out forwards;
+    opacity: 0;
+  }
+
+  .check-item:nth-child(1) { animation-delay: 0.1s; }
+  .check-item:nth-child(2) { animation-delay: 0.2s; }
+  .check-item:nth-child(3) { animation-delay: 0.3s; }
+  .check-item:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .check-icon {
@@ -203,79 +207,196 @@ const CSS = `
     color: #374151;
   }
 
-  /* Cards */
-  .cards-grid {
+  /* Core Values Section */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .core-values-section {
+    margin-top: 100px;
+    padding: 60px 0;
+    border-top: 2px solid #e5e7eb;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .core-values-heading {
+    font-family: var(--font-sora), "Sora", sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -1px;
+    
+  }
+
+  .core-values-wrapper {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    margin-top: 52px;
-  }
-
-  .card {
-    border-radius: 16px;
-    padding: 10px;
-    display: flex;
+    grid-template-columns: 1fr 120px 1fr;
+    gap: 0;
     align-items: center;
-    gap: 24px;
+    position: relative;
+    min-height: 550px;
   }
 
-  .mission-card {
-    background-color: #d8f0d8;
+  .core-values-left {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    padding-right: 40px;
   }
 
-  .vision-card {
-    background-color: #cff0f0;
+  .core-value-content {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
-  .card-icon {
-    flex-shrink: 0;
-    width: 150px;
-    height: 150px;
-    border-radius: 12px;
+  .core-value-title {
+    font-family: var(--font-sora), "Sora", sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: #00b8c4;
+    letter-spacing: -0.5px;
+    margin: 0 0 20px 0;
+    line-height: 1.3;
+    min-height: auto;
+  }
+
+  .core-value-description {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.8;
+    color: #374151;
+    font-family: 'matterregular', sans-serif;
+    min-height: auto;
+  }
+
+  .core-values-spacer {
+    width: 100%;
+    background: linear-gradient(to right, transparent, #e5e7eb, transparent);
+    height: 2px;
+  }
+
+  .core-values-right {
+    position: relative;
+    height: 550px;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
-    box-sizing: border-box;
+    perspective: 1000px;
+    padding-left: 40px;
   }
 
-  .mission-icon {
-    background-color: #A4E2A0;
-  }
-
-  .vision-icon {
-    background-color: #92DAE2;
-    padding: 0;
-  }
-
-  .vision-icon img {
-    object-position: left bottom;
-    border-radius: 16px;
-  }
-
-  .card-icon img {
+  .card-container {
+    position: relative;
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  .card-content {
-    padding: 8px 16px 8px 0;
+  .card-image {
+    position: absolute;
+    width: 300px;
+    height: 350px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 184, 196, 0.2);
+    border: 3px solid #e0f4f4;
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
   }
 
-  .card-content h3 {
-    margin: 0 0 10px 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: #111827;
+  .card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .card-content p {
-    margin: 0;
-    font-size: 15px;
-    line-height: 1.65;
-    color: #374151;
+  .card-image.active {
+    transform: scale(1) translateZ(0);
+    opacity: 1;
+    z-index: 10;
+    box-shadow: 0 30px 80px rgba(0, 184, 196, 0.3);
+  }
+
+  .card-image.next {
+    transform: translateX(100px) translateY(40px) scale(0.85) rotateZ(4deg);
+    opacity: 0.5;
+    z-index: 5;
+  }
+
+  .card-image.prev {
+    transform: translateX(-100px) translateY(40px) scale(0.85) rotateZ(-4deg);
+    opacity: 0.3;
+    z-index: 3;
+  }
+
+  .core-values-indicators {
+    display: flex;
+    gap: 10px;
+    margin-top: 40px;
+  }
+
+  .indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .indicator.active {
+    background-color: #00b8c4;
+    width: 32px;
+    border-radius: 20px;
+  }
+
+  .indicator:hover {
+    background-color: #00a0aa;
+  }
+
+  /* Fade animations */
+  @keyframes fadeInTitle {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInDesc {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .core-value-title {
+    animation: fadeInTitle 0.5s ease-out;
+  }
+
+  .core-value-description {
+    animation: fadeInDesc 0.6s ease-out 0.1s both;
   }
 
   /* Responsive */
@@ -288,18 +409,56 @@ const CSS = `
     .our-story-container { padding: 0 40px; }
     .heading-dark, .heading-primary { font-size: 42px; }
     .check-items-grid { gap: 20px 40px; }
-    .card { flex-direction: column; align-items: flex-start; padding: 10px; }
-    .card-icon { width: 100%; height: 200px; padding: 20px; }
-    .card-icon img, .vision-icon img { object-position: center; }
-    .card-content { padding: 8px 10px; }
+    .core-values-section { margin-top: 60px; padding: 40px 0; }
+    .core-values-heading { font-size: 32px; margin-bottom: 60px; }
+    .core-values-wrapper { 
+      grid-template-columns: 1fr 80px 1fr; 
+      gap: 0;
+      min-height: 450px;
+    }
+    .core-values-left { padding-right: 30px; gap: 24px; }
+    .core-values-right { height: 450px; padding-left: 30px; }
+    .card-image { width: 250px; height: 300px; }
+    .card-image.next { transform: translateX(80px) translateY(30px) scale(0.85) rotateZ(4deg); }
+    .card-image.prev { transform: translateX(-80px) translateY(30px) scale(0.85) rotateZ(-4deg); }
+    .core-value-title { font-size: 22px; }
+    .core-value-description { font-size: 14px; }
   }
 
   @media (max-width: 768px) {
     .our-story-section { padding: 130px 20px 60px; }
-    .our-story-container { padding:130px 20px 0px 20px; }
+    .our-story-container { padding: 130px 20px 0px 20px; }
     .heading-dark, .heading-primary { font-size: 32px; }
-    .check-items-grid { grid-template-columns: 1fr; }
-    .cards-grid { grid-template-columns: 1fr; }
+    .check-items-grid { grid-template-columns: 1fr; gap: 16px; margin-bottom: 40px; }
+    .core-values-section { margin-top: 40px; padding: 30px 0; }
+    .core-values-heading { font-size: 28px; margin-bottom: 40px; }
+    .core-values-wrapper { 
+      grid-template-columns: 1fr; 
+      gap: 40px;
+      min-height: auto;
+    }
+    .core-values-left { padding-right: 0; gap: 24px; }
+    .core-values-right { height: 400px; padding-left: 0; }
+    .card-image { width: 220px; height: 280px; }
+    .card-image.next { transform: translateX(60px) translateY(30px) scale(0.85) rotateZ(4deg); }
+    .card-image.prev { transform: translateX(-60px) translateY(30px) scale(0.85) rotateZ(-4deg); }
+    .core-value-title { font-size: 20px; }
+    .core-value-description { font-size: 13px; }
+    .core-value-content { min-height: 280px; }
+  }
+
+  @media (max-width: 480px) {
+    .core-values-wrapper { gap: 30px; }
+    .core-values-right { height: 330px; }
+    .card-image { width: 180px; height: 230px; }
+    .card-image.next { transform: translateX(50px) translateY(25px) scale(0.85) rotateZ(4deg); }
+    .card-image.prev { transform: translateX(-50px) translateY(25px) scale(0.85) rotateZ(-4deg); }
+    .core-values-heading { font-size: 24px; }
+    .core-value-title { font-size: 18px; margin-bottom: 16px; }
+    .core-value-description { font-size: 12px; }
+    .core-value-content { min-height: 240px; }
+    .core-values-left { gap: 20px; }
+    .core-values-indicators { gap: 8px; }
   }
 `;
 
@@ -315,75 +474,140 @@ const coreValues: CoreValue[] = [
     title: "Performing in Order to Surpass Excellence",
     description:
       "Performing in order to surpass excellence. We believe that achieving excellence is just a milestone in the journey to destiny. We trust in striving for more than excellence in each and every endeavor we undertake.",
-    imageSrc: "/images/about/ourstory/albert.png",
+    imageSrc: "/images/cores/Albert_Einstein_Head_cleaned.jpg",
     imageAlt: "Performing in order to surpass excellence",
   },
   {
     title: "Building Trust and Transparency",
     description:
       "We have always operated with a focus on business ethics and we strongly believe that TRUST and TRANSPARENCY are the most important ingredients in any business relationship and the same is inculcated in all our operational process at every step.",
-    imageSrc: "/images/about/ourstory/nelson.png",
+    imageSrc: "/images/cores/Nelson_Mandela_1994.jpg",
     imageAlt: "Building trust and transparency",
   },
   {
     title: "'Customer' is Regarded as Our King and 'Service', Our Queen",
     description:
       "Our customer is the pivot around which all our processes are built as we believe that the customer is the most important stakeholder of our business. We follow the golden principle — Customer First and think through by putting ourselves in our customers' shoes. We constantly rethink and innovate products, services, and capabilities focusing on customer delight.",
-    imageSrc: "/images/about/ourstory/gandhiji.png",
+    imageSrc: "/images/cores/pencil_sketch_gandhiji_by_shivasha_ddut6vc-fullview.jpg",
     imageAlt: "Customer is our king",
   },
   {
     title: "Becoming a Preferred Employer",
     description:
       "We are committed to become the most preferred employer in the industry by providing an employee-friendly culture in our organizations and making sure that each individual feels comfortable in the workplace. We create a working environment that is compelling to the best staff and encourage them to perform better with ample career growth. We know success comes from encouraging people to think differently. Our culture promotes innovation and entrepreneurial drive with strong management backing.",
-    imageSrc: "/images/about/ourstory/Timcook.png",
+    imageSrc: "/images/cores/images.jpg",
     imageAlt: "Becoming a preferred employer",
   },
   {
     title: "Committed to the Betterment of Society",
     description:
       "Our responsibility towards society and human community is our primary interest. Our principle is First Humanity, then business. Every staff member understands this principle and are always bound towards our customers, patrons, employees, regulatory authorities, finance industry, and the nation, to do business with good moral and business ethics.",
-    imageSrc: "/images/about/ourstory/Teresa.png",
+    imageSrc: "/images/cores/nun-religious-clothes-christianity.jpg",
     imageAlt: "Committed to the betterment of society",
   },
 ];
 
 function CoreValuesSection() {
-  return (
-    <div className="mt-20 max-w-[1400px]">
-      {/* Heading */}
-      <h2 className="heading-dark mb-10">
-        Our Core Values
-      </h2>
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const autoRotateRef = useRef<NodeJS.Timeout | null>(null);
 
-      {/* Values list */}
-      <div className="flex flex-col">
-        {coreValues.map((value, idx) => (
-          <div key={value.title} className={`flex flex-col sm:flex-row gap-6 sm:gap-8 py-8 ${idx !== 0 ? 'border-t border-gray-200' : ''}`}>
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div className="relative h-[80px] w-[80px] sm:h-[100px] sm:w-[100px] overflow-hidden rounded-full shadow-sm">
-                <Image
-                  src={value.imageSrc}
-                  alt={value.imageAlt}
-                  fill
-                  className="object-cover"
-                  sizes="100px"
-                />
-              </div>
+  const currentValue = coreValues[currentIndex];
+  const nextValue = coreValues[(currentIndex + 1) % coreValues.length];
+  const prevValue = coreValues[(currentIndex - 1 + coreValues.length) % coreValues.length];
+
+  const goToSlide = (index: number) => {
+    setCurrentIndex(index);
+    if (autoRotateRef.current) {
+      clearInterval(autoRotateRef.current);
+    }
+    startAutoRotate();
+  };
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % coreValues.length);
+  };
+
+  const startAutoRotate = () => {
+    if (autoRotateRef.current) {
+      clearInterval(autoRotateRef.current);
+    }
+    autoRotateRef.current = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % coreValues.length);
+    }, 5000);
+  };
+
+  useEffect(() => {
+    startAutoRotate();
+    return () => {
+      if (autoRotateRef.current) {
+        clearInterval(autoRotateRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className="core-values-section">
+      {/* Heading */}
+      <h2 className="core-values-heading">Our Core Values</h2>
+
+      {/* Main Content */}
+      <div className="core-values-wrapper">
+        {/* Left Side - Content */}
+        <div className="core-values-left">
+          <div className="core-value-content">
+            <h3 className="core-value-title">{currentValue.title}</h3>
+            <p className="core-value-description">{currentValue.description}</p>
+          </div>
+
+          {/* Indicators */}
+          <div className="core-values-indicators">
+            {coreValues.map((_, idx) => (
+              <div
+                key={idx}
+                className={`indicator ${idx === currentIndex ? 'active' : ''}`}
+                onClick={() => goToSlide(idx)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Spacer */}
+        <div className="core-values-spacer"></div>
+
+        {/* Right Side - Rotating Images */}
+        <div className="core-values-right">
+          <div className="card-container">
+            {/* Previous */}
+            <div className="card-image prev">
+              <Image
+                src={prevValue.imageSrc}
+                alt={prevValue.imageAlt}
+                fill
+                className="object-cover"
+              />
             </div>
 
-            {/* Text */}
-            <div className="flex-1 min-w-0 pt-1 sm:pt-3">
-              <h3 className="text-[12px] sm:text-[14px] font-[700] uppercase tracking-wider text-[#00b8c4] mb-2 sm:mb-3">
-                {value.title}
-              </h3>
-              <p className="text-[14px] sm:text-[15px] leading-[1.65] text-[#374151] m-0">
-                {value.description}
-              </p>
+            {/* Current/Active */}
+            <div className="card-image active">
+              <Image
+                src={currentValue.imageSrc}
+                alt={currentValue.imageAlt}
+                fill
+                className="object-cover"
+              />
+            </div>
+
+            {/* Next */}
+            <div className="card-image next">
+              <Image
+                src={nextValue.imageSrc}
+                alt={nextValue.imageAlt}
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
