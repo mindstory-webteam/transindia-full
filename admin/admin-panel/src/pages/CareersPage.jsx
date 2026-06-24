@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "../axios";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit, FileText, X } from "lucide-react";
+import { Plus, Trash2, Edit, FileText, X, Eye } from "lucide-react";
 
 export default function CareersPage() {
   const [activeTab, setActiveTab] = useState("roles"); // "roles" | "applications"
@@ -25,6 +25,7 @@ export default function CareersPage() {
   // Applications State
   const [applications, setApplications] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
+  const [appModalData, setAppModalData] = useState(null);
 
   useEffect(() => {
     fetchJobs();
@@ -275,6 +276,7 @@ export default function CareersPage() {
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Email</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Mobile</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Role</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Message</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Date</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}>Resume</th>
                 </tr>
@@ -286,6 +288,16 @@ export default function CareersPage() {
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{app.email}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{app.phone}</td>
                     <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--ti-ink)" }}>{app.jobId?.title || "Unknown Role"}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>
+                      {app.message ? (
+                        <button 
+                          onClick={() => setAppModalData({ title: "Message Details", text: app.message })}
+                          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", background: "#f1f5f9", border: "none", borderRadius: 6, cursor: "pointer", color: "#0F172A", fontWeight: 600, fontSize: 13 }}
+                        >
+                          <Eye size={14} /> View
+                        </button>
+                      ) : "-"}
+                    </td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>
                       {new Date(app.createdAt).toLocaleDateString()}
                     </td>
@@ -406,6 +418,21 @@ export default function CareersPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* App Message Modal */}
+      {appModalData && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+          <div style={{ background: "#fff", padding: 24, borderRadius: 16, width: "100%", maxWidth: 500, position: "relative" }}>
+            <button onClick={() => setAppModalData(null)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", cursor: "pointer", color: "#64748B" }}>
+              <X size={20} />
+            </button>
+            <h3 style={{ margin: "0 0 16px 0", fontSize: 18, fontWeight: 700, color: "#0F172A" }}>{appModalData.title}</h3>
+            <div style={{ background: "#f8fafc", padding: 16, borderRadius: 8, fontSize: 14, color: "#334155", lineHeight: 1.6, maxHeight: "60vh", overflowY: "auto", whiteSpace: "pre-wrap" }}>
+              {appModalData.text}
+            </div>
           </div>
         </div>
       )}

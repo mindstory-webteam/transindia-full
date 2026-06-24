@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getGeneralQueries, deleteGeneralQuery, updateGeneralQueryStatus } from "../services/api";
-import { Trash2, Search, X, ChevronDown } from "lucide-react";
+import { Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 
 const STATUS_COLORS = {
@@ -21,6 +21,7 @@ export default function GeneralQueryPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [modalData, setModalData] = useState(null);
   const itemsPerPage = 7;
 
   const load = () => {
@@ -190,8 +191,15 @@ export default function GeneralQueryPage() {
                   <td style={{ padding:"12px 16px", color:"#1E40AF", fontWeight:500 }}>
                     {q.insuranceType}
                   </td>
-                  <td style={{ padding:"12px 16px", color:"#475569", maxWidth: "200px" }}>
-                    {q.query || "-"}
+                  <td style={{ padding:"12px 16px", color:"#475569" }}>
+                    {q.query ? (
+                      <button 
+                        onClick={() => setModalData({ title: "Query Details", text: q.query })}
+                        style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", background: "#f1f5f9", border: "none", borderRadius: 6, cursor: "pointer", color: "#0F172A", fontWeight: 600, fontSize: 13 }}
+                      >
+                        <Eye size={14} /> View
+                      </button>
+                    ) : "-"}
                   </td>
                   <td style={{ padding:"12px 16px", textAlign:"center" }}>
                     <span style={{ padding:"3px 10px", borderRadius:20, background: q.callback?"#DCFCE7":"#FEE2E2", color: q.callback?"#16A34A":"#DC2626", fontSize:11, fontWeight:600 }}>
@@ -240,6 +248,21 @@ export default function GeneralQueryPage() {
               <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)} style={{ padding: "6px 12px", border: "1px solid var(--border)", borderRadius: 6, background: "#fff", cursor: currentPage === totalPages ? "not-allowed" : "pointer" }}>Next</button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Modal */}
+      {modalData && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
+          <div style={{ background: "#fff", padding: 24, borderRadius: 16, width: "100%", maxWidth: 500, position: "relative" }}>
+            <button onClick={() => setModalData(null)} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", cursor: "pointer", color: "#64748B" }}>
+              <X size={20} />
+            </button>
+            <h3 style={{ margin: "0 0 16px 0", fontSize: 18, fontWeight: 700, color: "#0F172A" }}>{modalData.title}</h3>
+            <div style={{ background: "#f8fafc", padding: 16, borderRadius: 8, fontSize: 14, color: "#334155", lineHeight: 1.6, maxHeight: "60vh", overflowY: "auto", whiteSpace: "pre-wrap" }}>
+              {modalData.text}
+            </div>
+          </div>
         </div>
       )}
     </div>
