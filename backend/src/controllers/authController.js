@@ -46,12 +46,14 @@ exports.register = async (req, res) => {
 
 // ── PUT /api/auth/change-password ─────────────────────────────────────────
 exports.changePassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+  const { newPassword } = req.body;
+  
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: "New password must be at least 6 characters long." });
+  }
+
   try {
     const admin = await Admin.findById(req.admin._id).select("+password");
-    const isMatch = await admin.matchPassword(currentPassword);
-    if (!isMatch)
-      return res.status(400).json({ success: false, message: "Current password incorrect" });
     admin.password = newPassword;
     await admin.save();
     res.json({ success: true, message: "Password updated" });

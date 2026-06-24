@@ -169,12 +169,11 @@ const styles = `
 `;
 
 export default function SettingsPage() {
-  const { admin: adminFromContext } = useAuth();
+  const { admin: adminFromContext, logout } = useAuth();
   const [admin, setAdmin] = useState(adminFromContext || null);
   const [loadingMe, setLoadingMe] = useState(true);
 
   const [passwords, setPasswords] = useState({
-    currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
@@ -208,9 +207,10 @@ export default function SettingsPage() {
     }
     setSavingPassword(true);
     try {
-      await apiChangePassword(passwords.currentPassword, passwords.newPassword);
-      toast.success("Password changed successfully");
-      setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      await apiChangePassword(passwords.newPassword);
+      toast.success("Password changed successfully. Please log in again.");
+      setPasswords({ newPassword: "", confirmPassword: "" });
+      logout();
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to change password");
     } finally {
@@ -268,16 +268,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="password-grid">
-              <div className="form-field field-full">
-                <label>Current password</label>
-                <input
-                  type="password"
-                  value={passwords.currentPassword}
-                  onChange={(e) => setPasswords((p) => ({ ...p, currentPassword: e.target.value }))}
-                  className="form-input"
-                  required
-                />
-              </div>
+
               <div className="form-field">
                 <label>New password</label>
                 <input

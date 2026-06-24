@@ -25,8 +25,8 @@ export async function getMe() {
 /**
  * Auth — change password for the logged-in admin
  */
-export async function changePassword(currentPassword, newPassword) {
-  return api.put("/auth/change-password", { currentPassword, newPassword });
+export async function changePassword(newPassword) {
+  return api.put("/auth/change-password", { newPassword });
 }
 
 /**
