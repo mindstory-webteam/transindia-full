@@ -199,53 +199,11 @@ export default function ComplaintPage() {
     <div>
       <style>{PAGE_STYLES}</style>
       
-      <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+      <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         {/* LEFT: Title */}
         <div style={{ flex: "1 1 200px" }}>
           <h1 style={{ fontSize:22, fontWeight:800, margin: "0 0 4px 0" }}>Complaints</h1>
           <p style={{ color:"#64748B", fontSize:13, margin: 0 }}>Manage complaint form submissions</p>
-        </div>
-
-        {/* CENTER: Filters */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "1 1 300px", justifyContent: "center" }}>
-          {/* Search */}
-          <div style={{ position: "relative", flex: "1 1 200px" }}>
-            <Search size={14} color="#94A3B8" style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)" }} />
-            <input
-              value={search}
-              onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-              placeholder="Search complaints..."
-              style={{
-                width: "100%", padding: "9px 12px 9px 32px",
-                border: "1px solid var(--border)", borderRadius: 10,
-                fontSize: 13, color: "#0F172A", background: "#fff",
-                outline: "none", boxSizing: "border-box", height: "100%",
-              }}
-            />
-            {search && (
-              <button onClick={() => { setSearch(""); setCurrentPage(1); }} style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", border: "none", background: "none", cursor: "pointer", display: "flex" }}>
-                <X size={13} color="#94A3B8" />
-              </button>
-            )}
-          </div>
-
-          {/* Status filter */}
-          <div style={{ position: "relative" }}>
-            <select
-              value={filterStatus}
-              onChange={e => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-              style={{
-                padding: "9px 32px 9px 12px", border: "1px solid var(--border)",
-                borderRadius: 10, fontSize: 13, color: "#0F172A",
-                background: "#fff", outline: "none", cursor: "pointer",
-                appearance: "none", height: "100%",
-              }}
-            >
-              <option value="All">All Statuses</option>
-              {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-            </select>
-            <ChevronDown size={13} color="#94A3B8" style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-          </div>
         </div>
 
         {/* RIGHT: Stats Chips + Exports */}
@@ -267,6 +225,48 @@ export default function ComplaintPage() {
           <button className="comp-export-btn" onClick={exportPDF} disabled={!filtered.length} style={exportBtnStyle} title="Download as PDF">
             <Download size={15} color="#DC2626" /> PDF
           </button>
+        </div>
+      </div>
+
+      {/* Filters (Moved below header, above table) */}
+      <div style={{ display: "flex", gap: 16, flexWrap: "wrap", marginBottom: "20px" }}>
+        {/* Search */}
+        <div style={{ position: "relative", width: "300px", maxWidth: "100%" }}>
+          <Search size={15} color="#94A3B8" style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)" }} />
+          <input
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+            placeholder="Search complaints..."
+            style={{
+              width: "100%", padding: "10px 14px 10px 36px",
+              border: "1px solid var(--border)", borderRadius: 10,
+              fontSize: 14, color: "#0F172A", background: "#fff",
+              outline: "none", boxSizing: "border-box"
+            }}
+          />
+          {search && (
+            <button onClick={() => { setSearch(""); setCurrentPage(1); }} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", border: "none", background: "none", cursor: "pointer", display: "flex" }}>
+              <X size={15} color="#94A3B8" />
+            </button>
+          )}
+        </div>
+
+        {/* Status filter */}
+        <div style={{ position: "relative", width: "200px", maxWidth: "100%" }}>
+          <select
+            value={filterStatus}
+            onChange={e => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+            style={{
+              width: "100%", padding: "10px 36px 10px 14px", border: "1px solid var(--border)",
+              borderRadius: 10, fontSize: 14, color: "#0F172A",
+              background: "#fff", outline: "none", cursor: "pointer",
+              appearance: "none", boxSizing: "border-box"
+            }}
+          >
+            <option value="All">All Statuses</option>
+            {STATUSES.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+          </select>
+          <ChevronDown size={15} color="#94A3B8" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
         </div>
       </div>
 
