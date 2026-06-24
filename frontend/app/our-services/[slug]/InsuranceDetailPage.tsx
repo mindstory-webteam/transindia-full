@@ -60,9 +60,12 @@ const CALC_CARD_TITLE = "Calculate your premium";
 const CALC_SUBMIT_LABEL = "Get My Quote";
 const CALC_SUBMIT_BG = "#1B8A3A";
 
-// Which fields belong to STEP 1 (personal / contact details). Everything else
-// (smoker, sum assured, term, income) belongs to STEP 2 (the calculator).
-const STEP1_KEYS = ["name", "email", "phone", "dob", "marital", "address", "gender"];
+// ── 3-STEP SPLIT ──────────────────────────────────────────────────────────────
+// Step 1: how to reach you (name, email, phone)
+// Step 2: about you        (dob, marital, address, gender)
+// Step 3: the calculator   (everything else: smoker, sum assured, term, income)
+const STEP1_KEYS = ["name", "email", "phone"];
+const STEP2_KEYS = ["dob", "marital", "address", "gender"];
 
 function HeroCalcCard() {
   // Calculator is frontend-only: always use the fields defined above.
@@ -72,11 +75,14 @@ function HeroCalcCard() {
     initialState[f.stateKey] = f.defaultValue;
   });
 
-  // Split the fields into the two steps (order preserved).
+  // Split the fields into the three steps (order preserved).
   const step1Fields = fields.filter((f) => STEP1_KEYS.includes(f.stateKey));
-  const step2Fields = fields.filter((f) => !STEP1_KEYS.includes(f.stateKey));
+  const step2Fields = fields.filter((f) => STEP2_KEYS.includes(f.stateKey));
+  const step3Fields = fields.filter(
+    (f) => !STEP1_KEYS.includes(f.stateKey) && !STEP2_KEYS.includes(f.stateKey)
+  );
 
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [values, setValues] = useState<Record<string, string>>(initialState);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
@@ -154,12 +160,18 @@ function HeroCalcCard() {
     return true;
   };
 
-  // Step 1 → Step 2.
-  const handleContinue = () => {
+  // Step 1 → Step 2 (guarded by contact validation).
+  const goToStep2 = () => {
     if (validateContact()) setStep(2);
   };
 
-  // ── estimate (Step 2) ────────────────────────────────────────────────────────
+  // Step 2 → Step 3 (no extra validation needed; defaults are safe).
+  const goToStep3 = () => {
+    setError(null);
+    setStep(3);
+  };
+
+  // ── estimate (Step 3) ─────────────────────────────────────────────────────────
   const calculate = () => {
     // Re-check contact details; if invalid, bounce back to step 1.
     if (!validateContact()) {
@@ -244,7 +256,7 @@ function HeroCalcCard() {
 
   if (!fields.length) return null;
 
-  // Shared field renderer (same markup as before, just reused for both steps).
+  // Shared field renderer (same markup as before, just reused for all steps).
   const renderField = (field: (typeof fields)[number]) => {
     // Date picker (e.g. Date of Birth)
     if (field.type === "date") {
@@ -331,89 +343,104 @@ function HeroCalcCard() {
     );
   };
 
+  // Compact step pill used in the 3-step indicator.
+  const StepDot = ({ n, label }: { n: 1 | 2 | 3; label: string }) => (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontSize: 11.5,
+        fontWeight: 700,
+        color: step >= n ? "#0B1F4D" : "#9CA3AF",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: "50%",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 10.5,
+          fontWeight: 800,
+          background: step >= n ? CALC_SUBMIT_BG : "#E5E7EB",
+          color: step >= n ? "#fff" : "#6B7280",
+          flexShrink: 0,
+        }}
+      >
+        {step > n ? "✓" : n}
+      </span>
+      {label}
+    </span>
+  );
+
+  const currentFields =
+    step === 1 ? step1Fields : step === 2 ? step2Fields : step3Fields;
+
+  const cardTitle =
+    step === 1
+      ? "How can we reach you?"
+      : step === 2
+      ? "Tell us about yourself"
+      : CALC_CARD_TITLE;
+
   return (
     <div className="li-card">
-      {/* ── Step indicator (inline-styled so the shared CSS stays untouched) ── */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-        <span
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            fontSize: 12, fontWeight: 700,
-            color: step >= 1 ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap",
-          }}
-        >
-          <span
-            style={{
-              width: 22, height: 22, borderRadius: "50%",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-              fontSize: 11, fontWeight: 800,
-              background: step >= 1 ? CALC_SUBMIT_BG : "#E5E7EB",
-              color: step >= 1 ? "#fff" : "#6B7280",
-            }}
-          >
-            1
-          </span>
-          Your details
-        </span>
-
+      {/* ── Step indicator (3 steps; inline-styled so shared CSS stays untouched) ── */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <StepDot n={1} label="Contact" />
         <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
-
-        <span
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 6,
-            fontSize: 12, fontWeight: 700,
-            color: step >= 2 ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap",
-          }}
-        >
-          <span
-            style={{
-              width: 22, height: 22, borderRadius: "50%",
-              display: "inline-flex", alignItems: "center", justifyContent: "center",
-              fontSize: 11, fontWeight: 800,
-              background: step >= 2 ? CALC_SUBMIT_BG : "#E5E7EB",
-              color: step >= 2 ? "#fff" : "#6B7280",
-            }}
-          >
-            2
-          </span>
-          Premium
-        </span>
+        <StepDot n={2} label="About you" />
+        <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
+        <StepDot n={3} label="Premium" />
       </div>
 
-      <h2 className="li-card-title">
-        {step === 1 ? "Tell us about yourself" : CALC_CARD_TITLE}
-      </h2>
+      <h2 className="li-card-title">{cardTitle}</h2>
 
       {/* Fields for the current step */}
-      {(step === 1 ? step1Fields : step2Fields).map(renderField)}
+      {currentFields.map(renderField)}
 
       {/* ── Actions ── */}
-      {step === 1 ? (
+      {step === 1 && (
         <button
           className="li-submit"
           style={{ background: CALC_SUBMIT_BG }}
-          onClick={handleContinue}
+          onClick={goToStep2}
           type="button"
         >
           Continue
         </button>
-      ) : (
+      )}
+
+      {step === 2 && (
         <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
           <button
             type="button"
             onClick={() => setStep(1)}
-            style={{
-              flexShrink: 0,
-              padding: "16px 22px",
-              background: "transparent",
-              color: "#0B1F4D",
-              border: "1.5px solid #0B1F4D",
-              borderRadius: 8,
-              fontSize: 15,
-              fontWeight: 800,
-              fontFamily: "'Plus Jakarta Sans', 'Inter', sans-serif",
-              cursor: "pointer",
-            }}
+            className="li-back-btn"
+          >
+            Back
+          </button>
+          <button
+            className="li-submit"
+            style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
+            onClick={goToStep3}
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
+      )}
+
+      {step === 3 && (
+        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+          <button
+            type="button"
+            onClick={() => setStep(2)}
+            className="li-back-btn"
           >
             Back
           </button>
@@ -430,7 +457,7 @@ function HeroCalcCard() {
 
       {error && <p className="li-error">{error}</p>}
 
-      {step === 2 && result && (
+      {step === 3 && result && (
         <div className="li-result">
           <div className="li-result-cov">
             <span className="li-result-cov-label">Your coverage</span>
@@ -757,27 +784,31 @@ const CSS = `
   .li-stat-value{ font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: #fff; line-height: 1.1; }
   .li-stat-label{ font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; white-space: nowrap; }
   .li-right{ flex: 0 0 42%; max-width: 800px; width: 100%; padding-top: 80px; }
-  .li-card{ background: #fff; border-radius: 16px; padding: 32px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); width: 100%; }
-  .li-card-title{ font-size: 22px; font-weight: 800; color: #0B1F4D; margin: 0 0 24px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
-  .li-field{ display: block; margin-bottom: 18px; }
-  .li-label{ display: block; font-size: 13px; font-weight: 700; color: #1F2937; margin-bottom: 8px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+  /* ── calculator card (tightened spacing for a shorter form) ── */
+  .li-card{ background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.25); width: 100%; }
+  .li-card-title{ font-size: 20px; font-weight: 800; color: #0B1F4D; margin: 0 0 16px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+  .li-field{ display: block; margin-bottom: 13px; }
+  .li-label{ display: block; font-size: 12.5px; font-weight: 700; color: #1F2937; margin-bottom: 6px; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
   .li-input-wrap{ position: relative; display: flex; align-items: center; }
-  .li-input, .li-select, .li-textfield, .li-textarea{ width: 100%; padding: 12px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #1F2937; background: #fff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.15s; }
+  .li-input, .li-select, .li-textfield, .li-textarea{ width: 100%; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; color: #1F2937; background: #fff; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; appearance: none; -webkit-appearance: none; outline: none; transition: border-color 0.15s; }
   .li-input:focus, .li-select:focus, .li-textfield:focus, .li-textarea:focus{ border-color: #38BDF8; }
   .li-input{ padding-right: 40px; }
   .li-textfield::placeholder, .li-textarea::placeholder{ color: #9CA3AF; }
-  .li-textarea{ resize: vertical; min-height: 64px; line-height: 1.5; }
+  .li-textarea{ resize: vertical; min-height: 56px; line-height: 1.5; }
   .li-calendar-icon{ position: absolute; right: 14px; pointer-events: none; }
   .li-select{ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='5 8 10 13 15 8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
-  .li-submit{ width: 100%; padding: 16px; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; margin-top: 6px; transition: filter 0.2s; }
+  .li-submit{ width: 100%; padding: 14px; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; margin-top: 6px; transition: filter 0.2s; }
   .li-submit:hover{ filter: brightness(0.9); }
-  .li-disclaimer{ text-align: center; font-size: 12px; color: #9CA3AF; margin: 12px 0 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+  .li-back-btn{ flex-shrink: 0; padding: 14px 20px; background: transparent; color: #0B1F4D; border: 1.5px solid #0B1F4D; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; transition: background 0.15s; }
+  .li-back-btn:hover{ background: #F1F5F9; }
+  .li-disclaimer{ text-align: center; font-size: 12px; color: #9CA3AF; margin: 10px 0 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
 
   /* ── inline validation message ── */
   .li-error{ margin: 12px 0 0; padding: 10px 12px; font-size: 12.5px; font-weight: 600; color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; text-align: center; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
 
   /* ── premium estimate result panel ── */
-  .li-result{ margin-top: 18px; padding: 18px; border-radius: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; animation: li-result-in 0.25s ease; }
+  .li-result{ margin-top: 16px; padding: 16px; border-radius: 12px; background: #F0FDF4; border: 1px solid #BBF7D0; animation: li-result-in 0.25s ease; }
   @keyframes li-result-in{ from{ opacity: 0; transform: translateY(6px); } to{ opacity: 1; transform: translateY(0); } }
   .li-result-cov{ display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px dashed #BBF7D0; }
   .li-result-cov-label{ font-size: 11px; font-weight: 700; color: #15803D; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -805,6 +836,6 @@ const CSS = `
     .li-btn-cta{ width: 100%; justify-content: center; margin-bottom: 28px; }
     .li-stats{ display: none; }
     .li-trail{ display: none; }
-    .li-card{ padding: 24px 20px; }
+    .li-card{ padding: 20px 18px; }
   }
 `;
