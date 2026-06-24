@@ -25,14 +25,15 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
-app.use("/api/auth",       require("./src/routes/auth"));
-app.use("/api/services",   require("./src/routes/services"));
-app.use("/api/leads",      require("./src/routes/leads"));
-app.use("/api/faqs",       require("./src/routes/faqs"));
-app.use("/api/contact",    require("./src/routes/contact"));
-app.use("/api/bmileads",   require("./src/routes/bmiLeads"));
-app.use("/api/claimleads", require("./src/routes/claimLeadsRoute"));
-app.use("/api/careers",    require("./src/routes/careers"));
+app.use("/api/auth",         require("./src/routes/auth"));
+app.use("/api/services",     require("./src/routes/services"));
+app.use("/api/leads",        require("./src/routes/leads"));
+app.use("/api/faqs",         require("./src/routes/faqs"));
+app.use("/api/contact",      require("./src/routes/contact"));
+app.use("/api/bmileads",     require("./src/routes/bmiLeads"));
+app.use("/api/claimleads",   require("./src/routes/claimLeadsRoute"));
+app.use("/api/careers",      require("./src/routes/careers"));
+app.use("/api/serviceleads", require("./src/routes/serviceLeads")); // ← premium calculator leads
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ message: "TransIndia API running ✅" }));

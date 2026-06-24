@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAllServices, getLeadStats } from "../services/api";
-import { ShieldCheck, Users, TrendingUp, CheckCircle, Clock, PhoneCall, XCircle, ArrowRight, Sparkles } from "lucide-react";
+import { getAllServices, getLeadStats, getServiceLeadStats } from "../services/api";
+import { ShieldCheck, Users, TrendingUp, CheckCircle, Clock, PhoneCall, XCircle, ArrowRight, Sparkles, Calculator } from "lucide-react";
 
 const DASH_STYLES = `
   .ti-stat {
@@ -51,15 +51,17 @@ function SectionLabel({ children }) {
 }
 
 export default function DashboardPage() {
-  const [services, setServices] = useState([]);
-  const [stats, setStats]       = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [services, setServices]   = useState([]);
+  const [stats, setStats]         = useState(null);
+  const [svcLeads, setSvcLeads]   = useState(null);   // service (premium calculator) lead stats
+  const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
-    Promise.all([getAllServices(), getLeadStats()])
-      .then(([svcRes, statsRes]) => {
-        setServices(svcRes.data);        // FIXED: svcRes is already the unwrapped body { success, data }
-        setStats(statsRes.data.data);    // unchanged: statsRes is the raw axios response
+    Promise.all([getAllServices(), getLeadStats(), getServiceLeadStats()])
+      .then(([svcRes, statsRes, svcLeadRes]) => {
+        setServices(svcRes.data);            // svcRes is already the unwrapped body { success, data }
+        setStats(statsRes.data.data);        // statsRes is the raw axios response
+        setSvcLeads(svcLeadRes.data.data);   // service lead stats { total, byStatus, byService }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -106,6 +108,7 @@ export default function DashboardPage() {
         <StatCard label="Total Services"  value={services.length}                          icon={ShieldCheck} color="#F15A3E" bg="#FEEEE9" />
         <StatCard label="Active Services" value={services.filter(s => s.isActive).length}   icon={CheckCircle} color="#16A34A" bg="#DCFCE7" />
         <StatCard label="Total Leads"     value={stats?.total || 0}                         icon={Users}       color="#7C3AED" bg="#F5F3FF" />
+        <StatCard label="Service Leads"   value={svcLeads?.total || 0}                      icon={Calculator}  color="#F15A3E" bg="#FEEEE9" />
         <StatCard label="Conversion Rate" value={stats?.total ? `${Math.round((stats.byStatus?.converted || 0) / stats.total * 100)}%` : "0%"} icon={TrendingUp} color="#0891B2" bg="#E0F7FA" />
       </div>
 
@@ -114,6 +117,24 @@ export default function DashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 14, marginBottom: 34 }}>
         {statusCards.map(c => <StatCard key={c.label} {...c} />)}
       </div>
+
+      {/* Service (premium calculator) leads summary */}
+      {svcLeads?.total > 0 && (
+        <>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <SectionLabel>Service Leads by Status</SectionLabel>
+            <Link to="/serviceleads" style={{ fontSize: 12, fontWeight: 600, color: "#F15A3E", display: "flex", alignItems: "center", gap: 4, textDecoration: "none" }}>
+              View all <ArrowRight size={12} />
+            </Link>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 14, marginBottom: 34 }}>
+            <StatCard label="New"       value={svcLeads?.byStatus?.new || 0}        icon={Clock}       color="#D97706" bg="#FEF3C7" />
+            <StatCard label="Contacted" value={svcLeads?.byStatus?.contacted || 0}  icon={PhoneCall}   color="#0891B2" bg="#E0F7FA" />
+            <StatCard label="Converted" value={svcLeads?.byStatus?.converted || 0}  icon={CheckCircle} color="#16A34A" bg="#DCFCE7" />
+            <StatCard label="Closed"    value={svcLeads?.byStatus?.closed || 0}     icon={XCircle}     color="#DC2626" bg="#FEE2E2" />
+          </div>
+        </>
+      )}
 
       {/* Leads by service */}
       {stats?.byService?.length > 0 && (
@@ -160,6 +181,13 @@ export default function DashboardPage() {
           style={{ padding: "11px 20px", background: "#fff", color: "#0F172A", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "1px solid var(--border)", textDecoration: "none" }}
         >
           View Leads
+        </Link>
+        <Link
+          to="/serviceleads"
+          className="ti-action-ghost"
+          style={{ padding: "11px 20px", background: "#fff", color: "#0F172A", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "1px solid var(--border)", textDecoration: "none" }}
+        >
+          View Service Leads
         </Link>
       </div>
     </div>

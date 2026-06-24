@@ -15,6 +15,7 @@ import ClaimSupportPage from "./pages/ClaimSupportPage";
 import ComplaintPage from "./pages/ComplaintPage";
 import ClaimLeadsPage from "./pages/ClaimLeadsPage";
 import CareersPage from "./pages/CareersPage";
+import ServiceLeadsPage  from "./pages/ServiceLeadsPage";
 
 function PrivateRoute({ children }) {
   const { admin, loading } = useAuth();
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="contact/complaints" element={<ComplaintPage />} />
             <Route path="claimleads" element={<ClaimLeadsPage />} />
             <Route path="careers" element={<CareersPage />} />
+            <Route path="/serviceleads" element={<ServiceLeadsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

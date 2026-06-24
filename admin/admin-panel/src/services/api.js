@@ -219,3 +219,49 @@ export async function submitClaimLead(formData) {
   });
   return data;
 }
+
+// ── Service Leads (premium calculator form) ───────────────────────────────────
+// These return the RAW axios response (like getLeadStats / getLeads above),
+// so the pages read res.data.data.
+
+/**
+ * Public — submit a service/premium-calculator lead
+ */
+export async function submitServiceLead(payload) {
+  return api.post("/serviceleads", payload);
+}
+
+/**
+ * Admin — get all service leads (optionally filter by ?status= / ?service=)
+ */
+export async function getServiceLeads(params = {}) {
+  return api.get("/serviceleads", { params });
+}
+
+/**
+ * Admin — get aggregate service-lead stats (total, byStatus, byService)
+ */
+export async function getServiceLeadStats() {
+  return api.get("/serviceleads/stats");
+}
+
+/**
+ * Admin — get a single service lead by id
+ */
+export async function getServiceLead(id) {
+  return api.get(`/serviceleads/${id}`);
+}
+
+/**
+ * Admin — update a service lead (e.g. status / notes)
+ */
+export async function updateServiceLead(id, payload) {
+  return api.patch(`/serviceleads/${id}`, payload);
+}
+
+/**
+ * Admin — delete a service lead
+ */
+export async function deleteServiceLead(id) {
+  return api.delete(`/serviceleads/${id}`);
+}

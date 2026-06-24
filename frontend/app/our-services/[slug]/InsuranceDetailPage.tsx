@@ -18,6 +18,14 @@ interface Props {
 // Change this one value if your contact route is different (e.g. "/contact").
 const CONTACT_HREF = "/contact-us";
 
+// Where the "View Plans" button (shown with the estimate) sends the user.
+// Change this if you have a dedicated plans/quote page (e.g. "/plans").
+const VIEW_PLANS_HREF = "/our-services";
+
+// Backend base URL. Set NEXT_PUBLIC_API_URL in your .env (e.g.
+// https://your-api.onrender.com/api). Falls back to localhost in dev.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
 // ─────────────────────────────────────────────────────────────────────────────
 // HERO CALCULATOR CARD — driven by API data (calcCardTitle, calcFields, etc.)
 // Also computes an estimated premium (monthly / yearly / total) + coverage.
@@ -67,7 +75,7 @@ const CALC_SUBMIT_BG = "#1B8A3A";
 const STEP1_KEYS = ["name", "email", "phone"];
 const STEP2_KEYS = ["dob", "marital", "address", "gender"];
 
-function HeroCalcCard() {
+function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: string }) {
   // Calculator is frontend-only: always use the fields defined above.
   const fields = DEFAULT_CALC_FIELDS ?? [];
   const initialState: Record<string, string> = {};
@@ -83,6 +91,7 @@ function HeroCalcCard() {
   );
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<Record<string, string>>(initialState);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
@@ -165,8 +174,46 @@ function HeroCalcCard() {
     if (validateContact()) setStep(2);
   };
 
-  // Step 2 → Step 3 (no extra validation needed; defaults are safe).
-  const goToStep3 = () => {
+  // Step 2 → Step 3: submit the lead to the backend, then advance.
+  // We send everything collected so far (contact + about-you + the step-3
+  // calculator defaults) so the lead is captured even if the user bounces
+  // before seeing the premium. A failed POST does NOT block the user.
+  const goToStep3 = async () => {
+    setError(null);
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          dob: values.dob,
+          maritalStatus: values.marital,
+          address: values.address,
+          gender: values.gender,
+          smoker: values.smoker,
+          sumAssured: values.sumAssured,
+          policyTerm: values.term,
+          annualIncome: values.income,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+    } catch (e) {
+      // Don't block the journey if the network call fails — just log it.
+      console.error("Service lead submit failed:", e);
+    } finally {
+      setSubmitting(false);
+      setStep(3);
+    }
+  };
+
+  // From the result view → back to the (step 3) form so the user can adjust inputs.
+  const handleRetry = () => {
+    setResult(null);
     setError(null);
     setStep(3);
   };
@@ -387,6 +434,9 @@ function HeroCalcCard() {
       ? "Tell us about yourself"
       : CALC_CARD_TITLE;
 
+  // When we have an estimate on step 3, the card swaps from the form to the result.
+  const showingResult = step === 3 && !!result;
+
   return (
     <div className="li-card">
       {/* ── Step indicator (3 steps; inline-styled so shared CSS stays untouched) ── */}
@@ -398,95 +448,119 @@ function HeroCalcCard() {
         <StepDot n={3} label="Premium" />
       </div>
 
-      <h2 className="li-card-title">{cardTitle}</h2>
+      <h2 className="li-card-title">
+        {showingResult ? "Your estimated premium" : cardTitle}
+      </h2>
 
-      {/* Fields for the current step */}
-      {currentFields.map(renderField)}
+      {/* ── FORM VIEW (hidden once an estimate exists on step 3) ── */}
+      {!showingResult && (
+        <>
+          {/* Fields for the current step */}
+          {currentFields.map(renderField)}
 
-      {/* ── Actions ── */}
-      {step === 1 && (
-        <button
-          className="li-submit"
-          style={{ background: CALC_SUBMIT_BG }}
-          onClick={goToStep2}
-          type="button"
-        >
-          Continue
-        </button>
-      )}
-
-      {step === 2 && (
-        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            className="li-back-btn"
-          >
-            Back
-          </button>
-          <button
-            className="li-submit"
-            style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
-            onClick={goToStep3}
-            type="button"
-          >
-            Continue
-          </button>
-        </div>
-      )}
-
-      {step === 3 && (
-        <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-          <button
-            type="button"
-            onClick={() => setStep(2)}
-            className="li-back-btn"
-          >
-            Back
-          </button>
-          <button
-            className="li-submit"
-            style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
-            onClick={calculate}
-            type="button"
-          >
-            {CALC_SUBMIT_LABEL}
-          </button>
-        </div>
-      )}
-
-      {error && <p className="li-error">{error}</p>}
-
-      {step === 3 && result && (
-        <div className="li-result">
-          <div className="li-result-cov">
-            <span className="li-result-cov-label">Your coverage</span>
-            <span className="li-result-cov-value">{result.coverageLabel}</span>
-          </div>
-          <div className="li-result-grid">
-            <div className="li-result-box">
-              <span className="li-result-amt">{result.monthly}</span>
-              <span className="li-result-unit">per month</span>
-            </div>
-            <div className="li-result-box">
-              <span className="li-result-amt">{result.yearly}</span>
-              <span className="li-result-unit">per year</span>
-            </div>
-          </div>
-          <div className="li-result-total">
-            Total over term: <strong>{result.total}</strong>
-          </div>
-          {result.note && <p className="li-result-cap">{result.note}</p>}
-          <p className="li-result-note">
-            Estimated premium incl. 18% GST. Final price depends on underwriting &amp; medical checks.
-          </p>
-          {result.to && (
-            <p className="li-result-note">We&apos;ll share this estimate with you at {result.to}.</p>
+          {/* ── Actions ── */}
+          {step === 1 && (
+            <button
+              className="li-submit"
+              style={{ background: CALC_SUBMIT_BG }}
+              onClick={goToStep2}
+              type="button"
+            >
+              Continue
+            </button>
           )}
-        </div>
+
+          {step === 2 && (
+            <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+              <button type="button" onClick={() => setStep(1)} className="li-back-btn">
+                Back
+              </button>
+              <button
+                className="li-submit"
+                style={{
+                  background: CALC_SUBMIT_BG,
+                  flex: 1,
+                  width: "auto",
+                  marginTop: 0,
+                  opacity: submitting ? 0.7 : 1,
+                  cursor: submitting ? "not-allowed" : "pointer",
+                }}
+                onClick={goToStep3}
+                disabled={submitting}
+                type="button"
+              >
+                {submitting ? "Saving…" : "Continue"}
+              </button>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+              <button type="button" onClick={() => setStep(2)} className="li-back-btn">
+                Back
+              </button>
+              <button
+                className="li-submit"
+                style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
+                onClick={calculate}
+                type="button"
+              >
+                {CALC_SUBMIT_LABEL}
+              </button>
+            </div>
+          )}
+
+          {error && <p className="li-error">{error}</p>}
+
+          <p className="li-disclaimer">No spam. No calls unless you want.</p>
+        </>
       )}
 
-      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+      {/* ── RESULT VIEW (replaces the form inside the same card) ── */}
+      {showingResult && result && (
+        <>
+          <div className="li-result">
+            <div className="li-result-cov">
+              <span className="li-result-cov-label">Your coverage</span>
+              <span className="li-result-cov-value">{result.coverageLabel}</span>
+            </div>
+            <div className="li-result-grid">
+              <div className="li-result-box">
+                <span className="li-result-amt">{result.monthly}</span>
+                <span className="li-result-unit">per month</span>
+              </div>
+              <div className="li-result-box">
+                <span className="li-result-amt">{result.yearly}</span>
+                <span className="li-result-unit">per year</span>
+              </div>
+            </div>
+            <div className="li-result-total">
+              Total over term: <strong>{result.total}</strong>
+            </div>
+            {result.note && <p className="li-result-cap">{result.note}</p>}
+            <p className="li-result-note">
+              Estimated premium incl. 18% GST. Final price depends on underwriting &amp; medical checks.
+            </p>
+            {result.to && (
+              <p className="li-result-note">We&apos;ll share this estimate with you at {result.to}.</p>
+            )}
+          </div>
+
+          {/* Retry (edit inputs) + View Plans (go to plans/quote) */}
+          <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+            <button type="button" onClick={handleRetry} className="li-back-btn">
+              Retry
+            </button>
+            <Link
+              href={VIEW_PLANS_HREF}
+              className="li-submit li-submit-link"
+              style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
+            >
+              View Plans
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -588,7 +662,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
 
             {/* RIGHT — frontend-only premium calculator */}
             <div className="li-right">
-              <HeroCalcCard />
+              <HeroCalcCard slug={slug} serviceTitle={data.title} />
             </div>
           </div>
         </section>
@@ -800,6 +874,7 @@ const CSS = `
   .li-select{ background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='5 8 10 13 15 8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 38px; }
   .li-submit{ width: 100%; padding: 14px; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; margin-top: 6px; transition: filter 0.2s; }
   .li-submit:hover{ filter: brightness(0.9); }
+  .li-submit-link{ display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
   .li-back-btn{ flex-shrink: 0; padding: 14px 20px; background: transparent; color: #0B1F4D; border: 1.5px solid #0B1F4D; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; transition: background 0.15s; }
   .li-back-btn:hover{ background: #F1F5F9; }
   .li-disclaimer{ text-align: center; font-size: 12px; color: #9CA3AF; margin: 10px 0 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
