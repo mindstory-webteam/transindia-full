@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, ShieldCheck, Users, Settings,
-  LogOut, Menu, MessageSquare, ChevronDown, FileText, Briefcase, Calculator
+  LogOut, Menu, MessageSquare, ChevronDown, FileText, BriefcaseBusiness, Calculator
 } from "lucide-react";
 
 const NAV = [
@@ -12,7 +12,7 @@ const NAV = [
   { to: "/leads",       icon: Users,           label: "Leads" },
   { to: "/serviceleads", icon: Calculator,     label: "Service Leads" },
   { to: "/claimleads",  icon: FileText,        label: "Claim Leads" },
-  { to: "/careers",     icon: Briefcase,       label: "Careers" },
+  { to: "/careers",     icon: BriefcaseBusiness, label: "Careers" },
 ];
 
 const CONTACT_LINKS = [
