@@ -456,7 +456,7 @@ export default function CareersPage() {
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Location Type</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Job Type</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Description</th>
-                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Order</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase", textAlign: "center" }}>Order</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Status</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}></th>
                 </tr>
@@ -477,7 +477,7 @@ export default function CareersPage() {
                         </button>
                       ) : "-"}
                     </td>
-                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.order || 0}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14, textAlign: "center" }}>{job.order || 0}</td>
                     <td style={{ padding: "16px 20px" }}>
                       <span style={{ 
                         background: job.isActive ? "#DEF7EC" : "#FDE8E8", 
