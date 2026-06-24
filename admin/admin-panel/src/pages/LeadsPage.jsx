@@ -12,7 +12,12 @@ import {
   CheckCircle2,
   Loader2,
   Inbox,
+  FileSpreadsheet,
+  FileText,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const STATUS_OPTIONS = ["new", "contacted", "converted", "closed"];
 
@@ -37,6 +42,32 @@ const styles = `
     color: #64748b;
     margin: 0;
   }
+
+  /* Export buttons */
+  .export-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .export-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  }
+
+  .export-btn:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
+  .export-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   /* Stats Grid */
   .stats-grid {
@@ -411,6 +442,13 @@ function getBmiBadgeClass(category) {
   return map[category] || "bmi-none";
 }
 
+function fmtDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+}
+
 function StatCard({ icon: Icon, label, value, accent }) {
   return (
     <div className="stat-card">
@@ -434,6 +472,7 @@ export default function LeadsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [deletingId, setDeletingId] = useState(null);
+  const [exporting, setExporting] = useState(false);
   const limit = 10;
 
   const fetchLeads = useCallback(async () => {
@@ -520,6 +559,98 @@ export default function LeadsPage() {
     );
   };
 
+  // ── Exports ─────────────────────────────────────────────────────────────────
+  // Re-fetch ALL leads matching the current search + status filter (ignoring
+  // pagination), so the export isn't limited to the page on screen.
+  const fetchAllForExport = async () => {
+    const params = { page: 1, limit: 100000 };
+    if (search.trim()) params.search = search.trim();
+    if (statusFilter) params.status = statusFilter;
+    const { data } = await api.get("/bmileads", { params });
+    return data?.leads ?? data?.data ?? (Array.isArray(data) ? data : []);
+  };
+
+  const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  const exportExcel = async () => {
+    setExporting(true);
+    try {
+      const all = await fetchAllForExport();
+      if (!all.length) { toast.error("No leads to export"); return; }
+      const rows = all.map((l) => ({
+        Name: l.name || "",
+        Email: l.email || "",
+        Phone: l.phone || "",
+        City: l.city || "",
+        BMI: l.bmi ?? "",
+        "BMI Category": l.bmiCategory || "",
+        Message: l.message || "",
+        Status: l.status || "",
+        Date: fmtDate(l.createdAt),
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(12, k.length + 2) }));
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "BMI Leads");
+      XLSX.writeFile(wb, `bmi-leads-${fileStamp()}.xlsx`);
+      toast.success(`Exported ${all.length} lead(s)`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportPDF = async () => {
+    setExporting(true);
+    try {
+      const all = await fetchAllForExport();
+      if (!all.length) { toast.error("No leads to export"); return; }
+
+      const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+      doc.setFontSize(15);
+      doc.setTextColor(15, 23, 42);
+      doc.text("BMI Leads", 40, 38);
+      doc.setFontSize(9);
+      doc.setTextColor(120, 120, 120);
+      doc.text(
+        `Exported ${new Date().toLocaleString("en-IN")}   •   ${all.length} lead(s)` +
+          (statusFilter ? `   •   Status: ${statusFilter}` : "") +
+          (search.trim() ? `   •   Search: "${search.trim()}"` : ""),
+        40,
+        54
+      );
+
+      const head = [["Name", "Phone", "Email", "City", "BMI", "Status", "Date"]];
+      const body = all.map((l) => [
+        l.name || "",
+        l.phone || "",
+        l.email || "",
+        l.city || "",
+        l.bmi != null ? `${l.bmi}${l.bmiCategory ? " · " + l.bmiCategory : ""}` : "—",
+        l.status || "",
+        fmtDate(l.createdAt),
+      ]);
+
+      autoTable(doc, {
+        head,
+        body,
+        startY: 66,
+        styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+        headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+        alternateRowStyles: { fillColor: [250, 251, 253] },
+        margin: { left: 40, right: 40 },
+      });
+
+      doc.save(`bmi-leads-${fileStamp()}.pdf`);
+      toast.success(`Exported ${all.length} lead(s)`);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Export failed");
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <>
       <style>{styles}</style>
@@ -528,6 +659,27 @@ export default function LeadsPage() {
           <div>
             <h1>Leads</h1>
             <p>Track and manage incoming quote requests.</p>
+          </div>
+
+          <div className="export-actions">
+            <button
+              className="export-btn"
+              onClick={exportExcel}
+              disabled={exporting}
+              title="Download all (filtered) leads as Excel"
+            >
+              {exporting ? <Loader2 size={15} className="spin" /> : <FileSpreadsheet size={15} color="#16A34A" />}
+              Excel
+            </button>
+            <button
+              className="export-btn"
+              onClick={exportPDF}
+              disabled={exporting}
+              title="Download all (filtered) leads as PDF"
+            >
+              {exporting ? <Loader2 size={15} className="spin" /> : <FileText size={15} color="#DC2626" />}
+              PDF
+            </button>
           </div>
         </div>
 

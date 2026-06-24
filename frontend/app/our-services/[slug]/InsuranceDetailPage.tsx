@@ -174,41 +174,10 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
     if (validateContact()) setStep(2);
   };
 
-  // Step 2 → Step 3: submit the lead to the backend, then advance.
-  // We send everything collected so far (contact + about-you + the step-3
-  // calculator defaults) so the lead is captured even if the user bounces
-  // before seeing the premium. A failed POST does NOT block the user.
-  const goToStep3 = async () => {
+  // Step 2 → Step 3 (no submit here; the lead is saved on "Get My Quote").
+  const goToStep3 = () => {
     setError(null);
-    setSubmitting(true);
-    try {
-      await fetch(`${API_BASE}/serviceleads`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: values.name,
-          email: values.email,
-          phone: values.phone,
-          dob: values.dob,
-          maritalStatus: values.marital,
-          address: values.address,
-          gender: values.gender,
-          smoker: values.smoker,
-          sumAssured: values.sumAssured,
-          policyTerm: values.term,
-          annualIncome: values.income,
-          serviceSlug: slug,
-          serviceTitle,
-          source: "website",
-        }),
-      });
-    } catch (e) {
-      // Don't block the journey if the network call fails — just log it.
-      console.error("Service lead submit failed:", e);
-    } finally {
-      setSubmitting(false);
-      setStep(3);
-    }
+    setStep(3);
   };
 
   // From the result view → back to the (step 3) form so the user can adjust inputs.
@@ -218,8 +187,8 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
     setStep(3);
   };
 
-  // ── estimate (Step 3) ─────────────────────────────────────────────────────────
-  const calculate = () => {
+  // ── estimate (Step 3) — computes the premium AND submits the lead ─────────────
+  const calculate = async () => {
     // Re-check contact details; if invalid, bounce back to step 1.
     if (!validateContact()) {
       setResult(null);
@@ -291,14 +260,52 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
     const monthly = yearly / 12;
     const total = yearly * termYears;
 
-    setResult({
-      coverageLabel: covRaw && covParsed && !note ? covRaw : fmt(sumAssured, symbol),
+    const estimate = {
+      coverage: covRaw && covParsed && !note ? covRaw : fmt(sumAssured, symbol),
       monthly: fmt(monthly, symbol),
       yearly: fmt(yearly, symbol),
       total: fmt(total, symbol),
+    };
+
+    setResult({
+      coverageLabel: estimate.coverage,
+      monthly: estimate.monthly,
+      yearly: estimate.yearly,
+      total: estimate.total,
       note,
       to: (findValue(/email/i) || "").trim(),
     });
+
+    // ── Submit the lead WITH the computed estimate. A failed POST never
+    //    blocks the user from seeing their result. ──
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          dob: values.dob,
+          maritalStatus: values.marital,
+          address: values.address,
+          gender: values.gender,
+          smoker: values.smoker,
+          sumAssured: values.sumAssured,
+          policyTerm: values.term,
+          annualIncome: values.income,
+          estimate,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (!fields.length) return null;
@@ -477,19 +484,11 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
               </button>
               <button
                 className="li-submit"
-                style={{
-                  background: CALC_SUBMIT_BG,
-                  flex: 1,
-                  width: "auto",
-                  marginTop: 0,
-                  opacity: submitting ? 0.7 : 1,
-                  cursor: submitting ? "not-allowed" : "pointer",
-                }}
+                style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
                 onClick={goToStep3}
-                disabled={submitting}
                 type="button"
               >
-                {submitting ? "Saving…" : "Continue"}
+                Continue
               </button>
             </div>
           )}
@@ -501,11 +500,19 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
               </button>
               <button
                 className="li-submit"
-                style={{ background: CALC_SUBMIT_BG, flex: 1, width: "auto", marginTop: 0 }}
+                style={{
+                  background: CALC_SUBMIT_BG,
+                  flex: 1,
+                  width: "auto",
+                  marginTop: 0,
+                  opacity: submitting ? 0.7 : 1,
+                  cursor: submitting ? "not-allowed" : "pointer",
+                }}
                 onClick={calculate}
+                disabled={submitting}
                 type="button"
               >
-                {CALC_SUBMIT_LABEL}
+                {submitting ? "Saving…" : CALC_SUBMIT_LABEL}
               </button>
             </div>
           )}

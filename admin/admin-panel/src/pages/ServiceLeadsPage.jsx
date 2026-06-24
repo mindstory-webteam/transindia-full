@@ -7,8 +7,11 @@ import {
 } from "../services/api";
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
-  CheckCircle, XCircle, RefreshCw,
+  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText,
 } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const STYLES = `
   .sl-stat { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
@@ -19,8 +22,10 @@ const STYLES = `
   .sl-del { transition: background .15s ease, color .15s ease; }
   .sl-del:hover { background:#FEE2E2; color:#DC2626; }
   .sl-select { font-family:inherit; }
+  .sl-export { transition: background .15s ease, border-color .15s ease, opacity .15s ease; }
+  .sl-export:hover:not(:disabled) { background:#F4F7FB; border-color:#DCE3EC; }
   @media (prefers-reduced-motion: reduce) {
-    .sl-stat, .sl-tab, .sl-del { transition:none !important; }
+    .sl-stat, .sl-tab, .sl-del, .sl-export { transition:none !important; }
   }
 `;
 
@@ -121,6 +126,88 @@ export default function ServiceLeadsPage() {
     }
   };
 
+  // ── Exports ─────────────────────────────────────────────────────────────────
+  // Both export the CURRENTLY loaded leads, so they respect the active filter.
+  const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  // Full, detailed rows for the spreadsheet (every field, incl. the estimate).
+  const buildRows = () =>
+    leads.map((l) => ({
+      Name: l.name || "",
+      Email: l.email || "",
+      Phone: l.phone || "",
+      Gender: l.gender || "",
+      "Marital Status": l.maritalStatus || "",
+      "Date of Birth": l.dob || "",
+      Address: l.address || "",
+      Service: l.serviceTitle || l.serviceSlug || "",
+      Smoker: l.smoker || "",
+      "Sum Assured": l.sumAssured || "",
+      "Policy Term": l.policyTerm || "",
+      "Annual Income": l.annualIncome || "",
+      Coverage: l.estimate?.coverage || "",
+      "Premium / Month": l.estimate?.monthly || "",
+      "Premium / Year": l.estimate?.yearly || "",
+      "Total Over Term": l.estimate?.total || "",
+      Status: STATUS_META[l.status]?.label || l.status || "",
+      "Submitted On": fmtDate(l.createdAt),
+    }));
+
+  const exportExcel = () => {
+    if (!leads.length) return;
+    const rows = buildRows();
+    const ws = XLSX.utils.json_to_sheet(rows);
+    ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(12, k.length + 2) }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Service Leads");
+    XLSX.writeFile(wb, `service-leads-${fileStamp()}.xlsx`);
+  };
+
+  const exportPDF = () => {
+    if (!leads.length) return;
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Service Leads", 40, 38);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Exported ${new Date().toLocaleString("en-IN")}   •   ${leads.length} lead(s)` +
+        (filter !== "all" ? `   •   Filter: ${STATUS_META[filter]?.label || filter}` : ""),
+      40,
+      54
+    );
+
+    const head = [[
+      "Name", "Phone", "Email", "Service", "Sum Assured",
+      "Term", "Premium/mo", "Status", "Date",
+    ]];
+    const body = leads.map((l) => [
+      l.name || "",
+      l.phone || "",
+      l.email || "",
+      l.serviceTitle || l.serviceSlug || "",
+      l.sumAssured || "",
+      l.policyTerm || "",
+      l.estimate?.monthly || "—",
+      STATUS_META[l.status]?.label || l.status || "",
+      fmtDate(l.createdAt),
+    ]);
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+      headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 251, 253] },
+      margin: { left: 40, right: 40 },
+    });
+
+    doc.save(`service-leads-${fileStamp()}.pdf`);
+  };
+
   const statCards = [
     { label: "Total",     value: stats?.total || 0,                 icon: Calculator,  color: "#F15A3E", bg: "#FEEEE9" },
     { label: "New",       value: stats?.byStatus?.new || 0,         icon: Clock,       color: "#D97706", bg: "#FEF3C7" },
@@ -128,6 +215,13 @@ export default function ServiceLeadsPage() {
     { label: "Converted", value: stats?.byStatus?.converted || 0,   icon: CheckCircle, color: "#16A34A", bg: "#DCFCE7" },
     { label: "Closed",    value: stats?.byStatus?.closed || 0,      icon: XCircle,     color: "#DC2626", bg: "#FEE2E2" },
   ];
+
+  const exportBtnStyle = {
+    display: "flex", alignItems: "center", gap: 8, padding: "10px 16px",
+    background: "#fff", color: "#0F172A", borderRadius: 10, fontSize: 13,
+    fontWeight: 600, border: "1px solid var(--border)", cursor: "pointer",
+    fontFamily: "inherit",
+  };
 
   return (
     <div>
@@ -145,13 +239,34 @@ export default function ServiceLeadsPage() {
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>Service Leads</h1>
           <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Leads from the premium calculator on your service pages</p>
         </div>
-        <button
-          onClick={() => load(filter)}
-          className="ti-action-ghost"
-          style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 16px", background: "#fff", color: "#0F172A", borderRadius: 10, fontSize: 13, fontWeight: 600, border: "1px solid var(--border)", cursor: "pointer", fontFamily: "inherit" }}
-        >
-          <RefreshCw size={15} /> Refresh
-        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <button
+            className="sl-export"
+            onClick={exportExcel}
+            disabled={!leads.length}
+            style={{ ...exportBtnStyle, opacity: leads.length ? 1 : 0.5, cursor: leads.length ? "pointer" : "not-allowed" }}
+            title="Download as Excel (.xlsx)"
+          >
+            <FileSpreadsheet size={15} color="#16A34A" /> Excel
+          </button>
+          <button
+            className="sl-export"
+            onClick={exportPDF}
+            disabled={!leads.length}
+            style={{ ...exportBtnStyle, opacity: leads.length ? 1 : 0.5, cursor: leads.length ? "pointer" : "not-allowed" }}
+            title="Download as PDF"
+          >
+            <FileText size={15} color="#DC2626" /> PDF
+          </button>
+          <button
+            onClick={() => load(filter)}
+            className="sl-export"
+            style={exportBtnStyle}
+          >
+            <RefreshCw size={15} /> Refresh
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -197,8 +312,8 @@ export default function ServiceLeadsPage() {
             <table className="sl-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 900 }}>
               <thead>
                 <tr style={{ background: "#F8FAFC", borderBottom: "1px solid var(--border)" }}>
-                  {["Name", "Contact", "Service", "Sum Assured", "Term", "Date", "Status", ""].map((h, i) => (
-                    <th key={i} style={{ padding: "12px 16px", textAlign: i >= 6 ? "center" : "left", fontWeight: 600, color: "#64748B", whiteSpace: "nowrap" }}>{h}</th>
+                  {["Name", "Contact", "Service", "Sum Assured", "Term", "Premium", "Date", "Status", ""].map((h, i) => (
+                    <th key={i} style={{ padding: "12px 16px", textAlign: i >= 7 ? "center" : "left", fontWeight: 600, color: "#64748B", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -207,7 +322,7 @@ export default function ServiceLeadsPage() {
                   const meta = STATUS_META[l.status] || STATUS_META.new;
                   return (
                     <tr key={l._id} style={{ borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
-                      {/* Name + gender/dob */}
+                      {/* Name + gender/marital */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
                         <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>
@@ -230,13 +345,11 @@ export default function ServiceLeadsPage() {
                         {l.serviceTitle || l.serviceSlug || "—"}
                       </td>
 
-                      {/* Sum assured */}
+                      {/* Sum assured + smoker */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
                         {l.sumAssured || "—"}
                         {l.smoker && (
-                          <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>
-                            Smoker: {l.smoker}
-                          </p>
+                          <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>Smoker: {l.smoker}</p>
                         )}
                       </td>
 
@@ -246,6 +359,18 @@ export default function ServiceLeadsPage() {
                         {l.annualIncome && (
                           <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>{l.annualIncome}</p>
                         )}
+                      </td>
+
+                      {/* Premium estimate */}
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
+                        {l.estimate?.monthly ? (
+                          <>
+                            <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
+                            {l.estimate?.coverage && (
+                              <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>Cover: {l.estimate.coverage}</p>
+                            )}
+                          </>
+                        ) : "—"}
                       </td>
 
                       {/* Date */}

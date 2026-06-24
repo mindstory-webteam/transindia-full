@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { FileText, Trash2, ChevronDown, AlertCircle, Search, X } from "lucide-react";
+import { FileText, Trash2, ChevronDown, AlertCircle, Search, X, FileSpreadsheet, Download } from "lucide-react";
 import toast from "react-hot-toast";
 import { getClaimLeads, deleteClaimLead, updateClaimLeadStatus } from "../services/api";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const STATUS_COLORS = {
   "New":         { bg: "#FEF3C7", color: "#D97706" },
@@ -30,6 +33,9 @@ const PAGE_STYLES = `
   @keyframes fadeIn { from { opacity:0 } to { opacity:1 } }
   .cl-modal-box { animation: slideUp .18s ease; }
   @keyframes slideUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+  .cl-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
+  .cl-export-btn:hover:not(:disabled) { background:#F4F7FB; border-color:#CBD5E1; }
+  .cl-export-btn:disabled { opacity:.5; cursor:not-allowed; }
 `;
 
 function Badge({ label, map }) {
@@ -43,6 +49,13 @@ function Badge({ label, map }) {
       {label}
     </span>
   );
+}
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function DetailModal({ claim, onClose }) {
@@ -243,6 +256,154 @@ export default function ClaimLeadsPage() {
 
   const urgentCount = claims.filter(c => c.isUrgent && c.status === "New").length;
 
+  // ── Exports ─────────────────────────────────────────────────────────────────
+  // Both export the CURRENTLY filtered list (search + status filter applied).
+  const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  const exportExcel = () => {
+    if (!filtered.length) { toast.error("No claim leads to export"); return; }
+
+    // Widen to the busiest claim so every document gets its own clickable column.
+    const maxDocs = filtered.reduce((m, c) => Math.max(m, c.documents?.length || 0), 0);
+
+    const baseHeaders = [
+      "Name", "Mobile", "Policy Number", "Insurance Type", "Claim Type",
+      "Urgent", "Status", "Description", "Documents", "Date",
+    ];
+    const docHeaders = Array.from({ length: maxDocs }, (_, i) => `Document ${i + 1}`);
+    const headers = [...baseHeaders, ...docHeaders];
+
+    // Build as an array-of-arrays so we control exact cell positions for links.
+    const aoa = [headers];
+    filtered.forEach((c) => {
+      const row = [
+        c.name || "",
+        c.mobile || "",
+        c.policyNumber || "",
+        c.insuranceType || "",
+        c.claimType || "",
+        c.isUrgent ? "Yes" : "No",
+        c.status || "",
+        c.description || "",
+        c.documents?.length || 0,
+        fmtDate(c.createdAt),
+      ];
+      for (let i = 0; i < maxDocs; i++) {
+        const d = c.documents?.[i];
+        row.push(d ? (d.originalName || `Document ${i + 1}`) : "");
+      }
+      aoa.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // Turn each document cell into a real clickable hyperlink (cell.l).
+    const docStartCol = baseHeaders.length; // 0-indexed column where docs begin
+    filtered.forEach((c, rIdx) => {
+      (c.documents || []).forEach((d, dIdx) => {
+        if (!d?.url) return;
+        const ref = XLSX.utils.encode_cell({ r: rIdx + 1, c: docStartCol + dIdx });
+        if (ws[ref]) {
+          ws[ref].l = { Target: d.url, Tooltip: d.originalName || "Open document" };
+        }
+      });
+    });
+
+    ws["!cols"] = headers.map((h) =>
+      h === "Description" ? { wch: 40 } :
+      h.startsWith("Document") ? { wch: 26 } :
+      { wch: Math.max(12, h.length + 2) }
+    );
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Claim Leads");
+    XLSX.writeFile(wb, `claim-leads-${fileStamp()}.xlsx`);
+    toast.success(`Exported ${filtered.length} claim(s)`);
+  };
+
+  const exportPDF = () => {
+    if (!filtered.length) { toast.error("No claim leads to export"); return; }
+
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const left = 40;
+
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Claim Leads", left, 38);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Exported ${new Date().toLocaleString("en-IN")}   •   ${filtered.length} claim(s)` +
+        (filterStatus !== "All" ? `   •   Status: ${filterStatus}` : "") +
+        (search.trim() ? `   •   Search: "${search.trim()}"` : ""),
+      left,
+      54
+    );
+
+    // Documents column lives in the table now (clickable file names).
+    const DOC_COL = 8;
+    const head = [["Name", "Mobile", "Policy No.", "Insurance", "Claim Type", "Urgent", "Status", "Date", "Documents"]];
+    const body = filtered.map((c) => [
+      c.name || "",
+      c.mobile || "",
+      c.policyNumber || "",
+      c.insuranceType || "",
+      c.claimType || "",
+      c.isUrgent ? "Yes" : "—",
+      c.status || "",
+      fmtDate(c.createdAt),
+      c.documents?.length
+        ? c.documents.map((d, i) => d.originalName || `Document ${i + 1}`).join("\n")
+        : "—",
+    ]);
+
+    const PAD = 4;
+    const FONT = 8;
+    const LINE = FONT * 1.15; // matches autoTable's row line height
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: FONT, cellPadding: PAD, overflow: "linebreak", valign: "top" },
+      headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 251, 253] },
+      columnStyles: { [DOC_COL]: { textColor: [0, 102, 255], cellWidth: 170 } },
+      margin: { left: 40, right: 40 },
+      // Overlay invisible clickable link areas on each document line.
+      didDrawCell: (data) => {
+        if (data.section !== "body" || data.column.index !== DOC_COL) return;
+        const claim = filtered[data.row.index];
+        const docs = claim?.documents || [];
+        if (!docs.length) return;
+
+        const innerW = data.cell.width - PAD * 2;
+        let y = data.cell.y + PAD;
+        doc.setFontSize(FONT);
+
+        docs.forEach((d) => {
+          const name = d.originalName || "Document";
+          const lines = doc.splitTextToSize(name, innerW); // mirror wrapping
+          const blockH = lines.length * LINE;
+          if (d?.url) {
+            doc.link(data.cell.x + PAD, y, innerW, blockH, { url: d.url });
+          }
+          y += blockH;
+        });
+      },
+    });
+
+    doc.save(`claim-leads-${fileStamp()}.pdf`);
+    toast.success(`Exported ${filtered.length} claim(s)`);
+  };
+
+  const exportBtnStyle = {
+    display: "flex", alignItems: "center", gap: 7, padding: "9px 14px",
+    border: "1px solid #E8EDF3", background: "#fff", color: "#0F172A",
+    borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer",
+    fontFamily: "inherit",
+  };
+
   return (
     <div>
       <style>{PAGE_STYLES}</style>
@@ -271,8 +432,8 @@ export default function ClaimLeadsPage() {
           </div>
         </div>
 
-        {/* Stats chips */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+        {/* Stats chips + exports */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           {STATUSES.map(s => {
             const count = claims.filter(c => c.status === s).length;
             const st = STATUS_COLORS[s];
@@ -283,6 +444,13 @@ export default function ClaimLeadsPage() {
               </div>
             );
           })}
+
+          <button className="cl-export-btn" onClick={exportExcel} disabled={!filtered.length} style={exportBtnStyle} title="Download as Excel">
+            <FileSpreadsheet size={15} color="#16A34A" /> Excel
+          </button>
+          <button className="cl-export-btn" onClick={exportPDF} disabled={!filtered.length} style={exportBtnStyle} title="Download as PDF">
+            <Download size={15} color="#DC2626" /> PDF
+          </button>
         </div>
       </div>
 
