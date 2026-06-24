@@ -455,6 +455,7 @@ export default function CareersPage() {
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Title</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Location Type</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Job Type</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Description</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Order</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Status</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}></th>
@@ -466,6 +467,16 @@ export default function CareersPage() {
                     <td style={{ padding: "16px 20px", fontWeight: 600 }}>{job.title}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.[0] || "-"}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.[1] || "-"}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>
+                      {job.description ? (
+                        <button 
+                          onClick={() => setAppModalData({ title: "Job Description", text: job.description })}
+                          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", background: "#f1f5f9", border: "none", borderRadius: 6, cursor: "pointer", color: "#0F172A", fontWeight: 600, fontSize: 13 }}
+                        >
+                          <Eye size={14} /> View
+                        </button>
+                      ) : "-"}
+                    </td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.order || 0}</td>
                     <td style={{ padding: "16px 20px" }}>
                       <span style={{ 
@@ -651,7 +662,7 @@ export default function CareersPage() {
         </div>
       )}
 
-      {/* App Message Modal */}
+      {/* Info Modal */}
       {appModalData && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100, padding: 20 }}>
           <div style={{ background: "#fff", padding: 24, borderRadius: 16, width: "100%", maxWidth: 500, position: "relative" }}>
