@@ -246,12 +246,24 @@ export default function CareersPage() {
 
                 <div className="form-group">
                   <label htmlFor="email">Email Address *</label>
-                  <input type="email" id="email" name="email" required placeholder="john@example.com" />
+                  <input type="email" id="email" name="email" required placeholder="john@gmail.com" pattern="^[a-zA-Z0-9._%+\-]+@gmail\.com$" title="Please enter a valid @gmail.com address" />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="phone">Phone Number *</label>
-                  <input type="tel" id="phone" name="phone" required placeholder="+91 9876543210" />
+                  <input 
+                    type="tel" 
+                    id="phone" 
+                    name="phone" 
+                    required 
+                    placeholder="0000000000" 
+                    pattern="^[0-9]{10}$" 
+                    title="Please enter a valid 10-digit phone number" 
+                    maxLength={10}
+                    onInput={(e) => {
+                      e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+                    }}
+                  />
                 </div>
 
                 <div className="form-group">

@@ -170,7 +170,7 @@ const TransindiaFooter: React.FC = () => {
               <br />
               Helping individuals and businesses across India find
               <br />
-              the right protection since 2009.
+              the right protection since 2006.
             </p>
 
             {/* ADDRESS */}

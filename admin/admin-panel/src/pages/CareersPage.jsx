@@ -168,8 +168,8 @@ export default function CareersPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1000 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+    <div style={{ maxWidth: 1200 }}>
+      <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: "var(--ti-ink)" }}>Careers Management</h1>
         {activeTab === "roles" && (
           <button 
@@ -223,7 +223,8 @@ export default function CareersPage() {
                 <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
                 <tr>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Title</th>
-                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Tags</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Location Type</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Job Type</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Order</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Status</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}></th>
@@ -233,7 +234,8 @@ export default function CareersPage() {
                 {jobs.map((job) => (
                   <tr key={job._id} style={{ borderBottom: "1px solid var(--ti-line)" }}>
                     <td style={{ padding: "16px 20px", fontWeight: 600 }}>{job.title}</td>
-                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.join(", ")}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.[0] || "-"}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.tags?.[1] || "-"}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{job.order || 0}</td>
                     <td style={{ padding: "16px 20px" }}>
                       <span style={{ 
@@ -270,6 +272,8 @@ export default function CareersPage() {
                 <thead style={{ background: "#F8FAFC", borderBottom: "1px solid var(--ti-line)", textAlign: "left" }}>
                 <tr>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Applicant</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Email</th>
+                  <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Mobile</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Role</th>
                   <th style={{ padding: "14px 20px", color: "var(--ti-muted)", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Date</th>
                   <th style={{ padding: "14px 20px", textAlign: "right" }}>Resume</th>
@@ -278,11 +282,9 @@ export default function CareersPage() {
               <tbody>
                 {applications.map((app) => (
                   <tr key={app._id} style={{ borderBottom: "1px solid var(--ti-line)" }}>
-                    <td style={{ padding: "16px 20px" }}>
-                      <div style={{ fontWeight: 600 }}>{app.name}</div>
-                      <div style={{ color: "var(--ti-muted)", fontSize: 13 }}>{app.email}</div>
-                      <div style={{ color: "var(--ti-muted)", fontSize: 13 }}>{app.phone}</div>
-                    </td>
+                    <td style={{ padding: "16px 20px", fontWeight: 600 }}>{app.name}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{app.email}</td>
+                    <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>{app.phone}</td>
                     <td style={{ padding: "16px 20px", fontWeight: 500, color: "var(--ti-ink)" }}>{app.jobId?.title || "Unknown Role"}</td>
                     <td style={{ padding: "16px 20px", color: "var(--ti-muted)", fontSize: 14 }}>
                       {new Date(app.createdAt).toLocaleDateString()}

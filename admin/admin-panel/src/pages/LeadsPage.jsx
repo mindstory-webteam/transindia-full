@@ -7,7 +7,7 @@ import {
   Trash2,
   Eye,
   Users,
-  Sparkles,
+  Star,
   PhoneCall,
   CheckCircle2,
   Loader2,
@@ -524,14 +524,16 @@ export default function LeadsPage() {
     <>
       <style>{styles}</style>
       <div className="leads-page">
-        <div className="leads-header">
-          <h1>Leads</h1>
-          <p>Track and manage incoming quote requests.</p>
+        <div className="leads-header" style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+          <div>
+            <h1>Leads</h1>
+            <p>Track and manage incoming quote requests.</p>
+          </div>
         </div>
 
         <div className="stats-grid">
           <StatCard icon={Users}        label="Total Leads" value={stats?.total}     accent="blue" />
-          <StatCard icon={Sparkles}     label="New"         value={stats?.new}       accent="sky" />
+          <StatCard icon={Star}         label="New"         value={stats?.new}       accent="sky" />
           <StatCard icon={PhoneCall}    label="Contacted"   value={stats?.contacted} accent="amber" />
           <StatCard icon={CheckCircle2} label="Converted"   value={stats?.converted} accent="emerald" />
         </div>

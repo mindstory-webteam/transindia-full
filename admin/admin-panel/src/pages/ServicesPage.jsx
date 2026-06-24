@@ -67,10 +67,10 @@ export default function ServicesPage() {
     <div>
       <style>{LIST_STYLES}</style>
 
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24 }}>
+      <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize:22, fontWeight:800, color:"#0F172A", letterSpacing:"-0.02em" }}>Services</h1>
-          <p style={{ color:"#64748B", fontSize:13 }}>Manage all insurance services shown on the website</p>
+          <h1 style={{ fontSize:22, fontWeight:800, color:"#0F172A", letterSpacing:"-0.02em", margin: "0 0 4px 0" }}>Services</h1>
+          <p style={{ color:"#64748B", fontSize:13, margin: 0 }}>Manage all insurance services shown on the website</p>
         </div>
         <Link to="/services/new" className="svc-add-btn" style={{ display:"inline-flex", alignItems:"center", gap:6, padding:"10px 18px", background:"#F15A3E", color:"#fff", borderRadius:10, fontSize:13, fontWeight:700, textDecoration:"none", boxShadow:"0 8px 18px rgba(241,90,62,0.24)" }}>
           <Plus size={15} /> Add Service

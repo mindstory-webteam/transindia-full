@@ -92,11 +92,11 @@ export default function GeneralQueryPage() {
 
   return (
     <div>
-      <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:24, flexWrap: "wrap", gap: 16 }}>
+      <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         {/* LEFT: Title */}
         <div style={{ flex: "1 1 200px" }}>
-          <h1 style={{ fontSize:22, fontWeight:800 }}>General Queries</h1>
-          <p style={{ color:"#64748B", fontSize:13 }}>Manage general query form submissions</p>
+          <h1 style={{ fontSize:22, fontWeight:800, margin: "0 0 4px 0" }}>General Queries</h1>
+          <p style={{ color:"#64748B", fontSize:13, margin: 0 }}>Manage general query form submissions</p>
         </div>
 
         {/* CENTER: Filters */}
