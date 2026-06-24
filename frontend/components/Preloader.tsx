@@ -94,12 +94,12 @@ export function Preloader({ duration = 1800, fadeDuration = 600 }: Props) {
         style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
         <TransIndiaLogo className="ti-logo" />
-        <div className="ti-dots">
+        {/* <div className="ti-dots">
           <span className="ti-dot" />
           <span className="ti-dot" />
           <span className="ti-dot" />
           <span className="ti-dot" />
-        </div>
+        </div> */}
       </div>
     </div>
   );
