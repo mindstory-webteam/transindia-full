@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import Preloader from "@/components/Preloader";
 import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
 
@@ -152,6 +153,7 @@ export default function TermsPage() {
     <>
       <style>{CSS}</style>
       <div className="policy-page">
+         <Preloader/>
         <Navbar alwaysSolid={true} />
 
         <div className="policy-wrapper">

@@ -8,6 +8,7 @@ import TransindiaFooter from "@/components/Transindiafooter";
 import ConsultationCTA from "@/components/about/ConsultationCTA";
 import Breadcrum from "@/components/Breadcrum";
 import { InsuranceDetailData } from "../insuranceData";
+import Preloader from "@/components/Preloader";
 
 interface Props {
   data: InsuranceDetailData;
@@ -629,6 +630,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
     <>
       <style>{CSS}</style>
       <div style={{ overflowX: "hidden", width: "100%" }}>
+         <Preloader/>
         <Navbar />
 
         {/* ── HERO ── */}

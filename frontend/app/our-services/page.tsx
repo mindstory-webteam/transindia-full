@@ -6,6 +6,7 @@ import ConsultationCTA from "@/components/about/ConsultationCTA";
 import ServicesHero from "@/components/Services/ServicesHero";
 import PersonalInsuranceServices from "@/components/Services/PersonalInsuranceServices";
 import CorporateRiskManagement from "@/components/Services/Corporateriskmanagement";
+import Preloader from "@/components/Preloader";
 
 export const metadata = {
   title: "Our Services | TransIndia Insurance",
@@ -16,6 +17,7 @@ export const metadata = {
 export default function OurServicesPage() {
   return (
     <div style={{ overflowX: "hidden", width: "100%", }}>
+       <Preloader/>
       <Navbar />
       <ServicesHero />
       <PersonalInsuranceServices />

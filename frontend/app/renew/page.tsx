@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
+import Preloader from "@/components/Preloader";
 
 export default function Maintenance() {
   return (
@@ -14,6 +15,7 @@ export default function Maintenance() {
         flexDirection: "column",
       }}
     >
+       <Preloader/>
       <Navbar alwaysSolid={true} />
 
       <main

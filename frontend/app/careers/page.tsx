@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Preloader from "@/components/Preloader";
 
 const JOBS_PER_PAGE = 10;
 
@@ -84,6 +85,7 @@ export default function CareersPage() {
     <>
       <style>{CSS}</style>
       <div className="careers-page">
+         <Preloader/>
         <Navbar alwaysSolid={true} />
 
         {/* Hero */}

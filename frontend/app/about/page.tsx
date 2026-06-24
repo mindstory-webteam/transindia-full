@@ -6,10 +6,12 @@ import Navbar from "@/components/Navbar";
 import AboutHero from "@/components/about/AboutHero";
 import TransindiaFooter from "@/components/Transindiafooter";
 import ConsultationCTA from "@/components/about/ConsultationCTA";
+import Preloader from "@/components/Preloader";
 
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
+       <Preloader/>
     <Navbar />
     <AboutHero />
     <OurStory/>

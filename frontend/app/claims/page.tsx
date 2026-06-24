@@ -5,12 +5,14 @@ import DocumentsChecklistSection from "@/components/claims/Documentschecklistsec
 import InsuranceClaimsSection from "@/components/claims/InsuranceClaimSection";
 import TrackClaimSection from "@/components/claims/Trackclaimsection";
 import Navbar from "@/components/Navbar";
+import Preloader from "@/components/Preloader";
 import TransindiaFooter from "@/components/Transindiafooter";
 
 
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
+       <Preloader/>
       <Navbar/>
       <ClaimHero/>
       <InsuranceClaimsSection/>
