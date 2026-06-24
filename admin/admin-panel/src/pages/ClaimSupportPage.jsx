@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getClaimSupports, deleteClaimSupport, updateClaimSupportStatus } from "../services/api";
-import { Trash2, Search, X, ChevronDown, Eye } from "lucide-react";
+import { Trash2, Search, X, ChevronDown, Eye, FileSpreadsheet, Download } from "lucide-react";
 import toast from "react-hot-toast";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const STATUS_COLORS = {
   "new":         { bg: "#FEF3C7", color: "#D97706" },
@@ -16,6 +19,12 @@ const STATUSES = [
   { value: "resolved", label: "Resolved" },
   { value: "closed", label: "Closed" }
 ];
+
+const PAGE_STYLES = `
+  .cs-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
+  .cs-export-btn:hover:not(:disabled) { background:#F4F7FB; border-color:#CBD5E1; }
+  .cs-export-btn:disabled { opacity:.5; cursor:not-allowed; }
+`;
 
 export default function ClaimSupportPage() {
   const [claims, setClaims] = useState([]);
@@ -93,8 +102,103 @@ export default function ClaimSupportPage() {
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const currentClaims = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  // ── Exports ─────────────────────────────────────────────────────────────────
+  const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  const exportExcel = () => {
+    if (!filtered.length) { toast.error("No claim support requests to export"); return; }
+
+    const headers = ["Date", "Policy Holder", "Policy Number", "Claim Type", "Mobile", "Incident", "Status"];
+    const aoa = [headers];
+    
+    filtered.forEach((c) => {
+      const row = [
+        new Date(c.createdAt).toLocaleDateString("en-IN"),
+        c.policyHolder || "",
+        c.policyNumber || "",
+        c.claimType || "",
+        c.mobile || "",
+        c.incident || "",
+        STATUSES.find(s => s.value === (c.status || "new"))?.label || c.status || "New",
+      ];
+      aoa.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 16 },
+      { wch: 15 },
+      { wch: 35 },
+      { wch: 14 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Claim Support");
+    XLSX.writeFile(wb, `claim-support-${fileStamp()}.xlsx`);
+    toast.success(`Exported ${filtered.length} claim(s)`);
+  };
+
+  const exportPDF = () => {
+    if (!filtered.length) { toast.error("No claim support requests to export"); return; }
+
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const left = 40;
+
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Claim Support Requests", left, 38);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Exported ${new Date().toLocaleString("en-IN")}   •   ${filtered.length} claim(s)` +
+        (filterStatus !== "All" ? `   •   Status: ${STATUSES.find(s => s.value === filterStatus)?.label}` : "") +
+        (search.trim() ? `   •   Search: "${search.trim()}"` : ""),
+      left,
+      54
+    );
+
+    const head = [["Date", "Policy Holder", "Policy Number", "Claim Type", "Mobile", "Incident", "Status"]];
+    const body = filtered.map((c) => [
+      new Date(c.createdAt).toLocaleDateString("en-IN"),
+      c.policyHolder || "",
+      c.policyNumber || "",
+      c.claimType || "",
+      c.mobile || "",
+      c.incident || "—",
+      STATUSES.find(s => s.value === (c.status || "new"))?.label || c.status || "New",
+    ]);
+
+    const PAD = 4;
+    const FONT = 8;
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: FONT, cellPadding: PAD, overflow: "linebreak", valign: "top" },
+      headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 251, 253] },
+      margin: { left: 40, right: 40 },
+    });
+
+    doc.save(`claim-support-${fileStamp()}.pdf`);
+    toast.success(`Exported ${filtered.length} claim(s)`);
+  };
+
+  const exportBtnStyle = {
+    display: "flex", alignItems: "center", gap: 7, padding: "9px 14px",
+    border: "1px solid #E8EDF3", background: "#fff", color: "#0F172A",
+    borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer",
+    fontFamily: "inherit",
+  };
+
   return (
     <div>
+      <style>{PAGE_STYLES}</style>
+      
       <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         {/* LEFT: Title */}
         <div style={{ flex: "1 1 200px" }}>
@@ -144,8 +248,8 @@ export default function ClaimSupportPage() {
           </div>
         </div>
 
-        {/* RIGHT: Stats Chips (Bricks) */}
-        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "1 1 200px", justifyContent: "flex-end" }}>
+        {/* RIGHT: Stats Chips + Exports */}
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap", flex: "1 1 200px", justifyContent: "flex-end", alignItems: "center" }}>
           {STATUSES.map(s => {
             const count = claims.filter(c => (c.status || "new") === s.value).length;
             const st = STATUS_COLORS[s.value];
@@ -156,6 +260,13 @@ export default function ClaimSupportPage() {
               </div>
             );
           })}
+
+          <button className="cs-export-btn" onClick={exportExcel} disabled={!filtered.length} style={exportBtnStyle} title="Download as Excel">
+            <FileSpreadsheet size={15} color="#16A34A" /> Excel
+          </button>
+          <button className="cs-export-btn" onClick={exportPDF} disabled={!filtered.length} style={exportBtnStyle} title="Download as PDF">
+            <Download size={15} color="#DC2626" /> PDF
+          </button>
         </div>
       </div>
 

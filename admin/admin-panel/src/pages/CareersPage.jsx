@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import axios from "../axios";
 import { toast } from "react-hot-toast";
-import { Plus, Trash2, Edit, FileText, X, Eye } from "lucide-react";
+import { Plus, Trash2, Edit, FileText, X, Eye, FileSpreadsheet, Download } from "lucide-react";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+const PAGE_STYLES = `
+  .careers-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
+  .careers-export-btn:hover:not(:disabled) { background:#F4F7FB; border-color:#CBD5E1; }
+  .careers-export-btn:disabled { opacity:.5; cursor:not-allowed; }
+`;
 
 export default function CareersPage() {
   const [activeTab, setActiveTab] = useState("roles"); // "roles" | "applications"
@@ -168,21 +177,241 @@ export default function CareersPage() {
     );
   };
 
+  // ── Exports ─────────────────────────────────────────────────────────────────
+  const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  const exportJobsExcel = () => {
+    if (!jobs.length) { toast.error("No job roles to export"); return; }
+
+    const headers = ["Title", "Location Type", "Job Type", "Description", "Order", "Status"];
+    const aoa = [headers];
+    
+    jobs.forEach((job) => {
+      const row = [
+        job.title || "",
+        job.tags?.[0] || "Remote",
+        job.tags?.[1] || "Full-time",
+        job.description || "",
+        job.order || 0,
+        job.isActive ? "Active" : "Inactive",
+      ];
+      aoa.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws["!cols"] = [
+      { wch: 30 },
+      { wch: 18 },
+      { wch: 18 },
+      { wch: 40 },
+      { wch: 10 },
+      { wch: 12 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Job Roles");
+    XLSX.writeFile(wb, `job-roles-${fileStamp()}.xlsx`);
+    toast.success(`Exported ${jobs.length} job role(s)`);
+  };
+
+  const exportJobsPDF = () => {
+    if (!jobs.length) { toast.error("No job roles to export"); return; }
+
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const left = 40;
+
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Job Roles", left, 38);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Exported ${new Date().toLocaleString("en-IN")}   •   ${jobs.length} job role(s)`,
+      left,
+      54
+    );
+
+    const head = [["Title", "Location Type", "Job Type", "Order", "Status"]];
+    const body = jobs.map((job) => [
+      job.title || "",
+      job.tags?.[0] || "Remote",
+      job.tags?.[1] || "Full-time",
+      job.order || 0,
+      job.isActive ? "Active" : "Inactive",
+    ]);
+
+    const PAD = 4;
+    const FONT = 8;
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: FONT, cellPadding: PAD, overflow: "linebreak", valign: "top" },
+      headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 251, 253] },
+      margin: { left: 40, right: 40 },
+    });
+
+    doc.save(`job-roles-${fileStamp()}.pdf`);
+    toast.success(`Exported ${jobs.length} job role(s)`);
+  };
+
+  const exportApplicationsExcel = () => {
+    if (!applications.length) { toast.error("No applications to export"); return; }
+
+    const headers = ["Name", "Email", "Mobile", "Role", "Message", "Date", "Resume"];
+    const aoa = [headers];
+    
+    applications.forEach((app) => {
+      const row = [
+        app.name || "",
+        app.email || "",
+        app.phone || "",
+        app.jobId?.title || "Unknown Role",
+        app.message || "",
+        new Date(app.createdAt).toLocaleDateString("en-IN"),
+        app.resumeUrl || "",
+      ];
+      aoa.push(row);
+    });
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+
+    // Add hyperlinks to resume URLs
+    applications.forEach((app, rIdx) => {
+      if (app.resumeUrl) {
+        const ref = XLSX.utils.encode_cell({ r: rIdx + 1, c: 6 });
+        if (ws[ref]) {
+          ws[ref].l = { Target: app.resumeUrl, Tooltip: "Open Resume" };
+        }
+      }
+    });
+
+    ws["!cols"] = [
+      { wch: 20 },
+      { wch: 25 },
+      { wch: 15 },
+      { wch: 25 },
+      { wch: 35 },
+      { wch: 15 },
+      { wch: 30 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Applications");
+    XLSX.writeFile(wb, `applications-${fileStamp()}.xlsx`);
+    toast.success(`Exported ${applications.length} application(s)`);
+  };
+
+  const exportApplicationsPDF = () => {
+    if (!applications.length) { toast.error("No applications to export"); return; }
+
+    const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+    const left = 40;
+
+    doc.setFontSize(15);
+    doc.setTextColor(15, 23, 42);
+    doc.text("Applications", left, 38);
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(
+      `Exported ${new Date().toLocaleString("en-IN")}   •   ${applications.length} application(s)`,
+      left,
+      54
+    );
+
+    const DOC_COL = 6;
+    const head = [["Name", "Email", "Mobile", "Role", "Message", "Date", "Resume"]];
+    const body = applications.map((app) => [
+      app.name || "",
+      app.email || "",
+      app.phone || "",
+      app.jobId?.title || "Unknown Role",
+      app.message || "",
+      new Date(app.createdAt).toLocaleDateString("en-IN"),
+      app.resumeUrl ? "View Resume" : "—",
+    ]);
+
+    const PAD = 4;
+    const FONT = 8;
+    const LINE = FONT * 1.15;
+
+    autoTable(doc, {
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: FONT, cellPadding: PAD, overflow: "linebreak", valign: "top" },
+      headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [250, 251, 253] },
+      columnStyles: { [DOC_COL]: { textColor: [0, 102, 255], cellWidth: 100 } },
+      margin: { left: 40, right: 40 },
+      didDrawCell: (data) => {
+        if (data.section !== "body" || data.column.index !== DOC_COL) return;
+        const app = applications[data.row.index];
+        if (!app?.resumeUrl) return;
+
+        const innerW = data.cell.width - PAD * 2;
+        const y = data.cell.y + PAD;
+        doc.setFontSize(FONT);
+
+        doc.link(data.cell.x + PAD, y, innerW, LINE, { url: app.resumeUrl });
+      },
+    });
+
+    doc.save(`applications-${fileStamp()}.pdf`);
+    toast.success(`Exported ${applications.length} application(s)`);
+  };
+
+  const exportBtnStyle = {
+    display: "flex", alignItems: "center", gap: 7, padding: "9px 14px",
+    border: "1px solid #E8EDF3", background: "#fff", color: "#0F172A",
+    borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer",
+    fontFamily: "inherit",
+  };
+
   return (
     <div style={{ maxWidth: 1200 }}>
+      <style>{PAGE_STYLES}</style>
+      
       <div style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, margin: 0, color: "var(--ti-ink)" }}>Careers Management</h1>
-        {activeTab === "roles" && (
-          <button 
-            onClick={() => handleOpenModal()}
-            style={{ 
-              display: "flex", alignItems: "center", gap: 8, background: "var(--ti-brand)", 
-              color: "#fff", border: "none", padding: "10px 16px", borderRadius: 8, cursor: "pointer", fontWeight: 600
-            }}
-          >
-            <Plus size={16} /> Add Role
-          </button>
-        )}
+        
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {activeTab === "roles" && (
+            <button 
+              onClick={() => handleOpenModal()}
+              style={{ 
+                display: "flex", alignItems: "center", gap: 8, background: "var(--ti-brand)", 
+                color: "#fff", border: "none", padding: "10px 16px", borderRadius: 8, cursor: "pointer", fontWeight: 600
+              }}
+            >
+              <Plus size={16} /> Add Role
+            </button>
+          )}
+
+          {activeTab === "roles" && (
+            <>
+              <button className="careers-export-btn" onClick={exportJobsExcel} disabled={!jobs.length} style={exportBtnStyle} title="Download as Excel">
+                <FileSpreadsheet size={15} color="#16A34A" /> Excel
+              </button>
+              <button className="careers-export-btn" onClick={exportJobsPDF} disabled={!jobs.length} style={exportBtnStyle} title="Download as PDF">
+                <Download size={15} color="#DC2626" /> PDF
+              </button>
+            </>
+          )}
+
+          {activeTab === "applications" && (
+            <>
+              <button className="careers-export-btn" onClick={exportApplicationsExcel} disabled={!applications.length} style={exportBtnStyle} title="Download as Excel">
+                <FileSpreadsheet size={15} color="#16A34A" /> Excel
+              </button>
+              <button className="careers-export-btn" onClick={exportApplicationsPDF} disabled={!applications.length} style={exportBtnStyle} title="Download as PDF">
+                <Download size={15} color="#DC2626" /> PDF
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -196,7 +425,7 @@ export default function CareersPage() {
             fontWeight: activeTab === "roles" ? 700 : 500, fontSize: 15
           }}
         >
-          Job Roles
+          Job Roles ({jobs.length})
         </button>
         <button
           onClick={() => setActiveTab("applications")}
@@ -207,7 +436,7 @@ export default function CareersPage() {
             fontWeight: activeTab === "applications" ? 700 : 500, fontSize: 15
           }}
         >
-          Applications
+          Applications ({applications.length})
         </button>
       </div>
 
