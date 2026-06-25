@@ -94,15 +94,24 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
             fontWeight:600,color:"#0B2563",fontFamily:"inherit",width:"100%"}} />
       </div>
 
-      <button className="ins-quote-cta" style={{
+      <button 
+        className="ins-quote-cta" 
+        onClick={() => {
+          // WhatsApp number
+          const whatsappNumber = "7510400320"; 
+          const message = `Hello, I'm interested in an insurance .\n\n*Insurance Type:* ${insType}\n*Sum Insured:* ${sum}\n*Mobile Number:* ${mobile}`;
+          window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
+        }}
+        style={{
           marginLeft:16, padding:"16px 32px", background:"#F25917",
           border:"none", borderRadius:12, color:"#fff", fontSize:16,
           fontWeight:800, cursor:"pointer", display:"flex", alignItems:"center",
           gap:10, whiteSpace:"nowrap",
           fontFamily:"inherit", transition:"transform 0.2s, box-shadow 0.2s",
         }}
-     
-      >Get Quote <ArrowRight /></button>
+      >
+        Get Quote <ArrowRight />
+      </button>
     </div>
   );
 }

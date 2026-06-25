@@ -326,11 +326,11 @@ export default function ContactFormSection() {
               <div>
                 <p className="cfs-office-name">Head Office- Kochi</p>
                 <p className="cfs-office-addr">
-                  1st Floor, Sivel House, Changampuzha Nagar,<br />
+                  1st Floor, Indel House, Changampuzha Nagar,<br />
                   S. Kalamassery,<br />
                   Cochin – 682 033
                 </p>
-                <p className="cfs-office-hours">Mon–Sat: 9AM–6PM</p>
+                <p className="cfs-office-hours">Mon–Sat: 9:30 – 5:30</p>
               </div>
             </div>
             <a href="https://maps.google.com/?q=Changampuzha+Nagar+Kochi" target="_blank" rel="noopener noreferrer" className="cfs-dir-btn">
