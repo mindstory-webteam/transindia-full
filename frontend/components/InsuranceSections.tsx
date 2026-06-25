@@ -317,11 +317,11 @@ function InsurerSection() {
           <BulletList items={partnerBullets} />
 
           <div>
-            <button
+            {/* <button
               style={s.btnDark}
               onMouseEnter={e => (e.currentTarget.style.background = "#334155")}
               onMouseLeave={e => (e.currentTarget.style.background = "#1E293B")}
-            >Compare all insurers</button>
+            >Compare all insurers</button> */}
           </div>
         </div>
 
