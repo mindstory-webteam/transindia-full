@@ -31,32 +31,22 @@ export default function OurStory() {
           {/* Body paragraphs */}
           <div className="our-story-body">
             <p>
-              Risk Management, which is very much in practice in Western
-              countries, was seriously felt in the Indian Insurance Market during
-              early 2000. When the Government of India announced privatization in
-              the Insurance Industry, it formed the Insurance Regulatory and
-              Development Authority of India (IRDAI) to address negligible
-              insurance penetration among the public.
+             Transindia Insurance Broking and Risk Management Pvt. Ltd. is a trusted insurance broking and risk management company committed to helping businesses identify, manage, and mitigate their risks through comprehensive insurance solutions.
             </p>
             <p>
-              Insurance products are intangible and legalistic. Insurance
-              Companies were eager to accept policies without proper Risk
-              Assessment — leading to inordinate claim delays and refusals on
-              technical grounds. This is precisely the gap TransIndia was built
-              to bridge.
+             With the evolution of the Indian insurance industry and the introduction of insurance broking by IRDAI, Transindia was established in July 2006 with a vision to bridge the gap between insurance products and effective risk management practices. Recognizing the need for proper risk assessment, structured insurance planning, and customer-focused advisory, Transindia was built to ensure that clients receive the right coverage, seamless service, and long-term protection.
             </p>
             <p>
-              IRDAI introduced the concept of Broking in 2002, as practiced in
-              Western countries.{" "}
-              <strong>Transindia Insurance Brokers (India) Pvt. Ltd.</strong>,
-              incorporated in July 2006, has since been a licensed insurance
-              intermediary — fully concerned about the risks and wellbeing of
-              all patrons, associates, and well-wishers.
+             We specialize in Retail and Corporate Insurance, Risk Advisory, and Claims Management, providing end-to-end solutions tailored to the unique requirements of organizations across industries. Our experienced team works closely with clients to design efficient insurance programs, optimize coverage, support policy administration, and ensure smooth claims settlement.
+            </p>
+            <p>
+              
+              At Transindia, we believe insurance is not just about policies but about protecting businesses, people, and assets. Through our expertise, industry relationships, and service-driven approach, we continue to deliver transparent, reliable, and value-based risk management solutions to our clients and partners.
             </p>
           </div>
 
           {/* Check items grid */}
-          <div className="check-items-grid">
+          {/* <div className="check-items-grid">
             {checkItems.map((item) => (
               <div key={item.id} className="check-item">
                 <span className="check-icon">
@@ -67,7 +57,7 @@ export default function OurStory() {
                 <span className="check-text">{item.text}</span>
               </div>
             ))}
-          </div>
+          </div> */}
 
           <CoreValuesSection />
         </div>

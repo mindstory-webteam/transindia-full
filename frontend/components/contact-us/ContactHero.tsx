@@ -17,7 +17,7 @@ const contactCards = [
     label: "Live chat",
     sub: "Average wait: 2 minutes",
     cta: "Start Chat",
-    ctaHref: "#chat",
+    ctaHref: "https://wa.me/917510400320",
     badge: "Available 24/7",
     badgeColor: "#2AC764",
   },
@@ -97,7 +97,12 @@ export default function ContactHero() {
                 <p className="contact-card-sub">{card.sub}</p>
 
                 {card.cta && (
-                  <a href={card.ctaHref} className="contact-card-cta">
+                  
+                  <a  href={card.ctaHref}
+                    className="contact-card-cta"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     {card.cta}
                   </a>
                 )}
@@ -235,7 +240,6 @@ const CSS = `
     box-shadow: 0 4px 10px rgba(255, 107, 53, 0.55);
   }
 
-
   .contact-card-highlight {
     display: inline-block;
     margin-top: 4px;
@@ -255,9 +259,9 @@ const CSS = `
   /* ── Large-screen banner ── */
   .contact-lg-banner {
     position: absolute;
-    right: 12%; /* Aligns it roughly in the middle of the 2 right cards */
-    bottom: -20px; /* Adjust to let it peek out/sit under cards */
-    width: 400px; /* Adjust size as needed */
+    right: 12%;
+    bottom: -20px;
+    width: 400px;
     pointer-events: none;
     z-index: 1;
   }
@@ -377,7 +381,7 @@ const CSS = `
       transform: none;
       width: 100%;
       max-width: 100%;
-      margin-top: -110px;   /* pulls first card up ~half its height into banner */
+      margin-top: -110px;
       padding: 0 16px;
       box-sizing: border-box;
       z-index: 10;

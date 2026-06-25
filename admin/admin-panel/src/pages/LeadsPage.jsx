@@ -9,6 +9,7 @@ import {
   Users,
   Star,
   PhoneCall,
+  MessageCircle,
   CheckCircle2,
   Loader2,
   Inbox,
@@ -21,13 +22,30 @@ import autoTable from "jspdf-autotable";
 
 const STATUS_OPTIONS = ["new", "contacted", "converted", "closed"];
 
+const SOURCES = {
+  bmi: {
+    key: "bmi",
+    basePath: "/bmileads",
+    label: "BMI Calculator",
+    title: "BMI Calculator Leads",
+    subtitle: "Track BMI calculator submissions.",
+  },
+  quote: {
+    key: "quote",
+    basePath: "/quoteleads",
+    label: "Talk to an Expert",
+    title: "Talk to an Expert Leads",
+    subtitle: "Track quote-bar & \"Talk to an expert\" requests from the homepage.",
+  },
+};
+
 const styles = `
   .leads-page {
     padding: 4px;
   }
 
   .leads-header {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   .leads-header h1 {
@@ -41,6 +59,54 @@ const styles = `
     font-size: 14px;
     color: #64748b;
     margin: 0;
+  }
+
+  /* Source toggle (sliding pill) */
+  .source-toggle-row {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 28px;
+  }
+
+  .source-toggle {
+    position: relative;
+    display: inline-flex;
+    background: #f1f5f9;
+    border-radius: 9999px;
+    padding: 4px;
+    width: fit-content;
+  }
+
+  .source-toggle-slider {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: #0f172a;
+    border-radius: 9999px;
+    transition: transform 0.25s ease;
+    z-index: 0;
+  }
+
+  .source-toggle-btn {
+    position: relative;
+    z-index: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 9999px;
+    white-space: nowrap;
+    transition: color 0.2s;
+    min-width: 168px;
+  }
+
+  .source-toggle-btn.active {
+    color: #ffffff;
   }
 
   /* Export buttons */
@@ -233,7 +299,7 @@ const styles = `
 
   .leads-table {
     width: 100%;
-    min-width: 860px;
+    min-width: 760px;
     border-collapse: collapse;
     font-size: 14px;
     text-align: left;
@@ -312,6 +378,20 @@ const styles = `
   .bmi-obesity     { background: #fef2f2; color: #dc2626; box-shadow: inset 0 0 0 1px #fecaca; }
   .bmi-none        { background: #f1f5f9; color: #94a3b8; box-shadow: inset 0 0 0 1px #e2e8f0; }
 
+  /* Insurance type badge (quote leads) */
+  .ins-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: inset 0 0 0 1px #bfdbfe;
+    white-space: nowrap;
+  }
+
   .actions-group {
     display: flex;
     align-items: center;
@@ -337,6 +417,8 @@ const styles = `
   .action-btn:hover { background: #f1f5f9; color: #1d4ed8; }
 
   .action-btn.delete:hover { background: #fff1f2; color: #dc2626; }
+  .action-btn.call:hover { background: #ecfdf5; color: #047857; }
+  .action-btn.whatsapp:hover { background: #ecfdf5; color: #16a34a; }
 
   .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
@@ -464,6 +546,10 @@ function StatCard({ icon: Icon, label, value, accent }) {
 }
 
 export default function LeadsPage() {
+  const [source, setSource] = useState("bmi"); // "bmi" | "quote"
+  const isQuote = source === "quote";
+  const basePath = SOURCES[source].basePath;
+
   const [leads, setLeads] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -475,13 +561,21 @@ export default function LeadsPage() {
   const [exporting, setExporting] = useState(false);
   const limit = 10;
 
+  const switchSource = (next) => {
+    if (next === source) return;
+    setSource(next);
+    setPage(1);
+    setSearch("");
+    setStatusFilter("");
+  };
+
   const fetchLeads = useCallback(async () => {
     setLoading(true);
     try {
       const params = { page, limit };
       if (search.trim()) params.search = search.trim();
       if (statusFilter) params.status = statusFilter;
-      const { data } = await api.get("/bmileads", { params });
+      const { data } = await api.get(basePath, { params });
       const list = data?.leads ?? data?.data ?? (Array.isArray(data) ? data : []);
       setLeads(list);
       setTotalPages(data?.totalPages ?? data?.pages ?? 1);
@@ -490,16 +584,16 @@ export default function LeadsPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, statusFilter]);
+  }, [page, search, statusFilter, basePath]);
 
   const fetchStats = useCallback(async () => {
     try {
-      const { data } = await api.get("/bmileads/stats");
+      const { data } = await api.get(`${basePath}/stats`);
       setStats(data?.stats ?? data ?? {});
     } catch {
       // non-critical
     }
-  }, []);
+  }, [basePath]);
 
   useEffect(() => { fetchStats(); }, [fetchStats]);
 
@@ -512,7 +606,7 @@ export default function LeadsPage() {
     const prev = leads;
     setLeads((curr) => curr.map((l) => (l._id === id ? { ...l, status: newStatus } : l)));
     try {
-      await api.patch(`/bmileads/${id}`, { status: newStatus });
+      await api.patch(`${basePath}/${id}`, { status: newStatus });
       toast.success("Status updated");
       fetchStats();
     } catch (err) {
@@ -527,18 +621,18 @@ export default function LeadsPage() {
         <div>
           <p style={{ margin: "0 0 10px 0", fontWeight: 500 }}>Delete this lead? This action cannot be undone.</p>
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-            <button 
-              onClick={() => toast.dismiss(t.id)} 
+            <button
+              onClick={() => toast.dismiss(t.id)}
               style={{ padding: "6px 12px", border: "1px solid #e2e8f0", background: "#fff", borderRadius: 4, cursor: "pointer" }}
             >
               Cancel
             </button>
-            <button 
+            <button
               onClick={async () => {
                 toast.dismiss(t.id);
                 setDeletingId(id);
                 try {
-                  await api.delete(`/bmileads/${id}`);
+                  await api.delete(`${basePath}/${id}`);
                   toast.success("Lead deleted");
                   setLeads((curr) => curr.filter((l) => l._id !== id));
                   fetchStats();
@@ -560,13 +654,11 @@ export default function LeadsPage() {
   };
 
   // ── Exports ─────────────────────────────────────────────────────────────────
-  // Re-fetch ALL leads matching the current search + status filter (ignoring
-  // pagination), so the export isn't limited to the page on screen.
   const fetchAllForExport = async () => {
     const params = { page: 1, limit: 100000 };
     if (search.trim()) params.search = search.trim();
     if (statusFilter) params.status = statusFilter;
-    const { data } = await api.get("/bmileads", { params });
+    const { data } = await api.get(basePath, { params });
     return data?.leads ?? data?.data ?? (Array.isArray(data) ? data : []);
   };
 
@@ -577,22 +669,32 @@ export default function LeadsPage() {
     try {
       const all = await fetchAllForExport();
       if (!all.length) { toast.error("No leads to export"); return; }
-      const rows = all.map((l) => ({
-        Name: l.name || "",
-        Email: l.email || "",
-        Phone: l.phone || "",
-        City: l.city || "",
-        BMI: l.bmi ?? "",
-        "BMI Category": l.bmiCategory || "",
-        Message: l.message || "",
-        Status: l.status || "",
-        Date: fmtDate(l.createdAt),
-      }));
+
+      const rows = isQuote
+        ? all.map((l) => ({
+            Mobile: l.mobile || "",
+            "Insurance Type": l.insuranceType || "",
+            "Sum Insured": l.sumInsured || "",
+            Status: l.status || "",
+            Date: fmtDate(l.createdAt),
+          }))
+        : all.map((l) => ({
+            Name: l.name || "",
+            Email: l.email || "",
+            Phone: l.phone || "",
+            City: l.city || "",
+            BMI: l.bmi ?? "",
+            "BMI Category": l.bmiCategory || "",
+            Message: l.message || "",
+            Status: l.status || "",
+            Date: fmtDate(l.createdAt),
+          }));
+
       const ws = XLSX.utils.json_to_sheet(rows);
       ws["!cols"] = Object.keys(rows[0]).map((k) => ({ wch: Math.max(12, k.length + 2) }));
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "BMI Leads");
-      XLSX.writeFile(wb, `bmi-leads-${fileStamp()}.xlsx`);
+      XLSX.utils.book_append_sheet(wb, ws, isQuote ? "Quote Leads" : "BMI Leads");
+      XLSX.writeFile(wb, `${isQuote ? "quote" : "bmi"}-leads-${fileStamp()}.xlsx`);
       toast.success(`Exported ${all.length} lead(s)`);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Export failed");
@@ -610,7 +712,7 @@ export default function LeadsPage() {
       const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
       doc.setFontSize(15);
       doc.setTextColor(15, 23, 42);
-      doc.text("BMI Leads", 40, 38);
+      doc.text(isQuote ? "Talk to an Expert Leads" : "BMI Leads", 40, 38);
       doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
       doc.text(
@@ -621,16 +723,21 @@ export default function LeadsPage() {
         54
       );
 
-      const head = [["Name", "Phone", "Email", "City", "BMI", "Status", "Date"]];
-      const body = all.map((l) => [
-        l.name || "",
-        l.phone || "",
-        l.email || "",
-        l.city || "",
-        l.bmi != null ? `${l.bmi}${l.bmiCategory ? " · " + l.bmiCategory : ""}` : "—",
-        l.status || "",
-        fmtDate(l.createdAt),
-      ]);
+      const head = isQuote
+        ? [["Mobile", "Insurance Type", "Sum Insured", "Status", "Date"]]
+        : [["Name", "Phone", "Email", "City", "BMI", "Status", "Date"]];
+
+      const body = isQuote
+        ? all.map((l) => [l.mobile || "", l.insuranceType || "", l.sumInsured || "", l.status || "", fmtDate(l.createdAt)])
+        : all.map((l) => [
+            l.name || "",
+            l.phone || "",
+            l.email || "",
+            l.city || "",
+            l.bmi != null ? `${l.bmi}${l.bmiCategory ? " · " + l.bmiCategory : ""}` : "—",
+            l.status || "",
+            fmtDate(l.createdAt),
+          ]);
 
       autoTable(doc, {
         head,
@@ -642,7 +749,7 @@ export default function LeadsPage() {
         margin: { left: 40, right: 40 },
       });
 
-      doc.save(`bmi-leads-${fileStamp()}.pdf`);
+      doc.save(`${isQuote ? "quote" : "bmi"}-leads-${fileStamp()}.pdf`);
       toast.success(`Exported ${all.length} lead(s)`);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Export failed");
@@ -651,14 +758,30 @@ export default function LeadsPage() {
     }
   };
 
+  const colSpan = isQuote ? 6 : 8;
+
   return (
     <>
       <style>{styles}</style>
       <div className="leads-page">
-        <div className="leads-header" style={{ background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)", border: "1px solid rgb(251, 224, 216)", borderRadius: "18px", padding: "22px 24px", marginBottom: "28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "16px", flexWrap: "wrap" }}>
+        <div
+          className="leads-header"
+          style={{
+            background: "linear-gradient(120deg, rgb(255, 244, 240) 0%, rgb(255, 255, 255) 58%)",
+            border: "1px solid rgb(251, 224, 216)",
+            borderRadius: "18px",
+            padding: "22px 24px",
+            marginBottom: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+            flexWrap: "wrap",
+          }}
+        >
           <div>
-            <h1>Leads</h1>
-            <p>Track and manage incoming quote requests.</p>
+            <h1>{SOURCES[source].title}</h1>
+            <p>{SOURCES[source].subtitle}</p>
           </div>
 
           <div className="export-actions">
@@ -683,6 +806,28 @@ export default function LeadsPage() {
           </div>
         </div>
 
+        {/* ── Sliding source toggle ───────────────────────────────────── */}
+        <div className="source-toggle-row">
+          <div className="source-toggle">
+            <div
+              className="source-toggle-slider"
+              style={{ transform: isQuote ? "translateX(100%)" : "translateX(0%)" }}
+            />
+            <button
+              className={`source-toggle-btn ${!isQuote ? "active" : ""}`}
+              onClick={() => switchSource("bmi")}
+            >
+              BMI Calculator
+            </button>
+            <button
+              className={`source-toggle-btn ${isQuote ? "active" : ""}`}
+              onClick={() => switchSource("quote")}
+            >
+              Talk to an Expert
+            </button>
+          </div>
+        </div>
+
         <div className="stats-grid">
           <StatCard icon={Users}        label="Total Leads" value={stats?.total}     accent="blue" />
           <StatCard icon={Star}         label="New"         value={stats?.new}       accent="sky" />
@@ -697,7 +842,7 @@ export default function LeadsPage() {
               type="text"
               value={search}
               onChange={(e) => { setPage(1); setSearch(e.target.value); }}
-              placeholder="Search name, email, phone…"
+              placeholder={isQuote ? "Search mobile, insurance type…" : "Search name, email, phone…"}
               className="search-input"
             />
           </div>
@@ -726,20 +871,33 @@ export default function LeadsPage() {
             <table className="leads-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Contact</th>
-                  <th>City</th>
-                  <th>BMI</th>
-                  <th>Message</th>
-                  <th>Status</th>
-                  <th>Date</th>
-                  <th className="text-right">Actions</th>
+                  {isQuote ? (
+                    <>
+                      <th>Mobile</th>
+                      <th>Insurance Type</th>
+                      <th>Sum Insured</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th className="text-right">Actions</th>
+                    </>
+                  ) : (
+                    <>
+                      <th>Name</th>
+                      <th>Contact</th>
+                      <th>City</th>
+                      <th>BMI</th>
+                      <th>Message</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                      <th className="text-right">Actions</th>
+                    </>
+                  )}
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={8}>
+                    <td colSpan={colSpan}>
                       <div className="table-state-cell">
                         <Loader2 size={22} className="state-icon spin" />
                         Loading leads…
@@ -748,14 +906,66 @@ export default function LeadsPage() {
                   </tr>
                 ) : leads.length === 0 ? (
                   <tr>
-                    <td colSpan={8}>
+                    <td colSpan={colSpan}>
                       <div className="table-state-cell">
                         <Inbox size={28} className="state-icon" style={{ color: "#cbd5e1" }} />
                         <p className="state-title">No leads found</p>
-                        <p className="state-sub">New quote requests will show up here.</p>
+                        <p className="state-sub">
+                          {isQuote
+                            ? "New \"Talk to an expert\" requests will show up here."
+                            : "New BMI calculator submissions will show up here."}
+                        </p>
                       </div>
                     </td>
                   </tr>
+                ) : isQuote ? (
+                  leads.map((lead) => (
+                    <tr key={lead._id}>
+                      <td className="td-name">{lead.mobile}</td>
+                      <td>
+                        <span className="ins-badge">{lead.insuranceType}</span>
+                      </td>
+                      <td className="td-city">{lead.sumInsured || <span className="dash">—</span>}</td>
+                      <td>
+                        <select
+                          value={lead.status || "new"}
+                          onChange={(e) => handleStatusChange(lead._id, e.target.value)}
+                          className={`status-select ${getStatusClass(lead.status)}`}
+                        >
+                          {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{s}</option>
+                          ))}
+                        </select>
+                      </td>
+                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—"}</td>
+                      <td className="td-actions">
+                        <div className="actions-group">
+                          <a href={`tel:+91${lead.mobile}`} className="action-btn call" title="Call lead">
+                            <PhoneCall size={16} />
+                          </a>
+                          
+                          <a  href={`https://wa.me/91${lead.mobile}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="action-btn whatsapp"
+                            title="WhatsApp lead"
+                          >
+                            <MessageCircle size={16} />
+                          </a>
+                          <button
+                            onClick={() => handleDelete(lead._id)}
+                            disabled={deletingId === lead._id}
+                            className="action-btn delete"
+                            title="Delete lead"
+                          >
+                            {deletingId === lead._id
+                              ? <Loader2 size={16} className="spin" />
+                              : <Trash2 size={16} />}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
                   leads.map((lead) => (
                     <tr key={lead._id}>

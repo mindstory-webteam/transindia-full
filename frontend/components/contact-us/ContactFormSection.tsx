@@ -344,11 +344,11 @@ export default function ContactFormSection() {
           <div className="cfs-social-card">
             <p className="cfs-social-title">Connect on social</p>
             <div className="cfs-social-links">
-              <a href="#" className="cfs-social-btn" aria-label="Facebook">
+              <a href="https://www.facebook.com/share/1E3xnJumpB/" className="cfs-social-btn" aria-label="Facebook">
                 <img src="/images/contact-us/contact-form-section/facebook.svg" alt="Facebook" style={{ width: "33px", height: "33px" }} />
                 <span className="cfs-social-text">Facebook</span>
               </a>
-              <a href="#" className="cfs-social-btn" aria-label="Instagram">
+              <a href="https://www.instagram.com/transindiainsurance?igsh=MXQ4Y3FsOHo4dzI3eA==" className="cfs-social-btn" aria-label="Instagram">
                 <img src="/images/contact-us/contact-form-section/Instagram.svg" alt="Instagram" style={{ width: "33px", height: "33px" }} />
                 <span className="cfs-social-text">Instagram</span>
               </a>
