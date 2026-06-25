@@ -8,10 +8,14 @@ export default function ConsultationCTA() {
 
   const handleClick = async () => {
     setLoading(true);
-    // Simulate API call / form submission
-    await new Promise((r) => setTimeout(r, 900));
+    // Small delay just for the loading-spinner UX
+    await new Promise((r) => setTimeout(r, 600));
     setLoading(false);
     setSubmitted(true);
+
+    const whatsappNumber = "7510400320";
+    const message = "Hello, I'd like a free consultation regarding insurance coverage.";
+    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
@@ -118,13 +122,6 @@ export default function ConsultationCTA() {
           transition: background 0.2s ease, transform 0.15s ease,
             box-shadow 0.2s ease;
         }
-
-      
-
-      
-
-
-       
 
         /* Spinner */
         .spinner {
