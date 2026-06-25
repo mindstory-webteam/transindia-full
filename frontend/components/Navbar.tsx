@@ -27,8 +27,6 @@ interface Service {
 const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
 
 // How long (ms) the dropdown waits before closing after the cursor leaves.
-// This grace period lets you move from "Services" down onto the menu without it
-// snapping shut. Increase if you still find it hard to catch.
 const DROPDOWN_CLOSE_DELAY = 240;
 
 const NAV_ITEMS: NavItem[] = [
@@ -38,13 +36,28 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Contact us",            href: "/contact-us" },
 ];
 
-const FALLBACK_SERVICES: Service[] = [
-  { _id: "1", title: "Life Insurance",   slug: "life-insurance",   isActive: true },
-  { _id: "2", title: "Health Insurance", slug: "health-insurance", isActive: true },
-  { _id: "3", title: "Motor Insurance",  slug: "motor-insurance",  isActive: true },
-  { _id: "4", title: "Travel Insurance", slug: "travel-insurance", isActive: true },
-  { _id: "5", title: "Home Insurance",   slug: "home-insurance",   isActive: true },
+// ─── MANUAL SERVICES ──────────────────────────────────────────────────────────
+// These slugs MUST match the folders in app/our-services/ (the static pages).
+// They are ALWAYS shown — even if the backend is down — so the dropdown never
+// links to a 404. Backend services are merged on top of these (deduped by slug)
+// in the fetch effect below.
+const MANUAL_SERVICES: Service[] = [
+  { _id: "m1",  title: "Life Insurance",          slug: "life-insurance",          isActive: true },
+  { _id: "m2",  title: "Health Insurance",        slug: "health-insurance",        isActive: true },
+  { _id: "m3",  title: "Motor Insurance",         slug: "motor-insurance",         isActive: true },
+  { _id: "m4",  title: "Home Insurance",          slug: "home-insurance",          isActive: true },
+
+  { _id: "m6",  title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
+  { _id: "m7",  title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
+  { _id: "m8",  title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
+  { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
+  { _id: "m10", title: "Risk Consultation",       slug: "risk-consultation",       isActive: true },
 ];
+
+// Slugs that have a real static detail page. Backend services NOT in this set
+// are skipped to avoid linking to a 404 (e.g. Marine/Fire with no page yet).
+// ⛔ Remove this guard if you add a dynamic [slug] catch-all route.
+const VALID_SLUGS = new Set(MANUAL_SERVICES.map((s) => s.slug));
 
 // ─── HELPER: drill into any backend shape and find the services array ─────────
 function extractServices(data: unknown): Service[] {
@@ -80,7 +93,7 @@ function extractServices(data: unknown): Service[] {
 export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean }) {
   const [scrolled,           setScrolled]           = useState(false);
   const [mobileOpen,         setMobileOpen]         = useState(false);
-  const [services,           setServices]           = useState<Service[]>(FALLBACK_SERVICES);
+  const [services,           setServices]           = useState<Service[]>(MANUAL_SERVICES);
   const [siteTitle,          setSiteTitle]          = useState<string>("");
   const [dropdownOpen,       setDropdownOpen]       = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
@@ -88,8 +101,6 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   const closeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ── Hover-intent handlers for the desktop dropdown ──────────────────────────
-  // Opening is immediate; closing is delayed so the cursor can travel from the
-  // trigger to the menu (across the small gap) without the menu disappearing.
   const openDropdown = () => {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current);
@@ -116,20 +127,19 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }, []);
 
-  // ── Fetch services ──────────────────────────────────────────────────────────
+  // ── Fetch services & merge with manual list ─────────────────────────────────
   useEffect(() => {
     const controller = new AbortController();
 
     const fetchServices = async () => {
       try {
-        // API_BASE already ends with /api → final URL is .../api/services
         const res = await fetch(`${API_BASE}/services`, {
           method:  "GET",
           headers: { "Content-Type": "application/json" },
           signal:  controller.signal,
         });
 
-        if (!res.ok) return; // keep fallback
+        if (!res.ok) return; // keep manual list
 
         const raw     = await res.json();
         const fetched = extractServices(raw);
@@ -138,13 +148,28 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
           console.log("[Navbar] extracted services:", fetched.length);
         }
 
-        if (fetched.length > 0) {
-          setServices(fetched.filter((s) => s.isActive !== false));
+        // ── Merge: manual base + backend, deduped by slug ──────────────────
+        // Manual entries come first (order preserved). Backend services are
+        // added only if active, not already present, and have a real page.
+        const merged: Service[] = [...MANUAL_SERVICES];
+        const seen = new Set(merged.map((s) => s.slug));
+
+        for (const s of fetched) {
+          if (s.isActive === false) continue;
+          if (!s.slug || seen.has(s.slug)) continue;
+          // Skip backend services with no static page (avoids 404).
+          // ⛔ Remove this line if you add a dynamic [slug] catch-all route.
+          if (!VALID_SLUGS.has(s.slug)) continue;
+
+          merged.push(s);
+          seen.add(s.slug);
         }
+
+        setServices(merged);
       } catch (err: any) {
         if (err?.name === "AbortError") return;
         if (process.env.NODE_ENV !== "production") {
-          console.warn("[Navbar] services fetch failed — using fallback.");
+          console.warn("[Navbar] services fetch failed — using manual list.");
         }
       }
     };
@@ -154,10 +179,6 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   }, []);
 
   // ── Optional: dynamic brand title ───────────────────────────────────────────
-  // Disabled by default. Your backend currently has no settings endpoint, so
-  // probing for one only produces 404 noise. To enable, set a FULL endpoint URL
-  // in NEXT_PUBLIC_SETTINGS_URL (e.g. https://.../api/settings). When unset, no
-  // request is made and the logo image is shown.
   useEffect(() => {
     const endpoint = process.env.NEXT_PUBLIC_SETTINGS_URL;
     if (!endpoint) return;
@@ -244,8 +265,6 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                     onMouseEnter={openDropdown}
                     onMouseLeave={scheduleCloseDropdown}
                   >
-                    {/* Clicking "Services" navigates to /our-services;
-                        hovering opens the dropdown below. */}
                     <Link
                       href={item.href || "/our-services"}
                       className="nav-link nav-dropdown-trigger"
@@ -488,7 +507,6 @@ const CSS = `
     z-index: 300;
     pointer-events: none;
 
-    /* ── Slow, smooth open/close animation ── */
     opacity: 0;
     transform: translateY(-14px) scaleY(0.92);
     transform-origin: top center;
@@ -497,10 +515,6 @@ const CSS = `
       transform  0.55s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* Invisible bridge that fills the 8px gap between the trigger and the menu,
-     so moving the cursor from "Services" down to the list never crosses dead
-     space (which would otherwise fire mouseleave). Paired with the JS close
-     delay, this makes the menu easy to "catch". */
   .nav-dropdown-menu::before {
     content: "";
     position: absolute;
@@ -645,7 +659,6 @@ const CSS = `
     border-radius: 8px;
     overflow: hidden;
 
-    /* Slow smooth height + fade animation */
     max-height: 0;
     opacity: 0;
     transition:
@@ -654,7 +667,7 @@ const CSS = `
   }
 
   .drawer-dropdown-menu.dropdown-visible {
-    max-height: 600px;   /* large enough for any service list */
+    max-height: 600px;
     opacity: 1;
     margin: 6px 0 10px;
   }
