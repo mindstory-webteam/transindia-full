@@ -8,7 +8,7 @@ import {
 
 const NAV = [
   { to: "/",            icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/services",    icon: ShieldCheck,     label: "Services" },
+  // { to: "/services",    icon: ShieldCheck,     label: "Services" },
   { to: "/leads",       icon: Users,           label: "Leads" },
   { to: "/serviceleads", icon: Calculator,     label: "Service Leads" },
   { to: "/claimleads",  icon: FileText,        label: "Claim Leads" },
