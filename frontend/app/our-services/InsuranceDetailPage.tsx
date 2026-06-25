@@ -25,13 +25,11 @@ const VIEW_PLANS_HREF = "/our-services";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // ═════════════════════════════════════════════════════════════════════════════
-// PER-SERVICE CALCULATOR REGISTRY
-// Each service defines its OWN step-2/step-3 fields and its OWN pricing logic,
-// while sharing the same card style. The contact step (step 1) is shared.
-// To add/adjust a service, edit its entry in SERVICE_CALCS below.
+// SERVICE FORM TYPE DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════════════
 
-type FieldType = "text" | "email" | "tel" | "date" | "select" | "textarea";
+type FieldType = "text" | "email" | "tel" | "date" | "select" | "textarea" | "file";
+type FormType = "calculator" | "motor" | "miscellaneous" | "simple";
 
 interface CalcFieldDef {
   label: string;
@@ -41,30 +39,31 @@ interface CalcFieldDef {
   defaultValue: string;
 }
 
-// What every compute() returns — drives the result panel (same style for all).
 interface CalcResult {
-  coverageCaption: string;   // top-left label  (e.g. "Your coverage", "Sum insured")
-  coverageLabel: string;     // top-right value  (e.g. "₹1 crore")
-  primaryAmount: string;     // left result box amount
-  primaryUnit: string;       // left result box unit
-  secondaryAmount: string;   // right result box amount
-  secondaryUnit: string;     // right result box unit
-  totalLabel?: string;       // optional "Total over term:" row label
-  total?: string;            // optional total value
-  note?: string;             // optional amber callout (e.g. income cap)
-  disclaimer: string;        // bottom fine print
+  coverageCaption: string;
+  coverageLabel: string;
+  primaryAmount: string;
+  primaryUnit: string;
+  secondaryAmount: string;
+  secondaryUnit: string;
+  totalLabel?: string;
+  total?: string;
+  note?: string;
+  disclaimer: string;
 }
 
 type Values = Record<string, string>;
 
 interface ServiceCalc {
+  formType: FormType;
   cardTitle: string;
   submitLabel: string;
   submitBg: string;
-  aboutTitle: string;
-  aboutFields: CalcFieldDef[];   // Step 2 — "about you"
-  quoteFields: CalcFieldDef[];   // Step 3 — the calculator inputs
-  compute: (v: Values) => CalcResult;
+  aboutTitle?: string;
+  aboutFields?: CalcFieldDef[];
+  quoteFields?: CalcFieldDef[];
+  compute?: (v: Values) => CalcResult;
+  description?: string;
 }
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
@@ -97,9 +96,15 @@ const CONTACT_FIELDS: CalcFieldDef[] = [
 const ADDRESS_FIELD: CalcFieldDef = {
   label: "Address", type: "textarea", stateKey: "address", defaultValue: "",
 };
+
+// ═════════════════════════════════════════════════════════════════════════════
+// SERVICE CONFIGURATIONS
+// ═════════════════════════════════════════════════════════════════════════════
+
 const SERVICE_CALCS: Record<string, ServiceCalc> = {
   // ─── LIFE ──────────────────────────────────────────────────────────────────
   "life-insurance": {
+    formType: "calculator",
     cardTitle: "Calculate your premium",
     submitLabel: "Get My Quote",
     submitBg: "#1B8A3A",
@@ -149,6 +154,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
 
   // ─── HEALTH ────────────────────────────────────────────────────────────────
   "health-insurance": {
+    formType: "calculator",
     cardTitle: "Get your health quote",
     submitLabel: "Get My Health Quote",
     submitBg: "#0D9488",
@@ -168,7 +174,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
       const siMap: Record<string, number> = { "₹3 lakh": 300000, "₹5 lakh": 500000, "₹10 lakh": 1000000, "₹25 lakh": 2500000, "₹50 lakh": 5000000 };
       const si = siMap[v.sumInsured] ?? 500000;
       const age = ageFromDOB(v.dob) ?? 30;
-      const rate = age <= 25 ? 10 : age <= 35 ? 14 : age <= 45 ? 22 : age <= 55 ? 38 : age <= 65 ? 60 : 95; // per ₹1,000
+      const rate = age <= 25 ? 10 : age <= 35 ? 14 : age <= 45 ? 22 : age <= 55 ? 38 : age <= 65 ? 60 : 95;
       const coverFactor = v.coverType === "Family Floater" ? 1.6 : v.coverType === "Senior Citizen" ? 1.8 : 1;
       const condFactor = v.conditions === "Diabetes" ? 1.25 : v.conditions === "Hypertension" ? 1.2 : v.conditions === "Both" ? 1.45 : 1;
       const cityFactor = v.cityTier.startsWith("Tier 1") ? 1.15 : v.cityTier.startsWith("Tier 2") ? 1 : 0.9;
@@ -186,281 +192,86 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
 
   // ─── MOTOR ─────────────────────────────────────────────────────────────────
   "motor-insurance": {
-    cardTitle: "Calculate motor premium",
-    submitLabel: "Get My Motor Quote",
+    formType: "motor",
+    cardTitle: "Get your motor insurance quote",
+    submitLabel: "Submit Motor Quote",
     submitBg: "#EA580C",
-    aboutTitle: "Where are you based?",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Vehicle Type", type: "select", options: ["Car", "Two-Wheeler", "Commercial Vehicle"], stateKey: "vehicleType", defaultValue: "Car" },
-      { label: "Registration Year", type: "select", options: ["2024", "2023", "2022", "2021", "2020", "2019 or older"], stateKey: "regYear", defaultValue: "2023" },
-      { label: "Fuel Type", type: "select", options: ["Petrol", "Diesel", "CNG", "Electric"], stateKey: "fuelType", defaultValue: "Petrol" },
-      { label: "NCB (No Claim Bonus)", type: "select", options: ["0%", "20%", "25%", "35%", "45%", "50%"], stateKey: "ncb", defaultValue: "0%" },
-      { label: "Add-ons Required", type: "select", options: ["None", "Zero Depreciation", "Engine Protect", "Both"], stateKey: "addons", defaultValue: "None" },
-    ],
-    compute: (v) => {
-      const baseIDV = v.vehicleType === "Two-Wheeler" ? 80000 : v.vehicleType === "Commercial Vehicle" ? 900000 : 600000;
-      const year = v.regYear.includes("older") ? new Date().getFullYear() - 7 : parseInt(v.regYear, 10);
-      const vAge = Math.max(0, new Date().getFullYear() - year);
-      const idv = baseIDV * (1 - Math.min(0.5, vAge * 0.1));
-      const odPremium = idv * 0.03;
-      const fuelFactor = v.fuelType === "Electric" ? 0.9 : v.fuelType === "CNG" ? 1.05 : v.fuelType === "Diesel" ? 1.1 : 1;
-      const ncb = parseInt(v.ncb.replace(/\D/g, ""), 10) / 100 || 0;
-      const tp = v.vehicleType === "Two-Wheeler" ? 752 : v.vehicleType === "Commercial Vehicle" ? 3500 : 2094;
-      const od = odPremium * fuelFactor * (1 - ncb);
-      const addon = v.addons === "Zero Depreciation" ? od * 0.15 : v.addons === "Engine Protect" ? od * 0.05 : v.addons === "Both" ? od * 0.2 : 0;
-      const yearly = (od + tp + addon) * GST;
-      return {
-        coverageCaption: "Approx IDV",
-        coverageLabel: fmt(idv),
-        primaryAmount: fmt(yearly), primaryUnit: "per year",
-        secondaryAmount: fmt(yearly / 12), secondaryUnit: "per month",
-        disclaimer: "Estimated premium incl. 18% GST. Final IDV & price depend on make, model & insurer.",
-      };
-    },
+    description: "Upload your old insurance document and provide your policy number for a quick quote comparison.",
   },
 
   // ─── HOME ──────────────────────────────────────────────────────────────────
   "home-insurance": {
-    cardTitle: "Protect your home",
+    formType: "simple",
+    cardTitle: "Get your home insurance quote",
     submitLabel: "Get Home Quote",
     submitBg: "#7C3AED",
-    aboutTitle: "Where is the property?",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Property Type", type: "select", options: ["Apartment", "Independent House", "Villa", "Row House"], stateKey: "propertyType", defaultValue: "Apartment" },
-      { label: "Property Age", type: "select", options: ["Less than 5 years", "5–10 years", "10–20 years", "20+ years"], stateKey: "propertyAge", defaultValue: "Less than 5 years" },
-      { label: "Cover Required", type: "select", options: ["Structure Only", "Contents Only", "Structure + Contents"], stateKey: "coverType", defaultValue: "Structure + Contents" },
-      { label: "Property Value", type: "select", options: ["Below ₹20L", "₹20–50L", "₹50L–1Cr", "₹1Cr–2Cr", "Above ₹2Cr"], stateKey: "propertyValue", defaultValue: "₹50L–1Cr" },
-    ],
-    compute: (v) => {
-      const valMap: Record<string, number> = { "Below ₹20L": 1500000, "₹20–50L": 3500000, "₹50L–1Cr": 7500000, "₹1Cr–2Cr": 15000000, "Above ₹2Cr": 30000000 };
-      const value = valMap[v.propertyValue] ?? 7500000;
-      const coverFactor = v.coverType === "Structure Only" ? 0.8 : v.coverType === "Contents Only" ? 0.6 : 1;
-      const ageFactor = v.propertyAge.startsWith("Less") ? 1 : v.propertyAge.startsWith("5") ? 1.1 : v.propertyAge.startsWith("10") ? 1.25 : 1.4;
-      const typeFactor = v.propertyType === "Villa" ? 1.15 : v.propertyType === "Apartment" ? 0.9 : 1;
-      const yearly = value * 0.0004 * coverFactor * ageFactor * typeFactor * GST;
-      return {
-        coverageCaption: "Sum insured",
-        coverageLabel: fmt(value),
-        primaryAmount: fmt(yearly), primaryUnit: "per year",
-        secondaryAmount: fmt(yearly / 12), secondaryUnit: "per month",
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on construction, location & valuation.",
-      };
-    },
+    description: "Our insurance experts will help you find the perfect home coverage. Share your details and we'll prepare a personalized quote.",
   },
 
   // ─── TRAVEL ────────────────────────────────────────────────────────────────
   "travel-insurance": {
+    formType: "simple",
     cardTitle: "Plan your travel cover",
     submitLabel: "Get Travel Quote",
     submitBg: "#0891B2",
-    aboutTitle: "Tell us about the traveller",
-    aboutFields: [
-      { label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: "" },
-      ADDRESS_FIELD,
-    ],
-    quoteFields: [
-      { label: "Travel Type", type: "select", options: ["International", "Domestic"], stateKey: "travelType", defaultValue: "International" },
-      { label: "Trip Type", type: "select", options: ["Single Trip", "Multi-Trip Annual"], stateKey: "tripType", defaultValue: "Single Trip" },
-      { label: "Traveller Type", type: "select", options: ["Individual", "Family", "Senior Citizen", "Student"], stateKey: "travellerType", defaultValue: "Individual" },
-      { label: "Destination Region", type: "select", options: ["Asia", "Europe", "USA/Canada", "Worldwide"], stateKey: "destination", defaultValue: "Asia" },
-      { label: "Trip Duration", type: "select", options: ["1–7 days", "8–15 days", "16–30 days", "31–90 days"], stateKey: "duration", defaultValue: "8–15 days" },
-    ],
-    compute: (v) => {
-      const daysMap: Record<string, number> = { "1–7 days": 7, "8–15 days": 15, "16–30 days": 30, "31–90 days": 90 };
-      const days = daysMap[v.duration] ?? 15;
-      const domestic = v.travelType === "Domestic";
-      const perDay = domestic ? 25 : v.destination === "Europe" ? 90 : v.destination === "USA/Canada" ? 140 : v.destination === "Worldwide" ? 160 : 60;
-      const travellerFactor = v.travellerType === "Family" ? 2.6 : v.travellerType === "Senior Citizen" ? 1.8 : v.travellerType === "Student" ? 1.1 : 1;
-      const tripFactor = v.tripType === "Multi-Trip Annual" ? 4.5 : 1;
-      const premium = perDay * days * travellerFactor * tripFactor * GST;
-      const medMap: Record<string, string> = { Asia: "₹25 Lakh", Europe: "₹40 Lakh", "USA/Canada": "₹1 Crore", Worldwide: "₹1 Crore" };
-      const cover = domestic ? "₹5 Lakh" : medMap[v.destination] ?? "₹25 Lakh";
-      return {
-        coverageCaption: "Medical cover",
-        coverageLabel: cover,
-        primaryAmount: fmt(premium), primaryUnit: "trip premium",
-        secondaryAmount: fmt(premium / days), secondaryUnit: "per day",
-        disclaimer: "Estimated one-time premium incl. 18% GST. Final price depends on age & plan benefits.",
-      };
-    },
+    description: "Get instant travel insurance quotes for domestic and international trips. Quick approval, hassle-free claims.",
   },
 
   // ─── MARINE ────────────────────────────────────────────────────────────────
   "marine-insurance": {
+    formType: "simple",
     cardTitle: "Get your marine quote",
     submitLabel: "Get Marine Quote",
     submitBg: "#0369A1",
-    aboutTitle: "Your business details",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Cargo Type", type: "select", options: ["General Goods", "Perishables", "Machinery", "Hazardous", "Electronics"], stateKey: "cargoType", defaultValue: "General Goods" },
-      { label: "Mode of Transit", type: "select", options: ["Sea", "Air", "Road", "Rail", "Multimodal"], stateKey: "transitMode", defaultValue: "Sea" },
-      { label: "Trade Type", type: "select", options: ["Import", "Export", "Inland (Domestic)"], stateKey: "tradeType", defaultValue: "Export" },
-      { label: "Policy Type", type: "select", options: ["Single Transit", "Open / Annual Policy"], stateKey: "policyType", defaultValue: "Single Transit" },
-      { label: "Cargo Value", type: "select", options: ["Below ₹10L", "₹10–50L", "₹50L–1Cr", "₹1Cr–5Cr", "Above ₹5Cr"], stateKey: "cargoValue", defaultValue: "₹10–50L" },
-    ],
-    compute: (v) => {
-      const valMap: Record<string, number> = { "Below ₹10L": 750000, "₹10–50L": 3000000, "₹50L–1Cr": 7500000, "₹1Cr–5Cr": 30000000, "Above ₹5Cr": 75000000 };
-      const value = valMap[v.cargoValue] ?? 3000000;
-      const baseRate = v.cargoType === "Perishables" ? 0.005 : v.cargoType === "Machinery" ? 0.003 : v.cargoType === "Hazardous" ? 0.0065 : v.cargoType === "Electronics" ? 0.004 : 0.0025;
-      const modeFactor = v.transitMode === "Air" ? 0.8 : v.transitMode === "Road" ? 1.1 : v.transitMode === "Rail" ? 0.95 : v.transitMode === "Multimodal" ? 1.15 : 1;
-      const tradeFactor = v.tradeType.startsWith("Inland") ? 0.85 : 1;
-      const open = v.policyType.startsWith("Open");
-      const policyFactor = open ? 8 : 1;
-      const premium = value * baseRate * modeFactor * tradeFactor * policyFactor * GST;
-      const effRate = premium / value;
-      return {
-        coverageCaption: "Cargo value",
-        coverageLabel: fmt(value),
-        primaryAmount: fmt(premium), primaryUnit: open ? "annual premium" : "per transit",
-        secondaryAmount: pct(effRate), secondaryUnit: "effective rate",
-        disclaimer: "Estimated premium incl. 18% GST. Final rate depends on route, packing & claims history.",
-      };
-    },
+    description: "Protect your cargo with comprehensive marine insurance. Our experts will assess your cargo and provide the best coverage.",
   },
 
   // ─── FIRE ──────────────────────────────────────────────────────────────────
   "fire-insurance": {
+    formType: "simple",
     cardTitle: "Calculate fire premium",
     submitLabel: "Get Fire Quote",
     submitBg: "#DC2626",
-    aboutTitle: "Where is the premises?",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Property Type", type: "select", options: ["Factory", "Warehouse / Godown", "Shop / Showroom", "Office"], stateKey: "propertyType", defaultValue: "Factory" },
-      { label: "What to Cover", type: "select", options: ["Building Only", "Stock Only", "Building + Stock + Machinery"], stateKey: "coverScope", defaultValue: "Building + Stock + Machinery" },
-      { label: "Sum Insured", type: "select", options: ["Below ₹25L", "₹25L–1Cr", "₹1Cr–5Cr", "₹5Cr–25Cr", "Above ₹25Cr"], stateKey: "sumInsured", defaultValue: "₹1Cr–5Cr" },
-      { label: "Earthquake Cover", type: "select", options: ["No", "Yes"], stateKey: "earthquake", defaultValue: "No" },
-      { label: "Loss of Profit Add-on", type: "select", options: ["No", "Yes"], stateKey: "lossOfProfit", defaultValue: "No" },
-    ],
-    compute: (v) => {
-      const valMap: Record<string, number> = { "Below ₹25L": 1500000, "₹25L–1Cr": 6000000, "₹1Cr–5Cr": 30000000, "₹5Cr–25Cr": 150000000, "Above ₹25Cr": 350000000 };
-      const value = valMap[v.sumInsured] ?? 6000000;
-      const baseRate = v.propertyType === "Warehouse / Godown" ? 0.0008 : v.propertyType === "Shop / Showroom" ? 0.0005 : v.propertyType === "Office" ? 0.0004 : 0.0006;
-      const scopeFactor = v.coverScope === "Building Only" ? 0.8 : v.coverScope === "Stock Only" ? 0.9 : 1;
-      let yearly = value * baseRate * scopeFactor;
-      if (v.earthquake === "Yes") yearly += value * 0.00015;
-      if (v.lossOfProfit === "Yes") yearly *= 1.2;
-      yearly *= GST;
-      return {
-        coverageCaption: "Sum insured",
-        coverageLabel: fmt(value),
-        primaryAmount: fmt(yearly), primaryUnit: "per year",
-        secondaryAmount: fmt(yearly / 12), secondaryUnit: "per month",
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on occupancy, risk grade & valuation.",
-      };
-    },
+    description: "Safeguard your property and business assets with our fire insurance. Get a customized quote in minutes.",
   },
 
   // ─── MISCELLANEOUS ─────────────────────────────────────────────────────────
   "miscellaneous-insurance": {
+    formType: "miscellaneous",
     cardTitle: "Find your cover",
     submitLabel: "Get a Quote",
     submitBg: "#4F46E5",
-    aboutTitle: "Your details",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Cover Required", type: "select", options: ["Burglary", "Fidelity Guarantee", "Money in Transit", "Machinery Breakdown", "Professional Indemnity", "Public Liability", "Workmen's Compensation"], stateKey: "coverType", defaultValue: "Burglary" },
-      { label: "Applicant Type", type: "select", options: ["Business / SME", "Professional", "Manufacturer", "Retailer"], stateKey: "applicantType", defaultValue: "Business / SME" },
-      { label: "Sum Insured / Limit", type: "select", options: ["Below ₹10L", "₹10–50L", "₹50L–2Cr", "₹2Cr–10Cr", "Above ₹10Cr"], stateKey: "sumInsured", defaultValue: "₹10–50L" },
-      { label: "Number of Employees", type: "select", options: ["1–10", "11–50", "51–200", "200+"], stateKey: "employees", defaultValue: "11–50" },
-    ],
-    compute: (v) => {
-      const valMap: Record<string, number> = { "Below ₹10L": 750000, "₹10–50L": 3000000, "₹50L–2Cr": 12500000, "₹2Cr–10Cr": 60000000, "Above ₹10Cr": 150000000 };
-      const value = valMap[v.sumInsured] ?? 3000000;
-      const rateMap: Record<string, number> = {
-        "Burglary": 0.0015, "Fidelity Guarantee": 0.002, "Money in Transit": 0.0025,
-        "Machinery Breakdown": 0.003, "Professional Indemnity": 0.0035, "Public Liability": 0.0018, "Workmen's Compensation": 0.0022,
-      };
-      const rate = rateMap[v.coverType] ?? 0.002;
-      const empFactor = v.employees === "11–50" ? 1.4 : v.employees === "51–200" ? 2 : v.employees === "200+" ? 3 : 1;
-      const headcountMatters = v.coverType === "Workmen's Compensation" || v.coverType === "Fidelity Guarantee";
-      const yearly = value * rate * (headcountMatters ? empFactor : 1) * GST;
-      return {
-        coverageCaption: "Sum insured / limit",
-        coverageLabel: fmt(value),
-        primaryAmount: fmt(yearly), primaryUnit: "per year",
-        secondaryAmount: fmt(yearly / 12), secondaryUnit: "per month",
-        note: `Estimate for ${v.coverType} cover.`,
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on risk profile & underwriting.",
-      };
-    },
+    description: "Specialized coverage for your unique business needs.",
   },
 
   // ─── ENTERTAINMENT ─────────────────────────────────────────────────────────
   "entertainment-insurance": {
+    formType: "simple",
     cardTitle: "Insure your production",
     submitLabel: "Get Production Quote",
     submitBg: "#9333EA",
-    aboutTitle: "Production contact",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Production Type", type: "select", options: ["Film / TV", "Concert / Live Event", "Broadcast / Streaming", "Exhibition / Fair", "Ad Film"], stateKey: "productionType", defaultValue: "Film / TV" },
-      { label: "Cover Required", type: "select", options: ["Full Production Package", "Equipment Only", "Event Cancellation", "Public Liability"], stateKey: "coverType", defaultValue: "Full Production Package" },
-      { label: "Venue / Shoot Setting", type: "select", options: ["Indoor / Studio", "Outdoor", "Both"], stateKey: "venue", defaultValue: "Both" },
-      { label: "Budget / Sum Insured", type: "select", options: ["Below ₹25L", "₹25L–1Cr", "₹1Cr–5Cr", "₹5Cr–25Cr", "Above ₹25Cr"], stateKey: "budget", defaultValue: "₹25L–1Cr" },
-      { label: "Duration", type: "select", options: ["1 day", "2–7 days", "1–4 weeks", "1–3 months", "3+ months"], stateKey: "duration", defaultValue: "2–7 days" },
-    ],
-    compute: (v) => {
-      const valMap: Record<string, number> = { "Below ₹25L": 1500000, "₹25L–1Cr": 6000000, "₹1Cr–5Cr": 30000000, "₹5Cr–25Cr": 150000000, "Above ₹25Cr": 350000000 };
-      const value = valMap[v.budget] ?? 6000000;
-      const baseRate = v.productionType === "Concert / Live Event" ? 0.015 : v.productionType === "Broadcast / Streaming" ? 0.01 : v.productionType === "Exhibition / Fair" ? 0.011 : v.productionType === "Ad Film" ? 0.013 : 0.012;
-      const coverFactor = v.coverType === "Equipment Only" ? 0.5 : v.coverType === "Event Cancellation" ? 0.7 : v.coverType === "Public Liability" ? 0.4 : 1;
-      const venueFactor = v.venue === "Outdoor" ? 1.25 : v.venue === "Indoor / Studio" ? 0.9 : 1.1;
-      const durMap: Record<string, number> = { "1 day": 0.6, "2–7 days": 1, "1–4 weeks": 1.8, "1–3 months": 3, "3+ months": 4.5 };
-      const durFactor = durMap[v.duration] ?? 1;
-      const premium = value * baseRate * coverFactor * venueFactor * durFactor * GST;
-      return {
-        coverageCaption: "Production budget",
-        coverageLabel: fmt(value),
-        primaryAmount: fmt(premium), primaryUnit: "total premium",
-        secondaryAmount: pct(premium / value), secondaryUnit: "of budget",
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on cast, schedule & risk survey.",
-      };
-    },
+    description: "Complete insurance coverage for your film, TV, and entertainment productions. Protect your cast, crew, and equipment.",
   },
 
   // ─── RISK CONSULTATION (free) ────────────────────────────────────────────────
   "risk-consultation": {
+    formType: "simple",
     cardTitle: "Book your free assessment",
     submitLabel: "Book Free Session",
     submitBg: "#1E293B",
-    aboutTitle: "Your details",
-    aboutFields: [ADDRESS_FIELD],
-    quoteFields: [
-      { label: "Assessment Type", type: "select", options: ["Personal Portfolio", "Business Risk", "Both"], stateKey: "assessmentType", defaultValue: "Personal Portfolio" },
-      { label: "Current Policies", type: "select", options: ["None", "1–2 policies", "3–5 policies", "6+"], stateKey: "currentPolicies", defaultValue: "1–2 policies" },
-      { label: "Annual Premium Spend", type: "select", options: ["Below ₹10K", "₹10–50K", "₹50K–2L", "Above ₹2L"], stateKey: "premiumSpend", defaultValue: "₹10–50K" },
-      { label: "Preferred Slot", type: "select", options: ["Morning (9–12)", "Afternoon (12–5)", "Evening (5–8)"], stateKey: "slot", defaultValue: "Morning (9–12)" },
-    ],
-    compute: (v) => {
-      const spendMap: Record<string, number> = { "Below ₹10K": 8000, "₹10–50K": 30000, "₹50K–2L": 125000, "Above ₹2L": 300000 };
-      const spend = spendMap[v.premiumSpend] ?? 30000;
-      const saving = spend * 0.22;
-      return {
-        coverageCaption: "Consultation",
-        coverageLabel: "Free Portfolio Audit",
-        primaryAmount: fmt(0), primaryUnit: "consultation fee",
-        secondaryAmount: fmt(saving), secondaryUnit: "potential saving/yr",
-        note: "Your first session is free — no obligation, no sales pitch.",
-        disclaimer: "Estimated saving based on typical 15–30% optimisation. Actual result varies by portfolio.",
-      };
-    },
+    description: "Get a personalized risk assessment and portfolio review from our experts. Free consultation, no obligation.",
   },
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HERO CALCULATOR CARD — fields + pricing logic come from SERVICE_CALCS[slug].
-// Same 3-step card style for every service; only the inputs and the math differ.
-//   Step 1: contact   (shared)
-//   Step 2: about you (config.aboutFields)
-//   Step 3: calculator(config.quoteFields)  → config.compute(values)
+// CALCULATOR CARD — for "calculator" formType only
 // ═════════════════════════════════════════════════════════════════════════════
-function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: string }) {
-  // Pick this service's config; fall back to life-insurance for any unknown slug.
+function CalculatorCard({ slug, serviceTitle }: { slug: string; serviceTitle: string }) {
   const config = SERVICE_CALCS[slug] ?? SERVICE_CALCS["life-insurance"];
+
+  if (config.formType !== "calculator" || !config.compute || !config.quoteFields || !config.aboutFields) {
+    return null;
+  }
 
   const step1Fields = CONTACT_FIELDS;
   const step2Fields = config.aboutFields;
@@ -478,11 +289,10 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
 
   const handleChange = (key: string, value: string) => {
     setValues((prev) => ({ ...prev, [key]: value }));
-    setResult(null); // inputs changed → clear stale estimate
+    setResult(null);
     setError(null);
   };
 
-  // ── Step 1 validation (contact / lead info) ──────────────────────────────────
   const validateContact = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
@@ -498,25 +308,20 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
   const goToStep3 = () => { setError(null); setStep(3); };
   const handleRetry = () => { setResult(null); setError(null); setStep(3); };
 
-  // ── estimate (Step 3) — runs this service's compute() AND submits the lead ──
   const calculate = async () => {
     if (!validateContact()) { setResult(null); setStep(1); return; }
 
-    // Per-service pricing logic:
-    const estimate = config.compute(values);
-
+    const estimate = config.compute!(values);
     setResult({ ...estimate, to: (values.email || "").trim() });
 
-    // Submit the lead WITH the computed estimate. A failed POST never blocks
-    // the user from seeing their result.
     setSubmitting(true);
     try {
       await fetch(`${API_BASE}/serviceleads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...values,                 // all collected field values (varies per service)
-          estimate,                  // the computed result for this service
+          ...values,
+          estimate,
           serviceSlug: slug,
           serviceTitle,
           source: "website",
@@ -529,9 +334,6 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
     }
   };
 
-  if (!fields.length) return null;
-
-  // Shared field renderer — same markup for every service.
   const renderField = (field: CalcFieldDef) => {
     if (field.type === "date") {
       return (
@@ -602,7 +404,6 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
     );
   };
 
-  // Step pill — active colour uses this service's submit colour.
   const StepDot = ({ n, label }: { n: 1 | 2 | 3; label: string }) => (
     <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 700, color: step >= n ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap" }}>
       <span style={{ width: 20, height: 20, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: step >= n ? config.submitBg : "#E5E7EB", color: step >= n ? "#fff" : "#6B7280", flexShrink: 0 }}>
@@ -618,7 +419,6 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
 
   return (
     <div className="li-card">
-      {/* Step indicator */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
         <StepDot n={1} label="Contact" />
         <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
@@ -631,7 +431,6 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
         {showingResult ? "Your estimated premium" : cardTitle}
       </h2>
 
-      {/* FORM VIEW */}
       {!showingResult && (
         <>
           {currentFields.map(renderField)}
@@ -671,7 +470,6 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
         </>
       )}
 
-      {/* RESULT VIEW — flexible labels, same style for every service */}
       {showingResult && result && (
         <>
           <div className="li-result">
@@ -697,14 +495,14 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
             {result.note && <p className="li-result-cap">{result.note}</p>}
             <p className="li-result-note">{result.disclaimer}</p>
             {result.to && (
-              <p className="li-result-note">We&apos;ll share this estimate with you at {result.to}.</p>
+              <p className="li-result-note">We'll share this estimate with you at {result.to}.</p>
             )}
           </div>
 
           <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
             <button type="button" onClick={handleRetry} className="li-back-btn">Retry</button>
             <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
-              View Plans
+              Compare Plans
             </Link>
           </div>
         </>
@@ -713,9 +511,475 @@ function HeroCalcCard({ slug, serviceTitle }: { slug: string; serviceTitle: stri
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FAQ ACCORDION — unchanged
-// ─────────────────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+// SIMPLE FORM CARD — for "simple" formType
+// ═════════════════════════════════════════════════════════════════════════════
+function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const validateForm = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            We've received your information. Our insurance experts will reach out to you shortly with a personalized quote.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "" }); }} className="li-back-btn">
+            New Quote
+          </button>
+          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
+           Compare Plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <h2 className="li-card-title">{config.cardTitle}</h2>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
+
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+
+      <button
+        className="li-submit"
+        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
+
+      {error && <p className="li-error">{error}</p>}
+      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MOTOR FORM CARD — for "motor" formType
+// ═════════════════════════════════════════════════════════════════════════════
+function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    insuranceNumber: "",
+  });
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      if (f.size > 5 * 1024 * 1024) {
+        setError("File size must be less than 5MB");
+        return;
+      }
+      setFile(f);
+      setError(null);
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    const insNumber = (values.insuranceNumber || "").trim();
+    
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!insNumber) { setError("Please enter your insurance policy number."); return false; }
+    if (!file) { setError("Please upload your old insurance document."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    try {
+      const formData = new FormData();
+      formData.append("name", values.name);
+      formData.append("email", values.email);
+      formData.append("phone", values.phone);
+      formData.append("insuranceNumber", values.insuranceNumber);
+      formData.append("serviceSlug", slug);
+      formData.append("serviceTitle", serviceTitle);
+      formData.append("source", "website");
+      if (file) formData.append("insuranceDocument", file);
+
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        body: formData,
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Quote Request Received!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            Thank you for uploading your insurance document. Our team will compare quotes and send you the best options shortly.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            Policy #: <strong>{values.insuranceNumber}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceNumber: "" }); setFile(null); }} className="li-back-btn">
+            New Quote
+          </button>
+          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
+           Compare Plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <h2 className="li-card-title">{config.cardTitle}</h2>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
+
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Insurance Policy Number</span>
+        <input
+          type="text"
+          value={values.insuranceNumber}
+          onChange={(e) => handleChange("insuranceNumber", e.target.value)}
+          className="li-textfield"
+          placeholder="e.g., POL123456789"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Upload Old Insurance Document</span>
+        <div className="li-file-upload">
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="li-file-input"
+            accept=".pdf,.jpg,.jpeg,.png"
+          />
+          <div className="li-file-label">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <span className="li-file-text">
+              {file ? file.name : "Click or drag to upload (PDF, JPG, PNG)"}
+            </span>
+          </div>
+        </div>
+      </label>
+
+      <button
+        className="li-submit"
+        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
+
+      {error && <p className="li-error">{error}</p>}
+      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MISCELLANEOUS FORM CARD — for "miscellaneous" formType
+// ═════════════════════════════════════════════════════════════════════════════
+function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    insuranceTypes: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const validateForm = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    const types = (values.insuranceTypes || "").trim();
+
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!types) { setError("Please tell us about your insurance needs."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            We've received your inquiry. Our insurance experts will assess your needs and provide the best coverage options.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            We'll contact you at: <strong>{values.email}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceTypes: "" }); }} className="li-back-btn">
+            New Inquiry
+          </button>
+          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
+           Compare Plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <h2 className="li-card-title">{config.cardTitle}</h2>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
+
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Insurance Types & Requirements</span>
+        <textarea
+          value={values.insuranceTypes}
+          onChange={(e) => handleChange("insuranceTypes", e.target.value)}
+          className="li-textarea"
+          rows={4}
+          placeholder="Tell us about your insurance needs. E.g., Burglary coverage, Professional indemnity, Employee welfare, etc."
+        />
+      </label>
+
+      <button
+        className="li-submit"
+        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
+
+      {error && <p className="li-error">{error}</p>}
+      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// FAQ SECTION
+// ═════════════════════════════════════════════════════════════════════════════
 function FAQSection({ data }: { data: InsuranceDetailData }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -759,15 +1023,17 @@ function FAQSection({ data }: { data: InsuranceDetailData }) {
   );
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
-// ─────────────────────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
 export default function InsuranceDetailPage({ data, slug }: Props) {
+  const config = SERVICE_CALCS[slug] ?? SERVICE_CALCS["life-insurance"];
+
   return (
     <>
       <style>{CSS}</style>
       <div style={{ overflowX: "hidden", width: "100%" }}>
-         <Preloader/>
+        <Preloader />
         <Navbar />
 
         {/* ── HERO ── */}
@@ -806,9 +1072,12 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
               </div>
             </div>
 
-            {/* RIGHT — per-service premium calculator */}
+            {/* RIGHT — render appropriate form based on formType */}
             <div className="li-right">
-              <HeroCalcCard slug={slug} serviceTitle={data.title || data.heroBadgeText} />
+              {config.formType === "calculator" && <CalculatorCard slug={slug} serviceTitle={data.title || data.heroBadgeText} />}
+              {config.formType === "simple" && <SimpleFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
+              {config.formType === "motor" && <MotorFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
+              {config.formType === "miscellaneous" && <MiscellaneousFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
             </div>
           </div>
         </section>
@@ -1016,6 +1285,14 @@ const CSS = `
   .li-back-btn{ flex-shrink: 0; padding: 14px 20px; background: transparent; color: #0B1F4D; border: 1.5px solid #0B1F4D; border-radius: 8px; font-size: 15px; font-weight: 800; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; cursor: pointer; transition: background 0.15s; }
   .li-back-btn:hover{ background: #F1F5F9; }
   .li-disclaimer{ text-align: center; font-size: 12px; color: #9CA3AF; margin: 10px 0 0; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
+
+  /* ── file upload ── */
+  .li-file-upload{ position: relative; border: 1.5px dashed #E2E8F0; border-radius: 8px; padding: 20px; text-align: center; transition: border-color 0.15s; cursor: pointer; background: #F9FAFB; }
+  .li-file-upload:hover{ border-color: #38BDF8; background: #F0F9FF; }
+  .li-file-input{ display: none; }
+  .li-file-label{ display: flex; flex-direction: column; align-items: center; gap: 8px; color: #6B7280; font-size: 13px; font-weight: 600; pointer-events: none; }
+  .li-file-label svg{ width: 24px; height: 24px; stroke: #6B7280; }
+  .li-file-text{ color: #374151; }
 
   /* ── inline validation message ── */
   .li-error{ margin: 12px 0 0; padding: 10px 12px; font-size: 12.5px; font-weight: 600; color: #B91C1C; background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; text-align: center; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }

@@ -51,7 +51,7 @@ const MANUAL_SERVICES: Service[] = [
   { _id: "m7",  title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
   { _id: "m8",  title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
   { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
-  { _id: "m10", title: "Risk Consultation",       slug: "risk-consultation",       isActive: true },
+
 ];
 
 // Slugs that have a real static detail page. Backend services NOT in this set

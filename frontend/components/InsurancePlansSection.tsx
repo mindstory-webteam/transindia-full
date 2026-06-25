@@ -2,17 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { SERVICE_CARDS } from "../app/our-services/insuranceData";
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-const SERVICE_ENDPOINTS = [`${API_BASE}/services`];
 const SERVICE_DETAIL_BASE = "/our-services";
 const CARD_TINTS = ["#FFF0F0", "#F0F8FF", "#F5F0FF", "#FFFBF0"];
 
 // Carousel settings
 const CAROUSEL_SETTINGS = {
-  autoPlayInterval: 5000,  // 5 seconds
-  transitionDuration: 0.6, // 600ms
+  autoPlayInterval: 5000,
+  transitionDuration: 0.6,
 };
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -27,9 +26,19 @@ type Plan = {
   imageBg: string;
 };
 
-// ─── NO FALLBACK DATA ─────────────────────────────────────────────────────────
-// All data is fetched from the backend API only.
+// ─── MANUAL PLANS (mapped from SERVICE_CARDS) ─────────────────────────────────
+const PLANS: Plan[] = SERVICE_CARDS.map((s, i) => ({
+  label:    s.title,
+  desc:     s.description,
+  cta:      "Know more",
+  slug:     s.slug,
+  href:     `${SERVICE_DETAIL_BASE}/${s.slug}`,
+  imageSrc: s.image,
+  imageAlt: `${s.title} illustration`,
+  imageBg:  CARD_TINTS[i % CARD_TINTS.length],
+}));
 
+// ─── TRUST ITEMS ──────────────────────────────────────────────────────────────
 const TRUST_ITEMS = [
   {
     label:    "24/7\nClaim Assistance",
@@ -57,113 +66,16 @@ const TRUST_ITEMS = [
   },
 ];
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-
-function extractList(json: any): any[] {
-  if (Array.isArray(json)) return json;
-  if (Array.isArray(json?.data)) return json.data;
-  if (Array.isArray(json?.services)) return json.services;
-  if (Array.isArray(json?.results)) return json.results;
-  if (Array.isArray(json?.data?.services)) return json.data.services;
-  return [];
-}
-
-function getImageSrc(s: any): string {
-  const img =
-    s.image ?? s.imageUrl ?? s.imageSrc ?? s.thumbnail ??
-    (Array.isArray(s.images) ? s.images[0] : null);
-  if (!img) return "";
-  if (typeof img === "string") return img;
-  return img.url ?? img.secure_url ?? img.src ?? "";
-}
-
-function slugify(str: string): string {
-  return str
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-function getSlug(s: any): string {
-  const raw =
-    s.slug ?? s._id ?? s.id ?? s.serviceId ?? slugify(s.title ?? s.name ?? s.label ?? "");
-  return String(raw);
-}
-
-function mapServiceToPlan(s: any, i: number): Plan {
-  const name = s.title ?? s.name ?? s.label ?? "Service";
-  const slug = getSlug(s);
-  return {
-    label:    name,
-    desc:     s.description ?? s.desc ?? s.shortDescription ?? s.summary ?? "",
-    cta:      "Know more",
-    slug,
-    href:     slug ? `${SERVICE_DETAIL_BASE}/${slug}` : "#",
-    imageSrc: getImageSrc(s),
-    imageAlt: `${name} illustration`,
-    imageBg:  CARD_TINTS[i % CARD_TINTS.length],
-  };
-}
-
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function InsurancePlansSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch services from the API only — no fallback data
-  useEffect(() => {
-    const controller = new AbortController();
-
-    (async () => {
-      let json: any = null;
-      let fetchError: string | null = null;
-
-      for (const url of SERVICE_ENDPOINTS) {
-        try {
-          const res = await fetch(url, { signal: controller.signal });
-          if (res.ok) {
-            json = await res.json();
-            break;
-          } else {
-            fetchError = `API returned ${res.status}`;
-          }
-        } catch (err: any) {
-          if (err?.name === "AbortError") return;
-          fetchError = err?.message || "Network error";
-        }
-      }
-
-      if (json) {
-        const list = extractList(json);
-        if (list.length > 0) {
-          const mapped = list.map(mapServiceToPlan);
-          setPlans(mapped);
-          setError(null);
-        } else {
-          setError("No services available from the API.");
-          setPlans([]);
-        }
-      } else {
-        const errorMsg = `Failed to fetch services from API (${SERVICE_ENDPOINTS.join(", ")}). ${fetchError || "Unknown error"}`;
-        console.error("[InsurancePlansSection]", errorMsg);
-        setError(errorMsg);
-        setPlans([]);
-      }
-
-      setLoading(false);
-    })();
-
-    return () => controller.abort();
-  }, []);
-
+  const plans = PLANS;
   const cardsPerRow = 4;
   const totalSlides = Math.ceil(plans.length / cardsPerRow);
 
@@ -183,7 +95,6 @@ export default function InsurancePlansSection() {
   const handleDotClick = (index: number) => {
     setCurrentSlide(index);
     setIsAutoPlay(false);
-    // Resume autoplay after 10 seconds of inactivity
     if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
     autoPlayTimerRef.current = setTimeout(() => {
       setIsAutoPlay(true);
@@ -221,79 +132,54 @@ export default function InsurancePlansSection() {
           </div>
 
           {/* ── CAROUSEL ── */}
-          {error ? (
-            <div className="ips-error-state">
-              <p className="ips-error-message">{error}</p>
-              <p className="ips-error-hint">Please check your API configuration and ensure it's properly connected.</p>
-            </div>
-          ) : plans.length === 0 && !loading ? (
-            <div className="ips-empty-state">
-              <p className="ips-empty-message">No services available at the moment.</p>
-            </div>
-          ) : (
           <div
             className="ips-carousel-wrapper"
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <div className="ips-carousel-track" ref={carouselRef} style={{
-              transform: `translateX(calc(-${currentSlide * 100}%))`
-            }}>
-              {loading
-                ? Array.from({ length: 4 }).map((_, i) => (
-                    <div key={`skel-${i}`} className="ips-carousel-item">
-                      <div className="ips-skel">
-                        <div className="ips-skel-img" />
-                        <div className="ips-skel-body">
-                          <div className="ips-skel-line title" />
-                          <div className="ips-skel-line" />
-                          <div className="ips-skel-line short" />
-                          <div className="ips-skel-line cta" />
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                : plans.map((plan, i) => (
-                    <div
-                      key={plan.slug || i}
-                      className="ips-carousel-item"
+            <div
+              className="ips-carousel-track"
+              ref={carouselRef}
+              style={{ transform: `translateX(calc(-${currentSlide * 100}%))` }}
+            >
+              {plans.map((plan, i) => (
+                <div key={plan.slug || i} className="ips-carousel-item">
+                  <div className="ips-card fade-in">
+                    <Link
+                      href={plan.href}
+                      className="ips-card-img-link"
+                      aria-label={`Explore ${plan.label} plans`}
                     >
-                      <div className="ips-card fade-in">
-                        <Link
-                          href={plan.href}
-                          className="ips-card-img-link"
-                          aria-label={`Explore ${plan.label} plans`}
-                        >
-                          <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
-                            {plan.imageSrc ? (
-                              <img
-                                src={plan.imageSrc}
-                                alt={plan.imageAlt}
-                                className="ips-card-img"
-                              />
-                            ) : null}
-                          </div>
-                        </Link>
-
-                        <div className="ips-card-body">
-                          <h3 className="ips-card-title">{plan.label}</h3>
-                          <p className="ips-card-desc">{plan.desc}</p>
-                          <Link href={plan.href} className="ips-card-cta">
-                            {plan.cta}
-                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                              <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
-                                stroke="currentColor" strokeWidth="1.8"
-                                strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                          </Link>
-                        </div>
+                      <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
+                        {plan.imageSrc ? (
+                          <img
+                            src={plan.imageSrc}
+                            alt={plan.imageAlt}
+                            className="ips-card-img"
+                          />
+                        ) : null}
                       </div>
+                    </Link>
+
+                    <div className="ips-card-body">
+                      <h3 className="ips-card-title">{plan.label}</h3>
+                      <p className="ips-card-desc">{plan.desc}</p>
+                      <Link href={plan.href} className="ips-card-cta">
+                        {plan.cta}
+                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                          <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
+                            stroke="currentColor" strokeWidth="1.8"
+                            strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </Link>
                     </div>
-                  ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* ── NAVIGATION DOTS ── */}
-            {!loading && totalSlides > 1 && (
+            {totalSlides > 1 && (
               <div className="ips-carousel-dots">
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <button
@@ -307,7 +193,6 @@ export default function InsurancePlansSection() {
               </div>
             )}
           </div>
-          )}
 
           {/* ── TRUST BANNER ── */}
           <div className="ips-banner fade-up">
@@ -449,43 +334,6 @@ const CSS = `
     overflow: hidden;
   }
 
-  /* Error and empty states */
-  .ips-error-state,
-  .ips-empty-state {
-    background: #fff;
-    border-radius: 16px;
-    padding: clamp(32px, 5vw, 48px) clamp(24px, 5vw, 40px);
-    text-align: center;
-    margin-bottom: clamp(36px, 5vw, 56px);
-    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-  }
-
-  .ips-error-state {
-    border-left: 4px solid #EF4444;
-    background: #FEF2F2;
-  }
-
-  .ips-error-message {
-    font-size: 16px;
-    font-weight: 600;
-    color: #DC2626;
-    margin: 0 0 12px;
-  }
-
-  .ips-error-hint {
-    font-size: 14px;
-    color: #B91C1C;
-    margin: 0;
-    line-height: 1.6;
-  }
-
-  .ips-empty-message {
-    font-size: 16px;
-    font-weight: 600;
-    color: #6B7280;
-    margin: 0;
-  }
-
   .ips-carousel-track {
     display: flex;
     gap: clamp(12px, 1.8vw, 20px);
@@ -513,7 +361,7 @@ const CSS = `
     }
   }
 
-  /* Single card ── */
+  /* Single card */
   .ips-card {
     background: #fff;
     border-radius: 18px;
@@ -610,49 +458,6 @@ const CSS = `
   }
 
   .ips-card-cta:hover { gap: 10px; }
-
-  /* ── Skeleton (loading) ── */
-  .ips-skel {
-    background: #fff;
-    border-radius: 18px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-height: 260px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-  }
-
-  .ips-skel-img {
-    height: clamp(110px, 12vw, 130px);
-    background: #eef1f5;
-    flex-shrink: 0;
-  }
-
-  .ips-skel-body {
-    padding: 20px 22px 26px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    flex: 1;
-  }
-
-  .ips-skel-line {
-    height: 12px;
-    border-radius: 6px;
-    background: linear-gradient(90deg, #eef1f5 25%, #e2e7ee 37%, #eef1f5 63%);
-    background-size: 400% 100%;
-    animation: ips-shimmer 1.4s ease infinite;
-  }
-
-  .ips-skel-line.title { height: 18px; width: 60%; }
-  .ips-skel-line.short { width: 80%; }
-  .ips-skel-line.cta   { width: 40%; margin-top: auto; }
-
-  @keyframes ips-shimmer {
-    0%   { background-position: 100% 0; }
-    100% { background-position: 0 0; }
-  }
 
   /* ── NAVIGATION DOTS ── */
   .ips-carousel-dots {

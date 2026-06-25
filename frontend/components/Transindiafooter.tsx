@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Link from "next/link";
 
 const LOGO_SRC          = "/images/logo/transindia.png";
@@ -16,62 +16,38 @@ const socialIcons: { name: string; src: string; href: string }[] = [
   { name: "LinkedIn",    href: "#", src: "/images/Footer/linkedin logo.svg" },
 ];
 
-interface Service {
-  _id: string;
-  title: string;
-  name?: string;
-  slug: string;
-  isActive: boolean;
-}
-
-const FALLBACK_SERVICES: Service[] = [
-  { _id: "1", title: "Life Insurance",   slug: "life-insurance",   isActive: true },
-  { _id: "2", title: "Health Insurance", slug: "health-insurance", isActive: true },
-  { _id: "3", title: "Motor Insurance",  slug: "motor-insurance",  isActive: true },
-  { _id: "4", title: "Travel Insurance", slug: "travel-insurance", isActive: true },
-  { _id: "5", title: "Home Insurance",   slug: "home-insurance",   isActive: true },
+const MANUAL_SERVICES = [
+  { _id: "m1", title: "Life Insurance",          slug: "life-insurance",          isActive: true },
+  { _id: "m2", title: "Health Insurance",        slug: "health-insurance",        isActive: true },
+  { _id: "m3", title: "Motor Insurance",         slug: "motor-insurance",         isActive: true },
+  { _id: "m4", title: "Home Insurance",          slug: "home-insurance",          isActive: true },
+  { _id: "m6", title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
+  { _id: "m7", title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
+  { _id: "m8", title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
+  { _id: "m9", title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
 ];
 
-function extractServices(data: unknown): Service[] {
-  if (!data) return [];
-  if (Array.isArray(data)) return data as Service[];
-  if (typeof data === "object" && data !== null) {
-    const obj = data as Record<string, unknown>;
-    for (const key of ["data", "services", "result", "results", "items", "payload"]) {
-      const val = obj[key];
-      if (Array.isArray(val) && val.length > 0) return val as Service[];
-    }
-    if (obj.data && typeof obj.data === "object") {
-      const nested = obj.data as Record<string, unknown>;
-      for (const key of ["services", "items", "results"]) {
-        const val = nested[key];
-        if (Array.isArray(val) && val.length > 0) return val as Service[];
-      }
-    }
-  }
-  return [];
-}
+const productLinks = MANUAL_SERVICES.map((s) => ({
+  label: s.title,
+  href: `/our-services/${s.slug}`,
+}));
 
 const companyLinks = [
-  { label: "About us", href: "/about" },
-  // { label: "Our team", href: "#" },
+  { label: "About us",          href: "/about" },
   { label: "Become an advisor", href: "#" },
-  // { label: "Corporate solutions", href: "#" },
-  { label: "Careers", href: "/careers" },
+  { label: "Careers",           href: "/careers" },
 ];
 
 const supportLinks = [
-  { label: "Make a claim", href: "/claims" },
-  // { label: "Track claim", href: "#" },
-  { label: "Contact us", href: "/contact-us" },
-  { label: "Privacy policy", href: "/privacy-policy" },
-  { label: "Terms of use", href: "/terms" },
+  { label: "Make a claim",  href: "/claims" },
+  { label: "Contact us",    href: "/contact-us" },
+  { label: "Privacy policy",href: "/privacy-policy" },
+  { label: "Terms of use",  href: "/terms" },
 ];
 
 const bottomLinks = [
   { label: "Terms",         href: "/terms" },
   { label: "Privacy",       href: "/privacy-policy" },
-  // { label: "Disclaimer",    href: "#" },
   { label: "Cookie policy", href: "/cookie-policy" },
 ];
 
@@ -113,40 +89,6 @@ const FooterColumn: React.FC<{ title: string; links: { label: string; href: stri
 );
 
 const TransindiaFooter: React.FC = () => {
-  const [services, setServices] = useState<Service[]>(FALLBACK_SERVICES);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const apiUrl  = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-        const res     = await fetch(`${apiUrl}/services`, {
-          method:  "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        if (!res.ok) return;
-
-        const raw      = await res.json();
-        const fetched  = extractServices(raw);
-
-        if (fetched.length > 0) {
-          setServices(fetched.filter((s) => s.isActive !== false));
-        }
-      } catch (err) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error("[Footer] services fetch error:", err);
-        }
-      }
-    };
-
-    fetchServices();
-  }, []);
-
-  const productLinks = services.map(s => ({
-    label: s.title || s.name || "",
-    href: `/our-services/${s.slug}`
-  }));
-
   return (
     <>
       <style>{RESPONSIVE_CSS}</style>
@@ -205,8 +147,8 @@ const TransindiaFooter: React.FC = () => {
             {/* SOCIAL ICONS */}
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {socialIcons.map((icon) => (
-                <a
-                  key={icon.name}
+                
+                <a  key={icon.name}
                   href={icon.href}
                   title={icon.name}
                   style={{
@@ -233,8 +175,8 @@ const TransindiaFooter: React.FC = () => {
           {/* ── Right nav columns ── */}
           <div className="tf-nav-cols">
             <FooterColumn title="Products" links={productLinks} />
-            <FooterColumn title="Company" links={companyLinks} />
-            <FooterColumn title="Support" links={supportLinks} />
+            <FooterColumn title="Company"  links={companyLinks} />
+            <FooterColumn title="Support"  links={supportLinks} />
           </div>
         </div>
 
@@ -273,7 +215,7 @@ const RESPONSIVE_CSS = `
   .tf-footer {
     background-color: #0d0f14;
     color: #9ca3af;
-   font-family: var(--font-sora), "Sora", sans-serif;
+    font-family: var(--font-sora), "Sora", sans-serif;
     padding-top: 48px;
     border-top: 1px solid #1f2937;
   }
