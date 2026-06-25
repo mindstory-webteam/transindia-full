@@ -23,8 +23,8 @@ const STEP_ICONS = [
   "/images/section-4/Future.svg",
 ];
 const BADGE_ICON_SRC        = "/images/section-4/Glowing Star.svg";
-const CLAIM_FIGURE_SRC      = "/images/section-4/close up of businessman in dark blue suit waving goodbye.svg";
-const BANNER_PEOPLE_SRC     = "/images/section-4/young people in casual clothes standing.svg";
+const CLAIM_FIGURE_SRC      = "/images/home/HOME/INSURANCE ADVISOR AVATAR.png";
+const BANNER_PEOPLE_SRC     = "/images/home/HOME/Life Insurance.png";
 const SATISFACTION_ICON_SRC = "/images/section-4/Beaming face with smiling eyes emoji.svg";
 const MORE_TILE_FIGURE_SRC  = "/images/section-4/network/hands holding heart.svg";
 
@@ -136,7 +136,7 @@ function ClaimSection() {
             src={CLAIM_FIGURE_SRC}
             alt="advisor"
             className="is-claim-figure"
-            style={{ position: "absolute", bottom: 0, right: 12, width: 130, objectFit: "contain", pointerEvents: "none" }}
+            style={{ position: "absolute", bottom: 0, right: 12, width: 200, objectFit: "contain", pointerEvents: "none" }}
           />
         </div>
 
@@ -219,11 +219,11 @@ function AdvisorSection() {
               style={{
                 position: "absolute",
                 bottom: 0,
-                right: 16,
-                width: 160,
+                right: -58,
+                width: 360,
                 objectFit: "contain",
                 objectPosition: "bottom",
-                height: "calc(100% + 48px)",
+                height: "300px",
                 pointerEvents: "none",
               }}
             />

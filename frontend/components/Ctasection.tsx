@@ -2,9 +2,7 @@
 
 import React from "react";
 
-
-const SHIELD_SRC  = "/images/Cta/Protection shield, System security, Verified access.svg";
-const FAMILY_SRC  = "/images/Cta/couple walks with baby.svg";
+const SHIELD_SRC = "/images/home/HOME/FAMILY PROTECTION VISUAL.png";
 
 const PhoneIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -47,7 +45,7 @@ export default function CtaSection() {
           position: relative;
           height: 480px;
           display: flex;
-          align-items: flex-end;
+          align-items: center;
           justify-content: center;
         }
 
@@ -145,18 +143,12 @@ export default function CtaSection() {
             </div>
           </div>
 
-          {/* ── RIGHT: composite illustration — shield behind family ── */}
+          {/* ── RIGHT: single shield image ── */}
           <div className="cta-image-col">
             <img
               src={SHIELD_SRC}
-              alt=""
-              aria-hidden="true"
+              alt="Protection shield"
               style={s.shieldImg}
-            />
-            <img
-              src={FAMILY_SRC}
-              alt="Family protected by insurance shield"
-              style={s.familyImg}
             />
           </div>
 
@@ -214,34 +206,14 @@ const s: Record<string, React.CSSProperties> = {
   },
 
   shieldImg: {
-    position: "absolute",
-    top: "8%",
-    left: "50%",
-    transform: "translateX(-62%)",
-    width: "68%",
-    maxWidth: 300,
+    width: "100%",
+    maxWidth: 640,
     height: "auto",
     objectFit: "contain",
-    opacity: 0.88,
+    opacity: 0.92,
     pointerEvents: "none",
     userSelect: "none" as const,
-    zIndex: 1,
     filter: "drop-shadow(0 12px 40px rgba(59,97,220,0.22))",
-  },
-
-  familyImg: {
-    position: "absolute",
-    bottom: 0,
-    left: "50%",
-    transform: "translateX(-44%)",
-    height: "94%",
-    maxHeight: 450,
-    width: "auto",
-    objectFit: "contain",
-    objectPosition: "bottom center",
-    pointerEvents: "none",
-    userSelect: "none" as const,
-    zIndex: 2,
   },
 
 };

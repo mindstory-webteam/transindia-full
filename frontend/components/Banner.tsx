@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 
-const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png";
+const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png]";
 
 const STATS = [
   { value: "1.2L+",   label: "Policies sold"  },
@@ -466,7 +466,7 @@ export default function Banner() {
             <div className="ins-right w-full lg:w-[52%] max-w-[500px] lg:max-w-[680px] flex flex-col items-center lg:items-end mt-4 lg:mt-0 mx-auto lg:mx-0">
               <div className="relative w-full lg:w-full lg:mr-[-18px]">
                 <img
-                  src="/images/home/home-banner-rightimg.png"
+                  src="/images/home/HOME/HERO BANNER.png"
                   alt="Insurance coverage"
                   className="w-full h-auto object-contain max-w-full lg:max-w-[110%] mx-auto lg:ml-auto"
                 />

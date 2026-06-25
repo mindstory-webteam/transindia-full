@@ -357,7 +357,7 @@ export default function BmiSection() {
             {/* Right: IMAGE AREA — replace src with your illustration */}
             <div className="bmi-figure">
               <img
-                src="/images/home/image 57.png"
+                src="/images/home/HOME/BMI  HEALTH INSURANCE VISUAL.png"
                 alt="BMI range chart from underweight to obesity, highlighting the healthy range 18.5 – 24.9"
                 onError={(e) => {
                   const img = e.currentTarget;

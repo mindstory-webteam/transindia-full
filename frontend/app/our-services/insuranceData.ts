@@ -909,7 +909,7 @@ export interface ServiceCard {
 export const SERVICE_CARDS: ServiceCard[] = [
   {
     slug: "life-insurance",
-    image: "/images/services/life.svg",
+    image: "/images/home/HOME/Life Insurance.png",
     iconBg: "bg-slate-100",
     title: "Life Insurance",
     badge: "Popular",
@@ -921,7 +921,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "health-insurance",
-    image: "/images/services/health.svg",
+    image: "/images/home/HOME/Health Insurance.png",
     iconBg: "bg-emerald-50",
     title: "Health Insurance",
     badge: "Critical need",
@@ -933,7 +933,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "motor-insurance",
-    image: "/images/services/motor.svg",
+    image: "/images/home/HOME/Motor Insurance.png",
     iconBg: "bg-orange-50",
     title: "Motor Insurance",
     badge: "Mandatory",
@@ -945,7 +945,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "home-insurance",
-    image: "/images/services/home.svg",
+    image: "/images/home/HOME/Home Insurance.png",
     iconBg: "bg-purple-50",
     title: "Home Insurance",
     badge: "Underrated",
@@ -958,7 +958,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   
   {
     slug: "marine-insurance",
-    image: "/images/services/marine.svg",
+    image: "/images/home/HOME/Marine Insurance.png",
     iconBg: "bg-sky-50",
     title: "Marine Insurance",
     badge: "For Traders",
@@ -970,7 +970,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "fire-insurance",
-    image: "/images/services/fire.svg",
+    image: "/images/home/HOME/Fire Insurance.png",
     iconBg: "bg-red-50",
     title: "Fire Insurance",
     badge: "For Business",
@@ -982,7 +982,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "miscellaneous-insurance",
-    image: "/images/services/miscellaneous.svg",
+    image: "/images/home/HOME/Miscellaneous Insurance.png",
     iconBg: "bg-indigo-50",
     title: "Miscellaneous Insurance",
     badge: "Specialised",
@@ -994,7 +994,7 @@ export const SERVICE_CARDS: ServiceCard[] = [
   },
   {
     slug: "entertainment-insurance",
-    image: "/images/services/entertainment.svg",
+    image: "/images/home/HOME/Entertainment Insurance.png",
     iconBg: "bg-purple-50",
     title: "Entertainment Insurance",
     badge: "For Productions",
