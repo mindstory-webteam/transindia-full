@@ -220,9 +220,9 @@ export async function submitClaimLead(formData) {
   return data;
 }
 
-// ── Service Leads (premium calculator form) ───────────────────────────────────
-// These return the RAW axios response (like getLeadStats / getLeads above),
-// so the pages read res.data.data.
+// ── Service Leads ─────────────────────────────────────────────────────────────
+// All admin functions return the RAW axios response so pages read res.data.data.
+// The update function uses PUT to match router.put("/:id") in servicesFormRoutes.js
 
 /**
  * Public — submit a service/premium-calculator lead
@@ -232,14 +232,19 @@ export async function submitServiceLead(payload) {
 }
 
 /**
- * Admin — get all service leads (optionally filter by ?status= / ?service=)
+ * Admin — get all service leads (optionally filter by ?status= / ?slug= / ?formType=)
+ *
+ * Usage:
+ *   getServiceLeads()                         → all leads
+ *   getServiceLeads({ status: "new" })        → filtered by status
+ *   getServiceLeads({ slug: "motor-insurance" })
  */
 export async function getServiceLeads(params = {}) {
   return api.get("/serviceleads", { params });
 }
 
 /**
- * Admin — get aggregate service-lead stats (total, byStatus, byService)
+ * Admin — get aggregate service-lead stats (total, byStatus)
  */
 export async function getServiceLeadStats() {
   return api.get("/serviceleads/stats");
@@ -253,10 +258,14 @@ export async function getServiceLead(id) {
 }
 
 /**
- * Admin — update a service lead (e.g. status / notes)
+ * Admin — update a service lead (status / notes)
+ *
+ * ⚠️  Uses PUT — must match router.put("/:id") in servicesFormRoutes.js.
+ *     The previous version used api.patch() which returned 404 because
+ *     no PATCH route exists for this resource.
  */
 export async function updateServiceLead(id, payload) {
-  return api.patch(`/serviceleads/${id}`, payload);
+  return api.put(`/serviceleads/${id}`, payload);   // ← PUT not PATCH
 }
 
 /**

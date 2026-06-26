@@ -7,7 +7,7 @@ import {
 } from "../services/api";
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
-  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip, Download,
+  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -24,44 +24,34 @@ const STYLES = `
   .sl-select { font-family:inherit; }
   .sl-export { transition: background .15s ease, border-color .15s ease, opacity .15s ease; }
   .sl-export:hover:not(:disabled) { background:#F4F7FB; border-color:#DCE3EC; }
-  .sl-doc { color:#0891B2; text-decoration:none; display: inline-flex; align-items: center; gap: 5px; }
+  .sl-doc { color:#0891B2; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
   .sl-doc:hover { text-decoration:underline; }
-  .sl-doc:active { opacity: 0.7; }
+  .sl-doc:active { opacity:0.7; }
   @media (prefers-reduced-motion: reduce) {
     .sl-stat, .sl-tab, .sl-del, .sl-export { transition:none !important; }
   }
 `;
 
+// ─── API base (strip trailing /api if present) ────────────────────────────────
 const API_HOST = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
 /**
- * ✅ IMPROVED: fileUrl function now handles multiple cases
- * 1. Direct Cloudinary URLs (https://) - use directly
- * 2. API proxy path - use via backend (/api/serviceleads/:id/document)
- * 3. Legacy local paths - prepend API_HOST
+ * Always use the backend proxy for document access.
+ *
+ * WHY: Cloudinary "raw" PDFs return a content-type of
+ *      application/octet-stream and may have CORS restrictions that
+ *      prevent the browser from opening / downloading them directly.
+ *      Going through our own backend endpoint lets us:
+ *        1. Set the correct Content-Disposition header.
+ *        2. Add auth if needed later.
+ *        3. Avoid CORS entirely.
+ *
+ * The endpoint  GET /api/serviceleads/:id/document
+ * looks up the lead, reads lead.insuranceDocument (the Cloudinary URL),
+ * and either proxies the stream or redirects with proper headers.
  */
-const fileUrl = (p, leadId) => {
-  if (!p) return "";
-  
-  // Case 1: Already a full HTTPS URL (Cloudinary)
-  if (p.startsWith("https://")) {
-    return p;
-  }
-  
-  // Case 2: HTTP URL (rare but handle it)
-  if (p.startsWith("http://")) {
-    return p;
-  }
-  
-  // Case 3: API proxy path (preferred for reliability)
-  // This goes through your backend, giving you control over CORS and caching
-  if (leadId) {
-    return `${API_HOST}/api/serviceleads/${leadId}/document`;
-  }
-  
-  // Case 4: Legacy local path
-  return `${API_HOST}${p}`;
-};
+const docProxyUrl = (leadId) =>
+  leadId ? `${API_HOST}/api/serviceleads/${leadId}/document` : "";
 
 const STATUS_META = {
   new:       { label: "New",       color: "#D97706", bg: "#FEF3C7" },
@@ -108,29 +98,30 @@ function fmtDate(iso) {
 
 const subText = { color: "#94A3B8", fontSize: 12, marginTop: 2 };
 
-// ✅ IMPROVED: LeadDetails now uses leadId for proper document access
+// ─── LeadDetails ─────────────────────────────────────────────────────────────
+// Always routes document access through the backend proxy URL.
 function LeadDetails({ l }) {
-  const slug = (l.serviceSlug || "").toLowerCase();
-  const docUrl = fileUrl(l.insuranceDocument, l._id);
+  const slug   = (l.serviceSlug || "").toLowerCase();
+  const hasDoc = Boolean(l.insuranceDocument);
+  const proxyUrl = docProxyUrl(l._id);
 
-  // Motor — policy number + uploaded document with improved link
-  if (slug.includes("motor") || l.insuranceNumber || l.insuranceDocument) {
+  // Motor — policy number + document download via proxy
+  if (slug.includes("motor") || l.insuranceNumber || hasDoc) {
     return (
       <div>
-        {l.insuranceNumber && <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>}
-        {l.insuranceDocument ? (
-          <a 
-            className="sl-doc" 
-            href={docUrl}
-            download
-            target="_blank" 
+        {l.insuranceNumber && (
+          <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>
+        )}
+        {hasDoc ? (
+          // Use an <a> with target="_blank" so the browser opens the proxied URL.
+          // The backend sets Content-Disposition: attachment so it downloads.
+          <a
+            className="sl-doc"
+            href={proxyUrl}
+            target="_blank"
             rel="noopener noreferrer"
-            title="Click to view or download the insurance document"
             style={{ fontSize: 12.5, marginTop: 3 }}
-            onClick={(e) => {
-              // Optional: Log for debugging
-              console.log("Accessing document:", docUrl);
-            }}
+            title="View / download insurance document"
           >
             <Paperclip size={12} /> View document
           </a>
@@ -157,7 +148,7 @@ function LeadDetails({ l }) {
         <p style={{ color: "#0F172A", fontWeight: 600 }}>
           {l.sumAssured || "—"}{l.policyTerm ? ` · ${l.policyTerm}` : ""}
         </p>
-        {l.smoker && <p style={subText}>Smoker: {l.smoker}</p>}
+        {l.smoker      && <p style={subText}>Smoker: {l.smoker}</p>}
         {l.annualIncome && <p style={subText}>{l.annualIncome}</p>}
       </div>
     );
@@ -176,16 +167,16 @@ function LeadDetails({ l }) {
     );
   }
 
-  // Simple forms (home/travel/marine/fire/entertainment/risk) — nothing extra
   return <span style={{ color: "#94A3B8" }}>—</span>;
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
 export default function ServiceLeadsPage() {
-  const [leads, setLeads]     = useState([]);
-  const [stats, setStats]     = useState(null);
-  const [filter, setFilter]   = useState("all");
+  const [leads,   setLeads]   = useState([]);
+  const [stats,   setStats]   = useState(null);
+  const [filter,  setFilter]  = useState("all");
   const [loading, setLoading] = useState(true);
-  const [busyId, setBusyId]   = useState(null);
+  const [busyId,  setBusyId]  = useState(null);
 
   const load = (status = filter) => {
     setLoading(true);
@@ -232,42 +223,37 @@ export default function ServiceLeadsPage() {
     }
   };
 
-  // ── Exports ─────────────────────────────────────────────────────────────────
+  // ── Exports ──────────────────────────────────────────────────────────────────
   const fileStamp = () => new Date().toISOString().slice(0, 10);
 
-  // Every field across every form type, so no submission is lost in the export.
   const buildRows = () =>
     leads.map((l) => ({
-      Name: l.name || "",
-      Email: l.email || "",
-      Phone: l.phone || "",
-      Service: l.serviceTitle || l.serviceSlug || "",
-      Gender: l.gender || "",
-      "Marital Status": l.maritalStatus || "",
-      "Date of Birth": l.dob || "",
-      Address: l.address || "",
-      // Life
-      Smoker: l.smoker || "",
-      "Sum Assured": l.sumAssured || "",
-      "Policy Term": l.policyTerm || "",
-      "Annual Income": l.annualIncome || "",
-      // Health
-      "Cover Type": l.coverType || "",
-      "Sum Insured": l.sumInsured || "",
-      "Conditions": l.conditions || "",
-      "City Tier": l.cityTier || "",
-      // Motor
-      "Policy Number": l.insuranceNumber || "",
-      "Document": l.insuranceDocument ? fileUrl(l.insuranceDocument, l._id) : "",
-      // Miscellaneous
-      "Requirements": l.insuranceTypes || "",
-      // Estimate
-      Coverage: l.estimate?.coverage || "",
+      Name:              l.name || "",
+      Email:             l.email || "",
+      Phone:             l.phone || "",
+      Service:           l.serviceTitle || l.serviceSlug || "",
+      Gender:            l.gender || "",
+      "Marital Status":  l.maritalStatus || "",
+      "Date of Birth":   l.dob || "",
+      Address:           l.address || "",
+      Smoker:            l.smoker || "",
+      "Sum Assured":     l.sumAssured || "",
+      "Policy Term":     l.policyTerm || "",
+      "Annual Income":   l.annualIncome || "",
+      "Cover Type":      l.coverType || "",
+      "Sum Insured":     l.sumInsured || "",
+      Conditions:        l.conditions || "",
+      "City Tier":       l.cityTier || "",
+      "Policy Number":   l.insuranceNumber || "",
+      // Use proxy URL so the Excel link also works correctly
+      Document:          l.insuranceDocument ? docProxyUrl(l._id) : "",
+      Requirements:      l.insuranceTypes || "",
+      Coverage:          l.estimate?.coverage || "",
       "Premium / Month": l.estimate?.monthly || "",
-      "Premium / Year": l.estimate?.yearly || "",
+      "Premium / Year":  l.estimate?.yearly || "",
       "Total Over Term": l.estimate?.total || "",
-      Status: STATUS_META[l.status]?.label || l.status || "",
-      "Submitted On": fmtDate(l.createdAt),
+      Status:            STATUS_META[l.status]?.label || l.status || "",
+      "Submitted On":    fmtDate(l.createdAt),
     }));
 
   const exportExcel = () => {
@@ -280,20 +266,25 @@ export default function ServiceLeadsPage() {
     XLSX.writeFile(wb, `service-leads-${fileStamp()}.xlsx`);
   };
 
-  // Short details string for the PDF (it can't render JSX).
+  // Short text details for the PDF "Details" column
   const pdfDetails = (l) => {
-    if (l.insuranceNumber || l.insuranceDocument)
-      return [l.insuranceNumber && `Policy ${l.insuranceNumber}`, l.insuranceDocument && "Doc attached"].filter(Boolean).join(", ");
-    if (l.insuranceTypes) return l.insuranceTypes;
-    if (l.sumAssured || l.policyTerm) return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
-    if (l.sumInsured || l.coverType) return [l.sumInsured, l.coverType].filter(Boolean).join(" / ");
-    return "—";
+    const parts = [];
+    if (l.insuranceNumber)   parts.push(`Policy: ${l.insuranceNumber}`);
+    if (l.insuranceDocument) parts.push("Doc ↗");   // visual indicator; real link added via didDrawCell
+    if (l.insuranceTypes)    return l.insuranceTypes;
+    if (l.sumAssured || l.policyTerm)
+      return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
+    if (l.sumInsured || l.coverType)
+      return [l.sumInsured, l.coverType].filter(Boolean).join(" / ");
+    return parts.join(", ") || "—";
   };
 
   const exportPDF = () => {
     if (!leads.length) return;
+
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
 
+    // Header
     doc.setFontSize(15);
     doc.setTextColor(15, 23, 42);
     doc.text("Service Leads", 40, 38);
@@ -305,29 +296,91 @@ export default function ServiceLeadsPage() {
       40, 54
     );
 
-    const head = [["Name", "Phone", "Email", "Service", "Details", "Premium/mo", "Status", "Date"]];
-    const body = leads.map((l) => [
-      l.name || "",
-      l.phone || "",
-      l.email || "",
-      l.serviceTitle || l.serviceSlug || "",
-      pdfDetails(l),
-      l.estimate?.monthly || "—",
-      STATUS_META[l.status]?.label || l.status || "",
-      fmtDate(l.createdAt),
-    ]);
+    // Build table rows — keep a parallel array of doc URLs indexed by row
+    const docUrls = [];
+    const head = [["Name", "Phone", "Email", "Service", "Details", "Document", "Premium/mo", "Status", "Date"]];
+    const body = leads.map((l, i) => {
+      // Store proxy URL (or empty) at same index so didDrawCell can look it up
+      docUrls[i] = l.insuranceDocument ? docProxyUrl(l._id) : "";
+
+      return [
+        l.name || "",
+        l.phone || "",
+        l.email || "",
+        l.serviceTitle || l.serviceSlug || "",
+        pdfDetails(l),
+        l.insuranceDocument ? "View doc" : "—",   // col 5 — text; link drawn below
+        l.estimate?.monthly || "—",
+        STATUS_META[l.status]?.label || l.status || "",
+        fmtDate(l.createdAt),
+      ];
+    });
+
+    // Column index for the "Document" column (0-based)
+    const DOC_COL = 5;
 
     autoTable(doc, {
-      head, body, startY: 66,
-      styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
+      head,
+      body,
+      startY: 66,
+      styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak" },
       headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 251, 253] },
+      columnStyles: {
+        0: { cellWidth: 80 },   // Name
+        1: { cellWidth: 75 },   // Phone
+        2: { cellWidth: 115 },  // Email
+        3: { cellWidth: 75 },   // Service
+        4: { cellWidth: 80 },   // Details
+        5: { cellWidth: 55 },   // Document
+        6: { cellWidth: 55 },   // Premium
+        7: { cellWidth: 55 },   // Status
+        8: { cellWidth: 60 },   // Date
+      },
       margin: { left: 40, right: 40 },
+
+      /**
+       * didDrawCell — fires after each cell is painted.
+       * For the Document column, if there is a URL we:
+       *   1. Paint a cyan underline under the "View doc" text.
+       *   2. Register a clickable link rectangle so it's interactive in PDF viewers.
+       */
+      didDrawCell(data) {
+        if (data.section !== "body") return;
+        if (data.column.index !== DOC_COL) return;
+
+        const url = docUrls[data.row.index];
+        if (!url) return;
+
+        const { x, y, width, height } = data.cell;
+        const text = "View doc";
+
+        // Measure text width at current font size
+        doc.setFontSize(7.5);
+        const textW = doc.getTextWidth(text);
+        const textX = x + 4;                       // cell left-padding = 4 (matches cellPadding)
+        const textY = y + height / 2 + 2.5;        // vertical centre (approx baseline)
+
+        // Draw the text in link colour (overwrite the default black)
+        doc.setTextColor(8, 145, 178);              // #0891B2
+        doc.text(text, textX, textY);
+        doc.setTextColor(0, 0, 0);                  // reset
+
+        // Underline
+        doc.setDrawColor(8, 145, 178);
+        doc.setLineWidth(0.5);
+        doc.line(textX, textY + 1, textX + textW, textY + 1);
+        doc.setDrawColor(0, 0, 0);                  // reset
+
+        // Clickable hotspot — works in Acrobat, Evince, Chrome PDF viewer, etc.
+        doc.link(x, y, width, height, { url });
+      },
     });
 
     doc.save(`service-leads-${fileStamp()}.pdf`);
   };
 
+  // ── Stat cards ────────────────────────────────────────────────────────────────
   const statCards = [
     { label: "Total",     value: stats?.total || 0,               icon: Calculator,  color: "#F15A3E", bg: "#FEEEE9" },
     { label: "New",       value: stats?.byStatus?.new || 0,       icon: Clock,       color: "#D97706", bg: "#FEF3C7" },
@@ -426,6 +479,7 @@ export default function ServiceLeadsPage() {
                   const meta = STATUS_META[l.status] || STATUS_META.new;
                   return (
                     <tr key={l._id} style={{ borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
+
                       {/* Name + gender/marital */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
@@ -447,12 +501,12 @@ export default function ServiceLeadsPage() {
                         {l.serviceTitle || l.serviceSlug || "—"}
                       </td>
 
-                      {/* Adaptive details (per form type) */}
+                      {/* Adaptive details */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <LeadDetails l={l} />
                       </td>
 
-                      {/* Premium estimate (calculator types only) */}
+                      {/* Premium estimate */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
                         {l.estimate?.monthly ? (
                           <>

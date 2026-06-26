@@ -1,5 +1,7 @@
 const ServiceLead = require("../models/ServicesForm");
 const cloudinary = require("../config/cloudinary");
+const https = require("https");
+const http = require("http");
 
 // slug → form type, so the server never trusts the client for it.
 const SLUG_FORM_TYPE = {
@@ -145,8 +147,19 @@ exports.createServiceLead = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// ✅ NEW: PROXY DOCUMENT DOWNLOAD  —  GET /api/serviceleads/:id/document
-// This endpoint proxies the Cloudinary URL and handles edge cases
+// PROXY DOCUMENT DOWNLOAD  —  GET /api/serviceleads/:id/document
+//
+// WHY NOT res.redirect():
+//   Cloudinary "raw" PDFs are served as application/octet-stream with
+//   no Content-Disposition header, so the browser opens a blank tab
+//   instead of downloading. Direct URLs also hit Cloudinary CORS
+//   restrictions when the referrer is your admin domain.
+//
+// FIX — stream through our own server:
+//   1. Fetch from Cloudinary server-to-server (no CORS).
+//   2. Forward Content-Type from Cloudinary's response.
+//   3. Add Content-Disposition: attachment so browsers always download.
+//   4. Pipe the byte stream straight to the client (no buffering).
 // ─────────────────────────────────────────────────────────────────────
 exports.getServiceLeadDocument = async (req, res, next) => {
   try {
@@ -159,16 +172,125 @@ exports.getServiceLeadDocument = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "No document attached." });
     }
 
+    const cloudinaryUrl = lead.insuranceDocument;
+
     // Validate the URL is a proper Cloudinary URL
-    if (!lead.insuranceDocument.startsWith("http")) {
+    if (!cloudinaryUrl.startsWith("http")) {
       return res.status(400).json({ success: false, message: "Invalid document URL." });
     }
 
-    // Log for debugging
-    console.log(`📄 Retrieving document for lead ${req.params.id}:`, lead.insuranceDocument);
+    console.log(`📄 Streaming document for lead ${req.params.id}:`, cloudinaryUrl);
 
-    // Option 1: Redirect directly to Cloudinary (fastest)
-    return res.redirect(lead.insuranceDocument);
+    // Build a safe download filename from the lead's name
+    const safeName = (lead.name || "document")
+      .replace(/[^a-zA-Z0-9 _-]/g, "")
+      .trim()
+      .replace(/\s+/g, "_")
+      .toLowerCase();
+
+    // Detect file extension from URL (Cloudinary appends it)
+    const urlPath = cloudinaryUrl.split("?")[0]; // strip query params
+    const extMatch = urlPath.match(/\.([a-zA-Z0-9]+)$/);
+    const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
+    const filename = `insurance-doc-${safeName}${ext}`;
+
+    // Choose http or https module based on URL
+    const transport = cloudinaryUrl.startsWith("https://") ? https : http;
+
+    // Stream the file from Cloudinary to the client
+    const cloudReq = transport.get(cloudinaryUrl, (cloudRes) => {
+      // Follow a single redirect if Cloudinary issues one (rare but possible)
+      if (
+        (cloudRes.statusCode === 301 || cloudRes.statusCode === 302) &&
+        cloudRes.headers.location
+      ) {
+        const redirectUrl = cloudRes.headers.location;
+        const redirectTransport = redirectUrl.startsWith("https://") ? https : http;
+
+        return redirectTransport.get(redirectUrl, (redirectRes) => {
+          if (redirectRes.statusCode !== 200) {
+            console.error(`[getServiceLeadDocument] Redirect target returned ${redirectRes.statusCode}`);
+            if (!res.headersSent) {
+              res.status(502).json({ success: false, message: "Could not retrieve document." });
+            }
+            return;
+          }
+
+          const contentType =
+            redirectRes.headers["content-type"] ||
+            (ext === ".pdf" ? "application/pdf" : "application/octet-stream");
+
+          res.setHeader("Content-Type", contentType);
+          res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+          res.setHeader("Cache-Control", "private, max-age=3600");
+
+          if (redirectRes.headers["content-length"]) {
+            res.setHeader("Content-Length", redirectRes.headers["content-length"]);
+          }
+
+          redirectRes.pipe(res);
+          redirectRes.on("error", (err) => {
+            console.error("[getServiceLeadDocument] Redirect stream error:", err.message);
+            if (!res.writableEnded) res.end();
+          });
+        });
+      }
+
+      // Normal (non-redirect) response
+      if (cloudRes.statusCode !== 200) {
+        console.error(`[getServiceLeadDocument] Cloudinary returned ${cloudRes.statusCode}`);
+        if (!res.headersSent) {
+          return res.status(502).json({ success: false, message: "Could not retrieve document from storage." });
+        }
+        return;
+      }
+
+      // Forward content-type from Cloudinary; fall back based on extension
+      const contentType =
+        cloudRes.headers["content-type"] ||
+        (ext === ".pdf"
+          ? "application/pdf"
+          : ext === ".png"
+          ? "image/png"
+          : ext === ".jpg" || ext === ".jpeg"
+          ? "image/jpeg"
+          : "application/octet-stream");
+
+      res.setHeader("Content-Type", contentType);
+      // "attachment" forces download prompt in every browser
+      res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+      res.setHeader("Cache-Control", "private, max-age=3600");
+
+      // Forward content-length so browser shows progress bar
+      if (cloudRes.headers["content-length"]) {
+        res.setHeader("Content-Length", cloudRes.headers["content-length"]);
+      }
+
+      // Pipe bytes directly — no buffering in memory
+      cloudRes.pipe(res);
+
+      cloudRes.on("error", (streamErr) => {
+        console.error("[getServiceLeadDocument] Stream error:", streamErr.message);
+        if (!res.writableEnded) res.end();
+      });
+    });
+
+    cloudReq.on("error", (reqErr) => {
+      console.error("[getServiceLeadDocument] Request error:", reqErr.message);
+      if (!res.headersSent) {
+        res.status(502).json({ success: false, message: "Could not connect to document storage." });
+      }
+    });
+
+    // Timeout after 15s
+    cloudReq.setTimeout(15000, () => {
+      console.error("[getServiceLeadDocument] Request timed out");
+      cloudReq.destroy();
+      if (!res.headersSent) {
+        res.status(504).json({ success: false, message: "Document retrieval timed out." });
+      }
+    });
+
   } catch (err) {
     next(err);
   }
