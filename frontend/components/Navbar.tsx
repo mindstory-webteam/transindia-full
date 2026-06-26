@@ -32,6 +32,7 @@ const DROPDOWN_CLOSE_DELAY = 240;
 const NAV_ITEMS: NavItem[] = [
   { label: "Services",              hasDropdown: true, href: "/our-services" },
   { label: "Renew existing policy", href: "/renew"      },
+  { label: "Events", href: "/events"      },
   { label: "About us",              href: "/about"      },
   { label: "Contact us",            href: "/contact-us" },
 ];
