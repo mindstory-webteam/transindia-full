@@ -23,6 +23,10 @@ const uploadErrorHandler = uploadServiceLead.uploadErrorHandler;
 // Auth Middleware
 const { protect, authorise } = require("../middleware/auth");
 
+// Roles allowed to access admin routes in this file.
+// Add any future elevated roles here in ONE place instead of editing every route.
+const ADMIN_ROLES = ["admin", "superadmin"];
+
 // ═══════════════════════════════════════════════════════════════
 // PUBLIC ROUTES
 // ═══════════════════════════════════════════════════════════════
@@ -30,17 +34,17 @@ const { protect, authorise } = require("../middleware/auth");
 /**
  * POST /api/serviceleads
  * Create a new service lead (PUBLIC - no auth required)
- * 
+ *
  * Handles multiple form types:
  * - calculator (life/health insurance)
  * - simple (home/travel/marine/fire/entertainment)
  * - motor (with file upload)
  * - miscellaneous
- * 
+ *
  * Request:
  *   - Form data with optional file: insuranceDocument
  *   - Fields: name, email, phone, serviceSlug, insuranceNumber (for motor), etc.
- * 
+ *
  * Response (201):
  *   { success: true, data: { id, formType } }
  */
@@ -57,30 +61,30 @@ router.post(
 
 /**
  * GET /api/serviceleads
- * List all service leads with optional filters (ADMIN ONLY)
- * 
+ * List all service leads with optional filters (ADMIN / SUPERADMIN ONLY)
+ *
  * Query params:
  *   ?status=new|contacted|converted|closed
  *   ?slug=motor-insurance|life-insurance|etc
  *   ?formType=calculator|motor|simple|miscellaneous
- * 
+ *
  * Example:
  *   GET /api/serviceleads?status=new&slug=motor-insurance
- * 
+ *
  * Response (200):
  *   { success: true, count: 10, data: [...leads] }
  */
 router.get(
   "/",
   protect,
-  authorise("admin"),  // Only admin role
+  authorise(...ADMIN_ROLES),
   getServiceLeads
 );
 
 /**
  * GET /api/serviceleads/stats
- * Get statistics about service leads by status (ADMIN ONLY)
- * 
+ * Get statistics about service leads by status (ADMIN / SUPERADMIN ONLY)
+ *
  * Response (200):
  *   {
  *     success: true,
@@ -98,19 +102,19 @@ router.get(
 router.get(
   "/stats",
   protect,
-  authorise("admin"),
+  authorise(...ADMIN_ROLES),
   getServiceLeadStats
 );
 
 /**
  * GET /api/serviceleads/:id/document
  * Download or view insurance document from Cloudinary (PUBLIC or ADMIN)
- * 
+ *
  * NOTE: Currently PUBLIC. Uncomment protect/authorise if you want to restrict.
- * 
+ *
  * Example with auth:
- *   router.get("/:id/document", protect, authorise("admin"), getServiceLeadDocument);
- * 
+ *   router.get("/:id/document", protect, authorise(...ADMIN_ROLES), getServiceLeadDocument);
+ *
  * Response (302):
  *   Redirects to Cloudinary secure_url
  */
@@ -119,60 +123,60 @@ router.get(
   getServiceLeadDocument  // ← Currently public (no auth)
   // Uncomment below to make admin-only:
   // protect,
-  // authorise("admin"),
+  // authorise(...ADMIN_ROLES),
   // getServiceLeadDocument
 );
 
 /**
  * GET /api/serviceleads/:id
- * Get a single service lead by ID (ADMIN ONLY)
- * 
+ * Get a single service lead by ID (ADMIN / SUPERADMIN ONLY)
+ *
  * Response (200):
  *   { success: true, data: { ...lead } }
  */
 router.get(
   "/:id",
   protect,
-  authorise("admin"),
+  authorise(...ADMIN_ROLES),
   getServiceLeadById
 );
 
 /**
  * PUT /api/serviceleads/:id
- * Update lead status or notes (ADMIN ONLY)
- * 
+ * Update lead status or notes (ADMIN / SUPERADMIN ONLY)
+ *
  * Request body:
  *   {
  *     "status": "contacted|converted|closed",  // optional
  *     "notes": "Internal notes about the lead"  // optional
  *   }
- * 
+ *
  * Response (200):
  *   { success: true, data: { ...updatedLead } }
  */
 router.put(
   "/:id",
   protect,
-  authorise("admin"),
+  authorise(...ADMIN_ROLES),
   updateServiceLead
 );
 
 /**
  * DELETE /api/serviceleads/:id
- * Delete a service lead and its attachments (ADMIN ONLY)
- * 
+ * Delete a service lead and its attachments (ADMIN / SUPERADMIN ONLY)
+ *
  * Automatically:
  * - Removes lead from MongoDB
  * - Deletes Cloudinary document (if attached)
  * - Logs deletion
- * 
+ *
  * Response (200):
  *   { success: true, message: "Lead deleted." }
  */
 router.delete(
   "/:id",
   protect,
-  authorise("admin"),
+  authorise(...ADMIN_ROLES),
   deleteServiceLead
 );
 
@@ -185,9 +189,9 @@ router.delete(
  * (optional - Express does this by default)
  */
 router.use((req, res) => {
-  res.status(404).json({ 
-    success: false, 
-    message: `Route not found: ${req.method} ${req.path}` 
+  res.status(404).json({
+    success: false,
+    message: `Route not found: ${req.method} ${req.path}`
   });
 });
 
