@@ -324,7 +324,7 @@ function InsurerSection() {
             >Compare all insurers</button> */}
           </div>
         </div>
-
+ 
       </div>
     </section>
   );

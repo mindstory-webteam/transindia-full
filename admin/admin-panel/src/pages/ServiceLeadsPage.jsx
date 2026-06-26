@@ -7,7 +7,7 @@ import {
 } from "../services/api";
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
-  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText,
+  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -24,12 +24,18 @@ const STYLES = `
   .sl-select { font-family:inherit; }
   .sl-export { transition: background .15s ease, border-color .15s ease, opacity .15s ease; }
   .sl-export:hover:not(:disabled) { background:#F4F7FB; border-color:#DCE3EC; }
+  .sl-doc { color:#0891B2; text-decoration:none; }
+  .sl-doc:hover { text-decoration:underline; }
   @media (prefers-reduced-motion: reduce) {
     .sl-stat, .sl-tab, .sl-del, .sl-export { transition:none !important; }
   }
 `;
 
-// Status badge colours, reused for the inline <select>.
+// Motor docs are now Cloudinary URLs (full https), so fileUrl returns them as-is.
+// API_HOST only matters for any legacy local /uploads paths still in the DB.
+const API_HOST = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
+const fileUrl = (p) => (!p ? "" : p.startsWith("http") ? p : `${API_HOST}${p}`);
+
 const STATUS_META = {
   new:       { label: "New",       color: "#D97706", bg: "#FEF3C7" },
   contacted: { label: "Contacted", color: "#0891B2", bg: "#E0F7FA" },
@@ -73,6 +79,68 @@ function fmtDate(iso) {
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
+const subText = { color: "#94A3B8", fontSize: 12, marginTop: 2 };
+
+// Adaptive "Details" cell — renders whatever fields apply to that form type.
+function LeadDetails({ l }) {
+  const slug = (l.serviceSlug || "").toLowerCase();
+
+  // Motor — policy number + uploaded document
+  if (slug.includes("motor") || l.insuranceNumber || l.insuranceDocument) {
+    return (
+      <div>
+        {l.insuranceNumber && <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>}
+        {l.insuranceDocument ? (
+          <a className="sl-doc" href={fileUrl(l.insuranceDocument)} target="_blank" rel="noopener noreferrer"
+             style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12.5, marginTop: 3 }}>
+            <Paperclip size={12} /> View document
+          </a>
+        ) : (
+          !l.insuranceNumber && <span style={{ color: "#94A3B8" }}>—</span>
+        )}
+      </div>
+    );
+  }
+
+  // Miscellaneous — free-text requirements
+  if (l.insuranceTypes) {
+    return (
+      <p style={{ color: "#0F172A", maxWidth: 260, whiteSpace: "normal" }} title={l.insuranceTypes}>
+        {l.insuranceTypes.length > 90 ? l.insuranceTypes.slice(0, 90) + "…" : l.insuranceTypes}
+      </p>
+    );
+  }
+
+  // Life — sum assured / term / smoker / income
+  if (l.sumAssured || l.policyTerm) {
+    return (
+      <div>
+        <p style={{ color: "#0F172A", fontWeight: 600 }}>
+          {l.sumAssured || "—"}{l.policyTerm ? ` · ${l.policyTerm}` : ""}
+        </p>
+        {l.smoker && <p style={subText}>Smoker: {l.smoker}</p>}
+        {l.annualIncome && <p style={subText}>{l.annualIncome}</p>}
+      </div>
+    );
+  }
+
+  // Health — sum insured / cover type / conditions / city tier
+  if (l.sumInsured || l.coverType) {
+    return (
+      <div>
+        <p style={{ color: "#0F172A", fontWeight: 600 }}>
+          {l.sumInsured || "—"}{l.coverType ? ` · ${l.coverType}` : ""}
+        </p>
+        {l.conditions && l.conditions !== "None" && <p style={subText}>{l.conditions}</p>}
+        {l.cityTier && <p style={subText}>{l.cityTier}</p>}
+      </div>
+    );
+  }
+
+  // Simple forms (home/travel/marine/fire/entertainment/risk) — nothing extra
+  return <span style={{ color: "#94A3B8" }}>—</span>;
+}
+
 export default function ServiceLeadsPage() {
   const [leads, setLeads]     = useState([]);
   const [stats, setStats]     = useState(null);
@@ -101,7 +169,6 @@ export default function ServiceLeadsPage() {
     try {
       await updateServiceLead(id, { status });
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, status } : l)));
-      // Refresh stats counts in the background.
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
       console.error("Status update failed:", e);
@@ -127,24 +194,35 @@ export default function ServiceLeadsPage() {
   };
 
   // ── Exports ─────────────────────────────────────────────────────────────────
-  // Both export the CURRENTLY loaded leads, so they respect the active filter.
   const fileStamp = () => new Date().toISOString().slice(0, 10);
 
-  // Full, detailed rows for the spreadsheet (every field, incl. the estimate).
+  // Every field across every form type, so no submission is lost in the export.
   const buildRows = () =>
     leads.map((l) => ({
       Name: l.name || "",
       Email: l.email || "",
       Phone: l.phone || "",
+      Service: l.serviceTitle || l.serviceSlug || "",
       Gender: l.gender || "",
       "Marital Status": l.maritalStatus || "",
       "Date of Birth": l.dob || "",
       Address: l.address || "",
-      Service: l.serviceTitle || l.serviceSlug || "",
+      // Life
       Smoker: l.smoker || "",
       "Sum Assured": l.sumAssured || "",
       "Policy Term": l.policyTerm || "",
       "Annual Income": l.annualIncome || "",
+      // Health
+      "Cover Type": l.coverType || "",
+      "Sum Insured": l.sumInsured || "",
+      "Conditions": l.conditions || "",
+      "City Tier": l.cityTier || "",
+      // Motor
+      "Policy Number": l.insuranceNumber || "",
+      "Document": l.insuranceDocument ? fileUrl(l.insuranceDocument) : "",
+      // Miscellaneous
+      "Requirements": l.insuranceTypes || "",
+      // Estimate
       Coverage: l.estimate?.coverage || "",
       "Premium / Month": l.estimate?.monthly || "",
       "Premium / Year": l.estimate?.yearly || "",
@@ -163,6 +241,16 @@ export default function ServiceLeadsPage() {
     XLSX.writeFile(wb, `service-leads-${fileStamp()}.xlsx`);
   };
 
+  // Short details string for the PDF (it can't render JSX).
+  const pdfDetails = (l) => {
+    if (l.insuranceNumber || l.insuranceDocument)
+      return [l.insuranceNumber && `Policy ${l.insuranceNumber}`, l.insuranceDocument && "Doc attached"].filter(Boolean).join(", ");
+    if (l.insuranceTypes) return l.insuranceTypes;
+    if (l.sumAssured || l.policyTerm) return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
+    if (l.sumInsured || l.coverType) return [l.sumInsured, l.coverType].filter(Boolean).join(" / ");
+    return "—";
+  };
+
   const exportPDF = () => {
     if (!leads.length) return;
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
@@ -175,30 +263,23 @@ export default function ServiceLeadsPage() {
     doc.text(
       `Exported ${new Date().toLocaleString("en-IN")}   •   ${leads.length} lead(s)` +
         (filter !== "all" ? `   •   Filter: ${STATUS_META[filter]?.label || filter}` : ""),
-      40,
-      54
+      40, 54
     );
 
-    const head = [[
-      "Name", "Phone", "Email", "Service", "Sum Assured",
-      "Term", "Premium/mo", "Status", "Date",
-    ]];
+    const head = [["Name", "Phone", "Email", "Service", "Details", "Premium/mo", "Status", "Date"]];
     const body = leads.map((l) => [
       l.name || "",
       l.phone || "",
       l.email || "",
       l.serviceTitle || l.serviceSlug || "",
-      l.sumAssured || "",
-      l.policyTerm || "",
+      pdfDetails(l),
       l.estimate?.monthly || "—",
       STATUS_META[l.status]?.label || l.status || "",
       fmtDate(l.createdAt),
     ]);
 
     autoTable(doc, {
-      head,
-      body,
-      startY: 66,
+      head, body, startY: 66,
       styles: { fontSize: 8, cellPadding: 4, overflow: "linebreak" },
       headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 251, 253] },
@@ -209,11 +290,11 @@ export default function ServiceLeadsPage() {
   };
 
   const statCards = [
-    { label: "Total",     value: stats?.total || 0,                 icon: Calculator,  color: "#F15A3E", bg: "#FEEEE9" },
-    { label: "New",       value: stats?.byStatus?.new || 0,         icon: Clock,       color: "#D97706", bg: "#FEF3C7" },
-    { label: "Contacted", value: stats?.byStatus?.contacted || 0,   icon: PhoneCall,   color: "#0891B2", bg: "#E0F7FA" },
-    { label: "Converted", value: stats?.byStatus?.converted || 0,   icon: CheckCircle, color: "#16A34A", bg: "#DCFCE7" },
-    { label: "Closed",    value: stats?.byStatus?.closed || 0,      icon: XCircle,     color: "#DC2626", bg: "#FEE2E2" },
+    { label: "Total",     value: stats?.total || 0,               icon: Calculator,  color: "#F15A3E", bg: "#FEEEE9" },
+    { label: "New",       value: stats?.byStatus?.new || 0,       icon: Clock,       color: "#D97706", bg: "#FEF3C7" },
+    { label: "Contacted", value: stats?.byStatus?.contacted || 0, icon: PhoneCall,   color: "#0891B2", bg: "#E0F7FA" },
+    { label: "Converted", value: stats?.byStatus?.converted || 0, icon: CheckCircle, color: "#16A34A", bg: "#DCFCE7" },
+    { label: "Closed",    value: stats?.byStatus?.closed || 0,    icon: XCircle,     color: "#DC2626", bg: "#FEE2E2" },
   ];
 
   const exportBtnStyle = {
@@ -237,33 +318,21 @@ export default function ServiceLeadsPage() {
       }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>Service Leads</h1>
-          <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Leads from the premium calculator on your service pages</p>
+          <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Leads from every insurance form across your service pages</p>
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <button
-            className="sl-export"
-            onClick={exportExcel}
-            disabled={!leads.length}
+          <button className="sl-export" onClick={exportExcel} disabled={!leads.length}
             style={{ ...exportBtnStyle, opacity: leads.length ? 1 : 0.5, cursor: leads.length ? "pointer" : "not-allowed" }}
-            title="Download as Excel (.xlsx)"
-          >
+            title="Download as Excel (.xlsx)">
             <FileSpreadsheet size={15} color="#16A34A" /> Excel
           </button>
-          <button
-            className="sl-export"
-            onClick={exportPDF}
-            disabled={!leads.length}
+          <button className="sl-export" onClick={exportPDF} disabled={!leads.length}
             style={{ ...exportBtnStyle, opacity: leads.length ? 1 : 0.5, cursor: leads.length ? "pointer" : "not-allowed" }}
-            title="Download as PDF"
-          >
+            title="Download as PDF">
             <FileText size={15} color="#DC2626" /> PDF
           </button>
-          <button
-            onClick={() => load(filter)}
-            className="sl-export"
-            style={exportBtnStyle}
-          >
+          <button onClick={() => load(filter)} className="sl-export" style={exportBtnStyle}>
             <RefreshCw size={15} /> Refresh
           </button>
         </div>
@@ -279,18 +348,14 @@ export default function ServiceLeadsPage() {
         {STATUS_TABS.map((t) => {
           const active = filter === t.key;
           return (
-            <button
-              key={t.key}
-              className="sl-tab"
-              onClick={() => setFilter(t.key)}
+            <button key={t.key} className="sl-tab" onClick={() => setFilter(t.key)}
               style={{
                 padding: "8px 16px", borderRadius: 999, fontSize: 13, fontWeight: 600,
                 cursor: "pointer", fontFamily: "inherit",
                 border: `1px solid ${active ? "#F15A3E" : "var(--border)"}`,
                 background: active ? "#FEEEE9" : "#fff",
                 color: active ? "#F15A3E" : "#64748B",
-              }}
-            >
+              }}>
               {t.label}
             </button>
           );
@@ -305,15 +370,15 @@ export default function ServiceLeadsPage() {
           <div style={{ padding: 48, textAlign: "center" }}>
             <Calculator size={34} color="#CBD5E1" style={{ marginBottom: 10 }} />
             <p style={{ color: "#64748B", fontSize: 14, fontWeight: 600 }}>No leads yet</p>
-            <p style={{ color: "#94A3B8", fontSize: 13, marginTop: 4 }}>Leads will appear here as visitors use the premium calculator.</p>
+            <p style={{ color: "#94A3B8", fontSize: 13, marginTop: 4 }}>Leads will appear here as visitors submit any service form.</p>
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table className="sl-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 900 }}>
+            <table className="sl-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, minWidth: 980 }}>
               <thead>
                 <tr style={{ background: "#F8FAFC", borderBottom: "1px solid var(--border)" }}>
-                  {["Name", "Contact", "Service", "Sum Assured", "Term", "Premium", "Date", "Status", ""].map((h, i) => (
-                    <th key={i} style={{ padding: "12px 16px", textAlign: i >= 7 ? "center" : "left", fontWeight: 600, color: "#64748B", whiteSpace: "nowrap" }}>{h}</th>
+                  {["Name", "Contact", "Service", "Details", "Premium", "Date", "Status", ""].map((h, i) => (
+                    <th key={i} style={{ padding: "12px 16px", textAlign: i >= 6 ? "center" : "left", fontWeight: 600, color: "#64748B", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -325,9 +390,7 @@ export default function ServiceLeadsPage() {
                       {/* Name + gender/marital */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
-                        <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>
-                          {[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}
-                        </p>
+                        <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
                       </td>
 
                       {/* Contact */}
@@ -345,32 +408,19 @@ export default function ServiceLeadsPage() {
                         {l.serviceTitle || l.serviceSlug || "—"}
                       </td>
 
-                      {/* Sum assured + smoker */}
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
-                        {l.sumAssured || "—"}
-                        {l.smoker && (
-                          <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>Smoker: {l.smoker}</p>
-                        )}
+                      {/* Adaptive details (per form type) */}
+                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                        <LeadDetails l={l} />
                       </td>
 
-                      {/* Term + income */}
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
-                        {l.policyTerm || "—"}
-                        {l.annualIncome && (
-                          <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>{l.annualIncome}</p>
-                        )}
-                      </td>
-
-                      {/* Premium estimate */}
+                      {/* Premium estimate (calculator types only) */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
                         {l.estimate?.monthly ? (
                           <>
                             <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
-                            {l.estimate?.coverage && (
-                              <p style={{ color: "#94A3B8", fontSize: 12, marginTop: 2 }}>Cover: {l.estimate.coverage}</p>
-                            )}
+                            {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
                           </>
-                        ) : "—"}
+                        ) : <span style={{ color: "#94A3B8" }}>—</span>}
                       </td>
 
                       {/* Date */}
@@ -381,22 +431,16 @@ export default function ServiceLeadsPage() {
                       {/* Status select */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
                         <div style={{ position: "relative", display: "inline-block" }}>
-                          <select
-                            className="sl-select"
-                            value={l.status}
-                            disabled={busyId === l._id}
+                          <select className="sl-select" value={l.status} disabled={busyId === l._id}
                             onChange={(e) => handleStatusChange(l._id, e.target.value)}
                             style={{
                               appearance: "none", WebkitAppearance: "none",
                               padding: "6px 26px 6px 12px", borderRadius: 999,
                               border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
                               color: meta.color, background: meta.bg, outline: "none",
-                            }}
-                          >
+                            }}>
                             {Object.keys(STATUS_META).map((k) => (
-                              <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>
-                                {STATUS_META[k].label}
-                              </option>
+                              <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>{STATUS_META[k].label}</option>
                             ))}
                           </select>
                           <ChevronDown size={13} color={meta.color} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
@@ -405,13 +449,8 @@ export default function ServiceLeadsPage() {
 
                       {/* Delete */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
-                        <button
-                          className="sl-del"
-                          onClick={() => handleDelete(l._id)}
-                          disabled={busyId === l._id}
-                          title="Delete lead"
-                          style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}
-                        >
+                        <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
+                          style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
                           <Trash2 size={16} />
                         </button>
                       </td>
