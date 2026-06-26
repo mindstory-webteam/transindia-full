@@ -1,10 +1,25 @@
 const multer = require("multer");
+const path = require("path");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
 /**
  * ✅ DEDICATED: uploadServiceLead Middleware
  * Handles Motor Insurance document uploads to Cloudinary.
+ *
+ * IMPORTANT FIX:
+ * Cloudinary's "raw" resource type (used for PDFs) does NOT automatically
+ * append a file extension to the delivery URL the way "image" uploads do.
+ * If we let multer-storage-cloudinary auto-generate a public_id, raw PDFs
+ * end up with a URL that has NO extension at all — which breaks downloads
+ * (the OS can't tell what kind of file it is, so it opens with whatever
+ * app handles extension-less files, e.g. Word, and shows raw garbage).
+ *
+ * The fix: explicitly build the public_id ourselves.
+ *  - For PDFs (raw): embed the extension directly in the public_id,
+ *    since Cloudinary won't add it for us.
+ *  - For images: do NOT put a dot in the public_id (Cloudinary appends
+ *    the format itself — adding our own dot would create "name.jpg.jpg").
  */
 
 const storage = new CloudinaryStorage({
@@ -17,10 +32,37 @@ const storage = new CloudinaryStorage({
       `(${file.mimetype}, ${file.size} bytes) - Type: ${isPdf ? "PDF" : "Image"}`
     );
 
+    // Extension taken from the original filename, falling back to a
+    // sensible default based on mimetype if the filename has none.
+    const extFromName = path.extname(file.originalname).toLowerCase().replace(".", "");
+    const ext = extFromName || (isPdf ? "pdf" : "jpg");
+
+    // Sanitised base name (no extension), used to keep filenames readable
+    // in the Cloudinary dashboard instead of pure random IDs.
+    const baseName = path
+      .basename(file.originalname, path.extname(file.originalname))
+      .replace(/[^a-zA-Z0-9_-]/g, "_")
+      .slice(0, 60) || "document";
+
+    if (isPdf) {
+      // RAW resource type: extension must be embedded in the public_id
+      // itself, otherwise the resulting secure_url has no extension.
+      return {
+        folder: "transindia/serviceleads",
+        resource_type: "raw",
+        public_id: `${Date.now()}-${baseName}.${ext}`,
+        allowed_formats: ["pdf"],
+      };
+    }
+
+    // IMAGE resource type: Cloudinary appends the format automatically,
+    // so public_id must NOT contain a dot/extension.
     return {
       folder: "transindia/serviceleads",
-      resource_type: isPdf ? "raw" : "image",
-      allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+      resource_type: "image",
+      public_id: `${Date.now()}-${baseName}`,
+      format: ext, // force a consistent extension matching the upload
+      allowed_formats: ["jpg", "jpeg", "png"],
     };
   },
 });

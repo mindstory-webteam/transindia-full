@@ -1,3 +1,4 @@
+const path = require("path");
 const ServiceLead = require("../models/ServicesForm");
 const cloudinary = require("../config/cloudinary");
 const https = require("https");
@@ -37,6 +38,60 @@ function normalizeEstimate(estimate) {
     note: estimate.note ?? "",
     disclaimer: estimate.disclaimer ?? "",
   };
+}
+
+const MIME_BY_EXT = {
+  ".pdf": "application/pdf",
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+};
+
+/*
+ * Work out the real file extension + MIME type for a lead's attached
+ * document, in order of trust:
+ *
+ *   1. insuranceDocumentOriginalName (saved at upload time — new leads)
+ *   2. the extension visible directly in the Cloudinary URL
+ *   3. ask Cloudinary's Admin API what format it actually recorded
+ *      (covers leads uploaded before this fix, whose URLs have no
+ *      extension at all)
+ *
+ * Returns { ext, mimeType } — either can be "" / null if truly unknown.
+ */
+async function resolveDocumentMeta(lead) {
+  let mimeType = lead.insuranceDocumentMimeType || null;
+  let ext = lead.insuranceDocumentOriginalName
+    ? path.extname(lead.insuranceDocumentOriginalName).toLowerCase()
+    : "";
+
+  if (!ext) {
+    const urlPath = (lead.insuranceDocument || "").split("?")[0];
+    const m = urlPath.match(/\.([a-zA-Z0-9]+)$/);
+    if (m) ext = `.${m[1].toLowerCase()}`;
+  }
+
+  if (!ext && lead.insuranceDocumentPublicId) {
+    try {
+      const resourceType = (lead.insuranceDocument || "").includes("/raw/upload/")
+        ? "raw"
+        : "image";
+      const info = await cloudinary.api.resource(lead.insuranceDocumentPublicId, {
+        resource_type: resourceType,
+      });
+      if (info?.format) {
+        ext = `.${info.format.toLowerCase()}`;
+      }
+    } catch (e) {
+      console.error("[resolveDocumentMeta] Cloudinary metadata lookup failed:", e.message);
+    }
+  }
+
+  if (!mimeType && ext) {
+    mimeType = MIME_BY_EXT[ext] || null;
+  }
+
+  return { ext, mimeType };
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -82,14 +137,19 @@ exports.createServiceLead = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Please describe your insurance needs." });
     }
 
-    // ✅ FIX: Validate Cloudinary URL before storing
+    // ✅ FIX: Validate Cloudinary URL before storing, and capture the
+    // original mimetype/filename so downloads never have to guess later.
     let documentUrl = undefined;
     let documentPublicId = undefined;
+    let documentMimeType = undefined;
+    let documentOriginalName = undefined;
 
     if (req.file) {
       // req.file.path is the secure_url from Cloudinary
       documentUrl = req.file.path;
       documentPublicId = req.file.filename;
+      documentMimeType = req.file.mimetype;
+      documentOriginalName = req.file.originalname;
 
       // Validate that we got a proper URL from Cloudinary
       if (!documentUrl || !documentUrl.startsWith("http")) {
@@ -128,9 +188,11 @@ exports.createServiceLead = async (req, res, next) => {
       insuranceNumber: b.insuranceNumber,
       insuranceTypes: b.insuranceTypes,
 
-      // ✅ Store the validated Cloudinary URL
+      // ✅ Store the validated Cloudinary URL + the real file metadata
       insuranceDocument: documentUrl,
       insuranceDocumentPublicId: documentPublicId,
+      insuranceDocumentMimeType: documentMimeType,
+      insuranceDocumentOriginalName: documentOriginalName,
 
       estimate: normalizeEstimate(estimateRaw),
       rawData: b,
@@ -157,8 +219,11 @@ exports.createServiceLead = async (req, res, next) => {
 //
 // FIX — stream through our own server:
 //   1. Fetch from Cloudinary server-to-server (no CORS).
-//   2. Forward Content-Type from Cloudinary's response.
-//   3. Add Content-Disposition: attachment so browsers always download.
+//   2. Forward the REAL Content-Type (resolved via resolveDocumentMeta,
+//      not guessed from the URL — Cloudinary URLs aren't guaranteed to
+//      carry an extension for "raw" resources).
+//   3. Add Content-Disposition: attachment with a correctly-extensioned
+//      filename so browsers always download it as the right file type.
 //   4. Pipe the byte stream straight to the client (no buffering).
 // ─────────────────────────────────────────────────────────────────────
 exports.getServiceLeadDocument = async (req, res, next) => {
@@ -181,6 +246,10 @@ exports.getServiceLeadDocument = async (req, res, next) => {
 
     console.log(`📄 Streaming document for lead ${req.params.id}:`, cloudinaryUrl);
 
+    // ✅ Resolve the real extension/MIME type instead of regex-guessing
+    // off the URL — this is what actually fixes "opens as garbage text".
+    const { ext, mimeType } = await resolveDocumentMeta(lead);
+
     // Build a safe download filename from the lead's name
     const safeName = (lead.name || "document")
       .replace(/[^a-zA-Z0-9 _-]/g, "")
@@ -188,10 +257,6 @@ exports.getServiceLeadDocument = async (req, res, next) => {
       .replace(/\s+/g, "_")
       .toLowerCase();
 
-    // Detect file extension from URL (Cloudinary appends it)
-    const urlPath = cloudinaryUrl.split("?")[0]; // strip query params
-    const extMatch = urlPath.match(/\.([a-zA-Z0-9]+)$/);
-    const ext = extMatch ? `.${extMatch[1].toLowerCase()}` : "";
     const filename = `insurance-doc-${safeName}${ext}`;
 
     // Choose http or https module based on URL
@@ -217,6 +282,7 @@ exports.getServiceLeadDocument = async (req, res, next) => {
           }
 
           const contentType =
+            mimeType ||
             redirectRes.headers["content-type"] ||
             (ext === ".pdf" ? "application/pdf" : "application/octet-stream");
 
@@ -245,8 +311,10 @@ exports.getServiceLeadDocument = async (req, res, next) => {
         return;
       }
 
-      // Forward content-type from Cloudinary; fall back based on extension
+      // Prefer our resolved MIME type (the trustworthy one); fall back to
+      // whatever Cloudinary sends, then to an extension-based guess.
       const contentType =
+        mimeType ||
         cloudRes.headers["content-type"] ||
         (ext === ".pdf"
           ? "application/pdf"
@@ -373,10 +441,17 @@ exports.deleteServiceLead = async (req, res, next) => {
 
     // Remove the attached document from Cloudinary too.
     if (lead.insuranceDocumentPublicId) {
-      const isPdf = (lead.insuranceDocument || "").toLowerCase().endsWith(".pdf");
+      // ✅ FIX: detect resource_type from the URL path itself
+      // (".../raw/upload/..." vs ".../image/upload/...") instead of
+      // sniffing the file extension — the extension may be missing
+      // entirely on older leads, which previously caused Cloudinary
+      // deletes to silently use the wrong resource_type and fail.
+      const resourceType = (lead.insuranceDocument || "").includes("/raw/upload/")
+        ? "raw"
+        : "image";
       try {
         await cloudinary.uploader.destroy(lead.insuranceDocumentPublicId, {
-          resource_type: isPdf ? "raw" : "image",
+          resource_type: resourceType,
         });
         console.log(`🗑️  Deleted Cloudinary asset: ${lead.insuranceDocumentPublicId}`);
       } catch (e) {

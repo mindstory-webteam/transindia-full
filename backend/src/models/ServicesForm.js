@@ -58,6 +58,10 @@ const serviceLeadSchema = new mongoose.Schema(
     insuranceNumber: { type: String, trim: true },
     insuranceDocument: { type: String, trim: true }, // Cloudinary secure_url (string!)
     insuranceDocumentPublicId: { type: String, trim: true }, // for deletion
+    // ✅ NEW: recorded at upload time so downloads never have to guess
+    // the file type from the URL (which can be missing an extension).
+    insuranceDocumentMimeType: { type: String, trim: true }, // e.g. "application/pdf"
+    insuranceDocumentOriginalName: { type: String, trim: true }, // e.g. "old-policy.pdf"
 
     // ── Miscellaneous form ──────────────────────────────────────
     insuranceTypes: { type: String, trim: true },
