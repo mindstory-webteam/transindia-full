@@ -80,6 +80,25 @@ exports.createServiceLead = async (req, res, next) => {
       return res.status(400).json({ success: false, message: "Please describe your insurance needs." });
     }
 
+    // ✅ FIX: Validate Cloudinary URL before storing
+    let documentUrl = undefined;
+    let documentPublicId = undefined;
+
+    if (req.file) {
+      // req.file.path is the secure_url from Cloudinary
+      documentUrl = req.file.path;
+      documentPublicId = req.file.filename;
+
+      // Validate that we got a proper URL from Cloudinary
+      if (!documentUrl || !documentUrl.startsWith("http")) {
+        console.error("Invalid Cloudinary URL:", documentUrl);
+        return res.status(500).json({ 
+          success: false, 
+          message: "Document upload failed. Please try again." 
+        });
+      }
+    }
+
     const lead = await ServiceLead.create({
       serviceSlug: b.serviceSlug,
       serviceTitle: b.serviceTitle,
@@ -107,9 +126,9 @@ exports.createServiceLead = async (req, res, next) => {
       insuranceNumber: b.insuranceNumber,
       insuranceTypes: b.insuranceTypes,
 
-      // Cloudinary: req.file.path = secure_url, req.file.filename = public_id
-      insuranceDocument: req.file ? req.file.path : undefined,
-      insuranceDocumentPublicId: req.file ? req.file.filename : undefined,
+      // ✅ Store the validated Cloudinary URL
+      insuranceDocument: documentUrl,
+      insuranceDocumentPublicId: documentPublicId,
 
       estimate: normalizeEstimate(estimateRaw),
       rawData: b,
@@ -121,7 +140,37 @@ exports.createServiceLead = async (req, res, next) => {
       data: { id: lead._id, formType: lead.formType },
     });
   } catch (err) {
-    next(err); // handled by the global error handler in server.js
+    next(err);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────
+// ✅ NEW: PROXY DOCUMENT DOWNLOAD  —  GET /api/serviceleads/:id/document
+// This endpoint proxies the Cloudinary URL and handles edge cases
+// ─────────────────────────────────────────────────────────────────────
+exports.getServiceLeadDocument = async (req, res, next) => {
+  try {
+    const lead = await ServiceLead.findById(req.params.id);
+    if (!lead) {
+      return res.status(404).json({ success: false, message: "Lead not found." });
+    }
+
+    if (!lead.insuranceDocument) {
+      return res.status(404).json({ success: false, message: "No document attached." });
+    }
+
+    // Validate the URL is a proper Cloudinary URL
+    if (!lead.insuranceDocument.startsWith("http")) {
+      return res.status(400).json({ success: false, message: "Invalid document URL." });
+    }
+
+    // Log for debugging
+    console.log(`📄 Retrieving document for lead ${req.params.id}:`, lead.insuranceDocument);
+
+    // Option 1: Redirect directly to Cloudinary (fastest)
+    return res.redirect(lead.insuranceDocument);
+  } catch (err) {
+    next(err);
   }
 };
 
@@ -207,6 +256,7 @@ exports.deleteServiceLead = async (req, res, next) => {
         await cloudinary.uploader.destroy(lead.insuranceDocumentPublicId, {
           resource_type: isPdf ? "raw" : "image",
         });
+        console.log(`🗑️  Deleted Cloudinary asset: ${lead.insuranceDocumentPublicId}`);
       } catch (e) {
         console.error("Cloudinary delete failed:", e.message);
       }

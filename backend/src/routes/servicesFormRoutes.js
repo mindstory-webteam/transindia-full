@@ -1,36 +1,194 @@
 const express = require("express");
 const router = express.Router();
 
-const upload = require("../middleware/uploadServiceLead");
-const ctrl = require("../controllers/servicesFormController");
+// ═══════════════════════════════════════════════════════════════
+// IMPORTS
+// ═══════════════════════════════════════════════════════════════
 
-/*
- * Turns multer/file errors (wrong type, too large) into a clean 400 JSON.
- * 4-arg signature => Express treats it as an error handler: it only runs when
- * `upload` calls next(err); on success Express skips it and hits the controller.
+// Controllers
+const {
+  createServiceLead,
+  getServiceLeads,
+  getServiceLeadStats,
+  getServiceLeadById,
+  getServiceLeadDocument,
+  updateServiceLead,
+  deleteServiceLead,
+} = require("../controllers/servicesFormController");
+
+// Upload Middleware
+const uploadServiceLead = require("../middleware/uploadServiceLead");
+const uploadErrorHandler = uploadServiceLead.uploadErrorHandler;
+
+// Auth Middleware
+const { protect, authorise } = require("../middleware/auth");
+
+// ═══════════════════════════════════════════════════════════════
+// PUBLIC ROUTES
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * POST /api/serviceleads
+ * Create a new service lead (PUBLIC - no auth required)
+ * 
+ * Handles multiple form types:
+ * - calculator (life/health insurance)
+ * - simple (home/travel/marine/fire/entertainment)
+ * - motor (with file upload)
+ * - miscellaneous
+ * 
+ * Request:
+ *   - Form data with optional file: insuranceDocument
+ *   - Fields: name, email, phone, serviceSlug, insuranceNumber (for motor), etc.
+ * 
+ * Response (201):
+ *   { success: true, data: { id, formType } }
  */
-function handleUpload(err, req, res, next) {
-  if (err) {
-    const msg =
-      err.code === "LIMIT_FILE_SIZE" ? "File must be under 5MB." : err.message;
-    return res.status(400).json({ success: false, message: msg });
-  }
-  next();
-}
+router.post(
+  "/",
+  uploadServiceLead.single("insuranceDocument"),  // Upload file to Cloudinary
+  uploadErrorHandler,                              // Handle upload errors
+  createServiceLead                                // Save lead to database
+);
 
-// ── PUBLIC ──────────────────────────────────────────────────────────
-// Every form on the site posts here. `upload.single` only activates for
-// multipart/form-data (the motor form); JSON bodies pass straight through.
-router.post("/", upload.single("insuranceDocument"), handleUpload, ctrl.createServiceLead);
+// ═══════════════════════════════════════════════════════════════
+// PROTECTED ADMIN ROUTES
+// ═══════════════════════════════════════════════════════════════
 
-// ── ADMIN ───────────────────────────────────────────────────────────
-// NOTE: /stats must be declared BEFORE /:id or "stats" is read as an id.
-router.get("/stats", ctrl.getServiceLeadStats);
-router.get("/", ctrl.getServiceLeads);
-router.get("/:id", ctrl.getServiceLeadById);
-// Your admin api.js uses api.patch(); PUT kept as well so both work.
-router.patch("/:id", ctrl.updateServiceLead);
-router.put("/:id", ctrl.updateServiceLead);
-router.delete("/:id", ctrl.deleteServiceLead);
+/**
+ * GET /api/serviceleads
+ * List all service leads with optional filters (ADMIN ONLY)
+ * 
+ * Query params:
+ *   ?status=new|contacted|converted|closed
+ *   ?slug=motor-insurance|life-insurance|etc
+ *   ?formType=calculator|motor|simple|miscellaneous
+ * 
+ * Example:
+ *   GET /api/serviceleads?status=new&slug=motor-insurance
+ * 
+ * Response (200):
+ *   { success: true, count: 10, data: [...leads] }
+ */
+router.get(
+  "/",
+  protect,
+  authorise("admin"),  // Only admin role
+  getServiceLeads
+);
+
+/**
+ * GET /api/serviceleads/stats
+ * Get statistics about service leads by status (ADMIN ONLY)
+ * 
+ * Response (200):
+ *   {
+ *     success: true,
+ *     data: {
+ *       total: 100,
+ *       byStatus: {
+ *         new: 50,
+ *         contacted: 30,
+ *         converted: 15,
+ *         closed: 5
+ *       }
+ *     }
+ *   }
+ */
+router.get(
+  "/stats",
+  protect,
+  authorise("admin"),
+  getServiceLeadStats
+);
+
+/**
+ * GET /api/serviceleads/:id/document
+ * Download or view insurance document from Cloudinary (PUBLIC or ADMIN)
+ * 
+ * NOTE: Currently PUBLIC. Uncomment protect/authorise if you want to restrict.
+ * 
+ * Example with auth:
+ *   router.get("/:id/document", protect, authorise("admin"), getServiceLeadDocument);
+ * 
+ * Response (302):
+ *   Redirects to Cloudinary secure_url
+ */
+router.get(
+  "/:id/document",
+  getServiceLeadDocument  // ← Currently public (no auth)
+  // Uncomment below to make admin-only:
+  // protect,
+  // authorise("admin"),
+  // getServiceLeadDocument
+);
+
+/**
+ * GET /api/serviceleads/:id
+ * Get a single service lead by ID (ADMIN ONLY)
+ * 
+ * Response (200):
+ *   { success: true, data: { ...lead } }
+ */
+router.get(
+  "/:id",
+  protect,
+  authorise("admin"),
+  getServiceLeadById
+);
+
+/**
+ * PUT /api/serviceleads/:id
+ * Update lead status or notes (ADMIN ONLY)
+ * 
+ * Request body:
+ *   {
+ *     "status": "contacted|converted|closed",  // optional
+ *     "notes": "Internal notes about the lead"  // optional
+ *   }
+ * 
+ * Response (200):
+ *   { success: true, data: { ...updatedLead } }
+ */
+router.put(
+  "/:id",
+  protect,
+  authorise("admin"),
+  updateServiceLead
+);
+
+/**
+ * DELETE /api/serviceleads/:id
+ * Delete a service lead and its attachments (ADMIN ONLY)
+ * 
+ * Automatically:
+ * - Removes lead from MongoDB
+ * - Deletes Cloudinary document (if attached)
+ * - Logs deletion
+ * 
+ * Response (200):
+ *   { success: true, message: "Lead deleted." }
+ */
+router.delete(
+  "/:id",
+  protect,
+  authorise("admin"),
+  deleteServiceLead
+);
+
+// ═══════════════════════════════════════════════════════════════
+// ERROR HANDLING
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * If a route doesn't match above, return 404
+ * (optional - Express does this by default)
+ */
+router.use((req, res) => {
+  res.status(404).json({ 
+    success: false, 
+    message: `Route not found: ${req.method} ${req.path}` 
+  });
+});
 
 module.exports = router;

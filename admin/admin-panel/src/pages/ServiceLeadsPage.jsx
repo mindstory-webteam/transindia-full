@@ -7,7 +7,7 @@ import {
 } from "../services/api";
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
-  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
+  CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip, Download,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -24,17 +24,44 @@ const STYLES = `
   .sl-select { font-family:inherit; }
   .sl-export { transition: background .15s ease, border-color .15s ease, opacity .15s ease; }
   .sl-export:hover:not(:disabled) { background:#F4F7FB; border-color:#DCE3EC; }
-  .sl-doc { color:#0891B2; text-decoration:none; }
+  .sl-doc { color:#0891B2; text-decoration:none; display: inline-flex; align-items: center; gap: 5px; }
   .sl-doc:hover { text-decoration:underline; }
+  .sl-doc:active { opacity: 0.7; }
   @media (prefers-reduced-motion: reduce) {
     .sl-stat, .sl-tab, .sl-del, .sl-export { transition:none !important; }
   }
 `;
 
-// Motor docs are now Cloudinary URLs (full https), so fileUrl returns them as-is.
-// API_HOST only matters for any legacy local /uploads paths still in the DB.
 const API_HOST = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
-const fileUrl = (p) => (!p ? "" : p.startsWith("http") ? p : `${API_HOST}${p}`);
+
+/**
+ * ✅ IMPROVED: fileUrl function now handles multiple cases
+ * 1. Direct Cloudinary URLs (https://) - use directly
+ * 2. API proxy path - use via backend (/api/serviceleads/:id/document)
+ * 3. Legacy local paths - prepend API_HOST
+ */
+const fileUrl = (p, leadId) => {
+  if (!p) return "";
+  
+  // Case 1: Already a full HTTPS URL (Cloudinary)
+  if (p.startsWith("https://")) {
+    return p;
+  }
+  
+  // Case 2: HTTP URL (rare but handle it)
+  if (p.startsWith("http://")) {
+    return p;
+  }
+  
+  // Case 3: API proxy path (preferred for reliability)
+  // This goes through your backend, giving you control over CORS and caching
+  if (leadId) {
+    return `${API_HOST}/api/serviceleads/${leadId}/document`;
+  }
+  
+  // Case 4: Legacy local path
+  return `${API_HOST}${p}`;
+};
 
 const STATUS_META = {
   new:       { label: "New",       color: "#D97706", bg: "#FEF3C7" },
@@ -81,18 +108,30 @@ function fmtDate(iso) {
 
 const subText = { color: "#94A3B8", fontSize: 12, marginTop: 2 };
 
-// Adaptive "Details" cell — renders whatever fields apply to that form type.
+// ✅ IMPROVED: LeadDetails now uses leadId for proper document access
 function LeadDetails({ l }) {
   const slug = (l.serviceSlug || "").toLowerCase();
+  const docUrl = fileUrl(l.insuranceDocument, l._id);
 
-  // Motor — policy number + uploaded document
+  // Motor — policy number + uploaded document with improved link
   if (slug.includes("motor") || l.insuranceNumber || l.insuranceDocument) {
     return (
       <div>
         {l.insuranceNumber && <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>}
         {l.insuranceDocument ? (
-          <a className="sl-doc" href={fileUrl(l.insuranceDocument)} target="_blank" rel="noopener noreferrer"
-             style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 12.5, marginTop: 3 }}>
+          <a 
+            className="sl-doc" 
+            href={docUrl}
+            download
+            target="_blank" 
+            rel="noopener noreferrer"
+            title="Click to view or download the insurance document"
+            style={{ fontSize: 12.5, marginTop: 3 }}
+            onClick={(e) => {
+              // Optional: Log for debugging
+              console.log("Accessing document:", docUrl);
+            }}
+          >
             <Paperclip size={12} /> View document
           </a>
         ) : (
@@ -219,7 +258,7 @@ export default function ServiceLeadsPage() {
       "City Tier": l.cityTier || "",
       // Motor
       "Policy Number": l.insuranceNumber || "",
-      "Document": l.insuranceDocument ? fileUrl(l.insuranceDocument) : "",
+      "Document": l.insuranceDocument ? fileUrl(l.insuranceDocument, l._id) : "",
       // Miscellaneous
       "Requirements": l.insuranceTypes || "",
       // Estimate

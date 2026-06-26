@@ -1,6 +1,13 @@
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin");
 
+/**
+ * ✅ Middleware: protect
+ * Verifies JWT token and checks if admin is active
+ * 
+ * Usage:
+ *   router.get("/", protect, getServiceLeads);
+ */
 exports.protect = async (req, res, next) => {
   let token;
 
@@ -24,9 +31,40 @@ exports.protect = async (req, res, next) => {
   }
 };
 
+/**
+ * ✅ Middleware Factory: authorise
+ * Checks if user has required role(s)
+ * 
+ * Usage:
+ *   router.get("/", protect, authorise("admin"), getServiceLeads);
+ *   router.get("/", protect, authorise("admin", "superAdmin"), getServiceLeads);
+ * 
+ * @param {...string} roles - Required roles
+ * @returns {Function} Express middleware
+ */
 exports.authorise = (...roles) => (req, res, next) => {
-  if (!roles.includes(req.admin.role)) {
-    return res.status(403).json({ success: false, message: "Insufficient permissions" });
+  if (!req.admin) {
+    return res.status(401).json({ success: false, message: "Not authenticated" });
   }
+
+  if (!roles.includes(req.admin.role)) {
+    return res.status(403).json({ 
+      success: false, 
+      message: `Insufficient permissions. Required role(s): ${roles.join(", ")}` 
+    });
+  }
+
   next();
 };
+
+/**
+ * ✅ LEGACY EXPORT: admin
+ * Convenience export for routes that just need admin role check
+ * 
+ * Usage:
+ *   router.get("/", protect, admin, getServiceLeads);
+ * 
+ * Equivalent to:
+ *   router.get("/", protect, authorise("admin"), getServiceLeads);
+ */
+ exports.admin = exports.authorise("admin");
