@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const upload = require("../middleware/uploadServiceLead");
-const ctrl = require("../controllers/serviceLeadController");
+const ctrl = require("../controllers/servicesFormController");
 
 /*
  * Turns multer/file errors (wrong type, too large) into a clean 400 JSON.
@@ -25,10 +25,11 @@ router.post("/", upload.single("insuranceDocument"), handleUpload, ctrl.createSe
 
 // ── ADMIN ───────────────────────────────────────────────────────────
 // NOTE: /stats must be declared BEFORE /:id or "stats" is read as an id.
-// Wrap these with your auth middleware (e.g. router.get("/", protect, ...)).
 router.get("/stats", ctrl.getServiceLeadStats);
 router.get("/", ctrl.getServiceLeads);
 router.get("/:id", ctrl.getServiceLeadById);
+// Your admin api.js uses api.patch(); PUT kept as well so both work.
+router.patch("/:id", ctrl.updateServiceLead);
 router.put("/:id", ctrl.updateServiceLead);
 router.delete("/:id", ctrl.deleteServiceLead);
 

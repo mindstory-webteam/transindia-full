@@ -33,6 +33,7 @@ app.use("/api/contact",      require("./src/routes/contact"));
 app.use("/api/bmileads",     require("./src/routes/bmiLeads"));
 app.use("/api/claimleads",   require("./src/routes/claimLeadsRoute"));
 app.use("/api/careers",      require("./src/routes/careers"));
+app.use("/api/serviceleads", require("./src/routes/servicesFormRoutes"));
 
 app.use("/api/quoteleads", require("./src/routes/quoteLeads"));
 

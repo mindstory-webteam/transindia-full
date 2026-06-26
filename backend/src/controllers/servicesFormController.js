@@ -1,4 +1,4 @@
-const ServiceLead = require("../models/ServiceLead");
+const ServiceLead = require("../models/ServicesForm");
 const cloudinary = require("../config/cloudinary");
 
 // slug → form type, so the server never trusts the client for it.
