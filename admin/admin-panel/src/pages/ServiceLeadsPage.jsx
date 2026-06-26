@@ -8,6 +8,7 @@ import {
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
   CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
+  AlertCircle,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -32,24 +33,8 @@ const STYLES = `
   }
 `;
 
-// ─── API base (strip trailing /api if present) ────────────────────────────────
 const API_HOST = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
-/**
- * Always use the backend proxy for document access.
- *
- * WHY: Cloudinary "raw" PDFs return a content-type of
- *      application/octet-stream and may have CORS restrictions that
- *      prevent the browser from opening / downloading them directly.
- *      Going through our own backend endpoint lets us:
- *        1. Set the correct Content-Disposition header.
- *        2. Add auth if needed later.
- *        3. Avoid CORS entirely.
- *
- * The endpoint  GET /api/serviceleads/:id/document
- * looks up the lead, reads lead.insuranceDocument (the Cloudinary URL),
- * and either proxies the stream or redirects with proper headers.
- */
 const docProxyUrl = (leadId) =>
   leadId ? `${API_HOST}/api/serviceleads/${leadId}/document` : "";
 
@@ -70,14 +55,11 @@ const STATUS_TABS = [
 
 function StatCard({ label, value, icon: Icon, color, bg }) {
   return (
-    <div
-      className="sl-stat"
-      style={{
-        background: "#fff", borderRadius: 16, padding: "18px 20px",
-        border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-        display: "flex", alignItems: "center", gap: 14,
-      }}
-    >
+    <div className="sl-stat" style={{
+      background: "#fff", borderRadius: 16, padding: "18px 20px",
+      border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+      display: "flex", alignItems: "center", gap: 14,
+    }}>
       <div style={{ width: 46, height: 46, borderRadius: 13, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
         <Icon size={21} color={color} />
       </div>
@@ -98,14 +80,11 @@ function fmtDate(iso) {
 
 const subText = { color: "#94A3B8", fontSize: 12, marginTop: 2 };
 
-// ─── LeadDetails ─────────────────────────────────────────────────────────────
-// Always routes document access through the backend proxy URL.
 function LeadDetails({ l }) {
   const slug   = (l.serviceSlug || "").toLowerCase();
   const hasDoc = Boolean(l.insuranceDocument);
   const proxyUrl = docProxyUrl(l._id);
 
-  // Motor — policy number + document download via proxy
   if (slug.includes("motor") || l.insuranceNumber || hasDoc) {
     return (
       <div>
@@ -113,16 +92,8 @@ function LeadDetails({ l }) {
           <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>
         )}
         {hasDoc ? (
-          // Use an <a> with target="_blank" so the browser opens the proxied URL.
-          // The backend sets Content-Disposition: attachment so it downloads.
-          <a
-            className="sl-doc"
-            href={proxyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ fontSize: 12.5, marginTop: 3 }}
-            title="View / download insurance document"
-          >
+          <a className="sl-doc" href={proxyUrl} target="_blank" rel="noopener noreferrer"
+            style={{ fontSize: 12.5, marginTop: 3 }} title="View / download insurance document">
             <Paperclip size={12} /> View document
           </a>
         ) : (
@@ -132,7 +103,6 @@ function LeadDetails({ l }) {
     );
   }
 
-  // Miscellaneous — free-text requirements
   if (l.insuranceTypes) {
     return (
       <p style={{ color: "#0F172A", maxWidth: 260, whiteSpace: "normal" }} title={l.insuranceTypes}>
@@ -141,20 +111,18 @@ function LeadDetails({ l }) {
     );
   }
 
-  // Life — sum assured / term / smoker / income
   if (l.sumAssured || l.policyTerm) {
     return (
       <div>
         <p style={{ color: "#0F172A", fontWeight: 600 }}>
           {l.sumAssured || "—"}{l.policyTerm ? ` · ${l.policyTerm}` : ""}
         </p>
-        {l.smoker      && <p style={subText}>Smoker: {l.smoker}</p>}
+        {l.smoker       && <p style={subText}>Smoker: {l.smoker}</p>}
         {l.annualIncome && <p style={subText}>{l.annualIncome}</p>}
       </div>
     );
   }
 
-  // Health — sum insured / cover type / conditions / city tier
   if (l.sumInsured || l.coverType) {
     return (
       <div>
@@ -170,6 +138,54 @@ function LeadDetails({ l }) {
   return <span style={{ color: "#94A3B8" }}>—</span>;
 }
 
+// ── Error banner shown when fetch fails ───────────────────────────────────────
+function ErrorBanner({ error, onRetry }) {
+  // Decode the most common failure reasons into plain English
+  const status = error?.response?.status;
+  const serverMsg = error?.response?.data?.message;
+
+  let title = "Could not load leads";
+  let detail = serverMsg || error?.message || "Unknown error";
+  let hint = null;
+
+  if (status === 401) {
+    title = "Authentication failed (401)";
+    detail = serverMsg || "Token missing or expired";
+    hint = "Your session may have expired. Try logging out and back in. Also check that your axios instance attaches the Authorization: Bearer <token> header.";
+  } else if (status === 403) {
+    title = "Permission denied (403)";
+    detail = serverMsg || "Your account does not have admin role";
+    hint = "The logged-in admin's role must be 'admin' to access this route.";
+  } else if (status === 404) {
+    title = "Route not found (404)";
+    detail = serverMsg || "The API endpoint does not exist";
+    hint = "Check that the backend has app.use('/api/serviceleads', ...) and the route file exports getServiceLeads correctly.";
+  } else if (!status) {
+    title = "Network error — no response";
+    hint = "The server is unreachable. Check VITE_API_URL in your .env and make sure the backend is running.";
+  }
+
+  return (
+    <div style={{
+      margin: "0 0 20px", padding: "16px 20px", borderRadius: 12,
+      background: "#FFF1F0", border: "1px solid #FFC9C9",
+      display: "flex", gap: 12, alignItems: "flex-start",
+    }}>
+      <AlertCircle size={18} color="#DC2626" style={{ flexShrink: 0, marginTop: 1 }} />
+      <div style={{ flex: 1 }}>
+        <p style={{ fontWeight: 700, color: "#DC2626", fontSize: 13 }}>{title}</p>
+        <p style={{ color: "#7F1D1D", fontSize: 12, marginTop: 3 }}>{detail}</p>
+        {hint && <p style={{ color: "#991B1B", fontSize: 11.5, marginTop: 5, fontStyle: "italic" }}>{hint}</p>}
+      </div>
+      <button onClick={onRetry} style={{
+        flexShrink: 0, padding: "6px 12px", borderRadius: 8, fontSize: 12,
+        fontWeight: 600, cursor: "pointer", background: "#fff",
+        border: "1px solid #FCA5A5", color: "#DC2626", fontFamily: "inherit",
+      }}>Retry</button>
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ServiceLeadsPage() {
   const [leads,   setLeads]   = useState([]);
@@ -177,18 +193,37 @@ export default function ServiceLeadsPage() {
   const [filter,  setFilter]  = useState("all");
   const [loading, setLoading] = useState(true);
   const [busyId,  setBusyId]  = useState(null);
+  const [error,   setError]   = useState(null);   // ← NEW: capture fetch errors
 
   const load = (status = filter) => {
     setLoading(true);
+    setError(null);
+
+    // ── Build params correctly ────────────────────────────────────────────────
+    // getServiceLeads(params) → api.get("/serviceleads", { params })
+    // Pass {} for "all" so axios sends no query string.
+    // Pass { status } for a specific tab so axios sends ?status=new etc.
+    const params = status === "all" ? {} : { status };
+
     Promise.all([
-      getServiceLeads(status === "all" ? undefined : { status }),
+      getServiceLeads(params),
       getServiceLeadStats(),
     ])
       .then(([leadsRes, statsRes]) => {
         setLeads(leadsRes.data.data || []);
         setStats(statsRes.data.data || null);
       })
-      .catch((e) => console.error("Failed to load service leads:", e))
+      .catch((e) => {
+        // Log the full error so it's visible in DevTools console too
+        console.error("Failed to load service leads:", {
+          status:  e?.response?.status,
+          message: e?.response?.data?.message,
+          url:     e?.config?.url,
+          headers: e?.config?.headers,
+          raw:     e,
+        });
+        setError(e);
+      })
       .finally(() => setLoading(false));
   };
 
@@ -201,8 +236,8 @@ export default function ServiceLeadsPage() {
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, status } : l)));
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
-      console.error("Status update failed:", e);
-      alert("Could not update status. Please try again.");
+      console.error("Status update failed:", e?.response?.data || e.message);
+      alert(`Could not update status: ${e?.response?.data?.message || e.message}`);
     } finally {
       setBusyId(null);
     }
@@ -216,14 +251,14 @@ export default function ServiceLeadsPage() {
       setLeads((prev) => prev.filter((l) => l._id !== id));
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
-      console.error("Delete failed:", e);
-      alert("Could not delete the lead. Please try again.");
+      console.error("Delete failed:", e?.response?.data || e.message);
+      alert(`Could not delete the lead: ${e?.response?.data?.message || e.message}`);
     } finally {
       setBusyId(null);
     }
   };
 
-  // ── Exports ──────────────────────────────────────────────────────────────────
+  // ── Exports ───────────────────────────────────────────────────────────────
   const fileStamp = () => new Date().toISOString().slice(0, 10);
 
   const buildRows = () =>
@@ -245,7 +280,6 @@ export default function ServiceLeadsPage() {
       Conditions:        l.conditions || "",
       "City Tier":       l.cityTier || "",
       "Policy Number":   l.insuranceNumber || "",
-      // Use proxy URL so the Excel link also works correctly
       Document:          l.insuranceDocument ? docProxyUrl(l._id) : "",
       Requirements:      l.insuranceTypes || "",
       Coverage:          l.estimate?.coverage || "",
@@ -266,11 +300,10 @@ export default function ServiceLeadsPage() {
     XLSX.writeFile(wb, `service-leads-${fileStamp()}.xlsx`);
   };
 
-  // Short text details for the PDF "Details" column
   const pdfDetails = (l) => {
     const parts = [];
     if (l.insuranceNumber)   parts.push(`Policy: ${l.insuranceNumber}`);
-    if (l.insuranceDocument) parts.push("Doc ↗");   // visual indicator; real link added via didDrawCell
+    if (l.insuranceDocument) parts.push("Doc ↗");
     if (l.insuranceTypes)    return l.insuranceTypes;
     if (l.sumAssured || l.policyTerm)
       return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
@@ -281,10 +314,8 @@ export default function ServiceLeadsPage() {
 
   const exportPDF = () => {
     if (!leads.length) return;
-
     const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
 
-    // Header
     doc.setFontSize(15);
     doc.setTextColor(15, 23, 42);
     doc.text("Service Leads", 40, 38);
@@ -296,83 +327,58 @@ export default function ServiceLeadsPage() {
       40, 54
     );
 
-    // Build table rows — keep a parallel array of doc URLs indexed by row
     const docUrls = [];
     const head = [["Name", "Phone", "Email", "Service", "Details", "Document", "Premium/mo", "Status", "Date"]];
     const body = leads.map((l, i) => {
-      // Store proxy URL (or empty) at same index so didDrawCell can look it up
       docUrls[i] = l.insuranceDocument ? docProxyUrl(l._id) : "";
-
       return [
         l.name || "",
         l.phone || "",
         l.email || "",
         l.serviceTitle || l.serviceSlug || "",
         pdfDetails(l),
-        l.insuranceDocument ? "View doc" : "—",   // col 5 — text; link drawn below
+        l.insuranceDocument ? "View doc" : "—",
         l.estimate?.monthly || "—",
         STATUS_META[l.status]?.label || l.status || "",
         fmtDate(l.createdAt),
       ];
     });
 
-    // Column index for the "Document" column (0-based)
     const DOC_COL = 5;
 
     autoTable(doc, {
-      head,
-      body,
-      startY: 66,
+      head, body, startY: 66,
       styles: { fontSize: 7.5, cellPadding: 4, overflow: "linebreak" },
       headStyles: { fillColor: [241, 90, 62], textColor: 255, fontStyle: "bold" },
       alternateRowStyles: { fillColor: [250, 251, 253] },
       columnStyles: {
-        0: { cellWidth: 80 },   // Name
-        1: { cellWidth: 75 },   // Phone
-        2: { cellWidth: 115 },  // Email
-        3: { cellWidth: 75 },   // Service
-        4: { cellWidth: 80 },   // Details
-        5: { cellWidth: 55 },   // Document
-        6: { cellWidth: 55 },   // Premium
-        7: { cellWidth: 55 },   // Status
-        8: { cellWidth: 60 },   // Date
+        0: { cellWidth: 80 }, 1: { cellWidth: 75 }, 2: { cellWidth: 115 },
+        3: { cellWidth: 75 }, 4: { cellWidth: 80 }, 5: { cellWidth: 55 },
+        6: { cellWidth: 55 }, 7: { cellWidth: 55 }, 8: { cellWidth: 60 },
       },
       margin: { left: 40, right: 40 },
-
-      /**
-       * didDrawCell — fires after each cell is painted.
-       * For the Document column, if there is a URL we:
-       *   1. Paint a cyan underline under the "View doc" text.
-       *   2. Register a clickable link rectangle so it's interactive in PDF viewers.
-       */
       didDrawCell(data) {
         if (data.section !== "body") return;
         if (data.column.index !== DOC_COL) return;
-
         const url = docUrls[data.row.index];
         if (!url) return;
 
         const { x, y, width, height } = data.cell;
         const text = "View doc";
-
-        // Measure text width at current font size
         doc.setFontSize(7.5);
         const textW = doc.getTextWidth(text);
-        const textX = x + 4;                       // cell left-padding = 4 (matches cellPadding)
-        const textY = y + height / 2 + 2.5;        // vertical centre (approx baseline)
+        const textX = x + 4;
+        const textY = y + height / 2 + 2.5;
 
-        // Draw the text in link colour (overwrite the default black)
-        doc.setTextColor(8, 145, 178);              // #0891B2
+        doc.setTextColor(8, 145, 178);
         doc.text(text, textX, textY);
-        doc.setTextColor(0, 0, 0);                  // reset
+        doc.setTextColor(0, 0, 0);
 
-        // Underline
         doc.setDrawColor(8, 145, 178);
         doc.setLineWidth(0.5);
         doc.line(textX, textY + 1, textX + textW, textY + 1);
-        doc.setDrawColor(0, 0, 0);                  // reset
+        doc.setDrawColor(0, 0, 0);
 
-        // Clickable hotspot — works in Acrobat, Evince, Chrome PDF viewer, etc.
         doc.link(x, y, width, height, { url });
       },
     });
@@ -380,7 +386,6 @@ export default function ServiceLeadsPage() {
     doc.save(`service-leads-${fileStamp()}.pdf`);
   };
 
-  // ── Stat cards ────────────────────────────────────────────────────────────────
   const statCards = [
     { label: "Total",     value: stats?.total || 0,               icon: Calculator,  color: "#F15A3E", bg: "#FEEEE9" },
     { label: "New",       value: stats?.byStatus?.new || 0,       icon: Clock,       color: "#D97706", bg: "#FEF3C7" },
@@ -412,7 +417,6 @@ export default function ServiceLeadsPage() {
           <h1 style={{ fontSize: 22, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>Service Leads</h1>
           <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Leads from every insurance form across your service pages</p>
         </div>
-
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <button className="sl-export" onClick={exportExcel} disabled={!leads.length}
             style={{ ...exportBtnStyle, opacity: leads.length ? 1 : 0.5, cursor: leads.length ? "pointer" : "not-allowed" }}
@@ -429,6 +433,9 @@ export default function ServiceLeadsPage() {
           </button>
         </div>
       </div>
+
+      {/* Error banner — shown instead of silent empty table */}
+      {error && <ErrorBanner error={error} onRetry={() => load(filter)} />}
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
@@ -458,6 +465,12 @@ export default function ServiceLeadsPage() {
       <div style={{ background: "#fff", borderRadius: 16, border: "1px solid var(--border)", boxShadow: "0 1px 2px rgba(15,23,42,0.04)", overflow: "hidden" }}>
         {loading ? (
           <p style={{ padding: 28, color: "#64748B", fontSize: 14 }}>Loading leads…</p>
+        ) : error ? (
+          <div style={{ padding: 48, textAlign: "center" }}>
+            <AlertCircle size={34} color="#FCA5A5" style={{ marginBottom: 10 }} />
+            <p style={{ color: "#64748B", fontSize: 14, fontWeight: 600 }}>Failed to load leads</p>
+            <p style={{ color: "#94A3B8", fontSize: 13, marginTop: 4 }}>See the error details above.</p>
+          </div>
         ) : leads.length === 0 ? (
           <div style={{ padding: 48, textAlign: "center" }}>
             <Calculator size={34} color="#CBD5E1" style={{ marginBottom: 10 }} />
@@ -480,13 +493,11 @@ export default function ServiceLeadsPage() {
                   return (
                     <tr key={l._id} style={{ borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
 
-                      {/* Name + gender/marital */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
                         <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
                       </td>
 
-                      {/* Contact */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <a href={`mailto:${l.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172A", textDecoration: "none", fontWeight: 500 }}>
                           <Mail size={13} color="#94A3B8" /> {l.email}
@@ -496,17 +507,14 @@ export default function ServiceLeadsPage() {
                         </a>
                       </td>
 
-                      {/* Service */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
                         {l.serviceTitle || l.serviceSlug || "—"}
                       </td>
 
-                      {/* Adaptive details */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
                         <LeadDetails l={l} />
                       </td>
 
-                      {/* Premium estimate */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
                         {l.estimate?.monthly ? (
                           <>
@@ -516,12 +524,10 @@ export default function ServiceLeadsPage() {
                         ) : <span style={{ color: "#94A3B8" }}>—</span>}
                       </td>
 
-                      {/* Date */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>
                         {fmtDate(l.createdAt)}
                       </td>
 
-                      {/* Status select */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
                         <div style={{ position: "relative", display: "inline-block" }}>
                           <select className="sl-select" value={l.status} disabled={busyId === l._id}
@@ -540,7 +546,6 @@ export default function ServiceLeadsPage() {
                         </div>
                       </td>
 
-                      {/* Delete */}
                       <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
                         <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
                           style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
