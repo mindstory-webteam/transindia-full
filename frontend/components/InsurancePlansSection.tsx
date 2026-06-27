@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { SERVICE_CARDS } from "../app/our-services/insuranceData";
 
@@ -73,15 +73,41 @@ export default function InsurancePlansSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlay, setIsAutoPlay] = useState(true);
+  const [cardsPerPage, setCardsPerPage] = useState(4); // responsive columns
   const autoPlayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const plans = PLANS;
-  const cardsPerRow = 4;
-  const totalSlides = Math.ceil(plans.length / cardsPerRow);
+
+  // ── Responsive columns: 4 (desktop) → 2 (tablet) → 1 (mobile) ──
+  useEffect(() => {
+    const calc = () => {
+      const w = window.innerWidth;
+      setCardsPerPage(w <= 520 ? 1 : w <= 960 ? 2 : 4);
+    };
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+
+  // ── Split plans into full-width pages of `cardsPerPage` cards ──
+  const pages = useMemo(() => {
+    const out: Plan[][] = [];
+    for (let i = 0; i < plans.length; i += cardsPerPage) {
+      out.push(plans.slice(i, i + cardsPerPage));
+    }
+    return out;
+  }, [plans, cardsPerPage]);
+
+  const totalSlides = pages.length;
+
+  // Keep the active slide valid when the column count (and page count) changes
+  useEffect(() => {
+    setCurrentSlide((s) => Math.min(s, Math.max(0, totalSlides - 1)));
+  }, [totalSlides]);
 
   // Auto-play carousel
   useEffect(() => {
-    if (!isAutoPlay || plans.length === 0) return;
+    if (!isAutoPlay || totalSlides <= 1) return;
 
     autoPlayTimerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
@@ -90,7 +116,7 @@ export default function InsurancePlansSection() {
     return () => {
       if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
     };
-  }, [isAutoPlay, plans.length, totalSlides]);
+  }, [isAutoPlay, totalSlides]);
 
   const handleDotClick = (index: number) => {
     setCurrentSlide(index);
@@ -140,39 +166,46 @@ export default function InsurancePlansSection() {
             <div
               className="ips-carousel-track"
               ref={carouselRef}
-              style={{ transform: `translateX(calc(-${currentSlide * 100}%))` }}
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
             >
-              {plans.map((plan, i) => (
-                <div key={plan.slug || i} className="ips-carousel-item">
-                  <div className="ips-card fade-in">
-                    <Link
-                      href={plan.href}
-                      className="ips-card-img-link"
-                      aria-label={`Explore ${plan.label} plans`}
-                    >
-                      <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
-                        {plan.imageSrc ? (
-                          <img
-                            src={plan.imageSrc}
-                            alt={plan.imageAlt}
-                            className="ips-card-img"
-                          />
-                        ) : null}
-                      </div>
-                    </Link>
+              {pages.map((page, pageIndex) => (
+                <div className="ips-slide" key={pageIndex}>
+                  <div
+                    className="ips-slide-grid"
+                    style={{ gridTemplateColumns: `repeat(${cardsPerPage}, minmax(0, 1fr))` }}
+                  >
+                    {page.map((plan, i) => (
+                      <div key={plan.slug || `${pageIndex}-${i}`} className="ips-card fade-in">
+                        <Link
+                          href={plan.href}
+                          className="ips-card-img-link"
+                          aria-label={`Explore ${plan.label} plans`}
+                        >
+                          <div className="ips-card-img-wrap" style={{ background: plan.imageBg }}>
+                            {plan.imageSrc ? (
+                              <img
+                                src={plan.imageSrc}
+                                alt={plan.imageAlt}
+                                className="ips-card-img"
+                              />
+                            ) : null}
+                          </div>
+                        </Link>
 
-                    <div className="ips-card-body">
-                      <h3 className="ips-card-title">{plan.label}</h3>
-                      <p className="ips-card-desc">{plan.desc}</p>
-                      <Link href={plan.href} className="ips-card-cta">
-                        {plan.cta}
-                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                          <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
-                            stroke="currentColor" strokeWidth="1.8"
-                            strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </Link>
-                    </div>
+                        <div className="ips-card-body">
+                          <h3 className="ips-card-title">{plan.label}</h3>
+                          <p className="ips-card-desc">{plan.desc}</p>
+                          <Link href={plan.href} className="ips-card-cta">
+                            {plan.cta}
+                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                              <path d="M3.5 9H14.5M14.5 9L10 4.5M14.5 9L10 13.5"
+                                stroke="currentColor" strokeWidth="1.8"
+                                strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -186,7 +219,7 @@ export default function InsurancePlansSection() {
                     key={index}
                     className={`ips-dot ${currentSlide === index ? "active" : ""}`}
                     onClick={() => handleDotClick(index)}
-                    aria-label={`Go to row ${index + 1}`}
+                    aria-label={`Go to page ${index + 1}`}
                     aria-current={currentSlide === index}
                   />
                 ))}
@@ -334,34 +367,30 @@ const CSS = `
     overflow: hidden;
   }
 
+  /* The track now holds full-width slides; no gap so each slide aligns
+     exactly to 100% (this is what fixes the overflow / cut-off cards). */
   .ips-carousel-track {
     display: flex;
-    gap: clamp(12px, 1.8vw, 20px);
+    gap: 0;
     transition: transform 0.6s cubic-bezier(0.22,1,0.36,1);
   }
 
-  .ips-carousel-item {
-    flex: 0 0 calc(25% - clamp(9px, 1.35vw, 15px));
-    min-width: calc(25% - clamp(9px, 1.35vw, 15px));
+  /* One slide = one full-width page of cards */
+  .ips-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
   }
 
-  /* Tablet: 2 columns */
-  @media(max-width: 960px) {
-    .ips-carousel-item {
-      flex: 0 0 calc(50% - clamp(6px, 0.9vw, 10px));
-      min-width: calc(50% - clamp(6px, 0.9vw, 10px));
-    }
+  /* Responsive grid of cards inside each slide. Columns are set inline
+     (4 / 2 / 1) so the layout never overflows. Padding gives the cards
+     breathing room and room for the hover lift. */
+  .ips-slide-grid {
+    display: grid;
+    gap: clamp(16px, 1.8vw, 24px);
+    padding: 6px 2px 26px;
   }
 
-  /* Mobile: 1 column */
-  @media(max-width: 520px) {
-    .ips-carousel-item {
-      flex: 0 0 100%;
-      min-width: 100%;
-    }
-  }
-
-  /* Single card */
+  /* Single card (flat, clean — drop shadows removed, hairline border kept) */
   .ips-card {
     background: #fff;
     border-radius: 18px;
@@ -369,19 +398,23 @@ const CSS = `
     display: flex;
     flex-direction: column;
     height: 100%;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
-    transition: transform 0.26s ease, box-shadow 0.26s ease;
+    min-width: 0;
+    border: 1px solid rgba(17,24,39,0.07);
+    box-shadow: none;
+    transition: transform 0.26s ease, box-shadow 0.26s ease, border-color 0.26s ease;
   }
 
   .ips-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 48px rgba(0,0,0,0.11);
+    transform: translateY(-4px);
+   
+    border-color: rgba(17,24,39,0.10);
   }
 
   @media(hover: none) {
     .ips-card:hover {
       transform: none;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+      box-shadow: none;
+      border-color: rgba(17,24,39,0.07);
     }
   }
 
@@ -464,7 +497,7 @@ const CSS = `
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin-top: clamp(20px, 3vw, 32px);
+    margin-top: clamp(8px, 2vw, 18px);
   }
 
   .ips-dot {
@@ -487,10 +520,9 @@ const CSS = `
     background: #F15A3E;
     width: 28px;
     border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(241, 90, 62, 0.3);
   }
 
-  /* ── Trust Banner ── */
+  /* ── Trust Banner (flat, no drop shadow) ── */
   .ips-banner {
     background: linear-gradient(135deg, #EBF5FF 0%, #EEF8FF 100%);
     border-radius: 20px;
@@ -499,7 +531,8 @@ const CSS = `
     align-items: center;
     gap: clamp(16px, 3vw, 40px);
     flex-wrap: wrap;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+    border: 1px solid rgba(11,37,99,0.06);
+    box-shadow: none;
   }
 
   .ips-banner-left {
