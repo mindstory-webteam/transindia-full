@@ -33,11 +33,16 @@ interface EventsPageProps {
 //   NEXT_PUBLIC_API_URL=https://transindia-api.onrender.com
 // During local dev it might be: http://localhost:5000
 // ─────────────────────────────────────────────────────────────
-const API_BASE =
+const RAW_API_BASE =
   process.env.NEXT_PUBLIC_API_URL /* preferred */ ||
-  "" /* ← or hardcode your backend origin here, e.g. "https://transindia-api.onrender.com" */;
+  "" /* ← or hardcode your backend origin here, e.g. "https://transindia-backend.onrender.com" */;
 
-const EVENTS_ENDPOINT = `${API_BASE}/api/events`;
+// Normalise the base so the endpoint is always correct no matter how the env
+// is written: strip a trailing slash, and strip a trailing "/api" if present
+// (we add "/api/events" ourselves — this prevents a doubled "/api/api/events").
+const API_BASE = RAW_API_BASE.replace(/\/+$/, "").replace(/\/api$/, "");
+
+const EVENTS_ENDPOINT = `${API_BASE}/events`;
 
 const FALLBACK_IMAGE = "https://picsum.photos/seed/transindia-event-fallback/800/600";
 
