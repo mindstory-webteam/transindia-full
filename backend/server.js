@@ -16,8 +16,42 @@ connectDB();
 
 const app = express();
 
-// ── Middleware ────────────────────────────────────────────────────────────────
-app.use(cors({ origin: "*", credentials: true }));
+// ── CORS ──────────────────────────────────────────────────────────────────────
+// IMPORTANT: origin "*" together with credentials:true is INVALID per the CORS
+// spec — browsers drop the Access-Control-Allow-Origin header and the preflight
+// fails. With credentials we must reflect an explicit, allow-listed origin.
+const STATIC_ALLOWED_ORIGINS = [
+  "http://localhost:3000",                  // public site (Next dev)
+  "http://localhost:5173",                  // admin (Vite dev)
+  "https://transindia-full.vercel.app",     // public site (prod)
+  // Add any other fixed production domains here.
+];
+
+// Vercel gives every preview deploy a different sub-domain
+// (e.g. transindia-full-n87v.vercel.app), so allow them by pattern.
+const VERCEL_PREVIEW = /^https:\/\/transindia-full[a-z0-9-]*\.vercel\.app$/;
+
+const corsOptions = {
+  origin(origin, callback) {
+    // Allow non-browser tools (curl, Postman, server-to-server) that send no Origin
+    if (!origin) return callback(null, true);
+
+    const allowed =
+      STATIC_ALLOWED_ORIGINS.includes(origin) || VERCEL_PREVIEW.test(origin);
+
+    if (allowed) return callback(null, true);
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// cors() automatically answers preflight OPTIONS requests, so no separate
+// app.options("*") route is needed (and "*" is invalid in Express 5).
+app.use(cors(corsOptions));
+
+// ── Body parsers ──────────────────────────────────────────────────────────────
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,6 +84,11 @@ app.use((err, req, res, next) => {
   // Log the full error (stack + name) so Render logs show the real cause,
   // not just a stripped-down .message
   console.error("Server error:", err);
+
+  // CORS rejection → respond clearly instead of a generic 500
+  if (err && typeof err.message === "string" && err.message.startsWith("CORS blocked")) {
+    return res.status(403).json({ success: false, message: err.message });
+  }
 
   // Multer file-size limit
   if (err.code === "LIMIT_FILE_SIZE") {
