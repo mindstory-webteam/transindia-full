@@ -41,6 +41,7 @@ const CATEGORY_OPTIONS = ["Webinar", "Workshop", "Conference", "Community", "Mee
 const emptyForm = {
   title: "",
   category: "Webinar",
+  customCategory: "",
   date: "",
   endDate: "",
   time: "",
@@ -112,9 +113,14 @@ export default function EventsAdminPage() {
   const handleOpenModal = (event = null) => {
     if (event) {
       setEditingEvent(event);
+      
+      // Check if category is in predefined list, if not, it's custom
+      const isCustom = event.category && !CATEGORY_OPTIONS.includes(event.category);
+      
       setFormData({
         title: event.title || "",
-        category: event.category || "Webinar",
+        category: isCustom ? "Other" : (event.category || "Webinar"),
+        customCategory: isCustom ? event.category : "",
         date: toDateInput(event.date),
         endDate: toDateInput(event.endDate),
         time: event.time || "",
@@ -198,6 +204,16 @@ export default function EventsAdminPage() {
       return;
     }
 
+    // Determine the final category: use customCategory if "Other" is selected
+    const finalCategory = formData.category === "Other" 
+      ? formData.customCategory 
+      : formData.category;
+
+    if (!finalCategory) {
+      toast.error("Please select or enter a category");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -207,7 +223,7 @@ export default function EventsAdminPage() {
       if (formData.endDate) fd.append("endDate", formData.endDate);
       if (formData.time) fd.append("time", formData.time);
       if (formData.location) fd.append("location", formData.location);
-      if (formData.category) fd.append("category", formData.category);
+      fd.append("category", finalCategory);
       if (formData.description) fd.append("description", formData.description);
       if (formData.href) fd.append("href", formData.href);
 
@@ -520,6 +536,18 @@ export default function EventsAdminPage() {
                     {CATEGORY_OPTIONS.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
+                {formData.category === "Other" && (
+                  <div style={{ flex: "1 1 180px" }}>
+                    <label style={labelStyle}>Custom Category</label>
+                    <input 
+                      type="text" 
+                      placeholder="Enter custom category" 
+                      value={formData.customCategory} 
+                      onChange={(e) => setFormData({ ...formData, customCategory: e.target.value })} 
+                      style={inputStyle}
+                    />
+                  </div>
+                )}
                 <div style={{ flex: "1 1 180px" }}>
                   <label style={labelStyle}>Location</label>
                   <input type="text" placeholder="Online Webinar / Kochi, Kerala" value={formData.location} onChange={(e) => setFormData({ ...formData, location: e.target.value })} style={inputStyle} />

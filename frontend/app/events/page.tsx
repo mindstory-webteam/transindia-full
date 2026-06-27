@@ -30,19 +30,26 @@ interface EventsPageProps {
 // ─────────────────────────────────────────────────────────────
 // API base — EDIT THIS (or set NEXT_PUBLIC_API_URL in your env).
 // It must point at your backend ORIGIN, with no trailing slash:
-//   NEXT_PUBLIC_API_URL=https://transindia-api.onrender.com
-// During local dev it might be: http://localhost:5000
+//
+// OPTION 1 - For production (set in .env.production):
+//   NEXT_PUBLIC_API_URL=https://transindia-backend.onrender.com
+//
+// OPTION 2 - For local development (set in .env.local):
+//   NEXT_PUBLIC_API_URL=http://localhost:5000
+//
+// OPTION 3 - Using Next.js API route (no external backend needed):
+//   NEXT_PUBLIC_API_URL=http://localhost:3000
+//   (then create app/api/events/route.ts to handle /api/events)
 // ─────────────────────────────────────────────────────────────
 const RAW_API_BASE =
-  process.env.NEXT_PUBLIC_API_URL /* preferred */ ||
-  "" /* ← or hardcode your backend origin here, e.g. "https://transindia-backend.onrender.com" */;
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 // Normalise the base so the endpoint is always correct no matter how the env
 // is written: strip a trailing slash, and strip a trailing "/api" if present
 // (we add "/api/events" ourselves — this prevents a doubled "/api/api/events").
 const API_BASE = RAW_API_BASE.replace(/\/+$/, "").replace(/\/api$/, "");
 
-const EVENTS_ENDPOINT = `${API_BASE}/events`;
+const EVENTS_ENDPOINT = `${API_BASE}/api/events`;
 
 const FALLBACK_IMAGE = "https://picsum.photos/seed/transindia-event-fallback/800/600";
 
