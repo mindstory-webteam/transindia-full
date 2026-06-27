@@ -28,15 +28,31 @@ interface EventsPageProps {
 }
 
 // ─────────────────────────────────────────────────────────────
-// API base — set NEXT_PUBLIC_API_URL to your backend origin, e.g.
+// API base — EDIT THIS (or set NEXT_PUBLIC_API_URL in your env).
+// It must point at your backend ORIGIN, with no trailing slash:
 //   NEXT_PUBLIC_API_URL=https://transindia-api.onrender.com
-// (falls back to same-origin "/api/events" if unset)
+// During local dev it might be: http://localhost:5000
 // ─────────────────────────────────────────────────────────────
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL /* preferred */ ||
+  "" /* ← or hardcode your backend origin here, e.g. "https://transindia-api.onrender.com" */;
+
 const EVENTS_ENDPOINT = `${API_BASE}/api/events`;
 
+const FALLBACK_IMAGE = "https://picsum.photos/seed/transindia-event-fallback/800/600";
+
+// Brand palette (pulled from the TransIndia site)
+const ACCENT = "#EC4F34"; // orange
+const TEAL = "#2DB9C4";   // teal / cyan
+const NAVY = "#0A1A3F";   // deep navy banner base
+
+// Default banner image — swap for your own events visual.
+const DEFAULT_BANNER_IMAGE =
+  "https://transindia-full.vercel.app/images/about/about-us-hero-lg.png";
+
 // ─────────────────────────────────────────────────────────────
-// Sample data — used as a fallback until the API responds (or if it fails).
+// Sample data — shown ONLY while loading and as a fallback if the
+// API can't be reached. Successful responses (even empty) replace it.
 // ─────────────────────────────────────────────────────────────
 const SAMPLE_EVENTS: EventItem[] = [
   {
@@ -54,7 +70,6 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "A free live session covering how to choose the right health cover, what riders actually mean, and common claim mistakes to avoid.",
-    href: "#",
   },
   {
     id: "2",
@@ -71,7 +86,6 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "A hands-on session on filing a smooth motor claim — documentation, surveyor visits, and timelines explained step by step.",
-    href: "#",
   },
   {
     id: "3",
@@ -89,7 +103,6 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "Our annual gathering for advisors and partners — product updates, panel discussions, and networking over two days.",
-    href: "#",
   },
   {
     id: "4",
@@ -105,7 +118,6 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "Why starting early matters more than the amount — a practical look at term plans, ULIPs, and simple compounding math.",
-    href: "#",
   },
   {
     id: "5",
@@ -121,7 +133,6 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "Free basic health screenings for policyholders and their families, in partnership with local clinics.",
-    href: "#",
   },
   {
     id: "6",
@@ -138,20 +149,8 @@ const SAMPLE_EVENTS: EventItem[] = [
     ],
     description:
       "Quick answers on trip delays, lost baggage, and medical cover before the monsoon travel season picks up.",
-    href: "#",
   },
 ];
-
-const FALLBACK_IMAGE = "https://picsum.photos/seed/transindia-event-fallback/800/600";
-
-// Brand palette (pulled from the TransIndia site)
-const ACCENT = "#EC4F34"; // orange
-const TEAL = "#2DB9C4";   // teal / cyan
-const NAVY = "#0A1A3F";   // deep navy banner base
-
-// Default banner image — swap for your own events visual.
-const DEFAULT_BANNER_IMAGE =
-  "https://transindia-full.vercel.app/images/about/about-us-hero-lg.png";
 
 // ─────────────────────────────────────────────────────────────
 // Helpers
@@ -190,6 +189,26 @@ function isUpcoming(iso: string): boolean {
 function getImages(event: EventItem): string[] {
   if (event.images && event.images.length) return event.images;
   return [event.imageUrl || FALLBACK_IMAGE];
+}
+
+// Map a raw API record into a safe EventItem (handles id/_id, missing
+// imageUrl, empty image arrays, etc.) so the UI never breaks on bad data.
+function normalizeEvent(raw: any, idx: number): EventItem {
+  const images: string[] = Array.isArray(raw?.images) ? raw.images.filter(Boolean) : [];
+  const cover = raw?.imageUrl || images[0] || FALLBACK_IMAGE;
+  return {
+    id: String(raw?.id ?? raw?._id ?? `event-${idx}`),
+    title: raw?.title ?? "Untitled event",
+    date: raw?.date ?? "",
+    endDate: raw?.endDate || undefined,
+    time: raw?.time || undefined,
+    location: raw?.location || undefined,
+    category: raw?.category || undefined,
+    imageUrl: cover,
+    images: images.length ? images : [cover],
+    description: raw?.description || undefined,
+    href: raw?.href || undefined,
+  };
 }
 
 const STYLES = `
@@ -403,6 +422,7 @@ export default function EventsPage({
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [events, setEvents] = useState<EventItem[]>(eventsProp ?? SAMPLE_EVENTS);
   const [loading, setLoading] = useState<boolean>(!eventsProp);
+  const [errored, setErrored] = useState<boolean>(false);
   const [lightbox, setLightbox] = useState<{
     images: string[];
     index: number;
@@ -417,15 +437,31 @@ export default function EventsPage({
 
     (async () => {
       try {
-        const res = await fetch(EVENTS_ENDPOINT, { signal: controller.signal });
+        setLoading(true);
+        setErrored(false);
+
+        const res = await fetch(EVENTS_ENDPOINT, {
+          signal: controller.signal,
+          headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const json = await res.json();
-        if (json?.success && Array.isArray(json.data)) {
-          setEvents(json.data);
+        const list = Array.isArray(json?.data)
+          ? json.data
+          : Array.isArray(json)
+          ? json
+          : null;
+
+        if (list) {
+          setEvents(list.map(normalizeEvent));
+        } else {
+          throw new Error("Unexpected response shape");
         }
       } catch (err) {
-        // keep the sample data on failure; optionally log
         if ((err as any)?.name !== "AbortError") {
-          console.error("Failed to load events:", err);
+          console.error("Failed to load events from", EVENTS_ENDPOINT, err);
+          setErrored(true); // keep SAMPLE_EVENTS so the page still looks alive
         }
       } finally {
         setLoading(false);
@@ -676,6 +712,12 @@ export default function EventsPage({
               Browse moments from our sessions and meetups. Tap any card to flip through the full
               gallery.
             </p>
+
+            {errored && (
+              <p style={{ marginTop: 12, fontSize: 13, color: "#B45309" }}>
+                Showing sample events — couldn&apos;t reach the live events service.
+              </p>
+            )}
           </div>
 
           {/* Category filter chips */}
@@ -988,4 +1030,4 @@ function Lightbox({
       )}
     </div>
   );
-}    
+}

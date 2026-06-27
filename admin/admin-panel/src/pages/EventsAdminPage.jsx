@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "../axios";
 import { toast } from "react-hot-toast";
 import {
@@ -9,7 +9,7 @@ import {
   Eye,
   FileSpreadsheet,
   Download,
-  Upload,
+  UploadCloud,
   Image as ImageIcon,
 } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -20,13 +20,20 @@ const PAGE_STYLES = `
   .events-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
   .events-export-btn:hover:not(:disabled) { background:#F4F7FB; border-color:#CBD5E1; }
   .events-export-btn:disabled { opacity:.5; cursor:not-allowed; }
-  .ev-admin-thumb-wrap { position:relative; width:74px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--ti-line); }
+  .ev-admin-thumb-wrap { position:relative; width:74px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--ti-line); background:#F1F5F9; }
   .ev-admin-thumb-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
   .ev-admin-thumb-x {
     position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%;
     background:rgba(15,23,42,0.72); color:#fff; border:none; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
+  .ev-dropzone {
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+    padding:22px; border:1.5px dashed #CBD5E1; border-radius:10px; cursor:pointer;
+    background:#F8FAFC; text-align:center; transition:border-color .15s, background .15s;
+  }
+  .ev-dropzone:hover { border-color:var(--ti-brand); background:#FFF7F4; }
+  .ev-dropzone.drag { border-color:var(--ti-brand); background:#FFF1ED; }
 `;
 
 const CATEGORY_OPTIONS = ["Webinar", "Workshop", "Conference", "Community", "Meetup", "Other"];
@@ -80,8 +87,11 @@ export default function EventsAdminPage() {
   const [existingImages, setExistingImages] = useState([]); // [{ url, publicId }]
   const [removedIds, setRemovedIds] = useState([]); // public_ids to delete
   const [newImages, setNewImages] = useState([]); // [{ file, url }]
+  const [dragOver, setDragOver] = useState(false);
 
   const [infoModal, setInfoModal] = useState(null); // { title, text }
+
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     fetchEvents();
@@ -139,14 +149,31 @@ export default function EventsAdminPage() {
     setExistingImages([]);
     setRemovedIds([]);
     setNewImages([]);
+    setDragOver(false);
   };
 
   // ── Image handlers ─────────────────────────────────────────────────────────
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files || []);
-    const mapped = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
+  const addFiles = (fileList) => {
+    const files = Array.from(fileList || []).filter((f) => f.type.startsWith("image/"));
+    if (!files.length) return;
+
+    const tooBig = files.filter((f) => f.size > 5 * 1024 * 1024);
+    const ok = files.filter((f) => f.size <= 5 * 1024 * 1024);
+    if (tooBig.length) toast.error(`${tooBig.length} image(s) skipped — over 5 MB`);
+
+    const mapped = ok.map((file) => ({ file, url: URL.createObjectURL(file) }));
     setNewImages((prev) => [...prev, ...mapped]);
+  };
+
+  const handleFileChange = (e) => {
+    addFiles(e.target.files);
     e.target.value = ""; // allow re-selecting the same file
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    addFiles(e.dataTransfer.files);
   };
 
   const removeExistingImage = (idx) => {
@@ -173,6 +200,7 @@ export default function EventsAdminPage() {
 
     try {
       setSaving(true);
+
       const fd = new FormData();
       fd.append("title", formData.title);
       fd.append("date", formData.date);
@@ -183,23 +211,30 @@ export default function EventsAdminPage() {
       if (formData.description) fd.append("description", formData.description);
       if (formData.href) fd.append("href", formData.href);
 
+      // IMPORTANT: field name MUST be "images" to match upload.array("images", 10)
       newImages.forEach((n) => fd.append("images", n.file));
 
       if (editingEvent && removedIds.length) {
         fd.append("removeImageIds", removedIds.join(","));
       }
 
+      // Let the browser set the multipart boundary. Passing FormData makes axios
+      // use multipart/form-data automatically; we also override transformRequest
+      // so an instance-level JSON transform can't stringify the body.
+      const config = { transformRequest: (data) => data };
+
       if (editingEvent) {
-        await axios.put(`/events/${getId(editingEvent)}`, fd);
+        await axios.put(`/events/${getId(editingEvent)}`, fd, config);
         toast.success("Event updated successfully");
       } else {
-        await axios.post("/events", fd);
+        await axios.post("/events", fd, config);
         toast.success("Event created successfully");
       }
 
       handleCloseModal();
       fetchEvents();
     } catch (err) {
+      console.error("Save event failed:", err?.response?.data || err);
       toast.error(err?.response?.data?.message || "Failed to save event");
     } finally {
       setSaving(false);
@@ -414,9 +449,13 @@ export default function EventsAdminPage() {
                   return (
                     <tr key={getId(ev)} style={{ borderBottom: "1px solid var(--ti-line)" }}>
                       <td style={{ padding: "12px 20px" }}>
-                        <div className="ev-admin-thumb-wrap" style={{ background: "#F1F5F9" }}>
+                        <div className="ev-admin-thumb-wrap">
                           {cover ? (
-                            <img src={cover} alt={ev.title} />
+                            <img
+                              src={cover}
+                              alt={ev.title}
+                              onError={(e) => { e.currentTarget.style.display = "none"; }}
+                            />
                           ) : (
                             <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#94A3B8" }}>
                               <ImageIcon size={18} />
@@ -520,7 +559,7 @@ export default function EventsAdminPage() {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 12 }}>
                     {existingImages.map((img, i) => (
                       <div key={`ex-${i}`} className="ev-admin-thumb-wrap" style={{ width: 88, height: 66 }}>
-                        <img src={img.url} alt={`existing ${i + 1}`} />
+                        <img src={img.url} alt={`existing ${i + 1}`} onError={(e) => { e.currentTarget.style.opacity = 0.3; }} />
                         <button type="button" className="ev-admin-thumb-x" onClick={() => removeExistingImage(i)} title="Remove">
                           <X size={12} />
                         </button>
@@ -537,16 +576,31 @@ export default function EventsAdminPage() {
                   </div>
                 )}
 
-                <label
-                  htmlFor="ev-image-input"
-                  style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 14px", border: "1px dashed #CBD5E1", borderRadius: 8, cursor: "pointer", color: "#0F172A", fontWeight: 600, fontSize: 14, background: "#F8FAFC" }}
+                {/* Robust dropzone: click OR drag & drop */}
+                <div
+                  className={`ev-dropzone ${dragOver ? "drag" : ""}`}
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
                 >
-                  <Upload size={16} /> Add images
-                </label>
-                <input id="ev-image-input" type="file" accept="image/*" multiple onChange={handleFileChange} style={{ display: "none" }} />
-                <p style={{ margin: "8px 0 0", fontSize: 12, color: "var(--ti-muted)" }}>
-                  The first image is used as the cover. Up to 10 images, 5 MB each.
-                </p>
+                  <UploadCloud size={22} color="#94A3B8" />
+                  <span style={{ fontWeight: 600, fontSize: 14, color: "#0F172A" }}>
+                    Click to upload or drag &amp; drop
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--ti-muted)" }}>
+                    PNG, JPG, WEBP — the first image is the cover. Up to 10 images, 5 MB each.
+                  </span>
+                </div>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 10 }}>
