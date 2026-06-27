@@ -16,11 +16,12 @@ type Props = {
  *
  * Sequence:
  *  1. Real butterfly (uploaded artwork, color #20BEC6) glides in from the
- *     right along a smooth, monotonic cubic-bezier arc, facing the direction
- *     it travels. The "transindia" text reveals left → right at the same
- *     time, timed so the last letter finishes exactly as the butterfly
- *     reaches its landing spot.
- *  2. Butterfly morphs (cross-fade) into the logo butterfly SVG path.
+ *     right along a smooth, monotonic cubic-bezier arc. The "transindi"
+ *     text reveals left → right at the same time, timed so the wordmark
+ *     finishes exactly as the butterfly reaches its landing spot.
+ *  2. On landing, the butterfly cross-fades into the logo butterfly — the
+ *     final "a" of the wordmark — which SPRINGS in with an overshoot pop,
+ *     perfectly synced to the moment of arrival.
  *  3. Overlay fades out after `duration` ms.
  *
  * No external dependencies — pure SVG + rAF.
@@ -52,17 +53,22 @@ export function Preloader({
     if (!bfSvg || !bfGroup || !bfShape || !logoText || !logoBf || !revRect) return;
 
     // ── timing (ms) ──────────────────────────────────────────────────────────
-    // Text now reveals DURING the flight (not after), finishing exactly as
-    // the butterfly lands — so there's no separate "REV_MS" phase anymore.
+    // Text reveals DURING the flight, finishing exactly as the butterfly lands.
+    // The final letter ("a" = logo butterfly) then pops during the morph.
     const FLY_MS   = 2600;  // butterfly travels in + text reveals, in sync
-    const MORPH_MS = 520;   // cross-fade real → logo butterfly
+    const MORPH_MS = 600;   // cross-fade real → logo butterfly + spring pop
 
     // ── easings ──────────────────────────────────────────────────────────────
-    // Smooth in-out cubic — gentler acceleration/deceleration than a quadratic
-    // ease, which is what made the flight feel a little mechanical before.
     const eio = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
     const eo  = (t: number) => 1 - (1 - t) ** 3;
     const lerp= (a: number, b: number, t: number) => a + (b - a) * t;
+
+    // easeOutBack — gives the final "a" a lively overshoot/settle pop.
+    const eback = (t: number) => {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    };
 
     function bez(t: number, a: number, b: number, c: number, d: number) {
       const m = 1 - t;
@@ -70,16 +76,11 @@ export function Preloader({
     }
 
     // ── layout constants ─────────────────────────────────────────────────────
-    // SVG viewBox is 530×150. The new butterfly artwork's source viewBox is
-    // 112.5×112.5, with its visual centre roughly at (56.25, 56.25).
     const W = 530, H = 150;
 
     // Where the butterfly lands (matches logo butterfly position in the wordmark)
     const LAND_X = 453;
     const LAND_Y = 72;
-    // Scaled down from the old BASE_SCALE (1.9, tuned for a 64-unit source) to
-    // keep the rendered size consistent now that the source art is 112.5 units:
-    // 1.9 * (64 / 112.5) ≈ 1.08
     const BASE_SCALE = 1.08;
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -87,20 +88,6 @@ export function Preloader({
       el.setAttribute('opacity', String(Math.max(0, Math.min(1, v))));
     }
 
-    /**
-     * Position the entire butterfly group at world coords (x,y) at `sc` scale,
-     * and apply a flap-like squash/skew to simulate wing movement.
-     *
-     * The butterfly artwork has its pivot at roughly (56.25, 56.25).
-     * We translate so that pivot lands on (x,y).
-     *
-     * The artwork is mirrored horizontally (negative scaleX) so it faces the
-     * direction it's actually flying (right → left) instead of "backwards".
-     * Flap deformation (applied to the whole shape, since it's a single path
-     * rather than separate left/right wing pieces):
-     *   - flapScX: 0 = wings closed (edge-on), 1 = wings fully open (flat)
-     *   - flapSkY: a small skew gives a "tilt" as they beat
-     */
     function place(
       x: number, y: number, sc: number,
       flapScX: number, flapSkY: number,
@@ -116,10 +103,20 @@ export function Preloader({
       );
     }
 
+    // Scale the final "a" (logo butterfly) about its own centre. transform-box
+    // fill-box makes the CSS transform-origin the element's bounding-box centre,
+    // so it grows/pops in place.
+    function setLetterPop(scale: number) {
+      logoBf.style.transformBox = 'fill-box';
+      logoBf.style.transformOrigin = 'center';
+      logoBf.style.transform = `scale(${scale})`;
+    }
+
     function reset() {
       setOp(bfSvg,  1);
       setOp(logoText, 0);
       setOp(logoBf,   0);
+      setLetterPop(0.4);            // final "a" starts shrunk, hidden
       revRect.setAttribute('width', '0');
       // start off-screen on the RIGHT
       place(W + 60, H * 0.5, BASE_SCALE * 0.7, 1, 0);
@@ -135,14 +132,9 @@ export function Preloader({
         const t  = el / FLY_MS;
         const te = eio(t);
 
-        // Smooth, strictly monotonic flight path (no backtracking on the
-        // x-axis — every control point is closer to the landing spot than
-        // the last, so it glides in one direction instead of zig-zagging).
         const bx = bez(te, W + 60, 520, 480, LAND_X);
         const by = bez(te, H * 0.55, -15, H * 0.9, LAND_Y);
 
-        // Wing flap amplitude eases down as it nears landing, so the flutter
-        // settles smoothly instead of cutting off abruptly at the hand-off.
         const amp  = lerp(0.82, 0.12, eo(t));
         const open = Math.sin(t * Math.PI * 2 * 7) * 0.5 + 0.5; // 7 flap cycles
         const flapScX = 1 - amp * (1 - open);
@@ -153,23 +145,28 @@ export function Preloader({
         setOp(bfSvg, 1);
         place(bx, by, sc, flapScX, flapSkY);
 
-        // Text reveals left → right in step with the flight, finishing
-        // exactly as the butterfly reaches its landing spot.
+        // Reveal "transindi" left → right, finishing right as it lands.
         setOp(logoText, 1);
         revRect.setAttribute('width', String(lerp(0, W, te)));
 
-      // ── Phase 2: morph ───────────────────────────────────────────────────
+        // final "a" stays hidden/shrunk until the butterfly arrives
+        setOp(logoBf, 0);
+        setLetterPop(0.4);
+
+      // ── Phase 2: morph + synced "a" pop ─────────────────────────────────
       } else if (el < FLY_MS + MORPH_MS) {
         const t  = (el - FLY_MS) / MORPH_MS;
-        const te = eo(t);
 
-        // Wings settle to a calm, fully-open rest pose
+        // wings settle to a calm, fully-open rest pose while fading out
         const settleFlapScX = 1 - 0.12 * (1 - (Math.sin(t * Math.PI * 3) * 0.5 + 0.5));
-        place(LAND_X, LAND_Y, BASE_SCALE, lerp(settleFlapScX, 1, te), lerp(1, 0, te));
+        place(LAND_X, LAND_Y, BASE_SCALE, lerp(settleFlapScX, 1, eo(t)), lerp(1, 0, eo(t)));
 
-        // Cross-fade real butterfly out, logo butterfly in
-        setOp(bfSvg, 1 - te);
-        setOp(logoBf, te);
+        // cross-fade: real butterfly out, logo "a" in (quick fade so the pop reads)
+        setOp(bfSvg, 1 - eo(t));
+        setOp(logoBf, Math.min(1, t * 2.2));
+
+        // the synced pop: scale the final "a" with an overshoot, landing on 1
+        setLetterPop(lerp(0.4, 1, eback(t)));
 
         setOp(logoText, 1);
         revRect.setAttribute('width', String(W));
@@ -179,6 +176,7 @@ export function Preloader({
         setOp(bfSvg,   0);
         setOp(logoBf,  1);
         setOp(logoText,1);
+        setLetterPop(1);
         revRect.setAttribute('width', String(W));
         return; // stop rAF
       }
@@ -222,14 +220,6 @@ export function Preloader({
         pointerEvents: fading ? 'none' : 'auto',
       }}
     >
-      {/*
-       * We use two overlapping SVGs sharing the same viewBox (530 × 150).
-       *
-       * bfSvg   — the flying butterfly (uploaded artwork, animated via rAF)
-       * mainSvg — the static logo paths + logo butterfly (revealed on morph)
-       *
-       * They sit in a wrapper sized with aspect-ratio so it scales on all screens.
-       */}
       <div
         style={{
           position:    'relative',
@@ -251,12 +241,6 @@ export function Preloader({
           }}
         >
           <g ref={bfGroupRef}>
-            {/*
-             * Butterfly artwork (from the uploaded animal__1_.svg), recolored
-             * to match the brand teal. It's a single unified path rather than
-             * separate left/right wing pieces, so the "flap" is simulated by
-             * squashing/skewing the whole shape about its centre pivot.
-             */}
             <g ref={bfShapeRef}>
               <path
                 fill="#20BEC6"
@@ -285,13 +269,8 @@ export function Preloader({
             </clipPath>
           </defs>
 
-          {/* "transindia" wordmark — revealed by clipPath */}
+          {/* "transindi" wordmark — revealed by clipPath (final "a" is the butterfly) */}
           <g ref={logoTextRef} opacity="0" clipPath="url(#ti-text-clip)">
-            {/*
-             * The original logo SVG has viewBox="0 0 89.81 21.09".
-             * We scale by 5.3 and translate to vertically centre inside 150px.
-             * 21.09 × 5.3 ≈ 112px  →  translate y = (150 - 112) / 2 / 5.3 ≈ 3.6
-             */}
             <g transform="scale(5.3) translate(0.3, 3.6)">
               {/* ── trans (orange) ── */}
               <path fill="#f15b40" d="M28.25,12.03c-.36.12-.92.48-1.4,1.22,0-.67-.55-1.22-1.22-1.22h-1.39v5.44c0-.06,0-.11,0-.17h0v-.08.08h0v3.78s0,0,0,0h2.6s0,0,0,0v-4.86c0-.91.77-1.64,1.69-1.59.85.05,1.49.8,1.49,1.65v4.8s0,0,0,0h2.6s0,0,0,0v-4.9c0-3.38-1.96-4.98-4.39-4.15Z"/>
@@ -299,7 +278,7 @@ export function Preloader({
               <path fill="#f15b40" d="M39.7,15.62c-.32-.11-.68-.18-1.05-.26-1.37-.29-1.73-.25-1.78-.84,0-.07-.05-.42.2-.76.39-.54,1.22-.43,1.55.01.12.16.16.47.16.64h2.61c-.03-.99-.54-1.84-1.42-2.38-1.21-.74-2.93-.76-4.19-.06-.98.55-1.54,1.48-1.54,2.55,0,1.36.76,1.89,1.66,2.28.28.08.77.21,1.09.28,1.37.29,1.72.35,1.78.95,0,.07.05.42-.2.76-.39.54-1.22.43-1.55-.01-.09-.12-.13-.32-.15-.49h-2.62c.08.92.58,1.72,1.41,2.23,1.21.74,2.93.76,4.19.06.98-.55,1.54-1.48,1.54-2.55,0-.41-.04-.76-.16-1.06-.29-.63-.83-1.11-1.54-1.35Z"/>
               <path fill="#f15b40" d="M7.95,12h-1.31v9.09h2.61v-3.87c0-1.42,1.15-2.57,2.57-2.57v-2.61c-.98,0-1.9.27-2.69.75-.2-.46-.66-.78-1.2-.78Z"/>
               <path fill="#f15b40" d="M2.61,12v-2.99H0v9.7c0,1.31,1.06,2.37,2.37,2.37h2.01v-2.37h-1.14c-.35,0-.63-.28-.63-.63v-1.85c.38-.95,1.31-1.62,2.39-1.62v-2.61c-.86,0-1.68.21-2.39.59v-.59Z"/>
-              {/* ── india (teal) ── */}
+              {/* ── indi (teal) — the final "a" is the butterfly below ── */}
               <path fill="#20bec6" d="M65.43,9.25h-1.35v2.87c-.64-.32-1.37-.51-2.14-.51-2.62,0-4.74,2.12-4.74,4.74s2.12,4.74,4.74,4.74c.9,0,1.73-.25,2.45-.68.24.28.59.46.99.46h1.3v-10.36c0-.69-.56-1.25-1.25-1.25ZM61.94,18.48c-1.18,0-2.14-.96-2.14-2.14s.96-2.14,2.14-2.14,2.14.96,2.14,2.14-.96,2.14-2.14,2.14Z"/>
               <path fill="#20bec6" d="M51.21,12.06c-.36.12-.92.48-1.4,1.21,0-.67-.54-1.21-1.21-1.21h-1.39v5.42c0-.06,0-.11,0-.17h0v-.08.08h0v3.77s0,0,0,0h2.59s0,0,0,0v-4.84c0-.91.77-1.64,1.69-1.58.84.05,1.48.8,1.48,1.64v4.78s0,0,0,0h2.59s0,0,0,0v-4.88c0-3.37-1.95-4.96-4.37-4.14Z"/>
               <rect fill="#20bec6" x="43" y="12.06" width="2.6" height="9.02"/>
@@ -307,7 +286,7 @@ export function Preloader({
             </g>
           </g>
 
-          {/* Logo butterfly — cross-fades in as real butterfly fades out */}
+          {/* Logo butterfly = the final "a". Cross-fades + springs in on landing. */}
           <g ref={logoBfRef} opacity="0">
             <g transform="scale(5.3) translate(0.3, 3.6)">
               <path fill="#20bec6" d="M88.38,12.9c-1.18-1.19-2.7-1.55-4.18-1.13.24-1.55.21-3.11-.25-4.64-.84-2.85-2.98-4.99-5.35-6.66l-.65-.46c-1.76,4.32-2.7,10.24,1.99,13.13l-.37-.52c-2.38-3.37-2.36-6.96-1.04-10.62,4.16,3.18,5.4,6.58,4.11,11.61,1.61-.76,3.18-1.46,4.83.2.78.78,1.37,2.18.9,3.26-.55,1.28-2.3,1.31-3.46,1.15-1-.13-2-.51-2.94-1.02-1.11-.61-2.13-1.42-2.97-2.26-.97-.98-1.78-2.09-2.46-3.27-.96-1.69-1.62-3.55-2.01-5.46l-.13-.62c-.66,1.94-.04,4.33,1,6.4-1.71.71-2.92,2.4-2.92,4.38,0,2.62,2.12,4.74,4.74,4.74.9,0,1.73-.25,2.45-.68.24.28.59.46.99.46h1.3v-2.25c.89.42,1.82.73,2.77.85,1.02.13,2.15.13,3.12-.28.76-.32,1.36-.87,1.68-1.63.67-1.58-.02-3.5-1.17-4.66ZM77.24,17.98c-.9,0-1.63-.73-1.63-1.63s.73-1.63,1.63-1.63,1.63.73,1.63,1.63-.73,1.63-1.63,1.63Z"/>

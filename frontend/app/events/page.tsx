@@ -12,15 +12,15 @@ import EventBanner from "@/components/EventBanner";
 export interface EventItem {
   id: string;
   title: string;
-  date: string;          // ISO date string, e.g. "2026-07-15"
-  endDate?: string;       // ISO date string, for multi-day events
-  time?: string;          // e.g. "4:00 PM – 5:30 PM"
-  location?: string;      // e.g. "Online Webinar" or a venue/city
-  category?: string;      // e.g. "Webinar", "Workshop", "Conference"
-  imageUrl: string;        // primary / fallback image
-  images?: string[];       // gallery images for the carousel + lightbox
+  date: string;          
+  endDate?: string;       
+  time?: string;          
+  location?: string;      
+  category?: string;      
+  imageUrl: string;        
+  images?: string[];       
   description?: string;
-  href?: string;           // (kept for data compatibility — no longer rendered)
+  href?: string;           
 }
 
 interface EventsPageProps {
@@ -28,20 +28,7 @@ interface EventsPageProps {
   bannerImage?: string;    // right-side hero image; swap for your own
 }
 
-// ─────────────────────────────────────────────────────────────
-// API base — EDIT THIS (or set NEXT_PUBLIC_API_URL in your env).
-// It must point at your backend ORIGIN, with no trailing slash:
-//
-// OPTION 1 - For production (set in .env.production):
-//   NEXT_PUBLIC_API_URL=https://transindia-backend.onrender.com
-//
-// OPTION 2 - For local development (set in .env.local):
-//   NEXT_PUBLIC_API_URL=http://localhost:5000
-//
-// OPTION 3 - Using Next.js API route (no external backend needed):
-//   NEXT_PUBLIC_API_URL=http://localhost:3000
-//   (then create app/api/events/route.ts to handle /api/events)
-// ─────────────────────────────────────────────────────────────
+
 const RAW_API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
