@@ -12,6 +12,7 @@ const NAV = [
   { to: "/leads",       icon: Users,           label: "Leads" },
   { to: "/serviceleads", icon: Calculator,     label: "Service Leads" },
   { to: "/claimleads",  icon: FileText,        label: "Claim Leads" },
+  { to: "/events",  icon: FileText,        label: "Events" },
   { to: "/careers",     icon: BriefcaseBusiness, label: "Careers" },
 ];
 

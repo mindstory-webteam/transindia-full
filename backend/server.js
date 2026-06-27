@@ -36,6 +36,7 @@ app.use("/api/careers",      require("./src/routes/careers"));
 app.use("/api/serviceleads", require("./src/routes/servicesFormRoutes"));
 
 app.use("/api/quoteleads", require("./src/routes/quoteLeads"));
+app.use("/api/events", require("./src/routes/events"));
 
 
 // ── Health check ──────────────────────────────────────────────────────────────

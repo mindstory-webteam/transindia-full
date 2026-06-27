@@ -37,11 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Contact us",            href: "/contact-us" },
 ];
 
-// ─── MANUAL SERVICES ──────────────────────────────────────────────────────────
-// These slugs MUST match the folders in app/our-services/ (the static pages).
-// They are ALWAYS shown — even if the backend is down — so the dropdown never
-// links to a 404. Backend services are merged on top of these (deduped by slug)
-// in the fetch effect below.
+
 const MANUAL_SERVICES: Service[] = [
   { _id: "m1",  title: "Life Insurance",          slug: "life-insurance",          isActive: true },
   { _id: "m2",  title: "Health Insurance",        slug: "health-insurance",        isActive: true },
