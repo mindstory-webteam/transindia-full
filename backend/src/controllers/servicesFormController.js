@@ -124,42 +124,52 @@ exports.createServiceLead = async (req, res, next) => {
       }
     }
 
-    // Per-type required-field checks.
-    if (formType === "motor") {
-      if (!(b.insuranceNumber || "").trim()) {
-        return res.status(400).json({ success: false, message: "Insurance policy number is required." });
-      }
-      if (!req.file) {
-        return res.status(400).json({ success: false, message: "Please upload your old insurance document." });
-      }
-    }
+    // ✅ FIX: the public motor form does NOT collect a policy number, and the
+    // document upload is OPTIONAL in the UI. The old code hard-required BOTH
+    // (insuranceNumber + req.file), so every motor submission returned 400 and
+    // never reached the database. Those checks are removed. We only keep the
+    // miscellaneous "describe your needs" requirement, which the misc form
+    // genuinely collects.
     if (formType === "miscellaneous" && !(b.insuranceTypes || "").trim()) {
       return res.status(400).json({ success: false, message: "Please describe your insurance needs." });
     }
 
-    // ✅ FIX: Validate Cloudinary URL before storing, and capture the
-    // original mimetype/filename so downloads never have to guess later.
+    // ✅ FIX: the route now uses .array("insuranceDocuments"), so uploaded
+    // file(s) arrive in req.files. We store the FIRST file in the existing
+    // single-document fields so the admin download proxy + delete logic keep
+    // working completely unchanged. (req.file kept as a fallback.)
+    const uploadedFile = (req.files && req.files[0]) || req.file || null;
+
     let documentUrl = undefined;
     let documentPublicId = undefined;
     let documentMimeType = undefined;
     let documentOriginalName = undefined;
 
-    if (req.file) {
-      // req.file.path is the secure_url from Cloudinary
-      documentUrl = req.file.path;
-      documentPublicId = req.file.filename;
-      documentMimeType = req.file.mimetype;
-      documentOriginalName = req.file.originalname;
+    if (uploadedFile) {
+      // uploadedFile.path is the secure_url from Cloudinary
+      documentUrl = uploadedFile.path;
+      documentPublicId = uploadedFile.filename;
+      documentMimeType = uploadedFile.mimetype;
+      documentOriginalName = uploadedFile.originalname;
 
       // Validate that we got a proper URL from Cloudinary
       if (!documentUrl || !documentUrl.startsWith("http")) {
         console.error("Invalid Cloudinary URL:", documentUrl);
-        return res.status(500).json({ 
-          success: false, 
-          message: "Document upload failed. Please try again." 
+        return res.status(500).json({
+          success: false,
+          message: "Document upload failed. Please try again.",
         });
       }
     }
+
+    // ✅ Fire/entertainment send `insuranceType` (singular). Fire also sends
+    // `industries`. Fold them into `insuranceTypes` so the existing dashboard
+    // "Requirements" column shows something without any extra UI changes,
+    // while the individual fields are still stored separately below.
+    const combinedRequirements =
+      (b.insuranceTypes || "").trim() ||
+      [b.industries, b.insuranceType].filter((x) => (x || "").trim()).join(" — ") ||
+      undefined;
 
     const lead = await ServiceLead.create({
       serviceSlug: b.serviceSlug,
@@ -185,8 +195,23 @@ exports.createServiceLead = async (req, res, next) => {
       conditions: b.conditions,
       cityTier: b.cityTier,
 
+      // ✅ NEW field mappings so nothing the public forms send is lost
+      pincode: b.pincode,
+      query: b.query,
+      wantsCallback: b.wantsCallback,
+      agreeTerms: b.agreeTerms,
+      plan: b.plan,
+      lastFour: b.lastFour,
+
+      // ── Motor form ──
       insuranceNumber: b.insuranceNumber,
-      insuranceTypes: b.insuranceTypes,
+      expiryDate: b.expiryDate,   // ✅ NEW
+      vehicleType: b.vehicleType, // ✅ NEW
+
+      // ── Fire / entertainment / miscellaneous ──
+      industries: b.industries,           // ✅ NEW
+      insuranceType: b.insuranceType,     // ✅ NEW (singular)
+      insuranceTypes: combinedRequirements,
 
       // ✅ Store the validated Cloudinary URL + the real file metadata
       insuranceDocument: documentUrl,

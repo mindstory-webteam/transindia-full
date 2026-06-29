@@ -42,17 +42,23 @@ const ADMIN_ROLES = ["admin", "superadmin"];
  * - miscellaneous
  *
  * Request:
- *   - Form data with optional file: insuranceDocument
- *   - Fields: name, email, phone, serviceSlug, insuranceNumber (for motor), etc.
+ *   - Form data with optional file(s): insuranceDocuments
+ *   - Fields: name, email, phone, serviceSlug, vehicleType, expiryDate, etc.
  *
  * Response (201):
  *   { success: true, data: { id, formType } }
+ *
+ * ✅ FIX: the public MotorFormCard appends files under the field name
+ * "insuranceDocuments" (plural) and allows multiple files. The old route
+ * used .single("insuranceDocument"), so multer rejected every motor upload
+ * with an "Unexpected field" error → 400. Use .array() with the matching
+ * name so the file(s) actually arrive (now in req.files).
  */
 router.post(
   "/",
-  uploadServiceLead.single("insuranceDocument"),  // Upload file to Cloudinary
-  uploadErrorHandler,                              // Handle upload errors
-  createServiceLead                                // Save lead to database
+  uploadServiceLead.array("insuranceDocuments", 5), // ✅ match frontend field name + allow multiple
+  uploadErrorHandler,                               // Handle upload errors
+  createServiceLead                                 // Save lead to database
 );
 
 // ═══════════════════════════════════════════════════════════════

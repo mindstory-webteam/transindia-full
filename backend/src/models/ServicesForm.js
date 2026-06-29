@@ -54,17 +54,30 @@ const serviceLeadSchema = new mongoose.Schema(
     conditions: { type: String, trim: true },
     cityTier: { type: String, trim: true },
 
+    // ✅ NEW: extra fields the public forms actually send but the schema
+    // never stored — so they used to vanish into rawData only.
+    pincode: { type: String, trim: true },       // life form
+    query: { type: String, trim: true },         // health hero form
+    wantsCallback: { type: String, trim: true }, // health / exact-quote
+    agreeTerms: { type: String, trim: true },    // health hero form
+    plan: { type: String, trim: true },          // exact-quote modal
+    lastFour: { type: String, trim: true },      // exact-quote modal
+
     // ── Motor form ──────────────────────────────────────────────
     insuranceNumber: { type: String, trim: true },
+    expiryDate: { type: String, trim: true },    // ✅ NEW: motor policy expiry
+    vehicleType: { type: String, trim: true },   // ✅ NEW: car / bike / truck…
     insuranceDocument: { type: String, trim: true }, // Cloudinary secure_url (string!)
     insuranceDocumentPublicId: { type: String, trim: true }, // for deletion
-    // ✅ NEW: recorded at upload time so downloads never have to guess
+    // ✅ recorded at upload time so downloads never have to guess
     // the file type from the URL (which can be missing an extension).
     insuranceDocumentMimeType: { type: String, trim: true }, // e.g. "application/pdf"
     insuranceDocumentOriginalName: { type: String, trim: true }, // e.g. "old-policy.pdf"
 
-    // ── Miscellaneous form ──────────────────────────────────────
-    insuranceTypes: { type: String, trim: true },
+    // ── Fire / entertainment / miscellaneous ────────────────────
+    industries: { type: String, trim: true },    // ✅ NEW: fire form
+    insuranceType: { type: String, trim: true },  // ✅ NEW: fire / entertainment (singular)
+    insuranceTypes: { type: String, trim: true }, // miscellaneous (plural)
 
     // ── Calculator estimate snapshot ────────────────────────────
     estimate: estimateSchema,

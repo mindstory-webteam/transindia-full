@@ -85,9 +85,16 @@ function LeadDetails({ l }) {
   const hasDoc = Boolean(l.insuranceDocument);
   const proxyUrl = docProxyUrl(l._id);
 
-  if (slug.includes("motor") || l.insuranceNumber || hasDoc) {
+  // ✅ also treat as a motor row when vehicleType is present, so the new
+  // motor fields render in the collapsed table row.
+  if (slug.includes("motor") || l.insuranceNumber || hasDoc || l.vehicleType) {
     return (
       <div>
+        {l.vehicleType && (
+          <p style={{ color: "#0F172A", fontWeight: 600 }}>
+            {l.vehicleType}{l.expiryDate ? ` · exp ${l.expiryDate}` : ""}
+          </p>
+        )}
         {l.insuranceNumber && (
           <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>
         )}
@@ -97,7 +104,7 @@ function LeadDetails({ l }) {
             <Paperclip size={12} /> View document
           </a>
         ) : (
-          !l.insuranceNumber && <span style={{ color: "#94A3B8" }}>—</span>
+          !l.insuranceNumber && !l.vehicleType && <span style={{ color: "#94A3B8" }}>—</span>
         )}
       </div>
     );
@@ -172,6 +179,15 @@ function LeadDetailPanel({ l }) {
     ["Conditions",      l.conditions],
     ["City Tier",       l.cityTier],
     ["Policy Number",   l.insuranceNumber],
+    // ✅ NEW fields the public forms send — DetailField hides empties.
+    ["Vehicle Type",    l.vehicleType],
+    ["Policy Expiry",   l.expiryDate],
+    ["Pincode",         l.pincode],
+    ["Industries",      l.industries],
+    ["Insurance Type",  l.insuranceType],
+    ["Query",           l.query],
+    ["Interested Plan", l.plan],
+    ["Wants Callback",  l.wantsCallback === "true" ? "Yes" : l.wantsCallback === "false" ? "No" : ""],
     ["Requirements",    l.insuranceTypes],
     ["Coverage",        l.estimate?.coverage],
     ["Premium / Month", l.estimate?.monthly],
@@ -358,6 +374,14 @@ export default function ServiceLeadsPage() {
       Conditions:        l.conditions || "",
       "City Tier":       l.cityTier || "",
       "Policy Number":   l.insuranceNumber || "",
+      // ✅ NEW columns so exports also carry the extra form fields
+      "Vehicle Type":    l.vehicleType || "",
+      "Policy Expiry":   l.expiryDate || "",
+      Pincode:           l.pincode || "",
+      Industries:        l.industries || "",
+      "Insurance Type":  l.insuranceType || "",
+      Query:             l.query || "",
+      "Interested Plan": l.plan || "",
       Document:          l.insuranceDocument ? docProxyUrl(l._id) : "",
       Requirements:      l.insuranceTypes || "",
       Coverage:          l.estimate?.coverage || "",
@@ -383,6 +407,8 @@ export default function ServiceLeadsPage() {
     if (l.insuranceNumber)   parts.push(`Policy: ${l.insuranceNumber}`);
     if (l.insuranceDocument) parts.push("Doc ↗");
     if (l.insuranceTypes)    return l.insuranceTypes;
+    if (l.vehicleType)
+      return [l.vehicleType, l.expiryDate].filter(Boolean).join(" / ");
     if (l.sumAssured || l.policyTerm)
       return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
     if (l.sumInsured || l.coverType)
