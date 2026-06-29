@@ -6,6 +6,7 @@ import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Preloader from "@/components/Preloader";
+import Breadcrum from "@/components/Breadcrum";
 
 const JOBS_PER_PAGE = 10;
 
@@ -90,24 +91,37 @@ export default function CareersPage() {
 
         {/* Hero */}
         <section className="careers-hero">
-          {/* Breadcrumb — hidden on sm/md */}
-          <nav className="careers-breadcrumb" aria-label="Breadcrumb">
-            <Link href="/" className="bc-link">Home</Link>
-            <span className="bc-sep">›</span>
-            <span className="bc-current">Careers</span>
-          </nav>
+          <div className="careers-inner">
+            <div className="careers-content">
+              <div className="careers-trail-wrapper">
+                 <Breadcrum crumbs={[{ label: "Home", href: "/" }, { label: "Careers" }]} />
+              </div>
 
-          {jobs.length > 0 && (
-            <>
               <h1 className="careers-title">
-                Be part of <span className="careers-title-accent">our mission</span>
+                Join Our <span style={{ color: "#F15A40" }}>Mission</span>
+                <br />
+                <span style={{ color: "#20BEC6" }}>Shape the Future.</span>
               </h1>
-              <p className="careers-subtitle">
-                We're looking for passionate people to join us on our mission. We value
-                flat hierarchies, clear communication, and full ownership and responsibility.
+              <p className="careers-desc">
+                We're looking for passionate people to join us. We value flat hierarchies, clear communication, and full ownership to build India's most trusted insurance marketplace.
               </p>
-            </>
-          )}
+
+              <div className="careers-btns">
+                <a href="#jobs" className="careers-btn-orange" onClick={(e) => {
+                  e.preventDefault();
+                  document.querySelector('.careers-jobs')?.scrollIntoView({ behavior: 'smooth' });
+                }}>View Open Roles</a>
+              </div>
+            </div>
+
+            <div className="careers-mobile-visual">
+              <img src="/images/career/careers_hero.png" alt="TransIndia Careers" />
+            </div>
+
+            <div className="careers-lg-banner">
+              <img src="/images/career/careers_hero.png" alt="TransIndia Careers Banner" />
+            </div>
+          </div>
         </section>
 
         {/* Job listings */}
@@ -310,60 +324,183 @@ const CSS = `
 
   /* ── Hero ── */
   .careers-hero {
-    padding: 140px 80px 52px;
+    background: #000d3a;
+    position: relative;
+    overflow: hidden; 
+    padding-top: 150px; 
+    padding-bottom: 40px; 
+    font-family: 'matterregular', sans-serif;
   }
 
-  /* ── Breadcrumb ── */
-  .careers-breadcrumb {
+  .careers-inner {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 0 32px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-bottom: 24px;
+    min-height: 400px;
+    position: relative;
+    z-index: 2;
   }
 
-  .bc-link {
-    font-size: 13px;
-    color: #666;
-    text-decoration: none;
-    transition: color 0.15s;
+  .careers-trail-wrapper {
+    margin-bottom: 20px;
   }
 
-  .bc-link:hover { color: #111; }
-
-  .bc-sep {
-    font-size: 13px;
-    color: #aaa;
-  }
-
-  .bc-current {
-    font-size: 13px;
-    color: #111;
-    font-weight: 600;
+  .careers-content {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 52%;
+    padding-bottom: 48px;
   }
 
   .careers-title {
-    font-size: 38px;
+    font-size: 55px;
     font-weight: 800;
-    color: #111;
-    line-height: 1.2;
+    color: #fff;
+    line-height: 1.15;
+    margin: 0 0 14px 0;
     letter-spacing: -0.5px;
-    margin: 0 0 16px 0;
   }
 
-  .careers-title-accent { color: #00b8c4; }
-
-  .careers-subtitle {
+  .careers-desc {
     font-size: 15px;
-    color: #555;
-    line-height: 1.7;
-    margin: 0;
-    max-width: 560px;
+    color: rgba(255,255,255,0.80);
+    line-height: 1.72;
+    max-width: 540px;
+    margin: 0 0 32px 0;
+  }
+
+  .careers-btns {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .careers-btn-orange {
+    background: #e84b2a;
+    color: #fff;
+    text-decoration: none;
+    padding: 12px 26px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: inline-flex;
+    align-items: center;
+  }
+  
+  .careers-mobile-visual {
+    display: none;
+  }
+
+  .careers-lg-banner {
+    position: absolute;
+    right: 40px;
+    top: 46%;
+    transform: translateY(-50%);
+    width: 50%;
+    max-width: 650px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  @media (max-width: 1450px) {
+    .careers-lg-banner {
+      right: 0;
+    }
+  }
+
+  .careers-lg-banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    object-position: center right;
+  }
+
+
+
+
+
+  @media (max-width: 1024px) {
+    .careers-lg-banner {
+      display: none;
+    }
+    .careers-hero {
+      background: #000b37;
+      padding-top: 110px;
+      padding-bottom: 60px;
+      overflow: visible;
+    }
+    .careers-inner {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      min-height: auto;
+      padding: 0 28px;
+    }
+
+    .careers-content { 
+      flex: 0 0 auto;
+      width: 100%; 
+      padding-bottom: 20px; 
+      text-align: left; 
+    }
+    .careers-title { font-size: 34px; }
+    .careers-desc { max-width: 100%; margin-bottom: 24px; margin-left: 0; }
+    .careers-btns { justify-content: flex-start; }
+
+    .careers-mobile-visual {
+      display: block;
+      flex: 0 0 auto;
+      width: 100%;
+      text-align: center;
+      padding-bottom: 20px;
+      margin-top: 20px;
+    }
+    .careers-mobile-visual img {
+      display: inline-block;
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+  }
+
+  @media (max-width: 600px) {
+    .careers-hero { background: #000b37; padding-top: 100px; }
+    .careers-inner { 
+      padding: 0 20px; 
+      min-height: auto; 
+      flex-direction: column; 
+      align-items: flex-start; 
+    }
+    .careers-content {  padding-bottom: 20px; width: 100%; }
+    .careers-title { font-size: 26px; }
+    
+    .careers-btns { flex-direction: column; width: 100%; }
+    .careers-btn-orange { width: 100%; justify-content: center; }
+
+    .careers-mobile-visual {
+      display: block;
+      width: 100%;
+      text-align: center;
+      margin-top: 20px;
+      padding-bottom: 20px; 
+    }
+    .careers-mobile-visual img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
   }
 
   /* ── Jobs section ── */
   .careers-jobs {
     flex: 1;
-    padding: 0 80px 80px;
+    padding: 80px 80px 80px;
   }
 
   /* 2-column grid */
@@ -757,25 +894,18 @@ const CSS = `
 
   /* Large desktop (≤ 1280px) */
   @media (max-width: 1280px) {
-    .careers-hero { padding: 140px 64px 52px; }
-    .careers-jobs { padding: 0 64px 72px; }
+    .careers-jobs { padding: 64px 64px 72px; }
   }
 
   /* Tablet landscape (≤ 1024px) */
   @media (max-width: 1024px) {
-    .careers-hero { padding: 130px 48px 44px; }
-    .careers-jobs { padding: 0 48px 64px; }
-    .careers-title { font-size: 34px; }
+    .careers-jobs { padding: 48px 48px 64px; }
     .careers-jobs-grid { column-gap: 32px; }
   }
 
   /* Tablet portrait (≤ 768px): single column, hide breadcrumb */
   @media (max-width: 768px) {
-    .careers-breadcrumb { display: none; }
-    .careers-hero { padding: 120px 24px 36px; }
-    .careers-jobs { padding: 0 24px 56px; }
-    .careers-title { font-size: 30px; }
-    .careers-subtitle { font-size: 14.5px; }
+    .careers-jobs { padding: 32px 24px 56px; }
 
     .careers-jobs-grid {
       grid-template-columns: 1fr;
@@ -793,7 +923,6 @@ const CSS = `
 
   /* Large mobile (≤ 600px) */
   @media (max-width: 600px) {
-    .careers-title { font-size: 28px; }
     .job-title { font-size: 15px; }
     .job-desc { font-size: 12.5px; }
     .pagination { gap: 4px; margin-top: 32px; }

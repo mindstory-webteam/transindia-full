@@ -77,7 +77,7 @@ export default function ContactHero() {
             {/* ── Small-screen banner image ── */}
             <div className="contact-sm-banner">
               <img
-                src="/images/contact-us/contact-us-small-banner1.png"
+                src="/images/contact-us/CONTACT/Contacts page - Hero banner.png"
                 alt="Contact us banner"
                 className="contact-sm-banner-img"
               />
