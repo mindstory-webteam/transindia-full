@@ -38,7 +38,7 @@ const ADMIN_ROLES = ["admin", "superadmin"];
  * Handles multiple form types:
  * - calculator (life/health insurance)
  * - simple (home/travel/marine/fire/entertainment)
- * - motor (with file upload)
+ * - motor (with file upload — multiple files allowed)
  * - miscellaneous
  *
  * Request:
@@ -46,17 +46,15 @@ const ADMIN_ROLES = ["admin", "superadmin"];
  *   - Fields: name, email, phone, serviceSlug, vehicleType, expiryDate, etc.
  *
  * Response (201):
- *   { success: true, data: { id, formType } }
+ *   { success: true, data: { id, formType, documents } }
  *
- * ✅ FIX: the public MotorFormCard appends files under the field name
- * "insuranceDocuments" (plural) and allows multiple files. The old route
- * used .single("insuranceDocument"), so multer rejected every motor upload
- * with an "Unexpected field" error → 400. Use .array() with the matching
- * name so the file(s) actually arrive (now in req.files).
+ * The MotorFormCard appends files under "insuranceDocuments" (plural) and
+ * allows multiple files, so we use .array() with the matching name. Every
+ * file then arrives in req.files and is stored on the lead.
  */
 router.post(
   "/",
-  uploadServiceLead.array("insuranceDocuments", 5), // ✅ match frontend field name + allow multiple
+  uploadServiceLead.array("insuranceDocuments", 5), // match frontend field name + allow multiple
   uploadErrorHandler,                               // Handle upload errors
   createServiceLead                                 // Save lead to database
 );
@@ -113,16 +111,25 @@ router.get(
 );
 
 /**
+ * GET /api/serviceleads/:id/document/:index
+ * Download / view the Nth attached document (PUBLIC or ADMIN)
+ *
+ * ✅ NEW: motor leads can carry several documents. This serves a specific
+ * one by its position in the lead's `insuranceDocuments` array.
+ */
+router.get(
+  "/:id/document/:index",
+  getServiceLeadDocument
+);
+
+/**
  * GET /api/serviceleads/:id/document
- * Download or view insurance document from Cloudinary (PUBLIC or ADMIN)
+ * Download or view the FIRST insurance document from Cloudinary (PUBLIC or ADMIN)
  *
  * NOTE: Currently PUBLIC. Uncomment protect/authorise if you want to restrict.
  *
  * Example with auth:
  *   router.get("/:id/document", protect, authorise(...ADMIN_ROLES), getServiceLeadDocument);
- *
- * Response (302):
- *   Redirects to Cloudinary secure_url
  */
 router.get(
   "/:id/document",
@@ -173,7 +180,7 @@ router.put(
  *
  * Automatically:
  * - Removes lead from MongoDB
- * - Deletes Cloudinary document (if attached)
+ * - Deletes every Cloudinary document attached (if any)
  * - Logs deletion
  *
  * Response (200):

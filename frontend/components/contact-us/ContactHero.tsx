@@ -4,7 +4,7 @@ import Breadcrum from "@/components/Breadcrum";
 
 const contactCards = [
   {
-    icon: "/images/contact-us/contact-hero/Call.svg",
+    icon: "/images/contact-us/CONTACT/Contact Icons - Call.png",
     label: "Call us",
     sub: "Mon–Sat, 9:30 – 5:30",
     highlight: "1800 425 8084",
@@ -13,7 +13,7 @@ const contactCards = [
     badgeColor: "#2AC764",
   },
   {
-    icon: "/images/contact-us/contact-hero/Chat.svg",
+    icon: "/images/contact-us/CONTACT/Contact Icons - Msg.png",
     label: "Live chat",
     sub: "Average wait: 2 minutes",
     cta: "Start Chat",
@@ -22,7 +22,7 @@ const contactCards = [
     badgeColor: "#2AC764",
   },
   {
-    icon: "/images/contact-us/contact-hero/Email.svg",
+    icon: "/images/contact-us/CONTACT/Contact Icons - mail.png",
     label: "Email Us",
     sub: "Reply within 4 hours",
     highlight: "care@transindia.com",
@@ -31,7 +31,7 @@ const contactCards = [
     badgeColor: "#6b7280",
   },
   {
-    icon: "/images/contact-us/contact-hero/Location.svg",
+    icon: "/images/contact-us/CONTACT/Contact Icons - Location.png",
     label: "Visit Us",
     sub: "Walk-in welcome",
     highlight: "Find Nearest Branch",

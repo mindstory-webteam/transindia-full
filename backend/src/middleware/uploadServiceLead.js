@@ -1,71 +1,24 @@
 const multer = require("multer");
-const path = require("path");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const cloudinary = require("../config/cloudinary");
 
 /**
- * ✅ DEDICATED: uploadServiceLead Middleware
- * Handles Motor Insurance document uploads to Cloudinary.
+ * ✅ uploadServiceLead Middleware  (MEMORY STORAGE)
  *
- * IMPORTANT FIX:
- * Cloudinary's "raw" resource type (used for PDFs) does NOT automatically
- * append a file extension to the delivery URL the way "image" uploads do.
- * If we let multer-storage-cloudinary auto-generate a public_id, raw PDFs
- * end up with a URL that has NO extension at all — which breaks downloads
- * (the OS can't tell what kind of file it is, so it opens with whatever
- * app handles extension-less files, e.g. Word, and shows raw garbage).
+ * WHY MEMORY STORAGE INSTEAD OF CloudinaryStorage:
+ *   multer-storage-cloudinary with an ASYNC `params` function + multer.array()
+ *   has a race condition: in a multi-file batch it reliably uploads only the
+ *   FIRST file and silently drops the rest. That's why "upload 3, see 1".
  *
- * The fix: explicitly build the public_id ourselves.
- *  - For PDFs (raw): embed the extension directly in the public_id,
- *    since Cloudinary won't add it for us.
- *  - For images: do NOT put a dot in the public_id (Cloudinary appends
- *    the format itself — adding our own dot would create "name.jpg.jpg").
+ *   The fix: multer just buffers every file in memory here, and the controller
+ *   uploads each one to Cloudinary explicitly in a loop (see
+ *   servicesFormController.js → uploadBufferToCloudinary). That guarantees ALL
+ *   files are stored, and keeps the raw-PDF vs image handling (extension in the
+ *   public_id for PDFs) exactly as before.
+ *
+ * After parsing, each file in req.files looks like:
+ *   { fieldname, originalname, mimetype, size, buffer }
  */
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    const isPdf = file.mimetype === "application/pdf";
-
-    console.log(
-      `📤 [uploadServiceLead] Attempting to upload: ${file.originalname} ` +
-      `(${file.mimetype}, ${file.size} bytes) - Type: ${isPdf ? "PDF" : "Image"}`
-    );
-
-    // Extension taken from the original filename, falling back to a
-    // sensible default based on mimetype if the filename has none.
-    const extFromName = path.extname(file.originalname).toLowerCase().replace(".", "");
-    const ext = extFromName || (isPdf ? "pdf" : "jpg");
-
-    // Sanitised base name (no extension), used to keep filenames readable
-    // in the Cloudinary dashboard instead of pure random IDs.
-    const baseName = path
-      .basename(file.originalname, path.extname(file.originalname))
-      .replace(/[^a-zA-Z0-9_-]/g, "_")
-      .slice(0, 60) || "document";
-
-    if (isPdf) {
-      // RAW resource type: extension must be embedded in the public_id
-      // itself, otherwise the resulting secure_url has no extension.
-      return {
-        folder: "transindia/serviceleads",
-        resource_type: "raw",
-        public_id: `${Date.now()}-${baseName}.${ext}`,
-        allowed_formats: ["pdf"],
-      };
-    }
-
-    // IMAGE resource type: Cloudinary appends the format automatically,
-    // so public_id must NOT contain a dot/extension.
-    return {
-      folder: "transindia/serviceleads",
-      resource_type: "image",
-      public_id: `${Date.now()}-${baseName}`,
-      format: ext, // force a consistent extension matching the upload
-      allowed_formats: ["jpg", "jpeg", "png"],
-    };
-  },
-});
+const storage = multer.memoryStorage();
 
 /**
  * File filter: Only accept PDF, JPG, JPEG, PNG
@@ -98,7 +51,8 @@ const uploadServiceLead = multer({
   storage,
   fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
+    fileSize: 5 * 1024 * 1024, // 5 MB per file
+    files: 5,                  // up to 5 files per submission
   },
 });
 
@@ -118,10 +72,17 @@ const uploadErrorHandler = (err, req, res, next) => {
       });
     }
 
+    if (err.code === "LIMIT_FILE_COUNT") {
+      return res.status(400).json({
+        success: false,
+        message: "Too many files. You can upload up to 5 documents.",
+      });
+    }
+
     if (err.code === "LIMIT_UNEXPECTED_FILE") {
       return res.status(400).json({
         success: false,
-        message: "No file provided or unexpected field name.",
+        message: "Unexpected file field. Please use the upload box on the form.",
       });
     }
 
@@ -137,15 +98,6 @@ const uploadErrorHandler = (err, req, res, next) => {
     return res.status(400).json({
       success: false,
       message: err.message,
-    });
-  }
-
-  // Cloudinary errors
-  if (err && err.http_code) {
-    console.error(`⚠️ [uploadServiceLead] Cloudinary error:`, err.message);
-    return res.status(500).json({
-      success: false,
-      message: "Document upload to cloud storage failed. Please try again.",
     });
   }
 

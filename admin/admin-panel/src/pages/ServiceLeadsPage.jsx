@@ -8,7 +8,7 @@ import {
 import {
   Calculator, Mail, Phone, Trash2, ChevronDown, ChevronRight, Clock, PhoneCall,
   CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
-  AlertCircle,
+  AlertCircle, X,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -28,8 +28,39 @@ const STYLES = `
   .sl-doc { color:#0891B2; text-decoration:none; display:inline-flex; align-items:center; gap:5px; }
   .sl-doc:hover { text-decoration:underline; }
   .sl-doc:active { opacity:0.7; }
+  /* ── Lead detail modal ── */
+  .sl-modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(15,23,42,0.55);
+    backdrop-filter: blur(3px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    animation: sl-fade .18s ease;
+  }
+  @keyframes sl-fade { from { opacity: 0; } to { opacity: 1; } }
+  .sl-modal {
+    background: #fff; border-radius: 18px; width: 100%; max-width: 720px;
+    max-height: 88vh; overflow: hidden; display: flex; flex-direction: column;
+    box-shadow: 0 30px 80px rgba(15,23,42,0.35);
+    animation: sl-pop .2s ease;
+  }
+  @keyframes sl-pop { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .sl-modal-close {
+    border: none; background: #F1F5F9; color: #475569; cursor: pointer;
+    width: 34px; height: 34px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .sl-modal-close:hover { background: #E2E8F0; color: #0F172A; }
+  .sl-doc-card {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border: 1px solid #E2E8F0; border-radius: 10px;
+    background: #F8FAFC; color: #0891B2; text-decoration: none;
+    font-size: 13px; font-weight: 600; transition: background .15s ease, border-color .15s ease;
+  }
+  .sl-doc-card:hover { background: #ECFEFF; border-color: #A5F3FC; }
   @media (prefers-reduced-motion: reduce) {
-    .sl-stat, .sl-tab, .sl-del, .sl-export { transition:none !important; }
+    .sl-stat, .sl-tab, .sl-del, .sl-export, .sl-modal, .sl-modal-overlay { animation:none !important; transition:none !important; }
   }
 `;
 
@@ -37,6 +68,35 @@ const API_HOST = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").r
 
 const docProxyUrl = (leadId) =>
   leadId ? `${API_HOST}/api/serviceleads/${leadId}/document` : "";
+
+// Per-index proxy URL (serves the Nth attached document).
+const docProxyUrlAt = (leadId, index) =>
+  leadId ? `${API_HOST}/api/serviceleads/${leadId}/document/${index}` : "";
+
+// Collect EVERY document a lead carries. Prefers the new `insuranceDocuments`
+// array (one entry per uploaded file) and links each via the per-index proxy.
+// Falls back to the legacy single `insuranceDocument` for older leads.
+const collectDocs = (l) => {
+  const arr = Array.isArray(l.insuranceDocuments) ? l.insuranceDocuments : [];
+  if (arr.length) {
+    return arr.map((d, i) => ({
+      label: (d && d.originalName) || `Document ${i + 1}`,
+      href: docProxyUrlAt(l._id, i),
+    }));
+  }
+  if (l.insuranceDocument) {
+    return [{
+      label: l.insuranceDocumentOriginalName || "Insurance document",
+      href: docProxyUrl(l._id),
+    }];
+  }
+  return [];
+};
+
+// Does this lead have at least one document?
+const leadHasDoc = (l) =>
+  Boolean(l.insuranceDocument) ||
+  (Array.isArray(l.insuranceDocuments) && l.insuranceDocuments.length > 0);
 
 const STATUS_META = {
   new:       { label: "New",       color: "#D97706", bg: "#FEF3C7" },
@@ -82,8 +142,10 @@ const subText = { color: "#94A3B8", fontSize: 12, marginTop: 2 };
 
 function LeadDetails({ l }) {
   const slug   = (l.serviceSlug || "").toLowerCase();
-  const hasDoc = Boolean(l.insuranceDocument);
-  const proxyUrl = docProxyUrl(l._id);
+  const hasDoc = leadHasDoc(l);
+  const docCount = Array.isArray(l.insuranceDocuments) && l.insuranceDocuments.length
+    ? l.insuranceDocuments.length
+    : (l.insuranceDocument ? 1 : 0);
 
   // ✅ also treat as a motor row when vehicleType is present, so the new
   // motor fields render in the collapsed table row.
@@ -99,10 +161,9 @@ function LeadDetails({ l }) {
           <p style={{ color: "#0F172A", fontWeight: 600 }}>Policy #: {l.insuranceNumber}</p>
         )}
         {hasDoc ? (
-          <a className="sl-doc" href={proxyUrl} target="_blank" rel="noopener noreferrer"
-            style={{ fontSize: 12.5, marginTop: 3 }} title="View / download insurance document">
-            <Paperclip size={12} /> View document
-          </a>
+          <span className="sl-doc" style={{ fontSize: 12.5, marginTop: 3 }} title="Open the lead to view documents">
+            <Paperclip size={12} /> {docCount} document{docCount > 1 ? "s" : ""}
+          </span>
         ) : (
           !l.insuranceNumber && !l.vehicleType && <span style={{ color: "#94A3B8" }}>—</span>
         )}
@@ -145,7 +206,7 @@ function LeadDetails({ l }) {
   return <span style={{ color: "#94A3B8" }}>—</span>;
 }
 
-// ── Expanded row detail panel (shown when a row is clicked) ───────────────────
+// ── Single field cell (hides empty values) ────────────────────────────────────
 function DetailField({ label, value }) {
   if (value == null || value === "") return null;
   return (
@@ -158,14 +219,27 @@ function DetailField({ label, value }) {
   );
 }
 
-function LeadDetailPanel({ l }) {
-  const proxyUrl = docProxyUrl(l._id);
+// ── Modal popup: shows EVERY detail of a lead + all documents ─────────────────
+function LeadDetailModal({ lead: l, onClose }) {
+  // Close on Escape key
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  if (!l) return null;
+
+  const meta = STATUS_META[l.status] || STATUS_META.new;
+  const docs = collectDocs(l);
 
   const fields = [
     ["Name",            l.name],
     ["Email",           l.email],
     ["Phone",           l.phone],
     ["Service",         l.serviceTitle || l.serviceSlug],
+    ["Form Type",       l.formType],
+    ["Source",          l.source],
     ["Gender",          l.gender],
     ["Marital Status",  l.maritalStatus],
     ["Date of Birth",   l.dob],
@@ -179,7 +253,6 @@ function LeadDetailPanel({ l }) {
     ["Conditions",      l.conditions],
     ["City Tier",       l.cityTier],
     ["Policy Number",   l.insuranceNumber],
-    // ✅ NEW fields the public forms send — DetailField hides empties.
     ["Vehicle Type",    l.vehicleType],
     ["Policy Expiry",   l.expiryDate],
     ["Pincode",         l.pincode],
@@ -187,35 +260,78 @@ function LeadDetailPanel({ l }) {
     ["Insurance Type",  l.insuranceType],
     ["Query",           l.query],
     ["Interested Plan", l.plan],
+    ["Last 4 Digits",   l.lastFour],
     ["Wants Callback",  l.wantsCallback === "true" ? "Yes" : l.wantsCallback === "false" ? "No" : ""],
+    ["Agreed Terms",    l.agreeTerms === "true" ? "Yes" : l.agreeTerms === "false" ? "No" : ""],
     ["Requirements",    l.insuranceTypes],
     ["Coverage",        l.estimate?.coverage],
     ["Premium / Month", l.estimate?.monthly],
     ["Premium / Year",  l.estimate?.yearly],
     ["Total Over Term", l.estimate?.total],
-    ["Status",          STATUS_META[l.status]?.label || l.status],
+    ["Estimate Note",   l.estimate?.note],
+    ["Disclaimer",      l.estimate?.disclaimer],
+    ["Notes",           l.notes],
     ["Submitted On",    fmtDate(l.createdAt)],
   ];
 
   return (
-    <div style={{ padding: "4px 4px 6px" }}>
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
-        gap: "16px 28px",
-      }}>
-        {fields.map(([label, value]) => <DetailField key={label} label={label} value={value} />)}
-
-        {l.insuranceDocument && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
-              Document
-            </span>
-            <a className="sl-doc" href={proxyUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13 }}>
-              <Paperclip size={12} /> View document
-            </a>
+    <div className="sl-modal-overlay" onClick={onClose}>
+      <div className="sl-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+        {/* Header */}
+        <div style={{
+          display: "flex", alignItems: "flex-start", justifyContent: "space-between",
+          gap: 16, padding: "20px 24px", borderBottom: "1px solid var(--border)",
+        }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0F172A", margin: 0, letterSpacing: "-0.02em" }}>
+              {l.name || "Lead details"}
+            </h2>
+            <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>
+              {l.serviceTitle || l.serviceSlug || "—"}
+            </p>
           </div>
-        )}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <span style={{
+              padding: "5px 12px", borderRadius: 999, fontSize: 12, fontWeight: 700,
+              color: meta.color, background: meta.bg, whiteSpace: "nowrap",
+            }}>
+              {meta.label}
+            </span>
+            <button className="sl-modal-close" onClick={onClose} aria-label="Close">
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Body (scrolls) */}
+        <div style={{ padding: "20px 24px", overflowY: "auto" }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+            gap: "16px 28px",
+          }}>
+            {fields.map(([label, value]) => <DetailField key={label} label={label} value={value} />)}
+          </div>
+
+          {/* Documents — show ALL attached docs */}
+          <div style={{ marginTop: 24, paddingTop: 18, borderTop: "1px solid var(--border)" }}>
+            <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Documents{docs.length ? ` (${docs.length})` : ""}
+            </span>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 10 }}>
+              {docs.length ? (
+                docs.map((d, i) => (
+                  <a key={i} className="sl-doc-card" href={d.href} target="_blank" rel="noopener noreferrer"
+                    title="View / download document">
+                    <Paperclip size={14} /> {d.label}
+                  </a>
+                ))
+              ) : (
+                <span style={{ color: "#94A3B8", fontSize: 13 }}>No documents attached</span>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -276,21 +392,21 @@ export default function ServiceLeadsPage() {
   const [filter,  setFilter]  = useState("all");
   const [loading, setLoading] = useState(true);
   const [busyId,  setBusyId]  = useState(null);
-  const [error,   setError]   = useState(null);   // ← NEW: capture fetch errors
-  const [expandedId, setExpandedId] = useState(null); // ← NEW: clicked row
+  const [error,   setError]   = useState(null);   // ← capture fetch errors
+  const [selectedLead, setSelectedLead] = useState(null); // ← lead shown in modal
 
-  // Toggle the detail panel for a row. Ignores clicks that land on interactive
-  // controls (status dropdown, delete button, email / phone / doc links) so
-  // those keep working without expanding/collapsing the row.
-  const toggleRow = (e, id) => {
+  // Open the modal for a row. Ignores clicks that land on interactive controls
+  // (status dropdown, delete button, email / phone links) so those keep working
+  // without opening the popup.
+  const openRow = (e, lead) => {
     if (e.target.closest("a, button, select, input, option, label")) return;
-    setExpandedId((curr) => (curr === id ? null : id));
+    setSelectedLead(lead);
   };
 
   const load = (status = filter) => {
     setLoading(true);
     setError(null);
-    setExpandedId(null); // collapse any open row when reloading
+    setSelectedLead(null); // close any open popup when reloading
 
     // ── Build params correctly ────────────────────────────────────────────────
     // getServiceLeads(params) → api.get("/serviceleads", { params })
@@ -327,6 +443,8 @@ export default function ServiceLeadsPage() {
     try {
       await updateServiceLead(id, { status });
       setLeads((prev) => prev.map((l) => (l._id === id ? { ...l, status } : l)));
+      // keep the open popup in sync if it's the same lead
+      setSelectedLead((curr) => (curr && curr._id === id ? { ...curr, status } : curr));
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
       console.error("Status update failed:", e?.response?.data || e.message);
@@ -342,7 +460,7 @@ export default function ServiceLeadsPage() {
     try {
       await deleteServiceLead(id);
       setLeads((prev) => prev.filter((l) => l._id !== id));
-      if (expandedId === id) setExpandedId(null);
+      setSelectedLead((curr) => (curr && curr._id === id ? null : curr));
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
       console.error("Delete failed:", e?.response?.data || e.message);
@@ -354,6 +472,9 @@ export default function ServiceLeadsPage() {
 
   // ── Exports ───────────────────────────────────────────────────────────────
   const fileStamp = () => new Date().toISOString().slice(0, 10);
+
+  // All document links for a lead, joined for a single export cell.
+  const docsExportText = (l) => collectDocs(l).map((d) => d.href).join(" | ");
 
   const buildRows = () =>
     leads.map((l) => ({
@@ -374,7 +495,6 @@ export default function ServiceLeadsPage() {
       Conditions:        l.conditions || "",
       "City Tier":       l.cityTier || "",
       "Policy Number":   l.insuranceNumber || "",
-      // ✅ NEW columns so exports also carry the extra form fields
       "Vehicle Type":    l.vehicleType || "",
       "Policy Expiry":   l.expiryDate || "",
       Pincode:           l.pincode || "",
@@ -382,7 +502,7 @@ export default function ServiceLeadsPage() {
       "Insurance Type":  l.insuranceType || "",
       Query:             l.query || "",
       "Interested Plan": l.plan || "",
-      Document:          l.insuranceDocument ? docProxyUrl(l._id) : "",
+      Documents:         docsExportText(l),
       Requirements:      l.insuranceTypes || "",
       Coverage:          l.estimate?.coverage || "",
       "Premium / Month": l.estimate?.monthly || "",
@@ -405,7 +525,7 @@ export default function ServiceLeadsPage() {
   const pdfDetails = (l) => {
     const parts = [];
     if (l.insuranceNumber)   parts.push(`Policy: ${l.insuranceNumber}`);
-    if (l.insuranceDocument) parts.push("Doc ↗");
+    if (leadHasDoc(l))       parts.push("Doc ↗");
     if (l.insuranceTypes)    return l.insuranceTypes;
     if (l.vehicleType)
       return [l.vehicleType, l.expiryDate].filter(Boolean).join(" / ");
@@ -432,16 +552,17 @@ export default function ServiceLeadsPage() {
     );
 
     const docUrls = [];
-    const head = [["Name", "Phone", "Email", "Service", "Details", "Document", "Premium/mo", "Status", "Date"]];
+    const head = [["Name", "Phone", "Email", "Service", "Details", "Documents", "Premium/mo", "Status", "Date"]];
     const body = leads.map((l, i) => {
-      docUrls[i] = l.insuranceDocument ? docProxyUrl(l._id) : "";
+      const ds = collectDocs(l);
+      docUrls[i] = ds.length ? ds[0].href : "";
       return [
         l.name || "",
         l.phone || "",
         l.email || "",
         l.serviceTitle || l.serviceSlug || "",
         pdfDetails(l),
-        l.insuranceDocument ? "View doc" : "—",
+        ds.length ? (ds.length > 1 ? `${ds.length} docs` : "View doc") : "—",
         l.estimate?.monthly || "—",
         STATUS_META[l.status]?.label || l.status || "",
         fmtDate(l.createdAt),
@@ -468,7 +589,7 @@ export default function ServiceLeadsPage() {
         if (!url) return;
 
         const { x, y, width, height } = data.cell;
-        const text = "View doc";
+        const text = data.cell.text && data.cell.text.length ? data.cell.text.join(" ") : "View doc";
         doc.setFontSize(7.5);
         const textW = doc.getTextWidth(text);
         const textX = x + 4;
@@ -508,6 +629,11 @@ export default function ServiceLeadsPage() {
   return (
     <div>
       <style>{STYLES}</style>
+
+      {/* Lead detail modal popup */}
+      {selectedLead && (
+        <LeadDetailModal lead={selectedLead} onClose={() => setSelectedLead(null)} />
+      )}
 
       {/* Header */}
       <div style={{
@@ -594,91 +720,75 @@ export default function ServiceLeadsPage() {
               <tbody>
                 {leads.map((l, i) => {
                   const meta = STATUS_META[l.status] || STATUS_META.new;
-                  const isOpen = expandedId === l._id;
                   return (
-                    <React.Fragment key={l._id}>
-                      <tr className="sl-row" onClick={(e) => toggleRow(e, l._id)}
-                        style={{ borderBottom: (isOpen || i < leads.length - 1) ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
+                    <tr key={l._id} className="sl-row" onClick={(e) => openRow(e, l)}
+                      style={{ borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                          <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-                            <ChevronRight size={15} color="#94A3B8"
-                              style={{ marginTop: 2, flexShrink: 0, transition: "transform .15s ease", transform: isOpen ? "rotate(90deg)" : "none" }} />
-                            <div>
-                              <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
-                              <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
-                            </div>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                        <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                          <ChevronRight size={15} color="#94A3B8" style={{ marginTop: 2, flexShrink: 0 }} />
+                          <div>
+                            <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
+                            <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
                           </div>
-                        </td>
+                        </div>
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                          <a href={`mailto:${l.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172A", textDecoration: "none", fontWeight: 500 }}>
-                            <Mail size={13} color="#94A3B8" /> {l.email}
-                          </a>
-                          <a href={`tel:${l.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#64748B", textDecoration: "none", marginTop: 4 }}>
-                            <Phone size={13} color="#94A3B8" /> {l.phone}
-                          </a>
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                        <a href={`mailto:${l.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172A", textDecoration: "none", fontWeight: 500 }}>
+                          <Mail size={13} color="#94A3B8" /> {l.email}
+                        </a>
+                        <a href={`tel:${l.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#64748B", textDecoration: "none", marginTop: 4 }}>
+                          <Phone size={13} color="#94A3B8" /> {l.phone}
+                        </a>
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
-                          {l.serviceTitle || l.serviceSlug || "—"}
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
+                        {l.serviceTitle || l.serviceSlug || "—"}
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                          <LeadDetails l={l} />
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                        <LeadDetails l={l} />
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
-                          {l.estimate?.monthly ? (
-                            <>
-                              <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
-                              {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
-                            </>
-                          ) : <span style={{ color: "#94A3B8" }}>—</span>}
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
+                        {l.estimate?.monthly ? (
+                          <>
+                            <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
+                            {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
+                          </>
+                        ) : <span style={{ color: "#94A3B8" }}>—</span>}
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>
-                          {fmtDate(l.createdAt)}
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>
+                        {fmtDate(l.createdAt)}
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
-                          <div style={{ position: "relative", display: "inline-block" }}>
-                            <select className="sl-select" value={l.status} disabled={busyId === l._id}
-                              onChange={(e) => handleStatusChange(l._id, e.target.value)}
-                              style={{
-                                appearance: "none", WebkitAppearance: "none",
-                                padding: "6px 26px 6px 12px", borderRadius: 999,
-                                border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
-                                color: meta.color, background: meta.bg, outline: "none",
-                              }}>
-                              {Object.keys(STATUS_META).map((k) => (
-                                <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>{STATUS_META[k].label}</option>
-                              ))}
-                            </select>
-                            <ChevronDown size={13} color={meta.color} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                          </div>
-                        </td>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
+                        <div style={{ position: "relative", display: "inline-block" }}>
+                          <select className="sl-select" value={l.status} disabled={busyId === l._id}
+                            onChange={(e) => handleStatusChange(l._id, e.target.value)}
+                            style={{
+                              appearance: "none", WebkitAppearance: "none",
+                              padding: "6px 26px 6px 12px", borderRadius: 999,
+                              border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
+                              color: meta.color, background: meta.bg, outline: "none",
+                            }}>
+                            {Object.keys(STATUS_META).map((k) => (
+                              <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>{STATUS_META[k].label}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={13} color={meta.color} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                        </div>
+                      </td>
 
-                        <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
-                          <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
-                            style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-
-                      {isOpen && (
-                        <tr>
-                          <td colSpan={8} style={{
-                            padding: "16px 20px 20px",
-                            background: "#F8FAFC",
-                            borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none",
-                          }}>
-                            <LeadDetailPanel l={l} />
-                          </td>
-                        </tr>
-                      )}
-                    </React.Fragment>
+                      <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
+                        <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
+                          style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
                   );
                 })}
               </tbody>

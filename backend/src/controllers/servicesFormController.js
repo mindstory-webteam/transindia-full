@@ -48,35 +48,33 @@ const MIME_BY_EXT = {
 };
 
 /*
- * Work out the real file extension + MIME type for a lead's attached
- * document, in order of trust:
+ * Work out the real file extension + MIME type for a single document,
+ * in order of trust:
  *
- *   1. insuranceDocumentOriginalName (saved at upload time — new leads)
+ *   1. originalName (saved at upload time — new leads)
  *   2. the extension visible directly in the Cloudinary URL
  *   3. ask Cloudinary's Admin API what format it actually recorded
  *      (covers leads uploaded before this fix, whose URLs have no
  *      extension at all)
  *
+ * `doc` is a normalised shape: { url, publicId, mimeType, originalName }.
  * Returns { ext, mimeType } — either can be "" / null if truly unknown.
  */
-async function resolveDocumentMeta(lead) {
-  let mimeType = lead.insuranceDocumentMimeType || null;
-  let ext = lead.insuranceDocumentOriginalName
-    ? path.extname(lead.insuranceDocumentOriginalName).toLowerCase()
-    : "";
+async function resolveDocumentMeta(doc) {
+  const d = doc || {};
+  let mimeType = d.mimeType || null;
+  let ext = d.originalName ? path.extname(d.originalName).toLowerCase() : "";
 
   if (!ext) {
-    const urlPath = (lead.insuranceDocument || "").split("?")[0];
+    const urlPath = (d.url || "").split("?")[0];
     const m = urlPath.match(/\.([a-zA-Z0-9]+)$/);
     if (m) ext = `.${m[1].toLowerCase()}`;
   }
 
-  if (!ext && lead.insuranceDocumentPublicId) {
+  if (!ext && d.publicId) {
     try {
-      const resourceType = (lead.insuranceDocument || "").includes("/raw/upload/")
-        ? "raw"
-        : "image";
-      const info = await cloudinary.api.resource(lead.insuranceDocumentPublicId, {
+      const resourceType = (d.url || "").includes("/raw/upload/") ? "raw" : "image";
+      const info = await cloudinary.api.resource(d.publicId, {
         resource_type: resourceType,
       });
       if (info?.format) {
@@ -94,9 +92,35 @@ async function resolveDocumentMeta(lead) {
   return { ext, mimeType };
 }
 
+/*
+ * Return every document attached to a lead as a normalised list:
+ *   [{ url, publicId, mimeType, originalName }, ...]
+ * Prefers the new `insuranceDocuments` array; falls back to the legacy
+ * single-document fields for older leads.
+ */
+function getLeadDocuments(lead) {
+  if (Array.isArray(lead.insuranceDocuments) && lead.insuranceDocuments.length) {
+    return lead.insuranceDocuments.map((d) => ({
+      url: d.url,
+      publicId: d.publicId,
+      mimeType: d.mimeType,
+      originalName: d.originalName,
+    }));
+  }
+  if (lead.insuranceDocument) {
+    return [{
+      url: lead.insuranceDocument,
+      publicId: lead.insuranceDocumentPublicId,
+      mimeType: lead.insuranceDocumentMimeType,
+      originalName: lead.insuranceDocumentOriginalName,
+    }];
+  }
+  return [];
+}
+
 // ─────────────────────────────────────────────────────────────────────
 // CREATE  —  POST /api/serviceleads   (public)
-// JSON for calculator/simple/miscellaneous; multipart for motor (+ file).
+// JSON for calculator/simple/miscellaneous; multipart for motor (+ files).
 // ─────────────────────────────────────────────────────────────────────
 exports.createServiceLead = async (req, res, next) => {
   try {
@@ -124,48 +148,44 @@ exports.createServiceLead = async (req, res, next) => {
       }
     }
 
-    // ✅ FIX: the public motor form does NOT collect a policy number, and the
-    // document upload is OPTIONAL in the UI. The old code hard-required BOTH
-    // (insuranceNumber + req.file), so every motor submission returned 400 and
-    // never reached the database. Those checks are removed. We only keep the
-    // miscellaneous "describe your needs" requirement, which the misc form
-    // genuinely collects.
+    // The public motor form does NOT collect a policy number, and the document
+    // upload is OPTIONAL. Only the miscellaneous "describe your needs" field is
+    // genuinely required.
     if (formType === "miscellaneous" && !(b.insuranceTypes || "").trim()) {
       return res.status(400).json({ success: false, message: "Please describe your insurance needs." });
     }
 
-    // ✅ FIX: the route now uses .array("insuranceDocuments"), so uploaded
-    // file(s) arrive in req.files. We store the FIRST file in the existing
-    // single-document fields so the admin download proxy + delete logic keep
-    // working completely unchanged. (req.file kept as a fallback.)
-    const uploadedFile = (req.files && req.files[0]) || req.file || null;
+    // ✅ FIX: the route uses .array("insuranceDocuments"), so EVERY uploaded
+    // file arrives in req.files. Previously only req.files[0] was stored, which
+    // is why the lead page showed a single document. Store them ALL.
+    const uploadedFiles =
+      (Array.isArray(req.files) && req.files.length ? req.files : (req.file ? [req.file] : []));
 
-    let documentUrl = undefined;
-    let documentPublicId = undefined;
-    let documentMimeType = undefined;
-    let documentOriginalName = undefined;
-
-    if (uploadedFile) {
-      // uploadedFile.path is the secure_url from Cloudinary
-      documentUrl = uploadedFile.path;
-      documentPublicId = uploadedFile.filename;
-      documentMimeType = uploadedFile.mimetype;
-      documentOriginalName = uploadedFile.originalname;
-
-      // Validate that we got a proper URL from Cloudinary
-      if (!documentUrl || !documentUrl.startsWith("http")) {
-        console.error("Invalid Cloudinary URL:", documentUrl);
+    const documents = [];
+    for (const f of uploadedFiles) {
+      const url = f.path;            // Cloudinary secure_url
+      if (!url || !url.startsWith("http")) {
+        console.error("Invalid Cloudinary URL for file:", f.originalname, url);
         return res.status(500).json({
           success: false,
           message: "Document upload failed. Please try again.",
         });
       }
+      documents.push({
+        url,
+        publicId: f.filename,
+        mimeType: f.mimetype,
+        originalName: f.originalname,
+      });
     }
 
-    // ✅ Fire/entertainment send `insuranceType` (singular). Fire also sends
-    // `industries`. Fold them into `insuranceTypes` so the existing dashboard
-    // "Requirements" column shows something without any extra UI changes,
-    // while the individual fields are still stored separately below.
+    // Keep the FIRST file in the legacy single-document fields so the existing
+    // download proxy + delete logic keep working for older code paths.
+    const first = documents[0] || null;
+
+    // Fire/entertainment send `insuranceType` (singular). Fire also sends
+    // `industries`. Fold them into `insuranceTypes` so the dashboard
+    // "Requirements" column shows something; individual fields stored too.
     const combinedRequirements =
       (b.insuranceTypes || "").trim() ||
       [b.industries, b.insuranceType].filter((x) => (x || "").trim()).join(" — ") ||
@@ -195,7 +215,7 @@ exports.createServiceLead = async (req, res, next) => {
       conditions: b.conditions,
       cityTier: b.cityTier,
 
-      // ✅ NEW field mappings so nothing the public forms send is lost
+      // extra fields the public forms send
       pincode: b.pincode,
       query: b.query,
       wantsCallback: b.wantsCallback,
@@ -205,19 +225,22 @@ exports.createServiceLead = async (req, res, next) => {
 
       // ── Motor form ──
       insuranceNumber: b.insuranceNumber,
-      expiryDate: b.expiryDate,   // ✅ NEW
-      vehicleType: b.vehicleType, // ✅ NEW
+      expiryDate: b.expiryDate,
+      vehicleType: b.vehicleType,
 
       // ── Fire / entertainment / miscellaneous ──
-      industries: b.industries,           // ✅ NEW
-      insuranceType: b.insuranceType,     // ✅ NEW (singular)
+      industries: b.industries,
+      insuranceType: b.insuranceType,
       insuranceTypes: combinedRequirements,
 
-      // ✅ Store the validated Cloudinary URL + the real file metadata
-      insuranceDocument: documentUrl,
-      insuranceDocumentPublicId: documentPublicId,
-      insuranceDocumentMimeType: documentMimeType,
-      insuranceDocumentOriginalName: documentOriginalName,
+      // ✅ ALL documents
+      insuranceDocuments: documents,
+
+      // legacy single-doc fields (first file) — backward compatible
+      insuranceDocument: first ? first.url : undefined,
+      insuranceDocumentPublicId: first ? first.publicId : undefined,
+      insuranceDocumentMimeType: first ? first.mimeType : undefined,
+      insuranceDocumentOriginalName: first ? first.originalName : undefined,
 
       estimate: normalizeEstimate(estimateRaw),
       rawData: b,
@@ -226,7 +249,7 @@ exports.createServiceLead = async (req, res, next) => {
     return res.status(201).json({
       success: true,
       message: "Lead submitted successfully.",
-      data: { id: lead._id, formType: lead.formType },
+      data: { id: lead._id, formType: lead.formType, documents: documents.length },
     });
   } catch (err) {
     next(err);
@@ -234,22 +257,13 @@ exports.createServiceLead = async (req, res, next) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────
-// PROXY DOCUMENT DOWNLOAD  —  GET /api/serviceleads/:id/document
+// PROXY DOCUMENT DOWNLOAD
+//   GET /api/serviceleads/:id/document            → first document
+//   GET /api/serviceleads/:id/document/:index     → the Nth document
 //
-// WHY NOT res.redirect():
-//   Cloudinary "raw" PDFs are served as application/octet-stream with
-//   no Content-Disposition header, so the browser opens a blank tab
-//   instead of downloading. Direct URLs also hit Cloudinary CORS
-//   restrictions when the referrer is your admin domain.
-//
-// FIX — stream through our own server:
-//   1. Fetch from Cloudinary server-to-server (no CORS).
-//   2. Forward the REAL Content-Type (resolved via resolveDocumentMeta,
-//      not guessed from the URL — Cloudinary URLs aren't guaranteed to
-//      carry an extension for "raw" resources).
-//   3. Add Content-Disposition: attachment with a correctly-extensioned
-//      filename so browsers always download it as the right file type.
-//   4. Pipe the byte stream straight to the client (no buffering).
+// Streams the file through our own server so the browser always downloads
+// it with the correct Content-Type + filename (Cloudinary "raw" PDFs have
+// no extension/disposition of their own).
 // ─────────────────────────────────────────────────────────────────────
 exports.getServiceLeadDocument = async (req, res, next) => {
   try {
@@ -258,36 +272,42 @@ exports.getServiceLeadDocument = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Lead not found." });
     }
 
-    if (!lead.insuranceDocument) {
+    const docs = getLeadDocuments(lead);
+    if (!docs.length) {
       return res.status(404).json({ success: false, message: "No document attached." });
     }
 
-    const cloudinaryUrl = lead.insuranceDocument;
+    // Pick the requested document (default to the first).
+    let idx = 0;
+    if (req.params.index != null) {
+      idx = parseInt(req.params.index, 10);
+      if (isNaN(idx) || idx < 0 || idx >= docs.length) {
+        return res.status(404).json({ success: false, message: "Document not found." });
+      }
+    }
+    const activeDoc = docs[idx];
+    const cloudinaryUrl = activeDoc.url;
 
-    // Validate the URL is a proper Cloudinary URL
-    if (!cloudinaryUrl.startsWith("http")) {
+    if (!cloudinaryUrl || !cloudinaryUrl.startsWith("http")) {
       return res.status(400).json({ success: false, message: "Invalid document URL." });
     }
 
-    console.log(`📄 Streaming document for lead ${req.params.id}:`, cloudinaryUrl);
+    console.log(`📄 Streaming document ${idx} for lead ${req.params.id}:`, cloudinaryUrl);
 
-    // ✅ Resolve the real extension/MIME type instead of regex-guessing
-    // off the URL — this is what actually fixes "opens as garbage text".
-    const { ext, mimeType } = await resolveDocumentMeta(lead);
+    const { ext, mimeType } = await resolveDocumentMeta(activeDoc);
 
-    // Build a safe download filename from the lead's name
+    // Build a safe download filename from the lead's name (+ index when many)
     const safeName = (lead.name || "document")
       .replace(/[^a-zA-Z0-9 _-]/g, "")
       .trim()
       .replace(/\s+/g, "_")
       .toLowerCase();
 
-    const filename = `insurance-doc-${safeName}${ext}`;
+    const suffix = docs.length > 1 ? `-${idx + 1}` : "";
+    const filename = `insurance-doc-${safeName}${suffix}${ext}`;
 
-    // Choose http or https module based on URL
     const transport = cloudinaryUrl.startsWith("https://") ? https : http;
 
-    // Stream the file from Cloudinary to the client
     const cloudReq = transport.get(cloudinaryUrl, (cloudRes) => {
       // Follow a single redirect if Cloudinary issues one (rare but possible)
       if (
@@ -336,8 +356,6 @@ exports.getServiceLeadDocument = async (req, res, next) => {
         return;
       }
 
-      // Prefer our resolved MIME type (the trustworthy one); fall back to
-      // whatever Cloudinary sends, then to an extension-based guess.
       const contentType =
         mimeType ||
         cloudRes.headers["content-type"] ||
@@ -350,16 +368,13 @@ exports.getServiceLeadDocument = async (req, res, next) => {
           : "application/octet-stream");
 
       res.setHeader("Content-Type", contentType);
-      // "attachment" forces download prompt in every browser
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
       res.setHeader("Cache-Control", "private, max-age=3600");
 
-      // Forward content-length so browser shows progress bar
       if (cloudRes.headers["content-length"]) {
         res.setHeader("Content-Length", cloudRes.headers["content-length"]);
       }
 
-      // Pipe bytes directly — no buffering in memory
       cloudRes.pipe(res);
 
       cloudRes.on("error", (streamErr) => {
@@ -375,7 +390,6 @@ exports.getServiceLeadDocument = async (req, res, next) => {
       }
     });
 
-    // Timeout after 15s
     cloudReq.setTimeout(15000, () => {
       console.error("[getServiceLeadDocument] Request timed out");
       cloudReq.destroy();
@@ -464,21 +478,14 @@ exports.deleteServiceLead = async (req, res, next) => {
     const lead = await ServiceLead.findById(req.params.id);
     if (!lead) return res.status(404).json({ success: false, message: "Lead not found." });
 
-    // Remove the attached document from Cloudinary too.
-    if (lead.insuranceDocumentPublicId) {
-      // ✅ FIX: detect resource_type from the URL path itself
-      // (".../raw/upload/..." vs ".../image/upload/...") instead of
-      // sniffing the file extension — the extension may be missing
-      // entirely on older leads, which previously caused Cloudinary
-      // deletes to silently use the wrong resource_type and fail.
-      const resourceType = (lead.insuranceDocument || "").includes("/raw/upload/")
-        ? "raw"
-        : "image";
+    // ✅ Remove EVERY attached document from Cloudinary (not just the first).
+    const docs = getLeadDocuments(lead);
+    for (const d of docs) {
+      if (!d.publicId) continue;
+      const resourceType = (d.url || "").includes("/raw/upload/") ? "raw" : "image";
       try {
-        await cloudinary.uploader.destroy(lead.insuranceDocumentPublicId, {
-          resource_type: resourceType,
-        });
-        console.log(`🗑️  Deleted Cloudinary asset: ${lead.insuranceDocumentPublicId}`);
+        await cloudinary.uploader.destroy(d.publicId, { resource_type: resourceType });
+        console.log(`🗑️  Deleted Cloudinary asset: ${d.publicId}`);
       } catch (e) {
         console.error("Cloudinary delete failed:", e.message);
       }

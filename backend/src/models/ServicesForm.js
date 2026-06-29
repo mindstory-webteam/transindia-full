@@ -22,6 +22,18 @@ const estimateSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ✅ NEW: one entry per uploaded file. The motor form can attach several
+// documents at once, so we keep them all here instead of just the first.
+const documentSchema = new mongoose.Schema(
+  {
+    url: { type: String, trim: true },          // Cloudinary secure_url
+    publicId: { type: String, trim: true },     // for deletion
+    mimeType: { type: String, trim: true },     // e.g. "application/pdf"
+    originalName: { type: String, trim: true }, // e.g. "old-policy.pdf"
+  },
+  { _id: false }
+);
+
 const serviceLeadSchema = new mongoose.Schema(
   {
     // ── Which service / which form ──────────────────────────────
@@ -54,8 +66,7 @@ const serviceLeadSchema = new mongoose.Schema(
     conditions: { type: String, trim: true },
     cityTier: { type: String, trim: true },
 
-    // ✅ NEW: extra fields the public forms actually send but the schema
-    // never stored — so they used to vanish into rawData only.
+    // ── Extra fields the public forms send ──────────────────────
     pincode: { type: String, trim: true },       // life form
     query: { type: String, trim: true },         // health hero form
     wantsCallback: { type: String, trim: true }, // health / exact-quote
@@ -65,18 +76,22 @@ const serviceLeadSchema = new mongoose.Schema(
 
     // ── Motor form ──────────────────────────────────────────────
     insuranceNumber: { type: String, trim: true },
-    expiryDate: { type: String, trim: true },    // ✅ NEW: motor policy expiry
-    vehicleType: { type: String, trim: true },   // ✅ NEW: car / bike / truck…
+    expiryDate: { type: String, trim: true },    // motor policy expiry
+    vehicleType: { type: String, trim: true },   // car / bike / truck…
+
+    // First / primary document — kept for backward compatibility with the
+    // existing download proxy and delete logic.
     insuranceDocument: { type: String, trim: true }, // Cloudinary secure_url (string!)
     insuranceDocumentPublicId: { type: String, trim: true }, // for deletion
-    // ✅ recorded at upload time so downloads never have to guess
-    // the file type from the URL (which can be missing an extension).
     insuranceDocumentMimeType: { type: String, trim: true }, // e.g. "application/pdf"
     insuranceDocumentOriginalName: { type: String, trim: true }, // e.g. "old-policy.pdf"
 
+    // ✅ NEW: ALL uploaded documents (motor can attach several at once).
+    insuranceDocuments: { type: [documentSchema], default: [] },
+
     // ── Fire / entertainment / miscellaneous ────────────────────
-    industries: { type: String, trim: true },    // ✅ NEW: fire form
-    insuranceType: { type: String, trim: true },  // ✅ NEW: fire / entertainment (singular)
+    industries: { type: String, trim: true },    // fire form
+    insuranceType: { type: String, trim: true },  // fire / entertainment (singular)
     insuranceTypes: { type: String, trim: true }, // miscellaneous (plural)
 
     // ── Calculator estimate snapshot ────────────────────────────
