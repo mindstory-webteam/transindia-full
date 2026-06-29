@@ -20,6 +20,8 @@ const PAGE_STYLES = `
   .events-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
   .events-export-btn:hover:not(:disabled) { background:#F4F7FB; border-color:#CBD5E1; }
   .events-export-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .ev-row { cursor:pointer; transition: background .12s ease; }
+  .ev-row:hover td { background:#FAFBFD; }
   .ev-admin-thumb-wrap { position:relative; width:74px; height:56px; border-radius:8px; overflow:hidden; border:1px solid var(--ti-line); background:#F1F5F9; }
   .ev-admin-thumb-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
   .ev-admin-thumb-x {
@@ -107,6 +109,14 @@ export default function EventsAdminPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Open the description/info modal when a row is clicked (same as the eye
+  // button). Ignores clicks on interactive controls (Eye / Edit / Delete
+  // buttons, links, inputs) so they keep doing their own thing.
+  const handleRowClick = (e, ev) => {
+    if (e.target.closest("button, a, input, select, label")) return;
+    setInfoModal({ title: ev.title, text: ev.description || "No description provided." });
   };
 
   // ── Modal open / close ─────────────────────────────────────────────────────
@@ -463,7 +473,7 @@ export default function EventsAdminPage() {
                   const cover = ev.imageUrl || ev.images?.[0];
                   const up = isUpcoming(ev.date);
                   return (
-                    <tr key={getId(ev)} style={{ borderBottom: "1px solid var(--ti-line)" }}>
+                    <tr key={getId(ev)} className="ev-row" onClick={(e) => handleRowClick(e, ev)} style={{ borderBottom: "1px solid var(--ti-line)" }}>
                       <td style={{ padding: "12px 20px" }}>
                         <div className="ev-admin-thumb-wrap">
                           {cover ? (

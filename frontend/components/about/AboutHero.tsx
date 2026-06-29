@@ -30,11 +30,11 @@ export default function AboutHero() {
           </div>
 
           <div className="about-mobile-visual">
-            <img src="/images/about/about-us-sm-banner1.png" alt="About TransIndia" />
+            <img src="/images/about/ABOUT/About page - Hero Baner.png" alt="About TransIndia" />
           </div>
 
           <div className="about-lg-banner">
-            <img src="/images/about/about-us-hero-lg.png" alt="About TransIndia Banner" />
+            <img src="/images/about/ABOUT/About page - Hero Baner.png" alt="About TransIndia Banner" />
           </div>
         </div>
 

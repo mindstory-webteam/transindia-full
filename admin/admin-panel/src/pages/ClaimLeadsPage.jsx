@@ -23,7 +23,7 @@ const INSURANCE_COLORS = {
 };
 
 const PAGE_STYLES = `
-  .cl-table tbody tr { transition: background .12s ease; }
+  .cl-table tbody tr { transition: background .12s ease; cursor: pointer; }
   .cl-table tbody tr:hover td { background: #FAFBFD; }
   .cl-del-btn { transition: background .15s, color .15s; }
   .cl-del-btn:hover { background: #FEE2E2 !important; color: #DC2626 !important; }
@@ -183,6 +183,14 @@ export default function ClaimLeadsPage() {
   useEffect(() => {
     fetchClaims();
   }, []);
+
+  // Open the detail modal when a row is clicked. Ignores clicks on interactive
+  // controls (name button, View / delete buttons, status dropdown) so they keep
+  // doing their own thing.
+  const handleRowClick = (e, claim) => {
+    if (e.target.closest("button, a, select, input, option, label")) return;
+    setSelected(claim);
+  };
 
   async function fetchClaims() {
     try {
@@ -520,7 +528,7 @@ export default function ClaimLeadsPage() {
               </thead>
               <tbody>
                 {filtered.map((c, i) => (
-                  <tr key={c._id} style={{ borderBottom: i < filtered.length - 1 ? "1px solid #E8EDF3" : "none" }}>
+                  <tr key={c._id} onClick={(e) => handleRowClick(e, c)} style={{ borderBottom: i < filtered.length - 1 ? "1px solid #E8EDF3" : "none" }}>
                     {/* Name */}
                     <td style={{ padding: "12px 16px", color: "#0F172A", fontWeight: 600, whiteSpace: "nowrap" }}>
                       <button

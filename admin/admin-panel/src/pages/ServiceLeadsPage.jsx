@@ -6,7 +6,7 @@ import {
   deleteServiceLead,
 } from "../services/api";
 import {
-  Calculator, Mail, Phone, Trash2, ChevronDown, Clock, PhoneCall,
+  Calculator, Mail, Phone, Trash2, ChevronDown, ChevronRight, Clock, PhoneCall,
   CheckCircle, XCircle, RefreshCw, FileSpreadsheet, FileText, Paperclip,
   AlertCircle,
 } from "lucide-react";
@@ -17,8 +17,8 @@ import autoTable from "jspdf-autotable";
 const STYLES = `
   .sl-stat { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
   .sl-stat:hover { transform: translateY(-2px); box-shadow: 0 12px 26px rgba(15,23,42,0.08); border-color:#DCE3EC; }
-  .sl-table tbody tr { transition: background .12s ease; }
-  .sl-table tbody tr:hover td { background:#FAFBFD; }
+  .sl-table tbody tr.sl-row { transition: background .12s ease; cursor: pointer; }
+  .sl-table tbody tr.sl-row:hover td { background:#FAFBFD; }
   .sl-tab { transition: background .15s ease, color .15s ease, border-color .15s ease; }
   .sl-del { transition: background .15s ease, color .15s ease; }
   .sl-del:hover { background:#FEE2E2; color:#DC2626; }
@@ -138,6 +138,73 @@ function LeadDetails({ l }) {
   return <span style={{ color: "#94A3B8" }}>—</span>;
 }
 
+// ── Expanded row detail panel (shown when a row is clicked) ───────────────────
+function DetailField({ label, value }) {
+  if (value == null || value === "") return null;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+        {label}
+      </span>
+      <span style={{ fontSize: 13, color: "#0F172A", wordBreak: "break-word" }}>{value}</span>
+    </div>
+  );
+}
+
+function LeadDetailPanel({ l }) {
+  const proxyUrl = docProxyUrl(l._id);
+
+  const fields = [
+    ["Name",            l.name],
+    ["Email",           l.email],
+    ["Phone",           l.phone],
+    ["Service",         l.serviceTitle || l.serviceSlug],
+    ["Gender",          l.gender],
+    ["Marital Status",  l.maritalStatus],
+    ["Date of Birth",   l.dob],
+    ["Address",         l.address],
+    ["Smoker",          l.smoker],
+    ["Sum Assured",     l.sumAssured],
+    ["Policy Term",     l.policyTerm],
+    ["Annual Income",   l.annualIncome],
+    ["Cover Type",      l.coverType],
+    ["Sum Insured",     l.sumInsured],
+    ["Conditions",      l.conditions],
+    ["City Tier",       l.cityTier],
+    ["Policy Number",   l.insuranceNumber],
+    ["Requirements",    l.insuranceTypes],
+    ["Coverage",        l.estimate?.coverage],
+    ["Premium / Month", l.estimate?.monthly],
+    ["Premium / Year",  l.estimate?.yearly],
+    ["Total Over Term", l.estimate?.total],
+    ["Status",          STATUS_META[l.status]?.label || l.status],
+    ["Submitted On",    fmtDate(l.createdAt)],
+  ];
+
+  return (
+    <div style={{ padding: "4px 4px 6px" }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))",
+        gap: "16px 28px",
+      }}>
+        {fields.map(([label, value]) => <DetailField key={label} label={label} value={value} />)}
+
+        {l.insuranceDocument && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <span style={{ fontSize: 11, color: "#94A3B8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Document
+            </span>
+            <a className="sl-doc" href={proxyUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13 }}>
+              <Paperclip size={12} /> View document
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Error banner shown when fetch fails ───────────────────────────────────────
 function ErrorBanner({ error, onRetry }) {
   // Decode the most common failure reasons into plain English
@@ -194,10 +261,20 @@ export default function ServiceLeadsPage() {
   const [loading, setLoading] = useState(true);
   const [busyId,  setBusyId]  = useState(null);
   const [error,   setError]   = useState(null);   // ← NEW: capture fetch errors
+  const [expandedId, setExpandedId] = useState(null); // ← NEW: clicked row
+
+  // Toggle the detail panel for a row. Ignores clicks that land on interactive
+  // controls (status dropdown, delete button, email / phone / doc links) so
+  // those keep working without expanding/collapsing the row.
+  const toggleRow = (e, id) => {
+    if (e.target.closest("a, button, select, input, option, label")) return;
+    setExpandedId((curr) => (curr === id ? null : id));
+  };
 
   const load = (status = filter) => {
     setLoading(true);
     setError(null);
+    setExpandedId(null); // collapse any open row when reloading
 
     // ── Build params correctly ────────────────────────────────────────────────
     // getServiceLeads(params) → api.get("/serviceleads", { params })
@@ -249,6 +326,7 @@ export default function ServiceLeadsPage() {
     try {
       await deleteServiceLead(id);
       setLeads((prev) => prev.filter((l) => l._id !== id));
+      if (expandedId === id) setExpandedId(null);
       getServiceLeadStats().then((r) => setStats(r.data.data)).catch(() => {});
     } catch (e) {
       console.error("Delete failed:", e?.response?.data || e.message);
@@ -490,69 +568,91 @@ export default function ServiceLeadsPage() {
               <tbody>
                 {leads.map((l, i) => {
                   const meta = STATUS_META[l.status] || STATUS_META.new;
+                  const isOpen = expandedId === l._id;
                   return (
-                    <tr key={l._id} style={{ borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
+                    <React.Fragment key={l._id}>
+                      <tr className="sl-row" onClick={(e) => toggleRow(e, l._id)}
+                        style={{ borderBottom: (isOpen || i < leads.length - 1) ? "1px solid var(--border)" : "none", opacity: busyId === l._id ? 0.55 : 1 }}>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                        <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
-                        <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                          <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+                            <ChevronRight size={15} color="#94A3B8"
+                              style={{ marginTop: 2, flexShrink: 0, transition: "transform .15s ease", transform: isOpen ? "rotate(90deg)" : "none" }} />
+                            <div>
+                              <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
+                              <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
+                            </div>
+                          </div>
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                        <a href={`mailto:${l.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172A", textDecoration: "none", fontWeight: 500 }}>
-                          <Mail size={13} color="#94A3B8" /> {l.email}
-                        </a>
-                        <a href={`tel:${l.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#64748B", textDecoration: "none", marginTop: 4 }}>
-                          <Phone size={13} color="#94A3B8" /> {l.phone}
-                        </a>
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                          <a href={`mailto:${l.email}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#0F172A", textDecoration: "none", fontWeight: 500 }}>
+                            <Mail size={13} color="#94A3B8" /> {l.email}
+                          </a>
+                          <a href={`tel:${l.phone}`} style={{ display: "flex", alignItems: "center", gap: 6, color: "#64748B", textDecoration: "none", marginTop: 4 }}>
+                            <Phone size={13} color="#94A3B8" /> {l.phone}
+                          </a>
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
-                        {l.serviceTitle || l.serviceSlug || "—"}
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
+                          {l.serviceTitle || l.serviceSlug || "—"}
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
-                        <LeadDetails l={l} />
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
+                          <LeadDetails l={l} />
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
-                        {l.estimate?.monthly ? (
-                          <>
-                            <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
-                            {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
-                          </>
-                        ) : <span style={{ color: "#94A3B8" }}>—</span>}
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A" }}>
+                          {l.estimate?.monthly ? (
+                            <>
+                              <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
+                              {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
+                            </>
+                          ) : <span style={{ color: "#94A3B8" }}>—</span>}
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>
-                        {fmtDate(l.createdAt)}
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>
+                          {fmtDate(l.createdAt)}
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
-                        <div style={{ position: "relative", display: "inline-block" }}>
-                          <select className="sl-select" value={l.status} disabled={busyId === l._id}
-                            onChange={(e) => handleStatusChange(l._id, e.target.value)}
-                            style={{
-                              appearance: "none", WebkitAppearance: "none",
-                              padding: "6px 26px 6px 12px", borderRadius: 999,
-                              border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
-                              color: meta.color, background: meta.bg, outline: "none",
-                            }}>
-                            {Object.keys(STATUS_META).map((k) => (
-                              <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>{STATUS_META[k].label}</option>
-                            ))}
-                          </select>
-                          <ChevronDown size={13} color={meta.color} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-                        </div>
-                      </td>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
+                          <div style={{ position: "relative", display: "inline-block" }}>
+                            <select className="sl-select" value={l.status} disabled={busyId === l._id}
+                              onChange={(e) => handleStatusChange(l._id, e.target.value)}
+                              style={{
+                                appearance: "none", WebkitAppearance: "none",
+                                padding: "6px 26px 6px 12px", borderRadius: 999,
+                                border: "none", cursor: "pointer", fontSize: 12, fontWeight: 700,
+                                color: meta.color, background: meta.bg, outline: "none",
+                              }}>
+                              {Object.keys(STATUS_META).map((k) => (
+                                <option key={k} value={k} style={{ color: "#0F172A", background: "#fff" }}>{STATUS_META[k].label}</option>
+                              ))}
+                            </select>
+                            <ChevronDown size={13} color={meta.color} style={{ position: "absolute", right: 9, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+                          </div>
+                        </td>
 
-                      <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
-                        <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
-                          style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
+                        <td style={{ padding: "13px 16px", verticalAlign: "top", textAlign: "center" }}>
+                          <button className="sl-del" onClick={() => handleDelete(l._id)} disabled={busyId === l._id} title="Delete lead"
+                            style={{ border: "none", background: "transparent", padding: 7, borderRadius: 8, cursor: "pointer", color: "#94A3B8", display: "inline-flex" }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+
+                      {isOpen && (
+                        <tr>
+                          <td colSpan={8} style={{
+                            padding: "16px 20px 20px",
+                            background: "#F8FAFC",
+                            borderBottom: i < leads.length - 1 ? "1px solid var(--border)" : "none",
+                          }}>
+                            <LeadDetailPanel l={l} />
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>

@@ -30,19 +30,34 @@ const styles = `
   @media (min-width: 640px) { .detail-page { padding: 24px; } }
   @media (min-width: 1024px) { .detail-page { padding: 32px; } }
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-    text-decoration: none;
-    margin-bottom: 16px;
-    transition: color 0.15s;
-  }
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-bottom: 16px;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
 
-  .back-link:hover { color: #0f172a; }
+.back-link:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.back-link:active {
+  background: #f1f5f9;
+  box-shadow: none;
+}
 
   /* Card */
   .detail-card {

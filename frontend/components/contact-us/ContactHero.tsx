@@ -68,7 +68,7 @@ export default function ContactHero() {
             {/* ── Large-screen banner image ── */}
             <div className="contact-lg-banner">
               <img
-                src="/images/contact-us/customer-service-representative-lg-screen.png"
+                src="/images/contact-us/CONTACT/Contacts page - Hero banner.png"
                 alt="Contact us representative"
                 className="contact-lg-banner-img"
               />
@@ -261,7 +261,7 @@ const CSS = `
     position: absolute;
     right: 12%;
     bottom: -20px;
-    width: 400px;
+    width: 700px;
     pointer-events: none;
     z-index: 1;
   }

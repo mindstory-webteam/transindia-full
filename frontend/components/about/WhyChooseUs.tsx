@@ -3,7 +3,7 @@ import React from "react";
 const features = [
   {
     id: 1,
-    icon: "/images/about/whychooseus/medical insurance.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Policy Clarity.png",
     bgColor: "#FFF1F0",
     iconAlign: "bottom",
     title: "Policy Clarity",
@@ -12,7 +12,7 @@ const features = [
   },
   {
     id: 2,
-    icon: "/images/about/whychooseus/Handshake for sealing a financial deal.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Better Deals.png",
     bgColor: "#EEF9FF",
     iconAlign: "bottom",
     title: "Better Deals",
@@ -21,7 +21,7 @@ const features = [
   },
   {
     id: 3,
-    icon: "/images/about/whychooseus/Business men shaking hands for deal.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Custom Programs.png",
     bgColor: "#FFF6DE",
     iconAlign: "bottom",
     title: "Custom Programs",
@@ -30,7 +30,7 @@ const features = [
   },
   {
     id: 4,
-    icon: "/images/about/whychooseus/Cloud wallet security with shield protecting online money savings.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Zero Extra Cost.png",
     bgColor: "#E6F9E6",
     title: "Zero Extra Cost",
     description:
@@ -38,7 +38,7 @@ const features = [
   },
   {
     id: 5,
-    icon: "/images/about/whychooseus/Completed list or work tasks.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Claims Assistance.png",
     bgColor: "#FFE4E5",
     title: "Claims Assistance",
     description:
@@ -46,7 +46,7 @@ const features = [
   },
   {
     id: 6,
-    icon: "/images/about/whychooseus/risk calculation panel.svg",
+    icon: "/images/about/ABOUT/About Page Icons - Risk Management.png",
     bgColor: "#DEF6FD",
     title: "Risk Management",
     description:
@@ -86,8 +86,6 @@ export default function WhyChooseUs() {
                   className="wct-icon-wrap"
                   style={{
                     backgroundColor: f.bgColor,
-                    alignItems: f.iconAlign === "bottom" ? "flex-end" : "center",
-                    paddingBottom: f.iconAlign === "bottom" ? "0" : undefined,
                   }}
                 >
                   <img src={f.icon} alt={f.title} className="wct-icon" />
@@ -174,24 +172,25 @@ const CSS = `
     border-radius: 24px;
   }
 
-  /* ── Icon ── */
   /* ── Icon wrapper ── */
   .wct-icon-wrap {
-    width: 60px;
-    height: 60px;
+    width: 88px;
+    height: 88px;
     margin-bottom: 20px;
-    border-radius: 16px;
+    border-radius: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    overflow: hidden;
   }
 
   .wct-icon {
-    width: 44px;
-    height: 44px;
+    width: 140px;
+    height: 140px;
     object-fit: contain;
     display: block;
+    flex-shrink: 0;
   }
 
   /* ── Card title ── */

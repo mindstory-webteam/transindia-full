@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../axios";
 import {
@@ -330,6 +330,9 @@ const styles = `
 
   .leads-table tbody tr:hover { background: #f8fafc; }
 
+  /* Clickable data rows */
+  .leads-table tbody tr.row-clickable { cursor: pointer; }
+
   .leads-table td {
     padding: 14px 20px;
     color: #475569;
@@ -546,6 +549,8 @@ function StatCard({ icon: Icon, label, value, accent }) {
 }
 
 export default function LeadsPage() {
+  const navigate = useNavigate();
+
   const [source, setSource] = useState("bmi"); // "bmi" | "quote"
   const isQuote = source === "quote";
   const basePath = SOURCES[source].basePath;
@@ -560,6 +565,14 @@ export default function LeadsPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [exporting, setExporting] = useState(false);
   const limit = 10;
+
+  // Navigate to lead details when a row is clicked.
+  // Ignores clicks that land on interactive controls (links, buttons,
+  // status dropdown, etc.) so those keep their own behaviour.
+  const handleRowClick = (e, id) => {
+    if (e.target.closest("a, button, select, input, label, option")) return;
+    navigate(`/leads/${id}`);
+  };
 
   const switchSource = (next) => {
     if (next === source) return;
@@ -920,7 +933,11 @@ export default function LeadsPage() {
                   </tr>
                 ) : isQuote ? (
                   leads.map((lead) => (
-                    <tr key={lead._id}>
+                    <tr
+                      key={lead._id}
+                      className="row-clickable"
+                      onClick={(e) => handleRowClick(e, lead._id)}
+                    >
                       <td className="td-name">{lead.mobile}</td>
                       <td>
                         <span className="ins-badge">{lead.insuranceType}</span>
@@ -968,7 +985,11 @@ export default function LeadsPage() {
                   ))
                 ) : (
                   leads.map((lead) => (
-                    <tr key={lead._id}>
+                    <tr
+                      key={lead._id}
+                      className="row-clickable"
+                      onClick={(e) => handleRowClick(e, lead._id)}
+                    >
                       <td className="td-name">{lead.name}</td>
                       <td>
                         <div className="td-email">{lead.email}</div>

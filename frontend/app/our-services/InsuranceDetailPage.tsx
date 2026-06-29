@@ -28,8 +28,8 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 // SERVICE FORM TYPE DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════════════
 
-type FieldType = "text" | "email" | "tel" | "date" | "select" | "textarea" | "file";
-type FormType = "calculator" | "motor" | "miscellaneous" | "simple";
+type FieldType = "text" | "email" | "tel" | "date" | "select" | "textarea" | "file" | "number";
+type FormType = "calculator" | "motor" | "miscellaneous" | "simple" | "life-simple" | "fire-simple" | "entertainment-simple";
 
 interface CalcFieldDef {
   label: string;
@@ -92,9 +92,9 @@ const CONTACT_FIELDS: CalcFieldDef[] = [
   { label: "Phone Number", type: "tel", stateKey: "phone", defaultValue: "" },
 ];
 
-// Reusable address field used in several "about you" steps.
-const ADDRESS_FIELD: CalcFieldDef = {
-  label: "Address", type: "textarea", stateKey: "address", defaultValue: "",
+// Reusable pincode field used in several "about you" steps.
+const PINCODE_FIELD: CalcFieldDef = {
+  label: "Pincode", type: "number", stateKey: "pincode", defaultValue: "",
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -104,52 +104,17 @@ const ADDRESS_FIELD: CalcFieldDef = {
 const SERVICE_CALCS: Record<string, ServiceCalc> = {
   // ─── LIFE ──────────────────────────────────────────────────────────────────
   "life-insurance": {
-    formType: "calculator",
-    cardTitle: "Calculate your premium",
-    submitLabel: "Get My Quote",
+    formType: "life-simple",
+    cardTitle: "Get your life insurance quote",
+    submitLabel: "Get Life Quote",
     submitBg: "#1B8A3A",
     aboutTitle: "Tell us about yourself",
     aboutFields: [
       { label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: "" },
       { label: "Marital Status", type: "select", options: ["Married", "Unmarried"], stateKey: "marital", defaultValue: "Unmarried" },
-      ADDRESS_FIELD,
       { label: "Gender", type: "select", options: ["Male", "Female"], stateKey: "gender", defaultValue: "Male" },
+      PINCODE_FIELD,
     ],
-    quoteFields: [
-      { label: "Smoker", type: "select", options: ["No", "Yes"], stateKey: "smoker", defaultValue: "No" },
-      { label: "Sum Assured Required", type: "select", options: ["₹25 Lakh", "₹50 Lakh", "₹1 crore", "₹2 crore", "₹5 crore"], stateKey: "sumAssured", defaultValue: "₹1 crore" },
-      { label: "Policy Term", type: "select", options: ["10 years", "20 years", "30 years", "40 years"], stateKey: "term", defaultValue: "30 years" },
-      { label: "Annual Income", type: "select", options: ["Below ₹6 Lakh", "₹6-12 Lakh", "₹12-25 Lakh", "₹25 Lakh+"], stateKey: "income", defaultValue: "₹6-12 Lakh" },
-    ],
-    compute: (v) => {
-      const sumMap: Record<string, number> = { "₹25 Lakh": 2500000, "₹50 Lakh": 5000000, "₹1 crore": 10000000, "₹2 crore": 20000000, "₹5 crore": 50000000 };
-      const incMap: Record<string, number> = { "Below ₹6 Lakh": 500000, "₹6-12 Lakh": 900000, "₹12-25 Lakh": 1800000, "₹25 Lakh+": 3000000 };
-      let sum = sumMap[v.sumAssured] ?? 10000000;
-      const age = ageFromDOB(v.dob) ?? 30;
-      const term = parseInt((v.term || "").replace(/\D/g, ""), 10) || 20;
-      const smoker = v.smoker === "Yes";
-      const female = v.gender === "Female";
-      const income = incMap[v.income];
-
-      let note: string | undefined;
-      if (income) {
-        const mult = age <= 35 ? 25 : age <= 45 ? 20 : age <= 55 ? 15 : 10;
-        const maxCover = mult * income;
-        if (sum > maxCover) { sum = maxCover; note = `Coverage capped to ${fmt(maxCover)} — the maximum eligible for your income.`; }
-      }
-      const baseRate = age <= 25 ? 0.85 : age <= 30 ? 1.05 : age <= 35 ? 1.45 : age <= 40 ? 2.1 : age <= 45 ? 3.2 : age <= 50 ? 4.9 : age <= 55 ? 7.8 : age <= 60 ? 12 : 18;
-      const termFactor = term <= 10 ? 0.8 : term <= 20 ? 0.95 : term <= 30 ? 1.1 : term <= 40 ? 1.28 : 1.45;
-      const yearly = (sum / 1000) * baseRate * (female ? 0.87 : 1) * (smoker ? 1.55 : 1) * termFactor * GST;
-      return {
-        coverageCaption: "Your coverage",
-        coverageLabel: note ? fmt(sum) : v.sumAssured,
-        primaryAmount: fmt(yearly / 12), primaryUnit: "per month",
-        secondaryAmount: fmt(yearly), secondaryUnit: "per year",
-        totalLabel: "Total over term", total: fmt(yearly * term),
-        note,
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on underwriting & medical checks.",
-      };
-    },
   },
 
   // ─── HEALTH ────────────────────────────────────────────────────────────────
@@ -162,7 +127,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     aboutFields: [
       { label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: "" },
       { label: "Gender", type: "select", options: ["Male", "Female"], stateKey: "gender", defaultValue: "Male" },
-      ADDRESS_FIELD,
+      PINCODE_FIELD,
     ],
     quoteFields: [
       { label: "Cover Type", type: "select", options: ["Individual", "Family Floater", "Senior Citizen"], stateKey: "coverType", defaultValue: "Individual" },
@@ -196,7 +161,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     cardTitle: "Get your motor insurance quote",
     submitLabel: "Submit Motor Quote",
     submitBg: "#EA580C",
-    description: "Upload your old insurance document and provide your policy number for a quick quote comparison.",
+    description: "Provide your vehicle details and policy information for a quick quote.",
   },
 
   // ─── HOME ──────────────────────────────────────────────────────────────────
@@ -228,7 +193,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
 
   // ─── FIRE ──────────────────────────────────────────────────────────────────
   "fire-insurance": {
-    formType: "simple",
+    formType: "fire-simple",
     cardTitle: "Calculate fire premium",
     submitLabel: "Get Fire Quote",
     submitBg: "#DC2626",
@@ -246,7 +211,7 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
 
   // ─── ENTERTAINMENT ─────────────────────────────────────────────────────────
   "entertainment-insurance": {
-    formType: "simple",
+    formType: "entertainment-simple",
     cardTitle: "Insure your production",
     submitLabel: "Get Production Quote",
     submitBg: "#9333EA",
@@ -262,6 +227,218 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     description: "Get a personalized risk assessment and portfolio review from our experts. Free consultation, no obligation.",
   },
 };
+
+// ═════════════════════════════════════════════════════════════════════════════
+// LIFE INSURANCE TWO-STEP FORM CARD
+// ═════════════════════════════════════════════════════════════════════════════
+function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const step1Fields = CONTACT_FIELDS;
+  const step2Fields = config.aboutFields || [];
+  
+  const [step, setStep] = useState<1 | 2>(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    dob: "",
+    marital: "Unmarried",
+    gender: "Male",
+    pincode: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const validateContact = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const goToStep2 = () => { if (validateContact()) setStep(2); };
+
+  const handleSubmit = async () => {
+    if (!validateContact()) return;
+
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const renderField = (field: CalcFieldDef) => {
+    if (field.type === "date") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <div className="li-input-wrap">
+            <input
+              type="date"
+              value={values[field.stateKey]}
+              onChange={(e) => handleChange(field.stateKey, e.target.value)}
+              className="li-input"
+            />
+            <svg className="li-calendar-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </div>
+        </label>
+      );
+    }
+
+    if (field.type === "select") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <select
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-select"
+          >
+            {field.options?.map((o, oi) => (
+              <option key={`${field.stateKey}-${oi}`}>{o}</option>
+            ))}
+          </select>
+        </label>
+      );
+    }
+
+    if (field.type === "number") {
+      return (
+        <label className="li-field" key={field.stateKey}>
+          <span className="li-label">{field.label}</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-textfield"
+            placeholder="Enter your pincode"
+            maxLength="6"
+          />
+        </label>
+      );
+    }
+
+    return (
+      <label className="li-field" key={field.stateKey}>
+        <span className="li-label">{field.label}</span>
+        <input
+          type={field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"}
+          inputMode={field.type === "tel" ? "tel" : undefined}
+          value={values[field.stateKey]}
+          onChange={(e) => handleChange(field.stateKey, e.target.value)}
+          className="li-textfield"
+          placeholder={field.label}
+        />
+      </label>
+    );
+  };
+
+  const StepDot = ({ n, label }: { n: 1 | 2; label: string }) => (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 700, color: step >= n ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap" }}>
+      <span style={{ width: 20, height: 20, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: step >= n ? config.submitBg : "#E5E7EB", color: step >= n ? "#fff" : "#6B7280", flexShrink: 0 }}>
+        {step > n ? "✓" : n}
+      </span>
+      {label}
+    </span>
+  );
+
+  const currentFields = step === 1 ? step1Fields : step2Fields;
+  const cardTitle = step === 1 ? "How can we reach you?" : config.aboutTitle;
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            We've received your information. Our insurance experts will reach out to you shortly with a personalized quote.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", dob: "", marital: "Unmarried", gender: "Male", pincode: "" }); }} className="li-back-btn">
+            New Quote
+          </button>
+          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
+            Compare Plans
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <StepDot n={1} label="Contact" />
+        <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
+        <StepDot n={2} label="About you" />
+      </div>
+
+      <h2 className="li-card-title">{cardTitle}</h2>
+
+      <>
+        {currentFields.map(renderField)}
+
+        {step === 1 && (
+          <button className="li-submit" style={{ background: config.submitBg }} onClick={goToStep2} type="button">
+            Continue
+          </button>
+        )}
+
+        {step === 2 && (
+          <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
+            <button type="button" onClick={() => setStep(1)} className="li-back-btn">Back</button>
+            <button
+              className="li-submit"
+              style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+              onClick={handleSubmit}
+              disabled={submitting}
+              type="button"
+            >
+              {submitting ? "Saving…" : config.submitLabel}
+            </button>
+          </div>
+        )}
+
+        {error && <p className="li-error">{error}</p>}
+        <p className="li-disclaimer">No spam. No calls unless you want.</p>
+      </>
+    </div>
+  );
+}
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CALCULATOR CARD — for "calculator" formType only
@@ -374,16 +551,18 @@ function CalculatorCard({ slug, serviceTitle }: { slug: string; serviceTitle: st
       );
     }
 
-    if (field.type === "textarea") {
+    if (field.type === "number") {
       return (
         <label className="li-field" key={field.stateKey}>
           <span className="li-label">{field.label}</span>
-          <textarea
+          <input
+            type="number"
+            inputMode="numeric"
             value={values[field.stateKey]}
             onChange={(e) => handleChange(field.stateKey, e.target.value)}
-            className="li-textarea"
-            rows={2}
-            placeholder="House no, street, city, pincode"
+            className="li-textfield"
+            placeholder="Enter your pincode"
+            maxLength="6"
           />
         </label>
       );
@@ -580,9 +759,6 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
           <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "" }); }} className="li-back-btn">
             New Quote
           </button>
-          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
-           Compare Plans
-          </Link>
         </div>
       </div>
     );
@@ -644,16 +820,17 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// MOTOR FORM CARD — for "motor" formType
+// MOTOR FORM CARD — with OPTIONAL multi-file upload
 // ═════════════════════════════════════════════════════════════════════════════
 function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
   const [values, setValues] = useState<Values>({
     name: "",
     email: "",
     phone: "",
-    insuranceNumber: "",
+    expiryDate: "",
+    vehicleType: "Car",
   });
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -664,28 +841,37 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) {
+    const newFiles = e.target.files ? Array.from(e.target.files) : [];
+    
+    // Check file sizes
+    const validFiles = newFiles.filter((f) => {
       if (f.size > 5 * 1024 * 1024) {
-        setError("File size must be less than 5MB");
-        return;
+        setError(`File ${f.name} is too large (max 5MB)`);
+        return false;
       }
-      setFile(f);
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles]);
       setError(null);
     }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
-    const insNumber = (values.insuranceNumber || "").trim();
+    const expiryDate = (values.expiryDate || "").trim();
     
     if (!name) { setError("Please enter your name."); return false; }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
     if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!insNumber) { setError("Please enter your insurance policy number."); return false; }
-    if (!file) { setError("Please upload your old insurance document."); return false; }
+    if (!expiryDate) { setError("Please enter policy expiry date."); return false; }
     setError(null);
     return true;
   };
@@ -699,11 +885,16 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
       formData.append("name", values.name);
       formData.append("email", values.email);
       formData.append("phone", values.phone);
-      formData.append("insuranceNumber", values.insuranceNumber);
+      formData.append("expiryDate", values.expiryDate);
+      formData.append("vehicleType", values.vehicleType);
       formData.append("serviceSlug", slug);
       formData.append("serviceTitle", serviceTitle);
       formData.append("source", "website");
-      if (file) formData.append("insuranceDocument", file);
+      
+      // Append multiple files if any
+      files.forEach((file) => {
+        formData.append("insuranceDocuments", file);
+      });
 
       await fetch(`${API_BASE}/serviceleads`, {
         method: "POST",
@@ -724,14 +915,14 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
         <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
           <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Quote Request Received!</h2>
           <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
-            Thank you for uploading your insurance document. Our team will compare quotes and send you the best options shortly.
+            Thank you for sharing your vehicle details. Our team will compare quotes and send you the best options shortly.
           </p>
           <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
-            Policy #: <strong>{values.insuranceNumber}</strong>
+            Vehicle Type: <strong>{values.vehicleType}</strong>
           </p>
         </div>
         <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceNumber: "" }); setFile(null); }} className="li-back-btn">
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", expiryDate: "", vehicleType: "Car" }); setFiles([]); }} className="li-back-btn">
             New Quote
           </button>
           <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
@@ -782,24 +973,48 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
       </label>
 
       <label className="li-field">
-        <span className="li-label">Insurance Policy Number</span>
-        <input
-          type="text"
-          value={values.insuranceNumber}
-          onChange={(e) => handleChange("insuranceNumber", e.target.value)}
-          className="li-textfield"
-          placeholder="e.g., POL123456789"
-        />
+        <span className="li-label">Policy Expiry Date</span>
+        <div className="li-input-wrap">
+          <input
+            type="date"
+            value={values.expiryDate}
+            onChange={(e) => handleChange("expiryDate", e.target.value)}
+            className="li-input"
+          />
+          <svg className="li-calendar-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+        </div>
       </label>
 
       <label className="li-field">
-        <span className="li-label">Upload Old Insurance Document</span>
+        <span className="li-label">Type of Vehicle</span>
+        <select
+          value={values.vehicleType}
+          onChange={(e) => handleChange("vehicleType", e.target.value)}
+          className="li-select"
+        >
+          <option>Car</option>
+          <option>Bike</option>
+          <option>Scooter</option>
+          <option>Truck</option>
+          <option>Auto</option>
+          <option>Commercial Vehicle</option>
+        </select>
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Upload Insurance Documents <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(Optional)</span></span>
         <div className="li-file-upload">
           <input
             type="file"
             onChange={handleFileChange}
             className="li-file-input"
             accept=".pdf,.jpg,.jpeg,.png"
+            multiple
           />
           <div className="li-file-label">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -808,10 +1023,332 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
               <line x1="12" y1="3" x2="12" y2="15" />
             </svg>
             <span className="li-file-text">
-              {file ? file.name : "Click or drag to upload (PDF, JPG, PNG)"}
+              Click or drag to upload (PDF, JPG, PNG) - Multiple files allowed
             </span>
           </div>
         </div>
+
+        {files.length > 0 && (
+          <div style={{ marginTop: 12, padding: 12, background: "#F3F4F6", borderRadius: 8 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Uploaded Files:</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {files.map((file, index) => (
+                <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 8, background: "#fff", borderRadius: 6, border: "1px solid #E5E7EB" }}>
+                  <span style={{ fontSize: 12, color: "#374151", wordBreak: "break-word" }}>{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    style={{ fontSize: 12, color: "#EF4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
+                  >
+                    ✕ Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </label>
+
+      <button
+        className="li-submit"
+        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
+
+      {error && <p className="li-error">{error}</p>}
+      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// FIRE INSURANCE FORM CARD — for "fire-simple" formType
+// ═════════════════════════════════════════════════════════════════════════════
+function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    industries: "",
+    insuranceType: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const validateForm = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    const industries = (values.industries || "").trim();
+    const insuranceType = (values.insuranceType || "").trim();
+
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!industries) { setError("Please tell us about your industries."); return false; }
+    if (!insuranceType) { setError("Please specify the type of insurance needed."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            We've received your fire insurance inquiry. Our experts will review your requirements and provide a customized quote.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", industries: "", insuranceType: "" }); }} className="li-back-btn">
+            New Quote
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <h2 className="li-card-title">{config.cardTitle}</h2>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
+
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Which Industries</span>
+        <textarea
+          value={values.industries}
+          onChange={(e) => handleChange("industries", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="E.g., Manufacturing, Retail, Hospitality, etc."
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Type of Insurance</span>
+        <textarea
+          value={values.insuranceType}
+          onChange={(e) => handleChange("insuranceType", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="Describe the type of fire insurance coverage you need..."
+        />
+      </label>
+
+      <button
+        className="li-submit"
+        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
+
+      {error && <p className="li-error">{error}</p>}
+      <p className="li-disclaimer">No spam. No calls unless you want.</p>
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// ENTERTAINMENT INSURANCE FORM CARD — for "entertainment-simple" formType
+// ═════════════════════════════════════════════════════════════════════════════
+function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    insuranceType: "",
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({ ...prev, [key]: value }));
+    setError(null);
+  };
+
+  const validateForm = (): boolean => {
+    const name = (values.name || "").trim();
+    const email = (values.email || "").trim();
+    const phoneDigits = (values.phone || "").replace(/\D/g, "");
+    const insuranceType = (values.insuranceType || "").trim();
+
+    if (!name) { setError("Please enter your name."); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
+    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!insuranceType) { setError("Please specify the type of insurance needed."); return false; }
+    setError(null);
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    setSubmitting(true);
+    try {
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
+      setSubmitted(true);
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="li-card">
+        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
+          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
+            We've received your production insurance inquiry. Our team will review your requirements and prepare a customized quote.
+          </p>
+          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
+        </div>
+        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceType: "" }); }} className="li-back-btn">
+            New Quote
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="li-card">
+      <h2 className="li-card-title">{config.cardTitle}</h2>
+      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
+
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+
+      <label className="li-field">
+        <span className="li-label">Type of Insurance</span>
+        <textarea
+          value={values.insuranceType}
+          onChange={(e) => handleChange("insuranceType", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="E.g., Film production, TV show, Theater, Music event, Sports event, etc. Describe your production type and specific coverage needs..."
+        />
       </label>
 
       <button
@@ -903,9 +1440,6 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
           <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceTypes: "" }); }} className="li-back-btn">
             New Inquiry
           </button>
-          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>
-           Compare Plans
-          </Link>
         </div>
       </div>
     );
@@ -1075,8 +1609,11 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
             {/* RIGHT — render appropriate form based on formType */}
             <div className="li-right">
               {config.formType === "calculator" && <CalculatorCard slug={slug} serviceTitle={data.title || data.heroBadgeText} />}
+              {config.formType === "life-simple" && <LifeSimpleFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
               {config.formType === "simple" && <SimpleFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
               {config.formType === "motor" && <MotorFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
+              {config.formType === "fire-simple" && <FireFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
+              {config.formType === "entertainment-simple" && <EntertainmentFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
               {config.formType === "miscellaneous" && <MiscellaneousFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
             </div>
           </div>
