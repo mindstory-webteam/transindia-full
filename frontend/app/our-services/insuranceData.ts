@@ -301,9 +301,9 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
     heroBadgeBg: "#022c22",
     heroBadgeColor: "#34D399",
     heroStats: [
-      { value: "10,000+", label: "Cashless Hospitals" },
-      { value: "15+", label: "Insurer Partners" },
-      { value: "₹1Cr", label: "Max Sum Insured" },
+      { value: "10,000+", label: "Customers Protected" },
+      { value: "19+", label: "Insurer Partners" },
+      { value: "98%", label: "Claim Settlement" },
     ],
     heroCtaLabel: "Talk to an Expert",
     heroCtaBg: "#0D9488",
