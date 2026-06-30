@@ -274,3 +274,20 @@ export async function updateServiceLead(id, payload) {
 export async function deleteServiceLead(id) {
   return api.delete(`/serviceleads/${id}`);
 }
+
+// ── Chatbot Leads ─────────────────────────────────────────────────────────────
+
+export async function getChatbotLeads() {
+  const { data } = await api.get("/chatbotleads");
+  return data.data;
+}
+
+export async function updateChatbotLeadStatus(id, status) {
+  const { data } = await api.patch(`/chatbotleads/${id}/status`, { status });
+  return data.data;
+}
+
+export async function deleteChatbotLead(id) {
+  const { data } = await api.delete(`/chatbotleads/${id}`);
+  return data;
+}
