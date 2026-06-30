@@ -111,6 +111,18 @@ export default function ChatbotWidget() {
   const handleSubmitName = (val: string) => {
     if (!val.trim()) return;
     const name = val.trim();
+    
+    const lowerName = name.toLowerCase().replace(/[^\w\s]/g, "");
+    if (["hi", "hello", "hey", "hola", "greetings"].includes(lowerName)) {
+      pushUserMsg(name);
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        pushAssistantMsg("Hello! Could you please tell me your name so we can proceed?");
+      }, 400);
+      return;
+    }
+
     setUserDetails(d => ({ ...d, name }));
     pushUserMsg(name);
     setIsLoading(true);
