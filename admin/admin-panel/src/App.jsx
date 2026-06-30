@@ -18,6 +18,8 @@ import CareersPage from "./pages/CareersPage";
 import ServiceLeadsPage  from "./pages/ServiceLeadsPage";
 import EventsAdminPage from "./pages/EventsAdminPage";
 
+import ChatbotLeadsPage from "./pages/ChatbotLeadsPage";
+
 function PrivateRoute({ children }) {
   const { admin, loading } = useAuth();
   if (loading) return (
@@ -55,7 +57,7 @@ export default function App() {
             <Route path="careers" element={<CareersPage />} />
             <Route path="/serviceleads" element={<ServiceLeadsPage />} />
              <Route path="/Events" element={<EventsAdminPage />} />
-
+             <Route path="chatbotleads" element={<ChatbotLeadsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

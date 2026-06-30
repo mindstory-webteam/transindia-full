@@ -71,6 +71,7 @@ app.use("/api/serviceleads", require("./src/routes/servicesFormRoutes"));
 
 app.use("/api/quoteleads", require("./src/routes/quoteLeads"));
 app.use("/api/events", require("./src/routes/events"));
+app.use("/api/chatbotleads", require("./src/routes/chatbotLeads"));
 
 
 // ── Health check ──────────────────────────────────────────────────────────────

@@ -146,19 +146,32 @@ export default function ChatbotWidget() {
     }, 800);
   };
 
-  const handleSubmitQuery = (val: string) => {
+  const handleSubmitQuery = async (val: string) => {
     if (!val.trim()) return;
     const query = val.trim();
-    setUserDetails(d => ({ ...d, query }));
+    const payload = { ...userDetails, query };
+    setUserDetails(payload);
     pushUserMsg(query);
     setIsLoading(true);
+
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      await fetch(`${apiUrl}/api/chatbotleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      console.error("Failed to save chatbot lead", err);
+    }
+
     setTimeout(() => {
       setIsLoading(false);
       setStep("chat");
       pushAssistantMsg(
-        `Thank you. We have noted your query: "${query}"\n\nOur team will reach out to you at ${userDetails.phone} shortly. Feel free to ask me anything about our insurance plans in the meantime.`
+        `Thank you. We have noted your query: "${query}"\n\nOur team will reach out to you at ${payload.phone} shortly. Feel free to ask me anything about our insurance plans in the meantime.`
       );
-    }, 1000);
+    }, 600);
   };
 
   const handleSendMessage = () => {
