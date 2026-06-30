@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Send, X, Loader2, ChevronRight, User, Phone, Mail, MessageSquare } from "lucide-react";
 import { FaRobot } from "react-icons/fa";
 import { motion } from "framer-motion";
+import AnimatedChatbotIcon from "./AnimatedChatbotIcon";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 interface Message {
@@ -203,7 +204,7 @@ export default function ChatbotWidget() {
     setIsLoading(true);
     setTimeout(() => {
       setIsLoading(false);
-      pushAssistantMsg("Thank you for your message. Our team will get back to you shortly. For urgent queries, please call us at 1800-XXX-XXXX.");
+      pushAssistantMsg("Thank you for your message. Our team will get back to you shortly. For urgent queries, please call us at 1800 425 8084.");
     }, 1200);
   };
 
@@ -402,11 +403,7 @@ export default function ChatbotWidget() {
         >
           <div style={{ position: "relative" }}>
             <div className="ctw-fab-img">
-              <img
-                src="/images/chatbot/d7b56dcd-0c53-488a-ae9b-528fc73a2bd8.svg"
-                alt="Chat with TransIndia"
-                style={{ objectFit: "contain", width: "100%", height: "100%" }}
-              />
+              <AnimatedChatbotIcon />
             </div>
           </div>
         </div>

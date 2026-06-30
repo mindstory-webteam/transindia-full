@@ -3,7 +3,8 @@ import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard, ShieldCheck, Users, Settings,
-  LogOut, Menu, MessageSquare, ChevronDown, FileText, BriefcaseBusiness, Calculator
+  LogOut, Menu, MessageSquare, ChevronDown, FileText, BriefcaseBusiness, Calculator,
+  BotIcon
 } from "lucide-react";
 
 const NAV = [
@@ -12,7 +13,7 @@ const NAV = [
   { to: "/leads",       icon: Users,           label: "Leads" },
   { to: "/serviceleads", icon: Calculator,     label: "Service Leads" },
   { to: "/claimleads",  icon: FileText,        label: "Claim Leads" },
-  { to: "/chatbotleads", icon: MessageSquare,  label: "Chatbot Leads" },
+  { to: "/chatbotleads", icon: BotIcon,  label: "Chatbot Leads" },
   { to: "/events",  icon: FileText,        label: "Events" },
   { to: "/careers",     icon: BriefcaseBusiness, label: "Careers" },
 ];
