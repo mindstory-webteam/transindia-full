@@ -90,6 +90,16 @@ export default function ChatbotWidget() {
 
   // ── Step handlers ──────────────────────────────────────────────────────────
   const startChat = () => {
+    const lastSubDate = localStorage.getItem("ti_chatbot_last_submission");
+    if (lastSubDate === new Date().toDateString()) {
+      setStep("chat");
+      setMessages([]);
+      setTimeout(() => pushAssistantMsg(
+        "Welcome back! We have already received your query today, and our team is actively working on it. We will be in touch with you shortly!"
+      ), 200);
+      return;
+    }
+
     setStep("collect_name");
     setMessages([]);
     setTimeout(() => pushAssistantMsg(
@@ -161,6 +171,8 @@ export default function ChatbotWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      // Store the submission date to prevent duplicate queries today
+      localStorage.setItem("ti_chatbot_last_submission", new Date().toDateString());
     } catch (err) {
       console.error("Failed to save chatbot lead", err);
     }
