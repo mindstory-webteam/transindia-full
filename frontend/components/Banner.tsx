@@ -85,14 +85,7 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
     setSubmitting(true);
     setFeedback(null);
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    if (!apiUrl) {
-      console.error("NEXT_PUBLIC_API_URL is not set — lead was NOT saved to backend.");
-      setFeedback({ type: "error", text: "Configuration error: lead was not saved (missing API URL)" });
-      setSubmitting(false);
-      return; // stop here — don't pretend it worked
-    }
+    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
 
     try {
       const res = await fetch(`${apiUrl}/quoteleads`, {
