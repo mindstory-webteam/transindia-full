@@ -326,8 +326,8 @@ const CSS = `
     .contact-sm-banner {
       display: block;
       position: absolute;
-      right: 0;
-      bottom: 0;
+      right: 30px;
+      bottom: 100px;
       width: 42%;
       max-width: 420px;
       pointer-events: none;
