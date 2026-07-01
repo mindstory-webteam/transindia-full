@@ -19,6 +19,11 @@ interface Service {
   isActive: boolean;
 }
 
+interface SimpleLink {
+  label: string;
+  href: string;
+}
+
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 
 // NOTE: NEXT_PUBLIC_API_URL already includes the "/api" suffix
@@ -34,9 +39,14 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Renew existing policy", href: "/renew"      },
   { label: "Events", href: "/events"      },
   { label: "About us",              href: "/about"      },
-  { label: "Contact us",            href: "/contact-us" },
+  { label: "Contact us",            hasDropdown: true, href: "/contact-us" },
 ];
 
+// Sub-links shown under the "Contact us" dropdown.
+const CONTACT_ITEMS: SimpleLink[] = [
+  { label: "Contact us", href: "/contact-us" },
+  { label: "Careers",    href: "/careers"    },
+];
 
 const MANUAL_SERVICES: Service[] = [
   { _id: "m1",  title: "Life Insurance",          slug: "life-insurance",          isActive: true },
@@ -92,12 +102,20 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
   const [mobileOpen,         setMobileOpen]         = useState(false);
   const [services,           setServices]           = useState<Service[]>(MANUAL_SERVICES);
   const [siteTitle,          setSiteTitle]          = useState<string>("");
+
+  // Services dropdown state (desktop + mobile)
   const [dropdownOpen,       setDropdownOpen]       = useState(false);
   const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const closeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Hover-intent handlers for the desktop dropdown ──────────────────────────
+  // Contact us dropdown state (desktop + mobile)
+  const [contactDropdownOpen,       setContactDropdownOpen]       = useState(false);
+  const [mobileContactDropdownOpen, setMobileContactDropdownOpen] = useState(false);
+  const contactDropdownRef = useRef<HTMLDivElement>(null);
+  const contactCloseTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Hover-intent handlers for the desktop Services dropdown ────────────────
   const openDropdown = () => {
     if (closeTimer.current) {
       clearTimeout(closeTimer.current);
@@ -119,9 +137,32 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
     setDropdownOpen(false);
   };
 
-  // Clear any pending timer on unmount
+  // ── Hover-intent handlers for the desktop Contact us dropdown ──────────────
+  const openContactDropdown = () => {
+    if (contactCloseTimer.current) {
+      clearTimeout(contactCloseTimer.current);
+      contactCloseTimer.current = null;
+    }
+    setContactDropdownOpen(true);
+  };
+
+  const scheduleCloseContactDropdown = () => {
+    if (contactCloseTimer.current) clearTimeout(contactCloseTimer.current);
+    contactCloseTimer.current = setTimeout(() => setContactDropdownOpen(false), DROPDOWN_CLOSE_DELAY);
+  };
+
+  const closeContactDropdownNow = () => {
+    if (contactCloseTimer.current) {
+      clearTimeout(contactCloseTimer.current);
+      contactCloseTimer.current = null;
+    }
+    setContactDropdownOpen(false);
+  };
+
+  // Clear any pending timers on unmount
   useEffect(() => () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (contactCloseTimer.current) clearTimeout(contactCloseTimer.current);
   }, []);
 
   // ── Fetch services & merge with manual list ─────────────────────────────────
@@ -220,11 +261,14 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // ── Close desktop dropdown on outside click ────────────────────────────────
+  // ── Close desktop dropdowns on outside click ────────────────────────────────
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         closeDropdownNow();
+      }
+      if (contactDropdownRef.current && !contactDropdownRef.current.contains(e.target as Node)) {
+        closeContactDropdownNow();
       }
     };
     document.addEventListener("mousedown", handler);
@@ -253,56 +297,109 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
 
           {/* ── Desktop Nav Links ── */}
           <ul className="nav-links">
-            {NAV_ITEMS.map((item) => (
-              <li key={item.label}>
-                {item.hasDropdown ? (
-                  <div
-                    className="nav-dropdown-wrapper"
-                    ref={dropdownRef}
-                    onMouseEnter={openDropdown}
-                    onMouseLeave={scheduleCloseDropdown}
-                  >
-                    <Link
-                      href={item.href || "/our-services"}
-                      className="nav-link nav-dropdown-trigger"
-                      aria-expanded={dropdownOpen}
-                      onClick={closeDropdownNow}
+            {NAV_ITEMS.map((item) => {
+              if (item.label === "Services") {
+                return (
+                  <li key={item.label}>
+                    <div
+                      className="nav-dropdown-wrapper"
+                      ref={dropdownRef}
+                      onMouseEnter={openDropdown}
+                      onMouseLeave={scheduleCloseDropdown}
                     >
-                      {item.label}
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        width={13}
-                        height={13}
-                        className={`chevron${dropdownOpen ? " chevron-open" : ""}`}
+                      <Link
+                        href={item.href || "/our-services"}
+                        className="nav-link nav-dropdown-trigger"
+                        aria-expanded={dropdownOpen}
+                        onClick={closeDropdownNow}
                       >
-                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
-                      </svg>
-                    </Link>
-
-                    {/* ── Dropdown Menu — always in DOM, animated via CSS ── */}
-                    <div className={`nav-dropdown-menu${dropdownOpen ? " dropdown-visible" : ""}`}
-                         aria-hidden={!dropdownOpen}>
-                      {services.map((service) => (
-                        <Link
-                          key={service._id}
-                          href={`/our-services/${service.slug}`}
-                          className="dropdown-item"
-                          onClick={closeDropdownNow}
-                          tabIndex={dropdownOpen ? 0 : -1}
+                        {item.label}
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          width={13}
+                          height={13}
+                          className={`chevron${dropdownOpen ? " chevron-open" : ""}`}
                         >
-                          {service.title || service.name}
-                        </Link>
-                      ))}
+                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+                        </svg>
+                      </Link>
+
+                      {/* ── Services Dropdown Menu ── */}
+                      <div className={`nav-dropdown-menu${dropdownOpen ? " dropdown-visible" : ""}`}
+                           aria-hidden={!dropdownOpen}>
+                        {services.map((service) => (
+                          <Link
+                            key={service._id}
+                            href={`/our-services/${service.slug}`}
+                            className="dropdown-item"
+                            onClick={closeDropdownNow}
+                            tabIndex={dropdownOpen ? 0 : -1}
+                          >
+                            {service.title || service.name}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                ) : (
+                  </li>
+                );
+              }
+
+              if (item.label === "Contact us") {
+                return (
+                  <li key={item.label}>
+                    <div
+                      className="nav-dropdown-wrapper"
+                      ref={contactDropdownRef}
+                      onMouseEnter={openContactDropdown}
+                      onMouseLeave={scheduleCloseContactDropdown}
+                    >
+                      <Link
+                        href={item.href || "/contact-us"}
+                        className="nav-link nav-dropdown-trigger"
+                        aria-expanded={contactDropdownOpen}
+                        onClick={closeContactDropdownNow}
+                      >
+                        {item.label}
+                        <svg
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          width={13}
+                          height={13}
+                          className={`chevron${contactDropdownOpen ? " chevron-open" : ""}`}
+                        >
+                          <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+                        </svg>
+                      </Link>
+
+                      {/* ── Contact us Dropdown Menu ── */}
+                      <div className={`nav-dropdown-menu${contactDropdownOpen ? " dropdown-visible" : ""}`}
+                           aria-hidden={!contactDropdownOpen}>
+                        {CONTACT_ITEMS.map((link) => (
+                          <Link
+                            key={link.label}
+                            href={link.href}
+                            className="dropdown-item"
+                            onClick={closeContactDropdownNow}
+                            tabIndex={contactDropdownOpen ? 0 : -1}
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </li>
+                );
+              }
+
+              return (
+                <li key={item.label}>
                   <Link href={item.href || "#"} className="nav-link">
                     {item.label}
                   </Link>
-                )}
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
 
           {/* ── CTA Buttons ── */}
@@ -333,10 +430,10 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
         {/* ── Mobile Drawer ── */}
         {mobileOpen && (
           <div className="nav-drawer">
-            {NAV_ITEMS.map((item) => (
-              <div key={item.label}>
-                {item.hasDropdown ? (
-                  <>
+            {NAV_ITEMS.map((item) => {
+              if (item.label === "Services") {
+                return (
+                  <div key={item.label}>
                     <button
                       className="drawer-link drawer-dropdown-trigger"
                       onClick={() => setMobileDropdownOpen((o) => !o)}
@@ -371,14 +468,59 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                         </Link>
                       ))}
                     </div>
-                  </>
-                ) : (
+                  </div>
+                );
+              }
+
+              if (item.label === "Contact us") {
+                return (
+                  <div key={item.label}>
+                    <button
+                      className="drawer-link drawer-dropdown-trigger"
+                      onClick={() => setMobileContactDropdownOpen((o) => !o)}
+                      aria-expanded={mobileContactDropdownOpen}
+                    >
+                      {item.label}
+                      <svg
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        width={14}
+                        height={14}
+                        className={`chevron${mobileContactDropdownOpen ? " chevron-open" : ""}`}
+                      >
+                        <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd"/>
+                      </svg>
+                    </button>
+
+                    <div className={`drawer-dropdown-menu${mobileContactDropdownOpen ? " dropdown-visible" : ""}`}
+                         aria-hidden={!mobileContactDropdownOpen}>
+                      {CONTACT_ITEMS.map((link) => (
+                        <Link
+                          key={link.label}
+                          href={link.href}
+                          className="drawer-dropdown-item"
+                          tabIndex={mobileContactDropdownOpen ? 0 : -1}
+                          onClick={() => {
+                            setMobileOpen(false);
+                            setMobileContactDropdownOpen(false);
+                          }}
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <div key={item.label}>
                   <Link href={item.href || "#"} className="drawer-link" onClick={() => setMobileOpen(false)}>
                     {item.label}
                   </Link>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
             <div className="drawer-actions">
               <a href="https://www.transindiainsurance.com/partner/posp-home" className="btn-outline drawer-btn">Become a PoSP</a>
               <a href="/claims" className="btn-fill drawer-btn">Make a claim</a>
