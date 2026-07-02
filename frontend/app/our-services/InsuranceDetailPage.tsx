@@ -767,11 +767,10 @@ const PC_TIER1_STATES = new Set(["Maharashtra", "Delhi", "Karnataka", "Tamil Nad
 type PCCoverType = "Individual" | "Family" | "Senior";
 
 const PC_COVER_OPTIONS: { value: PCCoverType; label: string; icon: string }[] = [
-  { value: "Individual", label: "Individual", icon: "👤" },
-  { value: "Family", label: "Family", icon: "👨‍👩‍👧" },
-  { value: "Senior", label: "Senior", icon: "👴" },
+  { value: "Individual", label: "Individual", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
+  { value: "Family", label: "Family", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+  { value: "Senior", label: "Senior", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - SENIOR.png" },
 ];
-
 function pcEstimate(age: number, coverType: PCCoverType, sumInsuredLakh: number, stateName: string) {
   const ageFactor =
     age <= 25 ? 0.85 :
@@ -845,7 +844,7 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
                       className={`pc-cover-btn${coverType === opt.value ? " pc-cover-btn--active" : ""}`}
                       onClick={() => setCoverType(opt.value)}
                     >
-                      <span className="pc-cover-icon">{opt.icon}</span>
+                      <img src={opt.icon} alt={opt.label} className="pc-cover-icon" />
                       <span className="pc-cover-label">{opt.label}</span>
                     </button>
                   ))}
@@ -1742,40 +1741,38 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
 
 
         {/* ── WHY SECTION ── */}
-        <section className="bg-white py-16 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col lg:flex-row items-center gap-12">
-              <div className="flex-1 max-w-2xl">
-                <span className="inline-block bg-cyan-100 text-cyan-700 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full mb-4">
-                  {data.whyBadge}
-                </span>
-                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
-                  {data.whyTitle}
-                  <br />
-                  <span style={{ color: data.whyTitleAccentColor }}>{data.whyTitleAccent}</span>
-                </h2>
-                <div className="space-y-5 text-slate-700 text-base leading-relaxed">
-                  {data.whyBody.map((para, i) => <p key={i}>{para}</p>)}
-                </div>
-              </div>
-              <div className="flex-1 flex justify-center items-center h-96">
-                {data.whyImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={data.whyImage} alt={data.whyTitle || "illustration"} className="w-full h-full object-cover rounded-3xl shadow-sm" />
-                ) : data.benefits[0]?.emoji ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center">
-                    <img src={data.benefits[0].emoji} alt={data.whyTitle || "illustration"} className="w-24 h-24 object-contain" />
-                  </div>
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-6xl">
-                    🛡️
-                  </div>
-                )}
-              </div>
-            </div>
+      <section className="bg-white py-16 px-6 md:px-12">
+  <div className="max-w-7xl mx-auto">
+    <div className="flex flex-col lg:flex-row items-center gap-12">
+      <div className="flex-1 max-w-2xl">
+        <span className="inline-block bg-cyan-100 text-cyan-700 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full mb-4">
+          {data.whyBadge}
+        </span>
+        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
+          {data.whyTitle}
+          <br />
+          <span style={{ color: data.whyTitleAccentColor }}>{data.whyTitleAccent}</span>
+        </h2>
+        <div className="space-y-5 text-slate-700 text-base leading-relaxed">
+          {data.whyBody.map((para, i) => <p key={i}>{para}</p>)}
+        </div>
+      </div>
+      <div className="flex-1 w-full">
+        {data.whyImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={data.whyImage} alt={data.whyTitle || "illustration"} className="w-full h-auto object-contain rounded-3xl" />
+        ) : data.benefits[0]?.emoji ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={data.benefits[0].emoji} alt={data.whyTitle || "illustration"} className="w-full h-auto object-contain rounded-3xl" />
+        ) : (
+          <div className="w-full h-96 flex items-center justify-center text-6xl">
+            🛡️
           </div>
-        </section>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* ── PREMIUM CALCULATOR (health-insurance only) ── */}
         {slug === "health-insurance" && (
@@ -1845,36 +1842,46 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-              <div className="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="text-2xl">😟</span>
-                  <h3 className="text-lg font-bold text-rose-600">{data.withoutTitle}</h3>
-                </div>
-                <ul className="space-y-3">
-                  {data.withoutItems.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
-                      <span className="text-rose-500 font-bold flex-shrink-0">✕</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-5">
-                  <span className="text-2xl">😊</span>
-                  <h3 className="text-lg font-bold text-emerald-600">{data.withTitle}</h3>
-                </div>
-                <ul className="space-y-3">
-                  {data.withItems.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
-                      <span className="text-emerald-500 font-bold flex-shrink-0">✓</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+  <div className="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-2xl p-6">
+    <div className="flex items-center gap-3 mb-5">
+      <img
+        
+         src="/images/services/SERVICE - LIFE INSURANCE/Without.png"
+        alt="worried face"
+        className="w-7 h-7"
+      />
+      <h3 className="text-lg font-bold text-rose-600">{data.withoutTitle}</h3>
+    </div>
+    <ul className="space-y-3">
+      {data.withoutItems.map((item) => (
+        <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
+          <span className="text-rose-500 font-bold flex-shrink-0">✕</span>
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-6">
+    <div className="flex items-center gap-3 mb-5">
+      <img
+       src="/images/services/SERVICE - LIFE INSURANCE/With.png"
+        alt="smiling face"
+        className="w-7 h-7"
+      />
+      <h3 className="text-lg font-bold text-emerald-600">{data.withTitle}</h3>
+    </div>
+    <ul className="space-y-3">
+      {data.withItems.map((item) => (
+        <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
+          <span className="text-emerald-500 font-bold flex-shrink-0">✓</span>
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
 
             <div className="bg-blue-950 rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
