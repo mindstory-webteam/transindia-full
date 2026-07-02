@@ -188,13 +188,13 @@ const CSS = `
   }
 
   /* ════════════════════════════════════════════════════════════════ */
-  /* CORE VALUES SECTION                                              */
+  /* CORE VALUES SECTION — full-width heading + full-width value list */
   /* ════════════════════════════════════════════════════════════════ */
 
   .core-values-section {
     margin-top: 80px;
     padding: 80px 0;
-   background: linear-gradient(109deg, #FFE9E5 0%, #B2F6FF 150%);
+    background: linear-gradient(109deg, #FFE9E5 0%, #B2F6FF 150%);
     border-radius: 24px;
     position: relative;
     overflow: hidden;
@@ -204,7 +204,6 @@ const CSS = `
     content: '';
     position: absolute;
     inset: 0;
- 
     pointer-events: none;
   }
 
@@ -212,6 +211,12 @@ const CSS = `
     position: relative;
     z-index: 1;
     padding: 0 60px;
+  }
+
+  /* ── Top intro block, full width ── */
+  .core-values-intro {
+    max-width: 720px;
+    margin-bottom: 56px;
   }
 
   .core-values-badge {
@@ -254,62 +259,69 @@ const CSS = `
   .core-values-subtitle {
     font-size: 15px;
     color: #6B7280;
-    margin: 20px 0 52px;
+    margin: 20px 0 0;
     max-width: 520px;
     line-height: 1.7;
     font-family: 'matterregular', sans-serif;
   }
 
-  .values-grid {
+  /* ── Value list, full width below heading ── */
+  .values-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .value-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 20px;
-  }
-
-  .value-card {
-    background: #ffffff;
-    border: 1px solid #E5E9F7;
-    border-radius: 18px;
-    padding: 30px 28px;
-    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+    grid-template-columns: 64px 56px 1fr;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 28px 20px;
+    border-top: 1px solid rgba(17, 24, 39, 0.08);
     position: relative;
-    overflow: hidden;
+    transition: background 0.25s ease, padding-left 0.25s ease;
+    border-radius: 12px;
   }
 
-  .value-card::before {
+  .values-list .value-row:last-child {
+    border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+  }
+
+  .value-row::before {
     content: '';
     position: absolute;
-    top: 0;
     left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #00b8c4, #0D47A1);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    border-radius: 18px 18px 0 0;
+    top: 8px;
+    bottom: 8px;
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(180deg, #00b8c4, #0D47A1);
+    transform: scaleY(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
   }
 
-  .value-card:hover {
-
-    transform: translateY(-3px);
-  
+  .value-row:hover {
+    background: rgba(255, 255, 255, 0.55);
+    padding-left: 28px;
   }
 
-  .value-card:hover::before {
-    opacity: 1;
+  .value-row:hover::before {
+    transform: scaleY(1);
   }
 
-  .value-card-content {
-    position: relative;
-    z-index: 1;
+  .value-index {
+    font-family: var(--font-sora), "Sora", sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: rgba(17, 24, 39, 0.14);
+    line-height: 1;
+    transition: color 0.25s ease;
   }
 
-  .value-card-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-bottom: 16px;
+  .value-row:hover .value-index {
+    color: rgba(0, 184, 196, 0.35);
   }
 
   .value-icon {
@@ -317,18 +329,19 @@ const CSS = `
     height: 48px;
     min-width: 48px;
     border-radius: 12px;
-    background: linear-gradient(135deg, #e0f4f4 0%, #e8eeff 100%);
+    background: #ffffff;
     border: 1.5px solid #c2eef0;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: background 0.25s ease, border-color 0.25s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
   }
 
-  .value-card:hover .value-icon {
-
-    
+  .value-row:hover .value-icon {
+    background: linear-gradient(135deg, #00b8c4, #0D47A1);
+    border-color: transparent;
+    transform: scale(1.06);
   }
 
   .value-icon svg {
@@ -342,13 +355,19 @@ const CSS = `
     transition: stroke 0.25s ease;
   }
 
-  .value-card:hover .value-icon svg {
-    stroke: #0D47A1;
+  .value-row:hover .value-icon svg {
+    stroke: #ffffff;
+  }
+
+  .value-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .value-title {
     font-family: var(--font-sora), "Sora", sans-serif;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
     color: #111827;
     margin: 0;
@@ -362,16 +381,7 @@ const CSS = `
     color: #4B5563;
     margin: 0;
     font-family: 'matterregular', sans-serif;
-  }
-
-  /* 5th card — centered row */
-  .values-center-row {
-    display: flex;
-    justify-content: center;
-  }
-
-  .value-card-center {
-    width: calc(50% - 10px);
+    max-width: 780px;
   }
 
   /* Responsive */
@@ -404,27 +414,28 @@ const CSS = `
     .core-values-content {
       padding: 0 32px;
     }
+    .core-values-intro {
+      margin-bottom: 40px;
+    }
     .core-values-heading {
       font-size: 28px;
     }
     .heading-dark, .heading-primary {
       font-size: 32px;
     }
-    .values-grid {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+    .value-row {
+      grid-template-columns: 44px 48px 1fr;
+      gap: 16px;
+      padding: 22px 16px;
     }
-    .value-card {
-      padding: 24px 22px;
+    .value-index {
+      font-size: 26px;
     }
     .value-title {
       font-size: 16px;
     }
     .value-description {
       font-size: 13px;
-    }
-    .value-card-center {
-      width: calc(50% - 10px);
     }
   }
 
@@ -443,12 +454,14 @@ const CSS = `
     .core-values-content {
       padding: 0 24px;
     }
+    .core-values-intro {
+      margin-bottom: 32px;
+    }
     .core-values-heading {
       font-size: 24px;
     }
     .core-values-subtitle {
       font-size: 14px;
-      margin-bottom: 36px;
     }
     .heading-dark, .heading-primary {
       font-size: 26px;
@@ -458,22 +471,13 @@ const CSS = `
       gap: 16px;
       margin-bottom: 40px;
     }
-    .values-grid {
+    .value-row {
       grid-template-columns: 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 10px;
+      padding: 20px 14px;
     }
-    .value-card {
-      padding: 20px 18px;
-    }
-    .value-card-center {
-      width: 100%;
-    }
-    .value-title {
-      font-size: 15px;
-    }
-    .value-description {
-      font-size: 13px;
+    .value-index {
+      font-size: 22px;
     }
     .value-icon {
       width: 42px;
@@ -483,6 +487,12 @@ const CSS = `
     .value-icon svg {
       width: 20px;
       height: 20px;
+    }
+    .value-title {
+      font-size: 15px;
+    }
+    .value-description {
+      font-size: 13px;
     }
   }
 
@@ -500,26 +510,18 @@ const CSS = `
     .core-values-content {
       padding: 0 16px;
     }
+    .core-values-intro {
+      margin-bottom: 28px;
+    }
     .core-values-heading {
       font-size: 22px;
     }
     .core-values-subtitle {
       font-size: 13px;
-      margin-bottom: 28px;
     }
-    .value-card {
-      padding: 18px 16px;
-      border-radius: 14px;
-    }
-    .value-card-header {
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .value-title {
-      font-size: 14px;
-    }
-    .value-description {
-      font-size: 12px;
+    .value-row {
+      padding: 18px 12px;
+      border-radius: 10px;
     }
     .value-icon {
       width: 38px;
@@ -530,6 +532,12 @@ const CSS = `
     .value-icon svg {
       width: 18px;
       height: 18px;
+    }
+    .value-title {
+      font-size: 14px;
+    }
+    .value-description {
+      font-size: 12px;
     }
   }
 `;
@@ -623,50 +631,36 @@ function CoreValuesSection() {
   return (
     <div className="core-values-section" ref={containerRef}>
       <div className="core-values-content">
-        {/* Badge */}
-        <div className="core-values-badge">Our Values</div>
 
-        {/* Heading */}
-        <h2 className="core-values-heading">
-          What We Stand <span>For</span>
-        </h2>
+        {/* ── Top: full-width intro ── */}
+        <div className="core-values-intro">
+          <div className="core-values-badge">Our Values</div>
 
-        {/* Subtitle */}
-        <p className="core-values-subtitle">
-          The principles that guide our decisions, shape our culture, and define our commitment to excellence
-        </p>
+          <h2 className="core-values-heading">
+            What We Stand <span>For</span>
+          </h2>
 
-        {/* 2×2 grid — first 4 values */}
-        <div className="values-grid">
-          {coreValues.slice(0, 4).map((value) => (
-            <div key={value.id} className="value-card">
-              <div className="value-card-content">
-                <div className="value-card-header">
-                  <div className="value-icon">
-                    <IconComponent type={value.icon} />
-                  </div>
-                  <h3 className="value-title">{value.title}</h3>
-                </div>
+          <p className="core-values-subtitle">
+            The principles that guide our decisions, shape our culture, and define our commitment to excellence.
+          </p>
+        </div>
+
+        {/* ── Below: full-width numbered value list ── */}
+        <div className="values-list">
+          {coreValues.map((value, i) => (
+            <div key={value.id} className="value-row">
+              <span className="value-index">{String(i + 1).padStart(2, "0")}</span>
+              <div className="value-icon">
+                <IconComponent type={value.icon} />
+              </div>
+              <div className="value-text">
+                <h3 className="value-title">{value.title}</h3>
                 <p className="value-description">{value.description}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* 5th card — centered below the grid */}
-        <div className="values-center-row">
-          <div className="value-card value-card-center">
-            <div className="value-card-content">
-              <div className="value-card-header">
-                <div className="value-icon">
-                  <IconComponent type={coreValues[4].icon} />
-                </div>
-                <h3 className="value-title">{coreValues[4].title}</h3>
-              </div>
-              <p className="value-description">{coreValues[4].description}</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

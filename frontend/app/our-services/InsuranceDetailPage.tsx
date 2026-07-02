@@ -753,11 +753,6 @@ function GetCoveredStepsSection() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
-// HEALTH INSURANCE PLANS SECTION
-// ═════════════════════════════════════════════════════════════════════════════
-
-
-// ═════════════════════════════════════════════════════════════════════════════
 // PREMIUM CALCULATOR SECTION — with GET EXACT QUOTE opening modal
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -1767,9 +1762,14 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
                 {data.whyImage ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={data.whyImage} alt={data.whyTitle || "illustration"} className="w-full h-full object-cover rounded-3xl shadow-sm" />
+                ) : data.benefits[0]?.emoji ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center">
+                    <img src={data.benefits[0].emoji} alt={data.whyTitle || "illustration"} className="w-24 h-24 object-contain" />
+                  </div>
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 rounded-3xl flex items-center justify-center text-6xl">
-                    {data.benefits[0]?.emoji ?? "🛡️"}
+                    🛡️
                   </div>
                 )}
               </div>
@@ -1804,11 +1804,9 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {data.benefits.map((b) => (
                 <div key={b.title} className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                  <div className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl overflow-hidden`}>
-                    {b.icon ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={b.icon} alt={b.title} className="w-8 h-8 object-contain" />
-                    ) : (b.emoji)}
+                  <div className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={b.icon || b.emoji} alt={b.title} className="w-8 h-8 object-contain" />
                   </div>
                   <h3 className="text-lg font-bold text-slate-900 mb-2">{b.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed">{b.description}</p>
@@ -1835,11 +1833,9 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-slate-200 rounded-2xl overflow-hidden mb-10">
               {data.stages.map((stage, i) => (
                 <div key={stage.title} className={`${stage.bg} p-6 ${i !== 0 ? "lg:border-l border-slate-200" : ""} ${i % 2 !== 0 ? "sm:border-l border-slate-200" : ""}`}>
-                  <div className="mb-6 text-3xl h-10 flex items-center">
-                    {stage.icon ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={stage.icon} alt={stage.title} className="w-10 h-10 object-contain" />
-                    ) : (stage.emoji)}
+                  <div className="mb-6 h-10 flex items-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={stage.icon || stage.emoji} alt={stage.title} className="w-10 h-10 object-contain" />
                   </div>
                   <div className={`${stage.ageColor} text-xs font-bold tracking-wider mb-2`}>{stage.age}</div>
                   <h3 className="text-lg font-bold text-slate-900 mb-3">{stage.title}</h3>
