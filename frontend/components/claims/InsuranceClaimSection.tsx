@@ -34,7 +34,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Settlement : 30 days",
     icon: Umbrella,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img1.png",
+    image: "/images/claims/MAKE A CLAIM/Life Insurance Claims.png",
     gradientColor: "#F9FFC7",
     iconWrapClass: "bg-white",
     iconColorClass: "text-indigo-500",
@@ -52,7 +52,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Settlement : 7 days",
     icon: HeartPulse,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img2.png",
+    image: "/images/claims/MAKE A CLAIM/Health Insurance Claims.png",
     gradientColor: "#FFC8CC",
     iconWrapClass: "bg-white",
     iconColorClass: "text-rose-500",
@@ -70,7 +70,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Settlement : 15 days",
     icon: Car,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img3.png",
+    image: "/images/claims/MAKE A CLAIM/Motor Insurance Claims.png",
     gradientColor: "#FFE1F3",
     iconWrapClass: "bg-white",
     iconColorClass: "text-rose-500",
@@ -88,7 +88,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Settlement : 21 days",
     icon: Home,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img4.png",
+    image: "/images/claims/MAKE A CLAIM/Home  Property Claims.png",
     gradientColor: "#E6FFD2",
     iconWrapClass: "bg-white",
     iconColorClass: "text-emerald-500",
@@ -106,7 +106,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Settlement : 10 days",
     icon: Plane,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img5.png",
+    image: "/images/claims/MAKE A CLAIM/Travel Insurance Claims.png",
     gradientColor: "#D8DFFF",
     iconWrapClass: "bg-white",
     iconColorClass: "text-sky-500",
@@ -124,7 +124,7 @@ const claimCategories: ClaimCategory[] = [
     ],
     badge: "Dedicated RM",
     icon: Building2,
-    image: "/images/claims/insurance-claim-section/insurance-claim-section-img6.png",
+    image: "/images/claims/MAKE A CLAIM/Commercial  Business Claims.png",
     gradientColor: "#FFFAE1",
     iconWrapClass: "bg-white",
     iconColorClass: "text-amber-500",
@@ -148,7 +148,10 @@ export default function InsuranceClaimsSection() {
             Every type of{" "}
             <span className="text-orange-500">insurance claim</span>
           </h2>
-          <p className="mt-3 sm:mt-4 sm:text-base leading-relaxed " style={{color:'#535862', fontSize:'18px' }}>
+          <p
+            className="mt-3 sm:mt-4 sm:text-base leading-relaxed"
+            style={{ color: "#535862", fontSize: "18px" }}
+          >
             Whether it&apos;s a life, health, motor, or property claim — our
             team knows the process inside out and fights on your behalf.
           </p>
@@ -157,21 +160,17 @@ export default function InsuranceClaimsSection() {
         {/* Grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {claimCategories.map((category) => {
-            const Icon = category.icon;
             return (
               <article
                 key={category.title}
                 className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_10px_30px_-5px_rgba(0,0,0,0.1)]"
               >
                 {/* Illustration */}
-                <div
-                  className={`flex h-40 items-center justify-center `}
-                  style={{ padding: "10px" }}
-                >
+                <div className="flex h-44 items-center justify-center p-4">
                   <img
                     src={category.image}
                     alt={category.title}
-                    className="h-full w-full object-fit"
+                    className="max-h-full max-w-[220px] w-auto object-contain"
                   />
                 </div>
 
@@ -200,19 +199,17 @@ export default function InsuranceClaimsSection() {
                     ))}
                   </ul>
 
-                  <div className="mt-5 pt-1">
+                  {/* Badge — pushed to bottom so all cards align */}
+                  <div className="mt-auto pt-5">
                     <div
+                      className="flex h-[41px] w-full max-w-[269px] items-center rounded-[9px] pl-3"
                       style={{
-                        width: "269px",
-                        height: "41px",
-                        borderRadius: "9px",
                         background: `linear-gradient(90deg, ${category.gradientColor} 0%, #FFFFFF 100%)`,
-                        display: "flex",
-                        alignItems: "center",
-                        paddingLeft: "12px",
                       }}
                     >
-                      <span className={`text-xs font-semibold ${category.badgeClass.split(" ")[1]}`}>
+                      <span
+                        className={`text-xs font-semibold ${category.badgeClass.split(" ")[1]}`}
+                      >
                         {category.badge}
                       </span>
                     </div>
