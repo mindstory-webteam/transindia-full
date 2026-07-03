@@ -231,8 +231,7 @@ function PlansModal({ open, onClose, defaultGender, bmiResult }: PlansModalProps
         onClick={resetAndClose}
       />
 
-      {/* Modal */}
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_-15px_rgba(30,41,82,0.45)]">
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_-15px_rgba(30,41,82,0.45)] mt-18 md:mt-15">
         {/* Header */}
         <div className="flex items-center justify-between bg-[#2C6FE8] px-6 py-5">
           <div>
@@ -932,7 +931,7 @@ export default function BmiCalculator() {
   }
 
   return (
-    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-18 sm:pt-22 lg:pt-6 pb-10 sm:pb-16 lg:pb-[50px]">
+    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-[100px] sm:pt-[120px] lg:pt-[130px] pb-10 sm:pb-16 lg:pb-[50px]">
       
       {/* UNIFIED CONTAINER: Intro + Calculator + Meter all left-aligned */}
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-5 lg:py-20">
