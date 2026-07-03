@@ -664,7 +664,7 @@ function BmiGaugeSection({ bmi }: { bmi: number | null }) {
   const needleAngle = bmi !== null ? bmiToAngle(bmi) : 0;
 
   return (
-    <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[432px] mx-auto h-[140px] sm:h-[180px] md:h-[190px] lg:h-[217px] mb-6 sm:mb-8 overflow-visible">
+    <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[432px] mx-auto aspect-[2/1] mb-6 sm:mb-8 overflow-visible">
       <Image 
         src="/images/bmi/bmi-calculator-image.svg" 
         alt="BMI Gauge Track" 
@@ -674,14 +674,12 @@ function BmiGaugeSection({ bmi }: { bmi: number | null }) {
       <div 
         className="absolute"
         style={{ 
-          width: '165px',
-          height: '52px',
-          left: '50%',
-          bottom: '0',
-          marginLeft: '-138px', 
-          marginBottom: '-20px', 
+          width: '38.2%',
+          height: '24%',
+          left: '18%',
+          bottom: '-9.3%',
+          transformOrigin: "83.6% 50%", 
           transform: `rotate(${needleAngle}deg)`,
-          transformOrigin: "138px 26px", 
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
@@ -957,7 +955,7 @@ export default function BmiCalculator() {
         </div>
 
         {/* Form + Meter side by side */}
-        <div className="flex flex-col items-start gap-8 pt-8 lg:pt-12 md:flex-row md:items-start md:gap-16 lg:gap-20">
+        <div className="flex flex-col items-start gap-8 pt-8 lg:pt-12 md:flex-row md:items-start md:gap-20 lg:gap-32 xl:gap-40">
           {/* LEFT: FORM or RESULT CARD */}
           {!result ? (
             <BmiFormSection
