@@ -117,7 +117,7 @@ const PersonalInsuranceServices = () => {
                     className="text-white font-semibold rounded-xl py-3 mt-auto transition-opacity hover:opacity-90 text-center block"
                     style={{ backgroundColor: service.heroCtaBg }}
                   >
-                    {service.heroCtaLabel}
+                    Know More
                   </Link>
                 </div>
               </div>
