@@ -231,8 +231,7 @@ function PlansModal({ open, onClose, defaultGender, bmiResult }: PlansModalProps
         onClick={resetAndClose}
       />
 
-      {/* Modal */}
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_-15px_rgba(30,41,82,0.45)]">
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-[0_30px_80px_-15px_rgba(30,41,82,0.45)] mt-18 md:mt-15">
         {/* Header */}
         <div className="flex items-center justify-between bg-[#2C6FE8] px-6 py-5">
           <div>
@@ -665,7 +664,7 @@ function BmiGaugeSection({ bmi }: { bmi: number | null }) {
   const needleAngle = bmi !== null ? bmiToAngle(bmi) : 0;
 
   return (
-    <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[432px] mx-auto h-[140px] sm:h-[180px] md:h-[190px] lg:h-[217px] mb-6 sm:mb-8 overflow-visible">
+    <div className="relative w-full max-w-[280px] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[432px] mx-auto aspect-[2/1] mb-6 sm:mb-8 overflow-visible">
       <Image 
         src="/images/bmi/bmi-calculator-image.svg" 
         alt="BMI Gauge Track" 
@@ -675,14 +674,12 @@ function BmiGaugeSection({ bmi }: { bmi: number | null }) {
       <div 
         className="absolute"
         style={{ 
-          width: '165px',
-          height: '52px',
-          left: '50%',
-          bottom: '0',
-          marginLeft: '-138px', 
-          marginBottom: '-20px', 
+          width: '38.2%',
+          height: '24%',
+          left: '18%',
+          bottom: '-9.3%',
+          transformOrigin: "83.6% 50%", 
           transform: `rotate(${needleAngle}deg)`,
-          transformOrigin: "138px 26px", 
           transition: 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)'
         }}
       >
@@ -932,7 +929,7 @@ export default function BmiCalculator() {
   }
 
   return (
-    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-18 sm:pt-22 lg:pt-6 pb-10 sm:pb-16 lg:pb-[50px]">
+    <div className="min-h-[80vh] w-full bg-[#ECF3FE] relative overflow-hidden pt-[100px] sm:pt-[120px] lg:pt-[130px] pb-10 sm:pb-16 lg:pb-[50px]">
       
       {/* UNIFIED CONTAINER: Intro + Calculator + Meter all left-aligned */}
       <div className="relative z-10 mx-auto w-full max-w-6xl px-4 sm:px-6 py-10 sm:py-5 lg:py-20">
@@ -958,7 +955,7 @@ export default function BmiCalculator() {
         </div>
 
         {/* Form + Meter side by side */}
-        <div className="flex flex-col items-start gap-8 pt-8 lg:pt-12 md:flex-row md:items-start md:gap-16 lg:gap-20">
+        <div className="flex flex-col items-start gap-8 pt-8 lg:pt-12 md:flex-row md:items-start md:gap-20 lg:gap-32 xl:gap-40">
           {/* LEFT: FORM or RESULT CARD */}
           {!result ? (
             <BmiFormSection

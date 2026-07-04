@@ -504,20 +504,18 @@ export default function ChatbotWidget() {
             }}>
               {/* Logo */}
               <div style={{
-                width: 150, height: 150, borderRadius: "50%",
-                
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
                 <Image
                   src="/images/logo/transindia.png"
                   alt="TransIndia"
-                  width={120}
-                  height={120}
+                  width={150}
+                  height={50}
                   style={{ objectFit: "contain" }}
                 />
               </div>
 
-              <div style={{ textAlign: "center" }}>
+              <div style={{ textAlign: "center", marginTop: -8 }}>
                 <h2 style={{
                   fontSize: 20, fontWeight: 700, color: "#111",
                   margin: "0 0 6px",
