@@ -425,6 +425,9 @@ const CSS = `
 
 
   @media (max-width: 1024px) {
+    .careers-trail-wrapper {
+      display: none;
+    }
     .careers-lg-banner {
       display: none;
     }

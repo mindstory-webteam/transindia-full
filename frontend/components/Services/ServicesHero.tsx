@@ -267,6 +267,9 @@ const CSS = `
 
   /* ── TABLET (≤960px) ── */
   @media(max-width: 960px){
+    .svc-trail-wrapper {
+      display: none;
+    }
     .svc-section{
       padding-top: 100px;
       height: auto;
