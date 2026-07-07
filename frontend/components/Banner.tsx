@@ -295,43 +295,71 @@ export default function Banner() {
             padding-top:80px!important;
           }
           .ins-inner{
-            flex-direction:column!important;
+            flex-direction:row!important;
             padding:32px 32px 0!important;
             align-items:center!important;
+            justify-content:space-between!important;
+            gap:20px!important;
           }
           .ins-left{
-            flex:unset!important;
+            flex:0 0 56%!important;
             max-width:100%!important;
-            width:100%!important;
+            width:unset!important;
             padding-bottom:40px!important;
-            text-align:center!important;
+            text-align:left!important;
           }
-          .ins-left h1,
-          .ins-left p{
-            margin-left:auto!important;
+          .ins-left h1{
+            font-size:clamp(24px, 3.5vw, 36px)!important;
+            margin-left:0!important;
             margin-right:auto!important;
-            text-align:center!important;
+            text-align:left!important;
+          }
+          .ins-left p{
+            font-size:13px!important;
+            margin-left:0!important;
+            margin-right:auto!important;
+            text-align:left!important;
           }
           .ins-cta-row{
-            justify-content:center!important;
+            justify-content:flex-start!important;
+          }
+          .ins-cta-row a {
+            padding: 10px 18px!important;
+            font-size: 13px!important;
           }
           .ins-stats{
-            justify-content:center!important;
+            justify-content:space-between!important;
+            flex-wrap: nowrap!important;
+            gap: 4px!important;
+            overflow: hidden!important;
+            width: 100%!important;
+          }
+          .ins-stats > div {
+            padding-right: 0!important;
+          }
+          .ins-stats .text-left > div:first-child {
+            font-size: 13px!important;
+          }
+          .ins-stats .text-left > div:last-child {
+            font-size: 9px!important;
+          }
+          .ins-stats .w-\\[1px\\] {
+            display: none!important;
           }
           .ins-right{
-            flex:unset!important;
+            flex:0 0 38%!important;
             max-width:100%!important;
-            width:100%!important;
+            width:unset!important;
             align-items:center!important;
-            justify-content:center!important;
+            justify-content:flex-end!important;
           }
           .ins-right > div{
-            width:80%!important;
+            width:100%!important;
             margin-right:0!important;
           }
           .ins-right img{
-            max-width:320px!important;
-            margin:0 auto!important;
+            max-width:100%!important;
+            margin:0 0 0 auto!important;
           }
           .floating-card{ display:none!important; }
           .ins-quote-wrap{
@@ -370,16 +398,25 @@ export default function Banner() {
             padding-top:72px!important;
           }
           .ins-inner{
+            flex-direction:column!important;
+            align-items:flex-start!important;
             padding:24px 16px 0!important;
           }
           .ins-left{
+            flex:unset!important;
+            width:100%!important;
             padding-bottom:32px!important;
+            text-align:left!important;
           }
           .ins-left h1{
             font-size:clamp(26px,7.5vw,38px)!important;
+            margin-left:0!important;
+            text-align:left!important;
           }
           .ins-left p{
             font-size:14px!important;
+            margin-left:0!important;
+            text-align:left!important;
           }
           .ins-cta-row{
             flex-direction:column!important;
@@ -391,19 +428,40 @@ export default function Banner() {
             width:100%!important;
             text-align:center!important;
             box-sizing:border-box!important;
+            justify-content:center!important;
+            display:flex!important;
           }
           .ins-stats{
-            justify-content:center!important;
-            gap:8px 0!important;
+            justify-content:space-between!important;
+            gap:4px!important;
+            width:100%!important;
+            overflow:hidden!important;
           }
           .ins-stats > div{
-            padding-right:12px!important;
+            padding-right:0!important;
+            gap:6px!important;
+          }
+          .ins-stats .text-left > div:first-child {
+            font-size: 13px!important;
+          }
+          .ins-stats .text-left > div:last-child {
+            font-size: 9px!important;
+          }
+          .ins-right{
+            width:100%!important;
+            align-items:center!important;
+            justify-content:center!important;
+            flex:unset!important;
+            position:relative!important;
+            bottom:auto!important;
+            opacity:1!important;
           }
           .ins-right > div{
             width:100%!important;
           }
           .ins-right img{
             max-width:240px!important;
+            margin:0 auto!important;
           }
           .ins-quote-wrap{
             padding-left:16px!important;
@@ -443,10 +501,11 @@ export default function Banner() {
                   Talk to an expert
                 </a>
               </div>
-              <div className="ins-stats flex items-start flex-wrap justify-center lg:justify-start gap-4 sm:gap-0">
+              <div className="ins-stats flex items-start flex-nowrap overflow-x-auto justify-start md:justify-start gap-4 sm:gap-0" style={{ scrollbarWidth: 'none' }}>
+                <style>{`.ins-stats::-webkit-scrollbar { display: none; }`}</style>
                 {STATS.map((s,i)=>(
-                  <div key={s.label} className="flex items-start gap-[10px] sm:gap-[18px] pr-2 sm:pr-[18px]">
-                    {i!==0 && <div className="hidden sm:block w-[1px] h-10 bg-white/15 shrink-0 mt-0.5" />}
+                  <div key={s.label} className="flex items-start gap-[10px] sm:gap-[18px] pr-2 sm:pr-[18px] flex-shrink-0">
+                    {i!==0 && <div className="block w-[1px] h-10 bg-white/15 shrink-0 mt-0.5" />}
                     <div className="text-left">
                       <div className="text-[clamp(17px,2vw,23px)] font-black text-white leading-tight">{s.value}</div>
                       <div className="text-[11px] text-white/50 mt-1 whitespace-nowrap">{s.label}</div>
