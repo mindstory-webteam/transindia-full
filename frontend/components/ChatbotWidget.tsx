@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Send, X, Loader2, ChevronRight, User, Phone, Mail, MessageSquare } from "lucide-react";
+import { Send, X, Loader2,  User, Phone, Mail, MessageSquare } from "lucide-react";
 import { FaRobot } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AnimatedChatbotIcon from "./AnimatedChatbotIcon";
@@ -352,14 +352,10 @@ export default function ChatbotWidget() {
           padding: 13px 28px; font-size: 14.5px; font-weight: 600;
           cursor: pointer;
           display: flex; align-items: center; justify-content: center; gap: 8px;
-          box-shadow: 0 6px 20px rgba(241,90,64,.35);
           transition: transform .18s, box-shadow .18s;
           width: 100%;
         }
-        .ctw-start-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 28px rgba(241,90,64,.45);
-        }
+   
 
         /* ── Responsive: phones ── */
         @media (max-width: 639px) {
@@ -549,7 +545,7 @@ export default function ChatbotWidget() {
               </div>
 
               <button className="ctw-start-btn" onClick={startChat}>
-                Start Chat <ChevronRight size={18} />
+                Start Chat 
               </button>
 
               <p style={{ fontSize: 11, color: "#9ca3af", margin: 0, textAlign: "center" }}>

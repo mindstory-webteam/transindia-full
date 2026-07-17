@@ -286,7 +286,7 @@ const CSS = `
       display: none;
     }
     .contact-trail-wrapper {
-      top: -20px;
+      display: none;
     }
     .contact-hero {
       background: #0b1240;

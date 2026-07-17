@@ -685,7 +685,7 @@ const CSS = `
     .clh-inner   { grid-template-columns: 1fr 380px; gap: 24px; padding: 0 24px; }
     .clh-title   { font-size: 38px; }
     .clh-form-wrap { padding: 28px 22px; }
-    .clh-trail-wrapper { top: -45px; left: 24px; }
+    .clh-trail-wrapper { display: none; }
   }
   @media (max-width: 900px) {
     .clh-section { padding-top: 110px; padding-bottom: 48px; }

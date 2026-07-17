@@ -2604,6 +2604,7 @@ const CSS = `
     .li-right{ padding-top: 0; }
     .li-card{ max-width: 560px; margin: 0 auto; }
     .hhf-card{ max-width: 560px; margin: 0 auto; }
+    .li-trail{ display: none; }
   }
   @media(max-width: 600px){
     .li-hero{ padding: 40px 16px; }

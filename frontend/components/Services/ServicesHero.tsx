@@ -49,7 +49,7 @@ export default function ServicesHero() {
               {/* RIGHT */}
               <div className="svc-right">
                 <img
-                  src="/images/services/Silver-shields.svg"
+                  src="/images/services/main-service-banner-img.png"
                   alt="Complete protection"
                   className="svc-visual-img"
                 />
@@ -206,7 +206,7 @@ const CSS = `
 
   .svc-visual-img{
     width: 100%;
-    max-width: 580px;
+    max-width: 440px;
     height: auto;
     object-fit: contain;
     display: block;
@@ -267,6 +267,9 @@ const CSS = `
 
   /* ── TABLET (≤960px) ── */
   @media(max-width: 960px){
+    .svc-trail-wrapper {
+      display: none;
+    }
     .svc-section{
       padding-top: 100px;
       height: auto;
