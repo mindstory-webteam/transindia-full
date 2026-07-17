@@ -100,7 +100,7 @@ export default function CookiePolicyPage() {
     <>
       <style>{CSS}</style>
       <div className="policy-page">
-         <Preloader/>
+        
         <Navbar alwaysSolid={true} />
 
         <div className="policy-wrapper">

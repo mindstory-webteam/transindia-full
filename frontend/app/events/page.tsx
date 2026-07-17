@@ -502,7 +502,7 @@ export default function EventsPage({
     >
       <style>{STYLES}</style>
 
-      <Preloader />
+      
       <Navbar alwaysSolid={true} />
 
       {/* ───────────────────────── Navy Banner Hero ───────────────────────── */}

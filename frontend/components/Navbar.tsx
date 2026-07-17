@@ -404,7 +404,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
 
           {/* ── CTA Buttons ── */}
           <div className="nav-actions">
-            <a href="#" className="btn-outline">Become an Advisor</a>
+            {/* <a href="#" className="btn-outline">Become an Advisor</a> */}
             <a href="/claims" className="btn-fill">Make a claim</a>
           </div>
 

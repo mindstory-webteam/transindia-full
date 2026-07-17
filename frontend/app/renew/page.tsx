@@ -15,7 +15,7 @@ export default function Maintenance() {
         flexDirection: "column",
       }}
     >
-       <Preloader/>
+      
       <Navbar alwaysSolid={true} />
 
       <main

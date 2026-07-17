@@ -753,6 +753,318 @@ function GetCoveredStepsSection() {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// CERTIFICATE SECTION — entertainment-insurance only (single-certificate design)
+// ═════════════════════════════════════════════════════════════════════════════
+function CertificatesSection({ data }: { data: InsuranceDetailData }) {
+  const certs = data.certificates || [];
+  if (certs.length === 0) return null;
+  const cert = certs[0]; // single-certificate featured layout
+
+  return (
+    <section className="cert-section">
+      <div className="cert-inner">
+        <div className="cert-header">
+          {data.certificatesBadge && (
+            <span className="cert-badge">{data.certificatesBadge}</span>
+          )}
+          <h2 className="cert-title">
+            {data.certificatesTitle}{" "}
+            {data.certificatesTitleAccent && (
+              <span style={{ color: data.certificatesTitleAccentColor || "#9333EA" }}>
+                {data.certificatesTitleAccent}
+              </span>
+            )}
+          </h2>
+          {data.certificatesSubtitle && (
+            <p className="cert-subtitle">{data.certificatesSubtitle}</p>
+          )}
+        </div>
+
+        <div className="cert-featured-card">
+          <div className="cert-featured-icon-wrap">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={cert.icon} alt={cert.title} className="cert-featured-icon" />
+          </div>
+          <div className="cert-featured-body">
+            <span className="cert-featured-eyebrow">Verified Accreditation</span>
+            <h3 className="cert-featured-title">{cert.title}</h3>
+            <p className="cert-featured-subtitle">{cert.subtitle}</p>
+          </div>
+          <div className="cert-featured-check" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#9333EA" strokeWidth="2.4">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M8 12.5l2.5 2.5L16 9.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        .cert-section {
+          background: #FAF5FF;
+          padding: 72px 48px;
+          font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        }
+        .cert-inner { max-width: 900px; margin: 0 auto; }
+        .cert-header { text-align: center; margin-bottom: 40px; }
+        .cert-badge {
+          display: inline-block;
+          background: #F3E8FF;
+          color: #9333EA;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          padding: 6px 16px;
+          border-radius: 999px;
+          margin-bottom: 16px;
+          border: 1px solid #E9D5FF;
+        }
+        .cert-title {
+          font-size: clamp(24px, 3.5vw, 36px);
+          font-weight: 900;
+          color: #0B1F4D;
+          margin: 0 0 12px;
+          letter-spacing: -0.3px;
+        }
+        .cert-subtitle {
+          font-size: 15px;
+          color: #6B7280;
+          margin: 0 auto;
+          max-width: 560px;
+          line-height: 1.6;
+        }
+
+        .cert-featured-card {
+          position: relative;
+          background: #fff;
+          border: 1.5px solid #E9D5FF;
+          border-radius: 20px;
+          padding: 36px 40px;
+          display: flex;
+          align-items: center;
+          gap: 28px;
+          box-shadow: 0 16px 40px rgba(147,51,234,0.08);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cert-featured-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 20px 48px rgba(147,51,234,0.14);
+        }
+        .cert-featured-icon-wrap {
+          flex-shrink: 0;
+          width: 96px;
+          height: 96px;
+          border-radius: 20px;
+          background: linear-gradient(150deg, #F3E8FF 0%, #FAF5FF 100%);
+          border: 1px solid #E9D5FF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+        .cert-featured-icon { width: 52px; height: 52px; object-fit: contain; }
+        .cert-featured-body { flex: 1; min-width: 0; }
+        .cert-featured-eyebrow {
+          display: block;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          color: #9333EA;
+          text-transform: uppercase;
+          margin-bottom: 8px;
+        }
+        .cert-featured-title {
+          font-size: 20px;
+          font-weight: 900;
+          color: #0B1F4D;
+          margin: 0 0 8px;
+        }
+        .cert-featured-subtitle {
+          font-size: 14px;
+          color: #6B7280;
+          line-height: 1.6;
+          margin: 0;
+        }
+        .cert-featured-check {
+          flex-shrink: 0;
+          width: 44px;
+          height: 44px;
+          border-radius: 50%;
+          background: #F3E8FF;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        @media (max-width: 700px) {
+          .cert-section { padding: 48px 24px; }
+          .cert-featured-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 28px 24px;
+          }
+          .cert-featured-check { position: absolute; top: 20px; right: 20px; }
+        }
+        @media (max-width: 480px) {
+          .cert-section { padding: 40px 16px; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// MOVIES WE'VE INSURED SECTION — entertainment-insurance only (white theme)
+// ═════════════════════════════════════════════════════════════════════════════
+function MoviesSection({ data }: { data: InsuranceDetailData }) {
+  const movies = data.movies || [];
+  if (movies.length === 0) return null;
+
+  return (
+    <section className="mov-section">
+      <div className="mov-inner">
+        <div className="mov-header">
+          {data.moviesBadge && <span className="mov-badge">{data.moviesBadge}</span>}
+          <h2 className="mov-title">
+            {data.moviesTitle}{" "}
+            {data.moviesTitleAccent && (
+              <span style={{ color: data.moviesTitleAccentColor || "#9333EA" }}>
+                {data.moviesTitleAccent}
+              </span>
+            )}
+          </h2>
+          {data.moviesSubtitle && <p className="mov-subtitle">{data.moviesSubtitle}</p>}
+        </div>
+
+        <div className="mov-grid" data-count={movies.length}>
+          {movies.map((m) => (
+            <div className="mov-card" key={m.title}>
+              <div className="mov-poster-wrap">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={m.poster} alt={m.title} className="mov-poster" />
+                <div className="mov-overlay">
+                  <span className="mov-genre-badge">{m.genre}</span>
+                </div>
+              </div>
+              <h3 className="mov-card-title">{m.title}</h3>
+              <p className="mov-card-meta">{m.year} · {m.genre}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        .mov-section {
+          background: #FFFFFF;
+          padding: 72px 48px;
+          font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        }
+        .mov-inner { max-width: 1200px; margin: 0 auto; }
+        .mov-header { text-align: center; margin-bottom: 44px; }
+        .mov-badge {
+          display: inline-block;
+          background: #F3E8FF;
+          color: #9333EA;
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          padding: 6px 16px;
+          border-radius: 999px;
+          margin-bottom: 16px;
+          border: 1px solid #E9D5FF;
+        }
+        .mov-title {
+          font-size: clamp(24px, 3.5vw, 36px);
+          font-weight: 900;
+          color: #0B1F4D;
+          margin: 0 0 12px;
+          letter-spacing: -0.3px;
+        }
+        .mov-subtitle {
+          font-size: 15px;
+          color: #6B7280;
+          margin: 0 auto;
+          max-width: 640px;
+          line-height: 1.6;
+        }
+        .mov-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 20px;
+          justify-content: center;
+        }
+        .mov-card {
+          display: flex;
+          flex-direction: column;
+        }
+        .mov-poster-wrap {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 2 / 3;
+          border-radius: 12px;
+          overflow: hidden;
+          background: #F3F4F6;
+          margin-bottom: 12px;
+          border: 1px solid #E5E7EB;
+          box-shadow: 0 4px 14px rgba(11,31,77,0.06);
+          transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .mov-poster-wrap:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 14px 32px rgba(147,51,234,0.16);
+        }
+        .mov-poster {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .mov-overlay {
+          position: absolute;
+          left: 0; right: 0; bottom: 0;
+          padding: 8px;
+          background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+          display: flex;
+          justify-content: flex-start;
+        }
+        .mov-genre-badge {
+          font-size: 9.5px;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+          color: #fff;
+          background: rgba(147,51,234,0.9);
+          padding: 3px 8px;
+          border-radius: 999px;
+          text-transform: uppercase;
+        }
+        .mov-card-title {
+          font-size: 13px;
+          font-weight: 700;
+          color: #0B1F4D;
+          margin: 0 0 4px;
+          line-height: 1.3;
+        }
+        .mov-card-meta {
+          font-size: 11.5px;
+          color: #9CA3AF;
+          margin: 0;
+        }
+        @media (max-width: 1024px) {
+          .mov-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        @media (max-width: 780px) {
+          .mov-section { padding: 48px 24px; }
+          .mov-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        }
+        @media (max-width: 480px) {
+          .mov-section { padding: 40px 16px; }
+          .mov-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+      `}</style>
+    </section>
+  );
+}
+// ═════════════════════════════════════════════════════════════════════════════
 // PREMIUM CALCULATOR SECTION — with GET EXACT QUOTE opening modal
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -1683,7 +1995,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
     <>
       <style>{CSS}</style>
       <div style={{ overflowX: "hidden", width: "100%" }}>
-        <Preloader />
+        
         <Navbar />
 
         {/* ── HERO ── */}
@@ -1773,6 +2085,16 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
     </div>
   </div>
 </section>
+
+        {/* ── CERTIFICATES SECTION — entertainment-insurance only ── */}
+        {slug === "entertainment-insurance" && data.certificates && data.certificates.length > 0 && (
+          <CertificatesSection data={data} />
+        )}
+
+        {/* ── MOVIES WE'VE INSURED SECTION — NEW, entertainment-insurance only ── */}
+        {slug === "entertainment-insurance" && data.movies && data.movies.length > 0 && (
+          <MoviesSection data={data} />
+        )}
 
         {/* ── PREMIUM CALCULATOR (health-insurance only) ── */}
         {slug === "health-insurance" && (

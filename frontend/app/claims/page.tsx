@@ -12,7 +12,7 @@ import TransindiaFooter from "@/components/Transindiafooter";
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
-       <Preloader/>
+      
       <Navbar/>
       <ClaimHero/>
       <InsuranceClaimsSection/>

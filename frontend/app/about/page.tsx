@@ -11,7 +11,7 @@ import Preloader from "@/components/Preloader";
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
-       <Preloader/>
+      
     <Navbar />
     <AboutHero />
     <OurStory/>

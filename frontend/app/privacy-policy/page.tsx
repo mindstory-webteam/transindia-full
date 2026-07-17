@@ -128,7 +128,7 @@ export default function PrivacyPolicyPage() {
     <>
       <style>{CSS}</style>
       <div className="policy-page">
-         <Preloader/>
+       
         <Navbar alwaysSolid={true} />
 
         <div className="policy-wrapper">

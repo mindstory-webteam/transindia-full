@@ -28,6 +28,21 @@ export interface HeroStat {
   label: string;
 }
 
+// ─── Certificates section (entertainment-insurance only) ─────────────────────
+export interface CertificateItem {
+  icon: string;   // image path to the certificate/badge logo
+  title: string;
+  subtitle: string;
+}
+
+// ─── NEW: Movies We've Insured section (entertainment-insurance only) ────────
+export interface MovieItem {
+  poster: string;  // image path to the movie poster / still
+  title: string;
+  year: string;
+  genre: string;
+}
+
 export interface InsuranceDetailData {
   slug: string;
   // Hero
@@ -73,6 +88,20 @@ export interface InsuranceDetailData {
   faqTitleAccent: string;
   faqTitleAccentColor: string;
   faqs: FAQItem[];
+  // ─── Certificates (optional — only entertainment-insurance uses this) ──────
+  certificatesBadge?: string;
+  certificatesTitle?: string;
+  certificatesTitleAccent?: string;
+  certificatesTitleAccentColor?: string;
+  certificatesSubtitle?: string;
+  certificates?: CertificateItem[];
+  // ─── NEW: Movies We've Insured (optional — only entertainment-insurance uses this) ──
+  moviesBadge?: string;
+  moviesTitle?: string;
+  moviesTitleAccent?: string;
+  moviesTitleAccentColor?: string;
+  moviesSubtitle?: string;
+  movies?: MovieItem[];
 }
 
 // ─── Calculator field config (reused in hero card) ───────────────────────────
@@ -823,7 +852,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
     heroBadgeBg: "#581c87",
     heroBadgeColor: "#C084FC",
     heroStats: [
-      { value: "500+", label: "Productions Covered" },
+      { value: "50+", label: "Productions Covered" },
       { value: "₹50Cr", label: "Max Production Cover" },
       { value: "24/7", label: "On-Set Support" },
     ],
@@ -895,6 +924,60 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       { question: "Is weather disruption to an outdoor event covered?", answer: "Yes, through weather or event cancellation cover. If rain, storm, or adverse weather forces you to cancel or postpone an outdoor shoot or live event, the policy compensates for the resulting losses, subject to the policy terms." },
       { question: "What is cast non-appearance cover?", answer: "It covers the additional costs and financial losses a production suffers if a key insured cast member is unable to start or continue work due to illness, injury, or death — for example, the cost of rescheduling shoots or re-shooting completed scenes." },
       { question: "Do live events need public liability insurance?", answer: "Strongly yes — and many venues require it. Public liability covers legal costs and compensation if an attendee is injured or third-party property is damaged at your event. For concerts and large gatherings, it's often a condition of the venue or permit." },
+    ],
+   // ─── Certificate section data (entertainment-insurance only, single cert) ──
+    certificatesBadge: "Certificate ",
+    certificatesTitle: "Trusted by ",
+    certificatesTitleAccent: "Industry Standards",
+    certificatesTitleAccentColor: "#9333EA",
+    certificatesSubtitle:
+      "Official Insurance Broker of the Kerala Film Chamber of Commerce.",
+    certificates: [
+      {
+        icon: "/images/services/SERVICE - Entertainment Insurance/certificates/irdai.png",
+        title: "Kerala Film Chamber of Commerce",
+        subtitle: "Proudly serving as the Official Insurance Broker of the Kerala Film Chamber of Commerce, Transindia provides specialized insurance solutions for film productions, ensuring comprehensive protection from pre-production through release.",
+      },
+    ],
+    // ─── NEW: Movies We've Insured section data (entertainment-insurance only) ──
+    moviesBadge: "OUR PORTFOLIO",
+    moviesTitle: "Productions",
+    moviesTitleAccent: "we've insured",
+    moviesTitleAccentColor: "#9333EA",
+    moviesSubtitle:
+      "Trusted by leading production houses across the Malayalam film industry, we've provided comprehensive insurance solutions for some of the most anticipated films and ongoing productions.",
+    movies: [
+      {
+        poster: "/images/movies/thudram.jpg",
+        title: "Thudarum",
+        year: "2024",
+        genre: "Rajaputras Visual Media",
+      },
+      {
+        poster: "/images/movies/lokah.jpg",
+        title: "Lokha",
+        year: "2024",
+        genre: "Wayfarer Films",
+      },
+      {
+        poster: "/images/movies/Kathanar.jpg",
+        title: "Kathanar",
+        year: "2023",
+        genre: "Gokulam Gopalan Productions",
+      },
+      {
+        poster: "/images/movies/dear student.jpg",
+        title: "Dear Students",
+        year: "2023",
+        genre: "Pauly Jr. Pictures",
+      },
+      {
+        poster: "/images/movies/images (2).jpg",
+        title: "Green Room Productions",
+        year: "ONGOING PROJECT",
+        genre: "Production Insurance",
+      },
+     
     ],
   },
 };

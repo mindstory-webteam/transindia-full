@@ -42,10 +42,10 @@ export default function AboutHero() {
         <div className="about-stats-bar">
           <div className="about-stats-inner">
             {[
-              { value: "18", label: "Years of Experience" },
+              { value: "20", label: "Years of Experience" },
               { value: "20", label: "Insurer Partners" },
-              { value: "500K", label: "Happy Customers" },
-              { value: "₹7000Cr", label: "Claims Settled" },
+              { value: "250", label: "Happy Customers" },
+              { value: "₹500Cr", label: "Claims Settled" },
             ].map((s) => (
               <div key={s.label} className="about-stat">
                 <p className="about-stat-value">{s.value}<span>+</span></p>

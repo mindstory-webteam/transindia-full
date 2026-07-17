@@ -291,3 +291,212 @@ export async function deleteChatbotLead(id) {
   const { data } = await api.delete(`/chatbotleads/${id}`);
   return data;
 }
+
+// ── BMI Leads ─────────────────────────────────────────────────────────────────
+// Matches routes/bmiLeadRoutes.js: POST /, GET /stats, GET /, GET /:id, PATCH /:id, DELETE /:id
+
+/**
+ * Public — submit a BMI calculator lead
+ */
+export async function submitBmiLead(payload) {
+  return api.post("/bmileads", payload);
+}
+
+/**
+ * Admin — get aggregate BMI lead stats (total, byStatus)
+ */
+export async function getBmiLeadStats() {
+  return api.get("/bmileads/stats");
+}
+
+/**
+ * Admin — get a paginated/filterable list of BMI leads
+ */
+export async function getBmiLeads(params = {}) {
+  return api.get("/bmileads", { params });
+}
+
+/**
+ * Admin — get a single BMI lead by id
+ */
+export async function getBmiLead(id) {
+  return api.get(`/bmileads/${id}`);
+}
+
+/**
+ * Admin — update a BMI lead (e.g. status)
+ */
+export async function updateBmiLead(id, payload) {
+  return api.patch(`/bmileads/${id}`, payload);
+}
+
+/**
+ * Admin — delete a BMI lead
+ */
+export async function deleteBmiLead(id) {
+  return api.delete(`/bmileads/${id}`);
+}
+
+// ── Careers: Jobs & Applications ──────────────────────────────────────────────
+// Matches routes/careerRoutes.js (mounted at /careers): 
+// GET /jobs (public), POST /jobs/:id/apply (public, resume upload),
+// GET /admin/jobs, POST /admin/jobs, PUT /admin/jobs/:id, DELETE /admin/jobs/:id,
+// GET /admin/applications, DELETE /admin/applications/:id
+
+/**
+ * Public — get all published job openings
+ */
+export async function getJobs(params = {}) {
+  const { data } = await api.get("/careers/jobs", { params });
+  return data;
+}
+
+/**
+ * Public — apply for a job (multipart with resume file)
+ */
+export async function applyForJob(jobId, formData) {
+  const { data } = await api.post(`/careers/jobs/${jobId}/apply`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+/**
+ * Admin — get all job openings (active + inactive)
+ */
+export async function getAdminJobs(params = {}) {
+  const { data } = await api.get("/careers/admin/jobs", { params });
+  return data;
+}
+
+/**
+ * Admin — create a new job opening
+ */
+export async function createJob(payload) {
+  const { data } = await api.post("/careers/admin/jobs", payload);
+  return data;
+}
+
+/**
+ * Admin — update an existing job opening
+ */
+export async function updateJob(id, payload) {
+  const { data } = await api.put(`/careers/admin/jobs/${id}`, payload);
+  return data;
+}
+
+/**
+ * Admin — delete a job opening
+ */
+export async function deleteJob(id) {
+  const { data } = await api.delete(`/careers/admin/jobs/${id}`);
+  return data;
+}
+
+/**
+ * Admin — get all job applications
+ */
+export async function getJobApplications(params = {}) {
+  const { data } = await api.get("/careers/admin/applications", { params });
+  return data;
+}
+
+/**
+ * Admin — delete a job application
+ */
+export async function deleteJobApplication(id) {
+  const { data } = await api.delete(`/careers/admin/applications/${id}`);
+  return data;
+}
+
+// ── Quote Leads ───────────────────────────────────────────────────────────────
+// Matches routes/quoteLeadRoutes.js: GET /stats, GET /, POST /, GET /:id, PATCH /:id, DELETE /:id
+
+/**
+ * Public — submit a quote lead (e.g. homepage banner quote bar)
+ */
+export async function submitQuoteLead(payload) {
+  return api.post("/quoteleads", payload);
+}
+
+/**
+ * Admin — get aggregate quote lead stats (total, byStatus)
+ */
+export async function getQuoteLeadStats() {
+  return api.get("/quoteleads/stats");
+}
+
+/**
+ * Admin — get a paginated/filterable list of quote leads
+ */
+export async function getQuoteLeads(params = {}) {
+  return api.get("/quoteleads", { params });
+}
+
+/**
+ * Admin — get a single quote lead by id
+ */
+export async function getQuoteLeadById(id) {
+  return api.get(`/quoteleads/${id}`);
+}
+
+/**
+ * Admin — update a quote lead (e.g. status)
+ */
+export async function updateQuoteLead(id, payload) {
+  return api.patch(`/quoteleads/${id}`, payload);
+}
+
+/**
+ * Admin — delete a quote lead
+ */
+export async function deleteQuoteLead(id) {
+  return api.delete(`/quoteleads/${id}`);
+}
+
+// ── Events ────────────────────────────────────────────────────────────────────
+// Matches routes/events.js: GET /, GET /:id, POST / (images upload), PUT /:id, DELETE /:id
+
+/**
+ * Public/Admin — get all events
+ */
+export async function getEvents(params = {}) {
+  const { data } = await api.get("/events", { params });
+  return data;
+}
+
+/**
+ * Public/Admin — get a single event by id
+ */
+export async function getEvent(id) {
+  const { data } = await api.get(`/events/${id}`);
+  return data;
+}
+
+/**
+ * Admin — create a new event (multipart, up to 10 images under "images")
+ */
+export async function createEvent(formData) {
+  const { data } = await api.post("/events", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+/**
+ * Admin — update an event (multipart, up to 10 images under "images")
+ */
+export async function updateEvent(id, formData) {
+  const { data } = await api.put(`/events/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return data;
+}
+
+/**
+ * Admin — delete an event
+ */
+export async function deleteEvent(id) {
+  const { data } = await api.delete(`/events/${id}`);
+  return data;
+}

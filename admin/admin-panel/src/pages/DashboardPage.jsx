@@ -1,15 +1,20 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   getAllServices, getLeadStats, getServiceLeadStats,
+  getBmiLeadStats, getQuoteLeadStats,
+  getClaimLeads, getChatbotLeads,
+  getGeneralQueries, getClaimSupports, getComplaints,
+  getAdminJobs, getJobApplications, getEvents,
 } from "../services/api";
 import {
-  ShieldCheck, Users, TrendingUp, CheckCircle, Clock, PhoneCall,
-  XCircle, ArrowRight, Calculator, BarChart2, Activity, Layers,
+  ShieldCheck, Users, TrendingUp, CheckCircle, Calculator, Activity,
+  Layers, HeartPulse, FileWarning, MessageCircle, MessagesSquare,
+  LifeBuoy, AlertTriangle, Briefcase, FileText, CalendarDays, ArrowRight,
 } from "lucide-react";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 
 /* ─── design tokens ─────────────────────────────────────────────── */
@@ -27,6 +32,10 @@ const C = {
   cyan:   { fg: "#0891B2", bg: "#E0F7FA" },
   green:  { fg: "#16A34A", bg: "#DCFCE7" },
   red:    { fg: "#DC2626", bg: "#FEE2E2" },
+  violet: { fg: "#7C3AED", bg: "#F5F3FF" },
+  pink:   { fg: "#DB2777", bg: "#FCE7F3" },
+  indigo: { fg: "#4F46E5", bg: "#EEF2FF" },
+  teal:   { fg: "#0D9488", bg: "#F0FDFA" },
 };
 
 const STATUS_COLORS = [
@@ -49,32 +58,64 @@ function card(extra = {}) {
   };
 }
 
+/** Safely resolve a promise, returning a fallback on failure (e.g. route not mounted yet, 403, etc.) */
+async function safe(promise, fallback) {
+  try {
+    return await promise;
+  } catch (e) {
+    console.warn("Dashboard fetch failed:", e?.config?.url || e?.message);
+    return fallback;
+  }
+}
+
+/** Merge N status objects like { new, contacted, converted, closed } into one */
+function mergeStatus(...statusObjs) {
+  const out = { new: 0, contacted: 0, converted: 0, closed: 0 };
+  statusObjs.forEach((s) => {
+    if (!s) return;
+    out.new       += s.new       || 0;
+    out.contacted += s.contacted || 0;
+    out.converted += s.converted || 0;
+    out.closed    += s.closed    || 0;
+  });
+  return out;
+}
+
+/** Derive a { new, contacted, converted, closed } breakdown from a raw array of items with a `status` field */
+function statusFromArray(arr = []) {
+  const out = { new: 0, contacted: 0, converted: 0, closed: 0 };
+  arr.forEach((item) => {
+    const s = (item?.status || "new").toLowerCase();
+    if (out[s] !== undefined) out[s] += 1;
+    else out.new += 1;
+  });
+  return out;
+}
+
 /* ─── sub-components ────────────────────────────────────────────── */
-function KpiCard({ label, value, icon: Icon, color, bg, trend }) {
-  return (
+function KpiCard({ label, value, icon: Icon, color, bg, to }) {
+  const inner = (
     <div
       style={{
-        ...card({ padding: "20px 22px", display: "flex", alignItems: "flex-start", gap: 14 }),
+        ...card({ padding: "18px 20px", display: "flex", alignItems: "flex-start", gap: 12 }),
         transition: "transform .15s,box-shadow .15s",
-        cursor: "default",
+        cursor: to ? "pointer" : "default",
+        textDecoration: "none",
+        height: "100%",
       }}
       onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 10px 28px rgba(15,23,42,0.09)"; }}
       onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 1px 3px rgba(15,23,42,0.06)"; }}
     >
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-        <Icon size={22} color={color} />
+      <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <Icon size={20} color={color} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ fontSize: 26, fontWeight: 800, color: C.ink, lineHeight: 1, letterSpacing: "-0.02em", margin: 0 }}>{value}</p>
-        <p style={{ fontSize: 12, color: C.muted, marginTop: 5, margin: "5px 0 0" }}>{label}</p>
-        {trend != null && (
-          <p style={{ fontSize: 11, marginTop: 4, color: trend >= 0 ? C.green.fg : C.red.fg, margin: "4px 0 0", fontWeight: 600 }}>
-            {trend >= 0 ? "↑" : "↓"} {Math.abs(trend)}%
-          </p>
-        )}
+        <p style={{ fontSize: 22, fontWeight: 800, color: C.ink, lineHeight: 1, letterSpacing: "-0.02em", margin: 0 }}>{value}</p>
+        <p style={{ fontSize: 11.5, color: C.muted, marginTop: 5, margin: "5px 0 0" }}>{label}</p>
       </div>
     </div>
   );
+  return to ? <Link to={to} style={{ display: "block", height: "100%" }}>{inner}</Link> : inner;
 }
 
 function SectionHeader({ title, to, toLabel }) {
@@ -100,6 +141,47 @@ function StatusBadge({ value, color, bg, label }) {
   );
 }
 
+/** Small horizontal "mini bar" summary row used in the module-summary cards */
+function MiniRow({ label, value, total, color }) {
+  const p = pct(value, total);
+  return (
+    <div style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: C.muted, marginBottom: 5 }}>
+        <span>{label}</span>
+        <span style={{ fontWeight: 700, color: C.ink }}>{value}</span>
+      </div>
+      <div style={{ height: 6, background: C.border, borderRadius: 3, overflow: "hidden" }}>
+        <div style={{ height: "100%", width: `${p}%`, background: color, borderRadius: 3, transition: "width .5s ease" }} />
+      </div>
+    </div>
+  );
+}
+
+/** Card summarising a "module" that doesn't have its own dedicated stats endpoint */
+function ModuleCard({ title, icon: Icon, color, bg, total, to, toLabel, children }) {
+  return (
+    <div style={{ ...card({ padding: "20px 20px 18px" }) }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon size={17} color={color} />
+          </div>
+          <div>
+            <p style={{ fontSize: 13.5, fontWeight: 700, color: C.ink, margin: 0 }}>{title}</p>
+            <p style={{ fontSize: 11, color: C.muted, margin: "2px 0 0" }}>{total} total</p>
+          </div>
+        </div>
+        {to && (
+          <Link to={to} style={{ fontSize: 11.5, fontWeight: 600, color: C.primary, display: "flex", alignItems: "center", gap: 3, textDecoration: "none", flexShrink: 0 }}>
+            {toLabel || "View"} <ArrowRight size={11} />
+          </Link>
+        )}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 /* ─── custom tooltip ─────────────────────────────────────────────── */
 function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -117,19 +199,62 @@ function CustomTooltip({ active, payload, label }) {
 
 /* ─── main page ──────────────────────────────────────────────────── */
 export default function DashboardPage() {
-  const [services, setServices] = useState([]);
-  const [stats,    setStats]    = useState(null);
-  const [svcLeads, setSvcLeads] = useState(null);
-  const [loading,  setLoading]  = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  const [services,  setServices]  = useState([]);
+  const [stats,     setStats]     = useState(null);   // /leads/stats
+  const [svcLeads,  setSvcLeads]  = useState(null);   // /serviceleads/stats
+  const [bmiStats,  setBmiStats]  = useState(null);   // /bmileads/stats
+  const [quoteStats,setQuoteStats]= useState(null);   // /quoteleads/stats
+
+  const [claimLeads,     setClaimLeads]     = useState([]);
+  const [chatbotLeads,   setChatbotLeads]   = useState([]);
+  const [generalQueries, setGeneralQueries] = useState([]);
+  const [claimSupports,  setClaimSupports]  = useState([]);
+  const [complaints,     setComplaints]     = useState([]);
+  const [jobs,            setJobs]           = useState([]);
+  const [applications,    setApplications]   = useState([]);
+  const [events,          setEvents]         = useState([]);
 
   useEffect(() => {
-    Promise.all([getAllServices(), getLeadStats(), getServiceLeadStats()])
-      .then(([svcRes, statsRes, svcLeadRes]) => {
-        setServices(svcRes.data);
-        setStats(statsRes.data.data);
-        setSvcLeads(svcLeadRes.data.data);
-      })
-      .finally(() => setLoading(false));
+    (async () => {
+      const [
+        svcRes, statsRes, svcLeadRes, bmiRes, quoteRes,
+        claimRes, chatbotRes, gqRes, csRes, compRes,
+        jobsRes, appsRes, eventsRes,
+      ] = await Promise.all([
+        safe(getAllServices(),      { data: [] }),
+        safe(getLeadStats(),        { data: { data: null } }),
+        safe(getServiceLeadStats(), { data: { data: null } }),
+        safe(getBmiLeadStats(),     { data: { data: null } }),
+        safe(getQuoteLeadStats(),   { data: { data: null } }),
+        safe(getClaimLeads(),       []),
+        safe(getChatbotLeads(),     []),
+        safe(getGeneralQueries(),   { data: [] }),
+        safe(getClaimSupports(),    { data: [] }),
+        safe(getComplaints(),       { data: [] }),
+        safe(getAdminJobs(),        { data: [] }),
+        safe(getJobApplications(),  { data: [] }),
+        safe(getEvents(),           { data: [] }),
+      ]);
+
+      setServices(svcRes.data || []);
+      setStats(statsRes.data?.data || null);
+      setSvcLeads(svcLeadRes.data?.data || null);
+      setBmiStats(bmiRes.data?.data || null);
+      setQuoteStats(quoteRes.data?.data || null);
+
+      setClaimLeads(claimRes || []);
+      setChatbotLeads(chatbotRes || []);
+      setGeneralQueries(gqRes.data || gqRes || []);
+      setClaimSupports(csRes.data || csRes || []);
+      setComplaints(compRes.data || compRes || []);
+      setJobs(jobsRes.data || jobsRes || []);
+      setApplications(appsRes.data || appsRes || []);
+      setEvents(eventsRes.data || eventsRes || []);
+
+      setLoading(false);
+    })();
   }, []);
 
   if (loading) {
@@ -143,18 +268,43 @@ export default function DashboardPage() {
   }
 
   /* ── derived data ── */
-  const totalLeads      = stats?.total || 0;
-  const totalSvcLeads   = svcLeads?.total || 0;
-  const converted       = stats?.byStatus?.converted || 0;
-  const conversionRate  = pct(converted, totalLeads);
-  const activeServices  = services.filter(s => s.isActive).length;
+  const totalGeneralLeads = stats?.total || 0;
+  const totalQuoteLeads   = quoteStats?.total || 0;
+  const totalSvcLeads     = svcLeads?.total || 0;
+  const totalBmiLeads     = bmiStats?.total || 0;
+  const totalClaimLeads   = claimLeads.length;
+  const totalChatbotLeads = chatbotLeads.length;
+  const totalGeneralQueries = generalQueries.length;
+  const totalClaimSupport   = claimSupports.length;
+  const totalComplaints     = complaints.length;
+  const totalJobs           = jobs.length;
+  const activeJobs          = jobs.filter(j => j.isActive !== false).length;
+  const totalApplications   = applications.length;
+  const totalEvents         = events.length;
 
-  /* bar chart — lead status breakdown */
+  const activeServices = services.filter(s => s.isActive).length;
+
+  const converted = stats?.byStatus?.converted || 0;
+  const conversionRate = pct(converted, totalGeneralLeads);
+
+  /* combined lead status (general + quote + service + bmi leads) */
+  const claimStatus   = statusFromArray(claimLeads);
+  const chatbotStatus = statusFromArray(chatbotLeads);
+
+  const combinedStatus = mergeStatus(
+    stats?.byStatus,
+    quoteStats?.byStatus,
+    svcLeads?.byStatus,
+    bmiStats?.byStatus,
+  );
+  const combinedTotal = totalGeneralLeads + totalQuoteLeads + totalSvcLeads + totalBmiLeads;
+
+  /* bar chart — combined lead status breakdown */
   const leadStatusData = [
-    { name: "New",       value: stats?.byStatus?.new       || 0 },
-    { name: "Contacted", value: stats?.byStatus?.contacted || 0 },
-    { name: "Converted", value: stats?.byStatus?.converted || 0 },
-    { name: "Closed",    value: stats?.byStatus?.closed    || 0 },
+    { name: "New",       value: combinedStatus.new },
+    { name: "Contacted", value: combinedStatus.contacted },
+    { name: "Converted", value: combinedStatus.converted },
+    { name: "Closed",    value: combinedStatus.closed },
   ];
 
   /* donut — service leads breakdown */
@@ -165,21 +315,32 @@ export default function DashboardPage() {
     { name: "Closed",    value: svcLeads?.byStatus?.closed    || 0, color: C.red.fg   },
   ].filter(d => d.value > 0);
 
-  /* bar chart — leads by service */
+  /* bar chart — leads by service (from /leads/stats byService) */
   const byServiceData = (stats?.byService || []).map(s => ({
     name:  (s.title || s._id || "").slice(0, 18),
     leads: s.count,
   }));
 
-  /* funnel area sparkline — simulated trend (replace with real time-series if available) */
+  /* funnel area sparkline — simulated trend across ALL lead sources */
   const trendData = (() => {
     const months = ["Jan","Feb","Mar","Apr","May","Jun"];
-    const base = Math.max(4, Math.round(totalLeads / 6));
+    const base = Math.max(4, Math.round(combinedTotal / 6));
     return months.map((m, i) => ({
       month: m,
       leads: Math.max(0, base + Math.round((Math.sin(i) * base * 0.4))),
     }));
   })();
+
+  /* pie — module distribution (which channel leads/requests come from) */
+  const moduleDonut = [
+   
+
+    { name: "Service Leads", value: totalSvcLeads,     color: "#0891B2" },
+   
+    { name: "Claim Leads",   value: totalClaimLeads,   color: "#DC2626" },
+    { name: "Chatbot Leads", value: totalChatbotLeads, color: "#DB2777" },
+  ].filter(d => d.value > 0);
+  const moduleTotal = moduleDonut.reduce((a, d) => a + d.value, 0);
 
   /* ── layout ── */
   return (
@@ -199,7 +360,7 @@ export default function DashboardPage() {
           </p>
           <h1 style={{ fontSize: 24, fontWeight: 800, color: C.ink, margin: 0, letterSpacing: "-0.025em" }}>Dashboard</h1>
           <p style={{ color: C.muted, fontSize: 13, marginTop: 4 }}>
-            {services.length} services · {totalLeads + totalSvcLeads} total leads tracked
+            {services.length} services · {combinedTotal + totalClaimLeads + totalChatbotLeads} leads &amp; requests tracked across all modules
           </p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
@@ -222,21 +383,31 @@ export default function DashboardPage() {
 
       <div style={{ padding: "0 28px" }}>
 
-        {/* ─── Row 1 — KPI cards ──────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 14, marginBottom: 28 }}>
-          <KpiCard label="Total Services"   value={services.length}                                            icon={ShieldCheck} color={C.primary}    bg={C.primaryBg} />
-          <KpiCard label="Active Services"  value={activeServices}                                             icon={CheckCircle} color={C.green.fg}  bg={C.green.bg}  />
-          <KpiCard label="All Leads"        value={totalLeads}                                                 icon={Users}       color="#7C3AED"      bg="#F5F3FF"     />
-          <KpiCard label="Service Leads"    value={totalSvcLeads}                                              icon={Calculator}  color={C.primary}    bg={C.primaryBg} />
-          <KpiCard label="Conversion Rate"  value={`${conversionRate}%`}                                       icon={TrendingUp}  color={C.cyan.fg}   bg={C.cyan.bg}   />
+        {/* ─── Row 1 — KPI cards (all modules) ────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(178px, 1fr))", gap: 14, marginBottom: 28 }}>
+          <KpiCard label="Total Services"     value={services.length}      icon={ShieldCheck}     color={C.primary}    bg={C.primaryBg} to="/services" />
+          <KpiCard label="Active Services"    value={activeServices}       icon={CheckCircle}     color={C.green.fg}   bg={C.green.bg}  to="/services" />
+          
+         
+          <KpiCard label="Service Leads"      value={totalSvcLeads}        icon={Calculator}      color={C.primary}    bg={C.primaryBg} to="/serviceleads" />
+         
+          <KpiCard label="Claim Leads"        value={totalClaimLeads}      icon={FileWarning}     color={C.red.fg}     bg={C.red.bg}    to="/claimleads" />
+          <KpiCard label="Chatbot Leads"      value={totalChatbotLeads}    icon={MessageCircle}   color={C.pink.fg}    bg={C.pink.bg}   to="/chatbotleads" />
+          <KpiCard label="General Queries"    value={totalGeneralQueries}  icon={MessagesSquare}  color={C.indigo.fg}  bg={C.indigo.bg} to="/contact/general-query" />
+          <KpiCard label="Claim Support"      value={totalClaimSupport}    icon={LifeBuoy}        color={C.teal.fg}    bg={C.teal.bg}   to="/contact/claim-support" />
+          <KpiCard label="Complaints"         value={totalComplaints}      icon={AlertTriangle}   color={C.amber.fg}   bg={C.amber.bg}  to="/contact/complaint" />
+          <KpiCard label="Job Openings"       value={`${activeJobs}/${totalJobs}`} icon={Briefcase} color={C.violet.fg} bg={C.violet.bg} to="/careers/jobs" />
+          <KpiCard label="Job Applications"   value={totalApplications}    icon={FileText}        color={C.cyan.fg}    bg={C.cyan.bg}   to="/careers/applications" />
+          <KpiCard label="Events"             value={totalEvents}          icon={CalendarDays}    color={C.pink.fg}    bg={C.pink.bg}   to="/events" />
+         
         </div>
 
-        {/* ─── Row 2 — Area chart + Status breakdown ──────────────── */}
+        {/* ─── Row 2 — Area chart + Combined lead status ──────────── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 18, marginBottom: 24, alignItems: "stretch" }}>
 
           {/* area trend */}
           <div style={{ ...card({ padding: "22px 22px 14px" }) }}>
-            <SectionHeader title="Lead Trend (6 months)" />
+            <SectionHeader title="Lead Trend — all sources (6 months)" />
             <ResponsiveContainer width="100%" height={220}>
               <AreaChart data={trendData} margin={{ top: 4, right: 8, bottom: 0, left: -10 }}>
                 <defs>
@@ -260,34 +431,34 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
 
-          {/* status breakdown */}
+          {/* combined status breakdown */}
           <div style={{ ...card({ padding: "22px 20px" }) }}>
-            <SectionHeader title="Lead Status" to="/leads" />
+            <SectionHeader title="Combined Lead Status" to="/leads" />
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 4 }}>
-              <StatusBadge value={stats?.byStatus?.new       || 0} color={C.amber.fg} bg={C.amber.bg} label="New"       />
-              <StatusBadge value={stats?.byStatus?.contacted || 0} color={C.cyan.fg}  bg={C.cyan.bg}  label="Contacted" />
-              <StatusBadge value={stats?.byStatus?.converted || 0} color={C.green.fg} bg={C.green.bg} label="Converted" />
-              <StatusBadge value={stats?.byStatus?.closed    || 0} color={C.red.fg}   bg={C.red.bg}   label="Closed"    />
+              <StatusBadge value={combinedStatus.new}       color={C.amber.fg} bg={C.amber.bg} label="New"       />
+              <StatusBadge value={combinedStatus.contacted} color={C.cyan.fg}  bg={C.cyan.bg}  label="Contacted" />
+              <StatusBadge value={combinedStatus.converted} color={C.green.fg} bg={C.green.bg} label="Converted" />
+              <StatusBadge value={combinedStatus.closed}    color={C.red.fg}   bg={C.red.bg}   label="Closed"    />
             </div>
             {/* conversion meter */}
-            <div style={{ marginTop: 18 }}>
+            {/* <div style={{ marginTop: 18 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: C.muted, marginBottom: 6 }}>
-                <span>Conversion rate</span>
+                <span>Conversion rate (general leads)</span>
                 <span style={{ fontWeight: 700, color: C.green.fg }}>{conversionRate}%</span>
               </div>
               <div style={{ height: 6, background: C.border, borderRadius: 3, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${conversionRate}%`, background: `linear-gradient(90deg, ${C.primary}, #16A34A)`, borderRadius: 3, transition: "width .6s ease" }} />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
-        {/* ─── Row 3 — Bar chart + Donut ──────────────────────────── */}
+        {/* ─── Row 3 — Bar chart + Module distribution donut ──────── */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 24 }}>
 
-          {/* bar — lead status */}
+          {/* bar — combined lead status */}
           <div style={{ ...card({ padding: "22px 22px 14px" }) }}>
-            <SectionHeader title="Leads by Status" />
+            <SectionHeader title="Leads by Status (all lead sources)" />
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={leadStatusData} margin={{ top: 4, right: 8, bottom: 0, left: -10 }} barSize={36}>
                 <CartesianGrid strokeDasharray="3 3" stroke={C.border} vertical={false} />
@@ -303,7 +474,55 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
 
-          {/* donut — service leads */}
+          {/* donut — where leads come from */}
+          <div style={{ ...card({ padding: "22px 20px" }) }}>
+            <SectionHeader title="Leads by Module" />
+            {moduleDonut.length > 0 ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+                <ResponsiveContainer width={160} height={200}>
+                  <PieChart>
+                    <Pie
+                      data={moduleDonut} cx="50%" cy="50%"
+                      innerRadius={52} outerRadius={76}
+                      paddingAngle={3} dataKey="value"
+                    >
+                      {moduleDonut.map((d, i) => (
+                        <Cell key={i} fill={d.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontSize: 11, color: C.muted, marginBottom: 10, fontWeight: 600 }}>TOTAL</p>
+                  <p style={{ fontSize: 30, fontWeight: 800, color: C.ink, letterSpacing: "-0.03em", margin: "0 0 14px" }}>{moduleTotal}</p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, maxHeight: 130, overflowY: "auto" }}>
+                    {moduleDonut.map((d, i) => (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+                        <span style={{ color: C.muted, flex: 1 }}>{d.name}</span>
+                        <span style={{ fontWeight: 700, color: C.ink }}>{d.value}</span>
+                        <span style={{ color: C.muted, fontSize: 10, minWidth: 32, textAlign: "right" }}>
+                          {pct(d.value, moduleTotal)}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: 180, gap: 10, color: C.muted }}>
+                <Calculator size={28} color={C.border} />
+                <span style={{ fontSize: 13 }}>No leads yet</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ─── Row 4 — Service leads donut + Leads by service ─────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, marginBottom: 24 }}>
+
+          {/* donut — service leads breakdown (kept from original) */}
           <div style={{ ...card({ padding: "22px 20px" }) }}>
             <SectionHeader title="Service Leads Breakdown" to="/serviceleads" />
             {svcLeadDonut.length > 0 ? (
@@ -346,29 +565,75 @@ export default function DashboardPage() {
               </div>
             )}
           </div>
+
+          {/* bar — leads by service */}
+          <div style={{ ...card({ padding: "22px 22px 14px" }) }}>
+            {/* <SectionHeader title="General Leads by Service" to="/leads" /> */}
+            {byServiceData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={byServiceData} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 10 }} barSize={18}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.border} horizontal={false} />
+                  <XAxis type="number" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} width={110} />
+                  <Tooltip content={<CustomTooltip />} cursor={{ fill: `${C.primary}10` }} />
+                  <Bar dataKey="leads" name="Leads" fill={C.primary} radius={[0, 6, 6, 0]}>
+                    {byServiceData.map((_, i) => (
+                      <Cell key={i} fill={i % 2 === 0 ? C.primary : "#F8895A"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 180, color: C.muted, fontSize: 13 }}>
+                No data yet
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ─── Row 4 — Leads by service bar chart ─────────────────── */}
-        {byServiceData.length > 0 && (
-          <div style={{ ...card({ padding: "22px 22px 14px", marginBottom: 24 }) }}>
-            <SectionHeader title="Leads by Service" to="/leads" />
-            <ResponsiveContainer width="100%" height={Math.max(180, byServiceData.length * 44 + 40)}>
-              <BarChart data={byServiceData} layout="vertical" margin={{ top: 0, right: 30, bottom: 0, left: 10 }} barSize={20}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.border} horizontal={false} />
-                <XAxis type="number" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" tick={{ fill: C.muted, fontSize: 11 }} axisLine={false} tickLine={false} width={120} />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: `${C.primary}10` }} />
-                <Bar dataKey="leads" name="Leads" fill={C.primary} radius={[0, 6, 6, 0]}>
-                  {byServiceData.map((_, i) => (
-                    <Cell key={i} fill={i % 2 === 0 ? C.primary : "#F8895A"} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+        {/* ─── Row 5 — Support & Ops modules (contact forms, claims, chatbot) ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 18, marginBottom: 24 }}>
 
-        {/* ─── Row 5 — Service list table ─────────────────────────── */}
+          <ModuleCard title="Claim Leads" icon={FileWarning} color={C.red.fg} bg={C.red.bg} total={totalClaimLeads} to="/claimleads">
+            <MiniRow label="New"       value={claimStatus.new}       total={totalClaimLeads} color={C.amber.fg} />
+            <MiniRow label="Contacted" value={claimStatus.contacted} total={totalClaimLeads} color={C.cyan.fg} />
+            <MiniRow label="Converted" value={claimStatus.converted} total={totalClaimLeads} color={C.green.fg} />
+            <MiniRow label="Closed"    value={claimStatus.closed}    total={totalClaimLeads} color={C.red.fg} />
+          </ModuleCard>
+
+          <ModuleCard title="Chatbot Leads" icon={MessageCircle} color={C.pink.fg} bg={C.pink.bg} total={totalChatbotLeads} to="/chatbotleads">
+            <MiniRow label="New"       value={chatbotStatus.new}       total={totalChatbotLeads} color={C.amber.fg} />
+            <MiniRow label="Contacted" value={chatbotStatus.contacted} total={totalChatbotLeads} color={C.cyan.fg} />
+            <MiniRow label="Converted" value={chatbotStatus.converted} total={totalChatbotLeads} color={C.green.fg} />
+            <MiniRow label="Closed"    value={chatbotStatus.closed}    total={totalChatbotLeads} color={C.red.fg} />
+          </ModuleCard>
+
+          <ModuleCard title="Contact Forms" icon={MessagesSquare} color={C.indigo.fg} bg={C.indigo.bg} total={totalGeneralQueries + totalClaimSupport + totalComplaints} to="/contact/general-query">
+            <MiniRow label="General Queries" value={totalGeneralQueries} total={totalGeneralQueries + totalClaimSupport + totalComplaints} color={C.indigo.fg} />
+            <MiniRow label="Claim Support"    value={totalClaimSupport}  total={totalGeneralQueries + totalClaimSupport + totalComplaints} color={C.teal.fg} />
+            <MiniRow label="Complaints"       value={totalComplaints}    total={totalGeneralQueries + totalClaimSupport + totalComplaints} color={C.amber.fg} />
+          </ModuleCard>
+
+          <ModuleCard title="Careers" icon={Briefcase} color={C.violet.fg} bg={C.violet.bg} total={totalJobs} to="/careers/jobs" toLabel="Manage jobs">
+            <MiniRow label="Active openings"   value={activeJobs}              total={Math.max(totalJobs, 1)} color={C.green.fg} />
+            <MiniRow label="Inactive openings" value={totalJobs - activeJobs}   total={Math.max(totalJobs, 1)} color={C.border === "#E8EDF5" ? "#94A3B8" : C.muted} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 14, paddingTop: 12, borderTop: `1px dashed ${C.border}` }}>
+              <span style={{ fontSize: 12, color: C.muted }}>Total applications</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: C.ink }}>{totalApplications}</span>
+            </div>
+          </ModuleCard>
+
+          <ModuleCard title="Events" icon={CalendarDays} color={C.pink.fg} bg={C.pink.bg} total={totalEvents} to="/events" toLabel="Manage events">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "20px 0", flexDirection: "column", gap: 6 }}>
+              <span style={{ fontSize: 32, fontWeight: 800, color: C.ink, letterSpacing: "-0.02em" }}>{totalEvents}</span>
+              <span style={{ fontSize: 12, color: C.muted }}>events published</span>
+            </div>
+          </ModuleCard>
+
+        
+        </div>
+
+        {/* ─── Row 6 — Service list table ─────────────────────────── */}
         <div style={{ ...card({ overflow: "hidden", marginBottom: 28 }) }}>
           <div style={{ padding: "20px 22px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -424,30 +689,6 @@ export default function DashboardPage() {
           </table>
         </div>
 
-        {/* ─── Quick actions ───────────────────────────────────────── */}
-        {/* <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-          {[
-            { to: "/services/new",  label: "+ Add Service",        primary: true  },
-            { to: "/leads",         label: "View Leads",           primary: false },
-            { to: "/serviceleads",  label: "View Service Leads",   primary: false },
-          ].map(({ to, label, primary }) => (
-            <Link
-              key={to} to={to}
-              style={{
-                padding: "11px 20px", borderRadius: 10, fontSize: 13, fontWeight: primary ? 700 : 600,
-                textDecoration: "none", transition: "background .15s, transform .15s",
-                ...(primary
-                  ? { background: C.primary, color: "#fff", boxShadow: "0 6px 16px rgba(241,90,62,0.28)" }
-                  : { background: C.surface, color: C.ink,  border: `1px solid ${C.border}` }
-                ),
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; if (primary) e.currentTarget.style.background = C.primaryDk; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = ""; if (primary) e.currentTarget.style.background = C.primary; }}
-            >
-              {label}
-            </Link>
-          ))}
-        </div> */}
       </div>
     </div>
   );

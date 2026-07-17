@@ -86,7 +86,7 @@ export default function CareersPage() {
     <>
       <style>{CSS}</style>
       <div className="careers-page">
-         <Preloader/>
+        
         <Navbar alwaysSolid={true} />
 
         {/* Hero */}

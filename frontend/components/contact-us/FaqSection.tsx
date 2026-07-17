@@ -27,12 +27,12 @@ const faqs: FAQItem[] = [
     answer:
       "You can renew your policy online through our 'Renew Existing Policy' section. Enter your policy number, review the details, and proceed with payment to renew instantly.",
   },
-  {
-    id: 4,
-    question: "How do I download my policy document?",
-    answer:
-      "Log in to your account, navigate to 'My Policies', and click on the download icon next to your policy. The document will be available as a PDF.",
-  },
+  // {
+  //   id: 4,
+  //   question: "How do I download my policy document?",
+  //   answer:
+  //     "Log in to your account, navigate to 'My Policies', and click on the download icon next to your policy. The document will be available as a PDF.",
+  // },
   {
     id: 5,
     question: "What is not covered under the policy?",
@@ -45,12 +45,12 @@ const faqs: FAQItem[] = [
     answer:
       "Required documents typically include your policy document, claim form, identity proof, and incident-related documents (hospital bills, FIR copy, repair estimate, etc.) depending on the type of claim.",
   },
-  {
-    id: 7,
-    question: "Can I track the status of my claim?",
-    answer:
-      "Yes, you can track your claim status by logging into your account and visiting the 'Claims' section. You can also contact our support team for real-time updates.",
-  },
+  // {
+  //   id: 7,
+  //   question: "Can I track the status of my claim?",
+  //   answer:
+  //     "Yes, you can track your claim status by logging into your account and visiting the 'Claims' section. You can also contact our support team for real-time updates.",
+  // },
   {
     id: 8,
     question: "What happens if I miss a premium payment?",
@@ -93,12 +93,12 @@ const faqs: FAQItem[] = [
     answer:
       "Yes, you can update nominee details at any time by logging into your account or contacting your insurer directly. We recommend keeping nominee details up to date.",
   },
-  {
-    id: 15,
-    question: "What is covered under my insurance policy?",
-    answer:
-      "Coverage depends on your specific plan. Log in to your account and view your policy schedule for a detailed list of inclusions. You can also contact our support team for a summary.",
-  },
+  // {
+  //   id: 15,
+  //   question: "What is covered under my insurance policy?",
+  //   answer:
+  //     "Coverage depends on your specific plan. Log in to your account and view your policy schedule for a detailed list of inclusions. You can also contact our support team for a summary.",
+  // },
   {
     id: 16,
     question: "How do I file an insurance claim?",

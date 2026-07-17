@@ -153,7 +153,7 @@ export default function TermsPage() {
     <>
       <style>{CSS}</style>
       <div className="policy-page">
-         <Preloader/>
+         
         <Navbar alwaysSolid={true} />
 
         <div className="policy-wrapper">

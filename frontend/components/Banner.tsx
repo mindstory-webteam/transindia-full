@@ -16,11 +16,6 @@ const INSURANCE_TYPES = [
   "Term Insurance","Travel Insurance",
 ];
 
-const SUM_INSURED = [
-  "₹2 Lakhs","₹3 Lakhs","₹5 Lakhs",
-  "₹10 Lakhs","₹25 Lakhs","₹50 Lakhs","₹1 Crore",
-];
-
 function ChevronDown({ color = "#0B2563" }: { color?: string }) {
   return (
     <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2.2}>
@@ -59,7 +54,7 @@ function AlertIcon() {
 
 function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
   const [insType, setInsType]       = useState("Health Insurance");
-  const [sum,     setSum]           = useState("₹5 Lakhs");
+  const [sum,     setSum]           = useState("");
   const [mobile,  setMobile]        = useState("7510715196");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback]     = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -70,6 +65,11 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
     color:"#0B2563", fontFamily:"inherit", cursor:"pointer",
     paddingRight:28, outline:"none", width:"100%",
   };
+  const inputStyle: React.CSSProperties = {
+    border:"none", outline:"none", background:"transparent",
+    fontSize:17, fontWeight:600, color:"#0B2563",
+    fontFamily:"inherit", width:"100%",
+  };
   const colStyle: React.CSSProperties = {
     flex:1, minWidth:180, padding:"0 28px",
     borderRight:"1.5px solid #E5E9F2",
@@ -79,6 +79,11 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
   const handleGetQuote = async () => {
     if (!/^[6-9]\d{9}$/.test(mobile)) {
       setFeedback({ type: "error", text: "Please enter a valid 10-digit mobile number" });
+      return;
+    }
+
+    if (!sum.trim()) {
+      setFeedback({ type: "error", text: "Please enter the sum insured amount" });
       return;
     }
 
@@ -146,12 +151,13 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
 
         <div className="ins-quote-col" style={colStyle}>
           <span style={{fontSize:10,fontWeight:400,color:"#838383",letterSpacing:1,textTransform:"uppercase"}}>Sum Insured</span>
-          <div style={{position:"relative",display:"flex",alignItems:"center"}}>
-            <select value={sum} onChange={e=>setSum(e.target.value)} style={selectStyle}>
-              {SUM_INSURED.map(s=><option key={s}>{s}</option>)}
-            </select>
-            <div style={{position:"absolute",right:0,pointerEvents:"none"}}><ChevronDown /></div>
-          </div>
+          <input
+            type="text"
+            value={sum}
+            onChange={e=>setSum(e.target.value)}
+            placeholder="e.g. ₹5 Lakhs"
+            style={inputStyle}
+          />
         </div>
 
         <div className="ins-quote-col" style={{...colStyle,borderRight:"none"}}>
