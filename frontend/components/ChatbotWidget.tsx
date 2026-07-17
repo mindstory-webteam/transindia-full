@@ -19,6 +19,8 @@ interface UserDetails {
   phone: string;
   email: string;
   query: string;
+  service?: string;
+  serviceSlug?: string;
 }
 type ChatStep =
   | "welcome"
@@ -26,7 +28,15 @@ type ChatStep =
   | "collect_phone"
   | "collect_email"
   | "collect_query"
+  | "collect_service"
   | "chat";
+
+interface Service {
+  _id: string;
+  title: string;
+  slug: string;
+  isActive: boolean;
+}
 
 // ── Brand tokens ───────────────────────────────────────────────────────────────
 const C1 = "#f15a40";   // orange-red
@@ -40,6 +50,20 @@ const QUICK_REPLIES = [
   "Renew my policy",
   "File a claim",
   "Talk to an advisor",
+];
+
+// ── Available insurance services (shown when user asks for a quote) ────────────
+const MANUAL_SERVICES: Service[] = [
+  { _id: "m1",  title: "Life Insurance",          slug: "life-insurance",          isActive: true },
+  { _id: "m2",  title: "Health Insurance",        slug: "health-insurance",        isActive: true },
+  { _id: "m3",  title: "Motor Insurance",         slug: "motor-insurance",         isActive: true },
+  { _id: "m4",  title: "Home Insurance",          slug: "home-insurance",          isActive: true },
+
+  { _id: "m6",  title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
+  { _id: "m7",  title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
+  { _id: "m8",  title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
+  { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
+
 ];
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -172,6 +196,21 @@ export default function ChatbotWidget() {
   const handleSubmitQuery = async (val: string) => {
     if (!val.trim()) return;
     const query = val.trim();
+
+    // Special flow: user wants an insurance quote → ask which service first,
+    // instead of submitting the lead immediately.
+    if (query.toLowerCase() === "get insurance quote") {
+      pushUserMsg(query);
+      setUserDetails(d => ({ ...d, query }));
+      setIsLoading(true);
+      setTimeout(() => {
+        setIsLoading(false);
+        setStep("collect_service");
+        pushAssistantMsg("Great choice! Which insurance service are you interested in?");
+      }, 600);
+      return;
+    }
+
     const payload = { ...userDetails, query };
     setUserDetails(payload);
     pushUserMsg(query);
@@ -199,16 +238,50 @@ export default function ChatbotWidget() {
     }, 600);
   };
 
+  const handleSelectService = async (service: Service) => {
+    pushUserMsg(service.title);
+    setIsLoading(true);
+
+    const payload: UserDetails = {
+      ...userDetails,
+      query: userDetails.query || "Get insurance quote",
+      service: service.title,
+      serviceSlug: service.slug,
+    };
+    setUserDetails(payload);
+
+    try {
+      const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
+      await fetch(`${API_BASE}/chatbotleads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      localStorage.setItem("ti_chatbot_last_submission", new Date().toDateString());
+    } catch (err) {
+      console.error("Failed to save chatbot lead", err);
+    }
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setStep("chat");
+      pushAssistantMsg(
+        `Thank you! We've noted your interest in ${service.title}.\n\nOur team will reach out to you at ${payload.phone} shortly with a personalised quote. Feel free to ask me anything else in the meantime.`
+      );
+    }, 600);
+  };
+
   const handleSendMessage = () => {
     if (!inputValue.trim() || isLoading) return;
     const value = inputValue.trim();
     setInputValue("");
 
     switch (step) {
-      case "collect_name":  return handleSubmitName(value);
-      case "collect_phone": return handleSubmitPhone(value);
-      case "collect_email": return handleSubmitEmail(value);
-      case "collect_query": return handleSubmitQuery(value);
+      case "collect_name":    return handleSubmitName(value);
+      case "collect_phone":   return handleSubmitPhone(value);
+      case "collect_email":   return handleSubmitEmail(value);
+      case "collect_query":   return handleSubmitQuery(value);
+      case "collect_service": return handleSelectService({ _id: "custom", title: value, slug: "", isActive: true });
     }
 
     // Free chat phase (backend not yet connected)
@@ -226,18 +299,19 @@ export default function ChatbotWidget() {
 
   const getPlaceholder = () => {
     switch (step) {
-      case "collect_name":  return "Enter your full name...";
-      case "collect_phone": return "Enter 10-digit mobile number...";
-      case "collect_email": return "Enter your email address...";
-      case "collect_query": return "Describe your query...";
-      default:              return "Type your message...";
+      case "collect_name":    return "Enter your full name...";
+      case "collect_phone":   return "Enter 10-digit mobile number...";
+      case "collect_email":   return "Enter your email address...";
+      case "collect_query":   return "Describe your query...";
+      case "collect_service": return "Or type the service you need...";
+      default:                return "Type your message...";
     }
   };
 
   const stepProgress: Record<ChatStep, number> = {
-    welcome: 0, collect_name: 25, collect_phone: 50, collect_email: 75, collect_query: 100, chat: 100,
+    welcome: 0, collect_name: 25, collect_phone: 50, collect_email: 75, collect_query: 100, collect_service: 100, chat: 100,
   };
-  const showProgress = ["collect_name","collect_phone","collect_email","collect_query"].includes(step);
+  const showProgress = ["collect_name","collect_phone","collect_email","collect_query","collect_service"].includes(step);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -570,10 +644,11 @@ export default function ChatbotWidget() {
                     fontSize: 12, color: C1,
                     display: "flex", alignItems: "center", gap: 7, flexShrink: 0,
                   }}>
-                    {step === "collect_name"  && <><User size={13} /> Step 1 of 4</>}
-                    {step === "collect_phone" && <><Phone size={13} /> Step 2 of 4</>}
-                    {step === "collect_email" && <><Mail size={13} /> Step 3 of 4</>}
-                    {step === "collect_query" && <><MessageSquare size={13} /> Step 4 of 4</>}
+                    {step === "collect_name"    && <><User size={13} /> Step 1 of 4</>}
+                    {step === "collect_phone"   && <><Phone size={13} /> Step 2 of 4</>}
+                    {step === "collect_email"   && <><Mail size={13} /> Step 3 of 4</>}
+                    {step === "collect_query"   && <><MessageSquare size={13} /> Step 4 of 4</>}
+                    {step === "collect_service" && <><MessageSquare size={13} /> Select a service</>}
                   </div>
                 )}
 
@@ -645,12 +720,23 @@ export default function ChatbotWidget() {
                   </div>
                 )}
 
-                {/* Quick replies */}
+                {/* Quick replies (initial query prompt) */}
                 {step === "collect_query" && !isLoading && (
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 4, paddingLeft: 35 }}>
                     {QUICK_REPLIES.map(qr => (
                       <button key={qr} className="ctw-quick-btn" onClick={() => handleSubmitQuery(qr)}>
                         {qr}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Service selection (shown after "Get insurance quote") */}
+                {step === "collect_service" && !isLoading && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginTop: 4, paddingLeft: 35 }}>
+                    {MANUAL_SERVICES.filter(s => s.isActive).map(s => (
+                      <button key={s._id} className="ctw-quick-btn" onClick={() => handleSelectService(s)}>
+                        {s.title}
                       </button>
                     ))}
                   </div>
@@ -680,6 +766,11 @@ export default function ChatbotWidget() {
                       <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <Mail size={12} style={{ color: C1, flexShrink: 0 }} /> {userDetails.email}
                       </span>
+                      {userDetails.service && (
+                        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <MessageSquare size={12} style={{ color: C1, flexShrink: 0 }} /> {userDetails.service}
+                        </span>
+                      )}
                     </div>
                   </div>
                 )}

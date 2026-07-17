@@ -5,7 +5,7 @@ const ChatbotLead = require("../models/ChatbotLead");
 // @access  Public
 exports.createChatbotLead = async (req, res, next) => {
   try {
-    const { name, phone, email, query } = req.body;
+    const { name, phone, email, query, service, serviceSlug } = req.body;
 
     if (!name || !phone || !email || !query) {
       return res.status(400).json({ success: false, message: "Please provide all required fields" });
@@ -16,6 +16,8 @@ exports.createChatbotLead = async (req, res, next) => {
       phone,
       email,
       query,
+      service: service || "",
+      serviceSlug: serviceSlug || "",
     });
 
     res.status(201).json({ success: true, data: lead });

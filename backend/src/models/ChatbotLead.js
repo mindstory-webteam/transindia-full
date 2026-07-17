@@ -21,6 +21,16 @@ const ChatbotLeadSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    service: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    serviceSlug: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["Pending", "Resolved"],

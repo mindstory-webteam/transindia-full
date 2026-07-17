@@ -91,7 +91,8 @@ export default function ChatbotLeadsPage() {
       q.name?.toLowerCase().includes(sText) ||
       q.phone?.toLowerCase().includes(sText) ||
       q.email?.toLowerCase().includes(sText) ||
-      q.query?.toLowerCase().includes(sText);
+      q.query?.toLowerCase().includes(sText) ||
+      q.service?.toLowerCase().includes(sText);
     return matchStatus && matchSearch;
   });
 
@@ -104,7 +105,7 @@ export default function ChatbotLeadsPage() {
   const exportExcel = () => {
     if (!filtered.length) { toast.error("No chatbot leads to export"); return; }
 
-    const headers = ["Date", "Name", "Phone", "Email", "Query", "Status"];
+    const headers = ["Date", "Name", "Phone", "Email", "Service", "Query", "Status"];
     const aoa = [headers];
     
     filtered.forEach((q) => {
@@ -113,6 +114,7 @@ export default function ChatbotLeadsPage() {
         q.name || "",
         q.phone || "",
         q.email || "",
+        q.service || "—",
         q.query || "",
         STATUSES.find(s => s.value === (q.status || "Pending"))?.label || q.status || "Pending",
       ];
@@ -125,6 +127,7 @@ export default function ChatbotLeadsPage() {
       { wch: 18 },
       { wch: 15 },
       { wch: 22 },
+      { wch: 20 },
       { wch: 35 },
       { wch: 14 },
     ];
@@ -154,12 +157,13 @@ export default function ChatbotLeadsPage() {
       54
     );
 
-    const head = [["Date", "Name", "Phone", "Email", "Query", "Status"]];
+    const head = [["Date", "Name", "Phone", "Email", "Service", "Query", "Status"]];
     const body = filtered.map((q) => [
       new Date(q.createdAt).toLocaleDateString("en-IN"),
       q.name || "",
       q.phone || "",
       q.email || "",
+      q.service || "—",
       q.query || "—",
       STATUSES.find(s => s.value === (q.status || "Pending"))?.label || q.status || "Pending",
     ]);
@@ -268,12 +272,13 @@ export default function ChatbotLeadsPage() {
       ) : (
         <div style={{ background:"#fff", borderRadius:12, border:"1px solid var(--border)", overflow:"hidden" }}>
           <div style={{ overflowX: "auto" }}>
-            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth: 900 }}>
+            <table style={{ width:"100%", borderCollapse:"collapse", fontSize:13, minWidth: 1000 }}>
               <thead>
               <tr style={{ background:"#F8FAFC", borderBottom:"1px solid var(--border)" }}>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Date</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Name</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Contact Info</th>
+                <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Service</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Query</th>
                 <th style={{ padding:"12px 16px", textAlign:"left", fontWeight:600, color:"#64748B" }}>Status</th>
                 <th style={{ padding:"12px 16px", textAlign:"right", fontWeight:600, color:"#64748B" }}>Actions</th>
@@ -291,6 +296,19 @@ export default function ChatbotLeadsPage() {
                   <td style={{ padding:"12px 16px" }}>
                     <div>{q.phone}</div>
                     <div style={{ color:"#64748B", fontSize:12 }}>{q.email}</div>
+                  </td>
+                  <td style={{ padding:"12px 16px" }}>
+                    {q.service ? (
+                      <span style={{
+                        display: "inline-block", padding: "3px 10px", borderRadius: 8,
+                        background: "#F3E8FF", color: "#7C3AED", fontSize: 11.5, fontWeight: 700,
+                        whiteSpace: "nowrap",
+                      }}>
+                        {q.service}
+                      </span>
+                    ) : (
+                      <span style={{ color: "#94A3B8" }}>—</span>
+                    )}
                   </td>
                   <td style={{ padding:"12px 16px", color:"#475569" }}>
                     {q.query ? (
@@ -332,7 +350,7 @@ export default function ChatbotLeadsPage() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={6} style={{ padding:32, textAlign:"center", color:"#94A3B8" }}>No chatbot leads found.</td></tr>
+                <tr><td colSpan={7} style={{ padding:32, textAlign:"center", color:"#94A3B8" }}>No chatbot leads found.</td></tr>
               )}
             </tbody>
             </table>
