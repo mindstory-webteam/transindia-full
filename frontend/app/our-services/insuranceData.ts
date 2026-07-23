@@ -950,25 +950,25 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       {
         poster: "/images/movies/thudram.jpg",
         title: "Thudarum",
-        year: "2024",
+        year: "2025",
         genre: "Rajaputras Visual Media",
       },
       {
         poster: "/images/movies/lokah.jpg",
         title: "Lokha",
-        year: "2024",
+        year: "2025",
         genre: "Wayfarer Films",
       },
       {
         poster: "/images/movies/Kathanar.jpg",
         title: "Kathanar",
-        year: "2023",
+        year: "ONGOING PROJECT",
         genre: "Gokulam Gopalan Productions",
       },
       {
         poster: "/images/movies/dear student.jpg",
         title: "Dear Students",
-        year: "2023",
+        year: "ONGOING PROJECT",
         genre: "Pauly Jr. Pictures",
       },
       {
