@@ -1068,53 +1068,90 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
 // PREMIUM CALCULATOR SECTION — with GET EXACT QUOTE opening modal
 // ═════════════════════════════════════════════════════════════════════════════
 
-const PC_STATES = [
-  "Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "Telangana", "Gujarat",
-  "West Bengal", "Kerala", "Uttar Pradesh", "Rajasthan", "Punjab", "Haryana",
-  "Madhya Pradesh", "Andhra Pradesh", "Bihar", "Odisha",
+// ── Premium chart (exact figures from the insurer rate card) ──────────────────
+// Structure: [siBand][combo][ageBand] -> [minPremium, maxPremium] | null (no listed rate)
+
+type PCAgeBand = "25-35" | "31-35" | "36-45" | "46-55" | "56-65" | "66-70";
+type PCSIBand = "5L-10L" | "15L-20L" | "25L-50L" | "1Cr+";
+type PCCombo = "1A" | "1A+1C" | "2A" | "2A+1C" | "2A+2C" | "2A+3C";
+type PCRange = [number, number] | null;
+
+const PC_AGE_BANDS: { value: PCAgeBand; label: string }[] = [
+  { value: "25-35", label: "25 to 35" },
+  { value: "31-35", label: "31 to 35" },
+  { value: "36-45", label: "36 to 45" },
+  { value: "46-55", label: "46 to 55" },
+  { value: "56-65", label: "56 to 65" },
+  { value: "66-70", label: "66 to 70" },
 ];
 
-const PC_TIER1_STATES = new Set(["Maharashtra", "Delhi", "Karnataka", "Tamil Nadu", "Telangana", "Gujarat", "West Bengal"]);
-
-type PCCoverType = "Individual" | "Family" | "Senior";
-
-const PC_COVER_OPTIONS: { value: PCCoverType; label: string; icon: string }[] = [
-  { value: "Individual", label: "Individual", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
-  { value: "Family", label: "Family", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
-  { value: "Senior", label: "Senior", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - SENIOR.png" },
+const PC_SI_BANDS: { value: PCSIBand; label: string }[] = [
+  { value: "5L-10L", label: "5 Lakhs to 10 Lakhs" },
+  { value: "15L-20L", label: "15 Lakhs to 20 Lakhs" },
+  { value: "25L-50L", label: "25 Lakhs to 50 Lakhs" },
+  { value: "1Cr+", label: "1 Cr to Unlimited" },
 ];
-function pcEstimate(age: number, coverType: PCCoverType, sumInsuredLakh: number, stateName: string) {
-  const ageFactor =
-    age <= 25 ? 0.85 :
-    age <= 35 ? 1.0 :
-    age <= 45 ? 1.4 :
-    age <= 55 ? 2.0 :
-    age <= 65 ? 2.8 : 3.8;
-  const coverFactor = coverType === "Family" ? 1.6 : coverType === "Senior" ? 1.8 : 1;
-  const cityFactor = PC_TIER1_STATES.has(stateName) ? 1.15 : 1.0;
-  const BASE_RATE_PER_LAKH = 300;
-  const yearlyRaw = sumInsuredLakh * BASE_RATE_PER_LAKH * ageFactor * coverFactor * cityFactor;
-  const yearly = Math.round(yearlyRaw / 10) * 10;
-  const monthly = Math.round(yearly / 12);
-  return { yearly, monthly };
+
+const PC_COMBOS: { value: PCCombo; label: string; icon: string }[] = [
+  { value: "1A", label: "1 Adult", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
+  { value: "1A+1C", label: "1 Adult + 1 Child", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
+  { value: "2A", label: "2 Adults", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+  { value: "2A+1C", label: "2 Adults + 1 Child", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+  { value: "2A+2C", label: "2 Adults + 2 Children", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+  { value: "2A+3C", label: "2 Adults + 3 Children", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+];
+
+const PC_TABLE: Record<PCSIBand, Record<PCCombo, Record<PCAgeBand, PCRange>>> = {
+  "5L-10L": {
+    "1A":    { "25-35": [6500, 8000],  "31-35": [7000, 8000],   "36-45": [8000, 9500],   "46-55": [13000, 15000], "56-65": [16000, 18500], "66-70": [21000, 23000] },
+    "1A+1C": { "25-35": [9000, 11000], "31-35": [9500, 12000],  "36-45": [11000, 13500], "46-55": [15500, 18000], "56-65": null,            "66-70": null },
+    "2A":    { "25-35": [9500, 11700], "31-35": [10000, 12000], "36-45": [11000, 13200], "46-55": [17000, 19200], "56-65": [25000, 27500], "66-70": [33500, 39000] },
+    "2A+1C": { "25-35": [12000, 15000],"31-35": [13000, 16000], "36-45": [14750, 17750], "46-55": [20700, 23700], "56-65": null,            "66-70": null },
+    "2A+2C": { "25-35": [14500, 18000],"31-35": [14000, 18000], "36-45": [17000, 21500], "46-55": [23000, 27500], "56-65": null,            "66-70": null },
+    "2A+3C": { "25-35": [17500, 22000],"31-35": [18000, 23000], "36-45": [20000, 24500], "46-55": [38500, 43000], "56-65": null,            "66-70": null },
+  },
+  "15L-20L": {
+    "1A":    { "25-35": [9600, 10700], "31-35": [10000, 11000], "36-45": [13000, 14100], "46-55": [20000, 22500], "56-65": [22000, 24000], "66-70": [25000, 27000] },
+    "1A+1C": { "25-35": [13000, 15000],"31-35": [14000, 16000], "36-45": [17000, 19000], "46-55": [23500, 25500], "56-65": null,            "66-70": null },
+    "2A":    { "25-35": [14000, 16000],"31-35": [14500, 16000], "36-45": [16000, 18000], "46-55": [25800, 27800], "56-65": [30000, 32000], "66-70": [40000, 43000] },
+    "2A+1C": { "25-35": [18000, 20000],"31-35": [19000, 21000], "36-45": [22000, 24000], "46-55": [31000, 33000], "56-65": null,            "66-70": null },
+    "2A+2C": { "25-35": [21000, 24000],"31-35": [22000, 24000], "36-45": [25000, 28000], "46-55": [34500, 37500], "56-65": null,            "66-70": null },
+    "2A+3C": { "25-35": [26200, 29000],"31-35": [27000, 30000], "36-45": [30000, 32800], "46-55": [38700, 41500], "56-65": null,            "66-70": null },
+  },
+  "25L-50L": {
+    "1A":    { "25-35": [11000, 13200],"31-35": [11800, 14200], "36-45": [14500, 16700], "46-55": [22500, 25000], "56-65": [24500, 26000], "66-70": [28000, 32000] },
+    "1A+1C": { "25-35": [15000, 18000],"31-35": [16000, 20000], "36-45": [19000, 22000], "46-55": [27000, 30000], "56-65": null,            "66-70": null },
+    "2A":    { "25-35": [16000, 19200],"31-35": [17000, 20000], "36-45": [19000, 22200], "46-55": [29500, 32700], "56-65": [34000, 37200], "66-70": [45000, 52000] },
+    "2A+1C": { "25-35": [21000, 25000],"31-35": [22000, 26000], "36-45": [25000, 29000], "46-55": [35500, 39500], "56-65": null,            "66-70": null },
+    "2A+2C": { "25-35": [25000, 30000],"31-35": [25000, 28000], "36-45": [29000, 34000], "46-55": [39400, 44000], "56-65": null,            "66-70": null },
+    "2A+3C": { "25-35": [30000, 36000],"31-35": [30000, 36000], "36-45": [34000, 40000], "46-55": [44200, 47000], "56-65": null,            "66-70": null },
+  },
+  "1Cr+": {
+    "1A":    { "25-35": [15000, 18000],"31-35": [16200, 20000], "36-45": [20000, 26000], "46-55": [31000, 34000], "56-65": [32000, 35000], "66-70": [36000, 39500] },
+    "1A+1C": { "25-35": [21000, 26000],"31-35": [22000, 28000], "36-45": [26500, 31500], "46-55": [37000, 42000], "56-65": null,            "66-70": null },
+    "2A":    { "25-35": [22000, 27500],"31-35": [23000, 28500], "36-45": [26000, 31000], "46-55": [40500, 46000], "56-65": [44000, 49500], "66-70": [58500, 71000] },
+    "2A+1C": { "25-35": [29000, 36400],"31-35": [30000, 38000], "36-45": [34600, 42000], "46-55": [48600, 56000], "56-65": null,            "66-70": null },
+    "2A+2C": { "25-35": [34000, 43000],"31-35": [35000, 43000], "36-45": [39000, 48000], "46-55": [54000, 63000], "56-65": null,            "66-70": null },
+    "2A+3C": { "25-35": [41000, 51000],"31-35": [41000, 51000], "36-45": [44000, 54000], "46-55": [60500, 70500], "56-65": null,            "66-70": null },
+  },
+};
+
+function pcLookup(siBand: PCSIBand, combo: PCCombo, ageBand: PCAgeBand): PCRange {
+  return PC_TABLE[siBand]?.[combo]?.[ageBand] ?? null;
 }
 
-const pcFormatSumInsured = (lakh: number) =>
-  lakh >= 100 ? "₹1 Crore" : `₹${lakh} Lakh`;
+const fmtRange = (min: number, max: number): string => `${fmt(min)} - ${fmt(max)}`;
 
 function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; serviceTitle: string }) {
-  const [age, setAge] = useState(31);
-  const [coverType, setCoverType] = useState<PCCoverType>("Individual");
-  const [sumInsuredLakh, setSumInsuredLakh] = useState(23);
-  const [stateName, setStateName] = useState("Maharashtra");
+  const [ageBand, setAgeBand] = useState<PCAgeBand>("25-35");
+  const [combo, setCombo] = useState<PCCombo>("2A");
+  const [siBand, setSiBand] = useState<PCSIBand>("5L-10L");
   const [showModal, setShowModal] = useState(false);
 
-  const { yearly, monthly } = pcEstimate(age, coverType, sumInsuredLakh, stateName);
-
-  const decAge = () => setAge((a) => Math.max(18, a - 1));
-  const incAge = () => setAge((a) => Math.min(75, a + 1));
-
-  const sumPercent = ((sumInsuredLakh - 1) / (100 - 1)) * 100;
+  const range = pcLookup(siBand, combo, ageBand);
+  const ageBandLabel = PC_AGE_BANDS.find((a) => a.value === ageBand)?.label ?? ageBand;
+  const comboLabel = PC_COMBOS.find((c) => c.value === combo)?.label ?? combo;
+  const siBandLabel = PC_SI_BANDS.find((s) => s.value === siBand)?.label ?? siBand;
 
   return (
     <>
@@ -1137,27 +1174,31 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
             {/* LEFT — inputs */}
             <div className="pc-left">
               <div className="pc-field">
-                <span className="pc-label">YOUR AGE</span>
-                <div className="pc-age-row">
-                  <button type="button" className="pc-step-btn" onClick={decAge} aria-label="Decrease age">−</button>
-                  <span className="pc-age-value">{age}</span>
-                  <button type="button" className="pc-step-btn" onClick={incAge} aria-label="Increase age">+</button>
-                </div>
-                <span className="pc-hint">18 – 75 years</span>
+                <span className="pc-label">AGE BAND</span>
+                <select
+                  value={ageBand}
+                  onChange={(e) => setAgeBand(e.target.value as PCAgeBand)}
+                  className="pc-select"
+                >
+                  {PC_AGE_BANDS.map((a) => (
+                    <option key={a.value} value={a.value}>{a.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div className="pc-field">
-                <span className="pc-label">COVERAGE TYPE</span>
-                <div className="pc-cover-row">
-                  {PC_COVER_OPTIONS.map((opt) => (
+                <span className="pc-label">ADULTS / CHILDREN</span>
+                <div className="pc-cover-row" style={{ flexWrap: "wrap" }}>
+                  {PC_COMBOS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      className={`pc-cover-btn${coverType === opt.value ? " pc-cover-btn--active" : ""}`}
-                      onClick={() => setCoverType(opt.value)}
+                      className={`pc-cover-btn${combo === opt.value ? " pc-cover-btn--active" : ""}`}
+                      style={{ flex: "1 1 30%", minWidth: 84 }}
+                      onClick={() => setCombo(opt.value)}
                     >
                       <img src={opt.icon} alt={opt.label} className="pc-cover-icon" />
-                      <span className="pc-cover-label">{opt.label}</span>
+                      <span className="pc-cover-label">{opt.value}</span>
                     </button>
                   ))}
                 </div>
@@ -1165,35 +1206,13 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
 
               <div className="pc-field">
                 <span className="pc-label">SUM INSURED</span>
-                <div className="pc-slider-wrap">
-                  <input
-                    type="range"
-                    min={1}
-                    max={100}
-                    step={1}
-                    value={sumInsuredLakh}
-                    onChange={(e) => setSumInsuredLakh(Number(e.target.value))}
-                    className="pc-slider"
-                    style={{ background: `linear-gradient(to right, #0D9488 ${sumPercent}%, #DCEFEC ${sumPercent}%)` }}
-                    aria-label="Sum insured"
-                  />
-                </div>
-                <div className="pc-slider-labels">
-                  <span>₹1 Lakh</span>
-                  <span className="pc-slider-value">{pcFormatSumInsured(sumInsuredLakh)}</span>
-                  <span>₹1 Crore</span>
-                </div>
-              </div>
-
-              <div className="pc-field">
-                <span className="pc-label">YOUR STATE</span>
                 <select
-                  value={stateName}
-                  onChange={(e) => setStateName(e.target.value)}
+                  value={siBand}
+                  onChange={(e) => setSiBand(e.target.value as PCSIBand)}
                   className="pc-select"
                 >
-                  {PC_STATES.map((s) => (
-                    <option key={s}>{s}</option>
+                  {PC_SI_BANDS.map((s) => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </select>
               </div>
@@ -1202,20 +1221,42 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
             {/* RIGHT — live estimate */}
             <div className="pc-right">
               <span className="pc-est-label">ESTIMATED PREMIUM</span>
-              <div className="pc-est-amount">
-                <span className="pc-est-value">{fmt(yearly)}</span>
-                <span className="pc-est-unit">/year*</span>
-              </div>
-              <p className="pc-est-sub">or {fmt(monthly)}/month</p>
+
+              {range ? (
+                <>
+                  <div className="pc-est-amount">
+                    <span className="pc-est-value" style={{ fontSize: "clamp(24px, 3vw, 34px)" }}>
+                      {fmtRange(range[0], range[1])}
+                    </span>
+                    <span className="pc-est-unit">/year*</span>
+                  </div>
+                  <p className="pc-est-sub">
+                    or {fmtRange(Math.round(range[0] / 12), Math.round(range[1] / 12))}/month
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="pc-est-amount">
+                    <span className="pc-est-value" style={{ fontSize: "clamp(16px, 2vw, 20px)" }}>
+                      Custom Quote
+                    </span>
+                  </div>
+                  <p className="pc-est-sub">This combination needs a personalised quote from our experts.</p>
+                </>
+              )}
 
               <div className="pc-coverage-box">
                 <div className="pc-coverage-row">
+                  <span className="pc-coverage-label">AGE BAND</span>
+                  <span className="pc-coverage-value">{ageBandLabel}</span>
+                </div>
+                <div className="pc-coverage-row">
                   <span className="pc-coverage-label">COVERAGE</span>
-                  <span className="pc-coverage-value">{coverType}</span>
+                  <span className="pc-coverage-value">{comboLabel}</span>
                 </div>
                 <div className="pc-coverage-row">
                   <span className="pc-coverage-label">SUM INSURED</span>
-                  <span className="pc-coverage-value">{pcFormatSumInsured(sumInsuredLakh)}</span>
+                  <span className="pc-coverage-value">{siBandLabel}</span>
                 </div>
               </div>
 
@@ -1228,7 +1269,7 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
                 GET EXACT QUOTE →
               </button>
 
-              <p className="pc-disclaimer">*Indicative premium and may vary based on insurer underwriting.</p>
+              <p className="pc-disclaimer">*Premium range as per current insurer rate card. Final price depends on insurer underwriting.</p>
             </div>
           </div>
         </div>
