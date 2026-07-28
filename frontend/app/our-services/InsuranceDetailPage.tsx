@@ -1093,12 +1093,12 @@ const PC_SI_BANDS: { value: PCSIBand; label: string }[] = [
 ];
 
 const PC_COMBOS: { value: PCCombo; label: string; icon: string }[] = [
-  { value: "1A", label: "1 Adult", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
-  { value: "1A+1C", label: "1 Adult + 1 Child", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - INDIVIDUAL.png" },
-  { value: "2A", label: "2 Adults", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
-  { value: "2A+1C", label: "2 Adults + 1 Child", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
-  { value: "2A+2C", label: "2 Adults + 2 Children", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
-  { value: "2A+3C", label: "2 Adults + 3 Children", icon: "/images/services/SERVICE - HEALTH INSURANCE/PREMIUM CALCULATOR - FAMILY.png" },
+  { value: "1A", label: "1 Adult", icon: "/images/icon/1A.png" },
+  { value: "1A+1C", label: "1 Adult + 1 Child", icon: "/images/icon/1A1C.png" },
+  { value: "2A", label: "2 Adults", icon: "/images/icon/2A.png" },
+  { value: "2A+1C", label: "2 Adults + 1 Child", icon: "/images/icon/2A1C.png" },
+  { value: "2A+2C", label: "2 Adults + 2 Children", icon: "/images/icon/2A2C.png" },
+  { value: "2A+3C", label: "2 Adults + 3 Children", icon: "/images/icon/2A3C.png" },
 ];
 
 const PC_TABLE: Record<PCSIBand, Record<PCCombo, Record<PCAgeBand, PCRange>>> = {
