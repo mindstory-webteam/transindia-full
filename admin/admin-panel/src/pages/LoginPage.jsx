@@ -624,14 +624,14 @@ export default function LoginPageWithVideo() {
           </form>
 
           {/* Footer with Demo Credentials */}
-          <div className="login-footer">
+          {/* <div className="login-footer">
             <span className="login-footer-title">Demo Credentials</span>
             <div className="login-footer-creds">
               admin@transindia.com
               <br />
               1234567
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
