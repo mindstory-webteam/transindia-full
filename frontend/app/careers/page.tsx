@@ -574,19 +574,22 @@ const CSS = `
     justify-content: center;
     padding: 7px 18px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: #fff;
-    background: #111;
-    border-radius: 999px;
+    background: #EC4F34;
+    border: none;
+    border-radius: 8px;
     text-decoration: none;
     white-space: nowrap;
-    letter-spacing: 0.01em;
-    transition: background 0.18s, transform 0.15s;
+    cursor: pointer;
+    font-family: 'matterregular', sans-serif;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
   }
 
   .job-apply:hover {
-    background: #ec4f34;
+    background: #d44026;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236,79,52,0.15);
   }
 
   /* ── Empty state ── */
