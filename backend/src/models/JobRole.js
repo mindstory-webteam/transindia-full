@@ -11,6 +11,12 @@ const jobRoleSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    department: { type: String, trim: true },
+    role: { type: String, trim: true },
+    grade: { type: String, trim: true },
+    reportingTo: { type: String, trim: true },
+    responsibilities: [{ type: String, trim: true }],
+    skills: [{ type: String, trim: true }],
     tags: [
       {
         type: String,

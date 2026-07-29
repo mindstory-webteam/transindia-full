@@ -34,7 +34,7 @@ const productLinks = MANUAL_SERVICES.map((s) => ({
 
 const companyLinks = [
   { label: "About us",          href: "/about" },
-  { label: "Become an advisor", href: "#" },
+  // { label: "Become an advisor", href: "#" },
   { label: "Careers",           href: "/careers" },
 ];
 

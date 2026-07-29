@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
@@ -19,6 +20,7 @@ interface JobRole {
 }
 
 export default function CareersPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<JobRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -106,12 +108,7 @@ export default function CareersPage() {
                 We're looking for passionate people to join us. We value flat hierarchies, clear communication, and full ownership to build India's most trusted insurance marketplace.
               </p>
 
-              <div className="careers-btns">
-                <a href="#jobs" className="careers-btn-orange" onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector('.careers-jobs')?.scrollIntoView({ behavior: 'smooth' });
-                }}>View Open Roles</a>
-              </div>
+
             </div>
 
             <div className="careers-mobile-visual">
@@ -143,10 +140,10 @@ export default function CareersPage() {
                   <h2 className="job-title">{job.title}</h2>
                   {/* Desktop Apply — hidden on mobile */}
                   <button
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => router.push(`/careers/${job._id}`)}
                     className="job-apply job-apply-desktop"
                   >
-                    Apply
+                    View
                   </button>
                 </div>
                 <p className="job-desc">{job.description}</p>
@@ -180,10 +177,10 @@ export default function CareersPage() {
                   )}
                   {/* Mobile Apply — shown only on mobile, sits next to tags */}
                   <button
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => router.push(`/careers/${job._id}`)}
                     className="job-apply job-apply-mobile"
                   >
-                    Apply
+                    View
                   </button>
                 </div>
               </div>
@@ -525,7 +522,7 @@ const CSS = `
 
   .job-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 8px;

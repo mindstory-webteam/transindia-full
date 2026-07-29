@@ -96,6 +96,7 @@ exports.getAdminJobs = async (req, res, next) => {
 // @access  Private (Admin)
 exports.createJob = async (req, res, next) => {
   try {
+    console.log("CREATE JOB PAYLOAD:", req.body);
     // Check if order is already used
     if (req.body.order !== undefined) {
       const existingJob = await JobRole.findOne({ order: req.body.order });
@@ -115,6 +116,7 @@ exports.createJob = async (req, res, next) => {
 // @access  Private (Admin)
 exports.updateJob = async (req, res, next) => {
   try {
+    console.log("UPDATE JOB PAYLOAD:", req.body);
     // Check if order is already used
     if (req.body.order !== undefined) {
       const existingJob = await JobRole.findOne({ order: req.body.order });
