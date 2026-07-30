@@ -333,28 +333,28 @@ const CSS = `
   .cd-job-body { display: flex; flex-direction: column; gap: 32px; }
 
   /* Static Content Styling (Light Mode) */
-  .cd-meta-table { display: flex; flex-direction: column; gap: 16px; font-size: 16px; }
+  .cd-meta-table { display: flex; flex-direction: column; gap: 16px; font-size: 17px; }
   .cd-meta-row { display: grid; grid-template-columns: 160px 20px 1fr; align-items: flex-start; }
   .cd-meta-label { font-weight: 700; color: #334155; }
   .cd-meta-colon { font-weight: 700; color: #94a3b8; text-align: center; }
   .cd-meta-value { color: #0f172a; }
   .cd-meta-value-bold { font-weight: 700; color: #0f172a; }
-
+ 
   .cd-spacer { border-top: 1px solid #f1f5f9; margin: 8px 0; }
-
-  .cd-rich-text { display: flex; flex-direction: column; gap: 16px; font-size: 15px; color: #0f172a; line-height: 1.5; }
-  .cd-rich-text h1 { font-size: 1.8em; font-weight: 700; margin-top: 16px; margin-bottom: 8px; color: #0f172a; }
-  .cd-rich-text h2 { font-size: 1.4em; font-weight: 600; margin-top: 14px; margin-bottom: 6px; color: #0f172a; }
-  .cd-rich-text h3 { font-size: 1.2em; font-weight: 600; margin-top: 12px; margin-bottom: 4px; color: #0f172a; }
-  .cd-rich-text p { margin-bottom: 10px; color: #0f172a; }
-  .cd-rich-text blockquote { border-left: 4px solid #cbd5e1; padding-left: 12px; color: #64748b; font-style: italic; margin: 10px 0; }
-  .cd-rich-text ul { list-style-type: disc !important; padding-left: 24px; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
-  .cd-rich-text ul li { font-size: 15px; color: #0f172a; line-height: 1.5; }
+ 
+  .cd-rich-text { font-size: 18px; color: #0f172a; line-height: 1.6; }
+  .cd-rich-text h1, .cd-rich-text h1 * { font-size: 2.2em !important; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: #0f172a; }
+  .cd-rich-text h2, .cd-rich-text h2 * { font-size: 1.8em !important; font-weight: 600; margin-top: 20px; margin-bottom: 6px; color: #0f172a; }
+  .cd-rich-text h3, .cd-rich-text h3 * { font-size: 1.5em !important; font-weight: 600; margin-top: 16px; margin-bottom: 4px; color: #0f172a; }
+  .cd-rich-text p, .cd-rich-text p *, .cd-rich-text span, .cd-rich-text font { font-size: 18px !important; margin-top: 0; margin-bottom: 12px; color: #0f172a; }
+  .cd-rich-text blockquote { border-left: 4px solid #cbd5e1; padding-left: 12px; color: #64748b; font-style: italic; margin: 16px 0; }
+  .cd-rich-text ul { list-style-type: disc !important; padding-left: 24px; margin: 8px 0 16px 0; display: flex; flex-direction: column; gap: 4px; }
+  .cd-rich-text ul li, .cd-rich-text ul li * { font-size: 18px !important; color: #0f172a; line-height: 1.6; }
   .cd-rich-text ul li::marker { color: #0f172a; }
-  .cd-rich-text ol { list-style-type: decimal !important; padding-left: 24px; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
-  .cd-rich-text ol li { font-size: 15px; color: #0f172a; line-height: 1.5; }
+  .cd-rich-text ol { list-style-type: decimal !important; padding-left: 24px; margin: 8px 0 16px 0; display: flex; flex-direction: column; gap: 4px; }
+  .cd-rich-text ol li, .cd-rich-text ol li * { font-size: 18px !important; color: #0f172a; line-height: 1.6; }
   .cd-rich-text ol li::marker { color: #0f172a; }
-  .cd-rich-text pre { background: #f1f5f9; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 8px 0; }
+  .cd-rich-text pre { background: #f1f5f9; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 12px 0; }
   .cd-rich-text code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
   .cd-rich-text img { max-width: 100%; height: auto; border-radius: 6px; margin: 12px 0; display: block; }
 

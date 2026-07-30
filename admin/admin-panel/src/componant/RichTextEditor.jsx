@@ -109,6 +109,7 @@ export default function RichTextEditor({ value, onChange }) {
         background: "#fff",
         borderRadius: 0,
         border: "none",
+        overflow: "hidden",
       }
     : {
         display: "flex",
@@ -125,8 +126,9 @@ export default function RichTextEditor({ value, onChange }) {
         overflowY: "auto",
         padding: 24,
         outline: "none",
-        fontSize: 16,
+        fontSize: 18,
         lineHeight: 1.6,
+        height: "100%",
       }
     : {
         minHeight: 180,
@@ -134,22 +136,25 @@ export default function RichTextEditor({ value, onChange }) {
         overflowY: "auto",
         padding: "12px 16px",
         outline: "none",
-        fontSize: 15,
-        lineHeight: 1.5,
+        fontSize: 18,
+        lineHeight: 1.6,
       };
 
   return (
     <div style={containerStyles} className="rte-container">
       {/* Scope CSS for rendering contentEditable preview cleanly */}
       <style>{`
-        .rte-editor h1 { font-size: 1.8em; font-weight: 700; margin-top: 16px; margin-bottom: 8px; }
-        .rte-editor h2 { font-size: 1.4em; font-weight: 600; margin-top: 14px; margin-bottom: 6px; }
-        .rte-editor h3 { font-size: 1.2em; font-weight: 600; margin-top: 12px; margin-bottom: 4px; }
-        .rte-editor p { margin-bottom: 10px; }
-        .rte-editor blockquote { border-left: 4px solid #cbd5e1; padding-left: 12px; color: #64748b; font-style: italic; margin: 10px 0; }
-        .rte-editor ul { list-style-type: disc !important; padding-left: 24px; margin: 8px 0; }
-        .rte-editor ol { list-style-type: decimal !important; padding-left: 24px; margin: 8px 0; }
-        .rte-editor pre { background: #f1f5f9; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 8px 0; }
+        .rte-editor { font-size: 18px; line-height: 1.6; }
+        .rte-editor h1, .rte-editor h1 * { font-size: 2.2em !important; font-weight: 700; margin-top: 24px; margin-bottom: 8px; }
+        .rte-editor h2, .rte-editor h2 * { font-size: 1.8em !important; font-weight: 600; margin-top: 20px; margin-bottom: 6px; }
+        .rte-editor h3, .rte-editor h3 * { font-size: 1.5em !important; font-weight: 600; margin-top: 16px; margin-bottom: 4px; }
+        .rte-editor p, .rte-editor p *, .rte-editor span, .rte-editor font { font-size: 18px !important; margin-top: 0; margin-bottom: 12px; }
+        .rte-editor blockquote { border-left: 4px solid #cbd5e1; padding-left: 12px; color: #64748b; font-style: italic; margin: 16px 0; }
+        .rte-editor ul { list-style-type: disc !important; padding-left: 24px; margin: 8px 0 16px 0; }
+        .rte-editor ul li, .rte-editor ul li * { font-size: 18px !important; line-height: 1.6; }
+        .rte-editor ol { list-style-type: decimal !important; padding-left: 24px; margin: 8px 0 16px 0; }
+        .rte-editor ol li, .rte-editor ol li * { font-size: 18px !important; line-height: 1.6; }
+        .rte-editor pre { background: #f1f5f9; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 12px 0; }
         .rte-editor code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; fontSize: 0.9em; }
         
         .rte-btn {
@@ -284,7 +289,7 @@ export default function RichTextEditor({ value, onChange }) {
       </div>
 
       {/* Editable Area */}
-      <div style={{ position: "relative", flex: 1, display: "flex" }}>
+      <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
         {isEmpty && (
           <div
             style={{
