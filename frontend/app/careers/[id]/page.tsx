@@ -129,7 +129,6 @@ export default function CareerDetailPage() {
             </div>
           ) : !job ? (
             <div className="cd-not-found">
-              <div className="cd-not-found-icon">🔍</div>
               <h2>Job not found</h2>
               <p>The position you're looking for might have been closed or removed.</p>
               <button className="cd-back-btn" onClick={() => router.push("/careers")}>
