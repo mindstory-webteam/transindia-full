@@ -14,8 +14,7 @@ interface JobRole {
   role?: string;
   grade?: string;
   reportingTo?: string;
-  responsibilities?: string[];
-  skills?: string[];
+  body?: string;
   tags: string[];
   createdAt: string;
 }
@@ -202,28 +201,12 @@ export default function CareerDetailPage() {
 
                 <div className="cd-spacer" />
 
-                {/* Dynamic Responsibilities */}
-                {job.responsibilities && job.responsibilities.length > 0 && (
-                  <div className="cd-list-section">
-                    <h3 className="cd-list-heading">Key Responsibilities</h3>
-                    <ul className="cd-bullet-list">
-                      {job.responsibilities.map((resp, i) => (
-                        <li key={i}>{resp}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {/* Dynamic Skills */}
-                {job.skills && job.skills.length > 0 && (
-                  <div className="cd-list-section">
-                    <h3 className="cd-list-heading cd-skills-heading">Skills &amp; Competencies Required</h3>
-                    <ul className="cd-bullet-list">
-                      {job.skills.map((skill, i) => (
-                        <li key={i}>{skill}</li>
-                      ))}
-                    </ul>
-                  </div>
+                {/* Dynamic Body content */}
+                {job.body && (
+                  <div 
+                    className="cd-rich-text"
+                    dangerouslySetInnerHTML={{ __html: job.body }}
+                  />
                 )}
               </div>
 
@@ -360,13 +343,21 @@ const CSS = `
 
   .cd-spacer { border-top: 1px solid #f1f5f9; margin: 8px 0; }
 
-  .cd-list-section { display: flex; flex-direction: column; gap: 16px; }
-  .cd-list-heading { font-size: 19px; font-weight: 700; color: #0f172a; margin: 0;  text-underline-offset: 4px; }
-  .cd-skills-heading { text-decoration: none; }
-  
-  .cd-bullet-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; list-style-type: disc; }
-  .cd-bullet-list li { font-size: 15.5px; color: #475569; line-height: 1.6; }
-  .cd-bullet-list li::marker { color: #00b8c4; font-size: 1.1em; }
+  .cd-rich-text { display: flex; flex-direction: column; gap: 16px; font-size: 15px; color: #0f172a; line-height: 1.5; }
+  .cd-rich-text h1 { font-size: 1.8em; font-weight: 700; margin-top: 16px; margin-bottom: 8px; color: #0f172a; }
+  .cd-rich-text h2 { font-size: 1.4em; font-weight: 600; margin-top: 14px; margin-bottom: 6px; color: #0f172a; }
+  .cd-rich-text h3 { font-size: 1.2em; font-weight: 600; margin-top: 12px; margin-bottom: 4px; color: #0f172a; }
+  .cd-rich-text p { margin-bottom: 10px; color: #0f172a; }
+  .cd-rich-text blockquote { border-left: 4px solid #cbd5e1; padding-left: 12px; color: #64748b; font-style: italic; margin: 10px 0; }
+  .cd-rich-text ul { list-style-type: disc !important; padding-left: 24px; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
+  .cd-rich-text ul li { font-size: 15px; color: #0f172a; line-height: 1.5; }
+  .cd-rich-text ul li::marker { color: #0f172a; }
+  .cd-rich-text ol { list-style-type: decimal !important; padding-left: 24px; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
+  .cd-rich-text ol li { font-size: 15px; color: #0f172a; line-height: 1.5; }
+  .cd-rich-text ol li::marker { color: #0f172a; }
+  .cd-rich-text pre { background: #f1f5f9; padding: 10px; border-radius: 4px; overflow-x: auto; margin: 8px 0; }
+  .cd-rich-text code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  .cd-rich-text img { max-width: 100%; height: auto; border-radius: 6px; margin: 12px 0; display: block; }
 
   /* Modal */
   .cd-modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; animation: cd-fadeIn 0.2s ease-out; }

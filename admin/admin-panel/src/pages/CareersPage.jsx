@@ -5,6 +5,7 @@ import { Plus, Trash2, Edit, FileText, X, Eye, FileSpreadsheet, Download } from 
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import RichTextEditor from "../componant/RichTextEditor";
 
 const PAGE_STYLES = `
   .careers-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
@@ -29,8 +30,7 @@ export default function CareersPage() {
     role: "",
     grade: "",
     reportingTo: "",
-    responsibilities: "",
-    skills: "",
+    body: "",
     location: "Remote",
     jobType: "Full-time",
     order: 0,
@@ -79,8 +79,7 @@ export default function CareersPage() {
         role: job.role || "",
         grade: job.grade || "",
         reportingTo: job.reportingTo || "",
-        responsibilities: job.responsibilities ? job.responsibilities.join("\n") : "",
-        skills: job.skills ? job.skills.join("\n") : "",
+        body: job.body || "",
         location: job.tags && job.tags[0] ? job.tags[0] : "Remote",
         jobType: job.tags && job.tags[1] ? job.tags[1] : "Full-time",
         order: job.order || 0,
@@ -90,7 +89,7 @@ export default function CareersPage() {
       setEditingJob(null);
       setFormData({ 
         title: "", description: "", department: "", role: "", grade: "", 
-        reportingTo: "", responsibilities: "", skills: "", 
+        reportingTo: "", body: "", 
         location: "Remote", jobType: "Full-time", order: 0, isActive: true 
       });
     }
@@ -107,8 +106,6 @@ export default function CareersPage() {
     try {
       const payload = {
         ...formData,
-        responsibilities: formData.responsibilities.split("\n").map(s => s.trim()).filter(s => s),
-        skills: formData.skills.split("\n").map(s => s.trim()).filter(s => s),
         tags: [formData.location, formData.jobType],
       };
 
@@ -669,13 +666,11 @@ export default function CareersPage() {
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Key Responsibilities (One per line)</label>
-                <textarea rows={3} value={formData.responsibilities} onChange={(e) => setFormData({...formData, responsibilities: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15, fontFamily: "inherit" }} />
-              </div>
-
-              <div>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Skills & Competencies (One per line)</label>
-                <textarea rows={3} value={formData.skills} onChange={(e) => setFormData({...formData, skills: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15, fontFamily: "inherit" }} />
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Body</label>
+                <RichTextEditor
+                  value={formData.body}
+                  onChange={(html) => setFormData({ ...formData, body: html })}
+                />
               </div>
 
               <div style={{ display: "flex", alignItems: "center", gap: 20 }}>

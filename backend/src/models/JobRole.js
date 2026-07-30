@@ -15,8 +15,7 @@ const jobRoleSchema = new mongoose.Schema(
     role: { type: String, trim: true },
     grade: { type: String, trim: true },
     reportingTo: { type: String, trim: true },
-    responsibilities: [{ type: String, trim: true }],
-    skills: [{ type: String, trim: true }],
+    body: { type: String, default: "" },
     tags: [
       {
         type: String,
