@@ -86,7 +86,7 @@ export default function RichTextEditor({ value, onChange }) {
         let parentNode = selection.getRangeAt(0).startContainer;
         while (parentNode && parentNode !== editorRef.current) {
           const tag = parentNode.nodeName?.toLowerCase();
-          if (["h1", "h2", "h3", "blockquote", "pre", "p"].includes(tag)) {
+          if (["h1", "h2", "h3", "pre", "p"].includes(tag)) {
             setActiveFormat(tag);
             return;
           }
@@ -209,7 +209,6 @@ export default function RichTextEditor({ value, onChange }) {
           <option value="h1">Heading 1</option>
           <option value="h2">Heading 2</option>
           <option value="h3">Heading 3</option>
-          <option value="blockquote">Quote</option>
         </select>
 
         <div className="rte-separator" />
