@@ -223,6 +223,8 @@ export default function CareersPage() {
           )}
         </section>
 
+
+
         <TransindiaFooter />
       </div>
 
@@ -500,7 +502,7 @@ const CSS = `
   /* ── Jobs section ── */
   .careers-jobs {
     flex: 1;
-    padding: 80px 80px 80px;
+    padding: 48px 80px 64px;
   }
 
   /* 2-column grid */
@@ -962,4 +964,5 @@ const CSS = `
     .careers-hero { padding: 100px 14px 28px; }
     .careers-jobs { padding: 0 14px 40px; }
   }
+
 `;
