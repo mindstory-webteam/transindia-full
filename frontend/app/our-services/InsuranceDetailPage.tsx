@@ -959,7 +959,7 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           padding: 72px 48px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
-        .mov-inner { max-width: 1200px; margin: 0 auto; }
+        .mov-inner { max-width: 1100px; margin: 0 auto; }
         .mov-header { text-align: center; margin-bottom: 44px; }
         .mov-badge {
           display: inline-block;
@@ -987,15 +987,25 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           max-width: 640px;
           line-height: 1.6;
         }
+
+        /*
+          Auto-fit grid: cards size themselves between 220–250px and
+          the row wraps naturally. Fewer than 4 cards stay centered
+          instead of stretching; more than 4 wrap onto new rows.
+          justify-content:center means leftover space becomes margin,
+          not stretched cards, so 1–3 items never look sparse or huge.
+        */
         .mov-grid {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(220px, 250px));
           gap: 20px;
           justify-content: center;
         }
+
         .mov-card {
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
         .mov-poster-wrap {
           position: relative;
@@ -1038,27 +1048,35 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           text-transform: uppercase;
         }
         .mov-card-title {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 700;
           color: #0B1F4D;
           margin: 0 0 4px;
           line-height: 1.3;
         }
         .mov-card-meta {
-          font-size: 11.5px;
+          font-size: 12px;
           color: #9CA3AF;
           margin: 0;
         }
-        @media (max-width: 1024px) {
-          .mov-grid { grid-template-columns: repeat(4, 1fr); }
-        }
+
         @media (max-width: 780px) {
           .mov-section { padding: 48px 24px; }
-          .mov-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+          .mov-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+            gap: 16px;
+          }
         }
         @media (max-width: 480px) {
           .mov-section { padding: 40px 16px; }
-          .mov-grid { grid-template-columns: repeat(2, 1fr); }
+          .mov-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+          }
+          /* a single leftover card on mobile shouldn't stretch full width */
+          .mov-grid[data-count="1"] {
+            grid-template-columns: minmax(0, 200px);
+          }
         }
       `}</style>
     </section>

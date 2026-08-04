@@ -57,7 +57,7 @@ const MANUAL_SERVICES: Service[] = [
   { _id: "m6",  title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
   { _id: "m7",  title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
   { _id: "m8",  title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
-  // { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
+  { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
 
 ];
 

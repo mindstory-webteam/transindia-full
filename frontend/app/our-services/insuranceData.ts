@@ -971,12 +971,12 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
         year: "ONGOING PROJECT",
         genre: "Pauly Jr. Pictures",
       },
-      { 
-        poster: "/images/movies/images (2).jpg",
-        title: "Green Room Productions",
-        year: "ONGOING PROJECT",
-        genre: "Production Insurance",
-      },
+      // { 
+      //   poster: "/images/movies/images (2).jpg",
+      //   title: "Green Room Productions",
+      //   year: "ONGOING PROJECT",
+      //   genre: "Production Insurance",
+      // },
      
     ],
   },
