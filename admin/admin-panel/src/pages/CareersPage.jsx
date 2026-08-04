@@ -5,6 +5,7 @@ import { Plus, Trash2, Edit, FileText, X, Eye, FileSpreadsheet, Download } from 
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import RichTextEditor from "../componant/RichTextEditor";
 
 const PAGE_STYLES = `
   .careers-export-btn { transition: background .15s, border-color .15s, opacity .15s; }
@@ -25,6 +26,11 @@ export default function CareersPage() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    department: "",
+    role: "",
+    grade: "",
+    reportingTo: "",
+    body: "",
     location: "Remote",
     jobType: "Full-time",
     order: 0,
@@ -67,8 +73,13 @@ export default function CareersPage() {
     if (job) {
       setEditingJob(job);
       setFormData({
-        title: job.title,
-        description: job.description,
+        title: job.title || "",
+        description: job.description || "",
+        department: job.department || "",
+        role: job.role || "",
+        grade: job.grade || "",
+        reportingTo: job.reportingTo || "",
+        body: job.body || "",
         location: job.tags && job.tags[0] ? job.tags[0] : "Remote",
         jobType: job.tags && job.tags[1] ? job.tags[1] : "Full-time",
         order: job.order || 0,
@@ -76,7 +87,11 @@ export default function CareersPage() {
       });
     } else {
       setEditingJob(null);
-      setFormData({ title: "", description: "", location: "Remote", jobType: "Full-time", order: 0, isActive: true });
+      setFormData({ 
+        title: "", description: "", department: "", role: "", grade: "", 
+        reportingTo: "", body: "", 
+        location: "Remote", jobType: "Full-time", order: 0, isActive: true 
+      });
     }
     setIsJobModalOpen(true);
   };
@@ -566,7 +581,7 @@ export default function CareersPage() {
       {/* JOB MODAL */}
       {isJobModalOpen && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <div style={{ background: "#fff", width: "100%", maxWidth: 600, borderRadius: 12, padding: 24, position: "relative" }}>
+          <div style={{ background: "#fff", width: "100%", maxWidth: 700, maxHeight: "90vh", overflowY: "auto", borderRadius: 12, padding: 24, position: "relative" }}>
             <button 
               onClick={handleCloseModal}
               style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", cursor: "pointer", color: "var(--ti-muted)" }}
@@ -621,10 +636,40 @@ export default function CareersPage() {
                 <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Description</label>
                 <textarea 
                   required
-                  rows={4}
+                  rows={2}
                   value={formData.description}
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                   style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15, fontFamily: "inherit" }}
+                />
+              </div>
+
+              <div style={{ display: "flex", gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Department</label>
+                  <input type="text" value={formData.department} onChange={(e) => setFormData({...formData, department: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15 }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Role</label>
+                  <input type="text" value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15 }} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 16 }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Grade</label>
+                  <input type="text" value={formData.grade} onChange={(e) => setFormData({...formData, grade: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15 }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Reporting To</label>
+                  <input type="text" value={formData.reportingTo} onChange={(e) => setFormData({...formData, reportingTo: e.target.value})} style={{ width: "100%", padding: "10px 12px", border: "1px solid #d1d5db", borderRadius: 6, fontSize: 15 }} />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 600, fontSize: 14 }}>Body</label>
+                <RichTextEditor
+                  value={formData.body}
+                  onChange={(html) => setFormData({ ...formData, body: html })}
                 />
               </div>
 

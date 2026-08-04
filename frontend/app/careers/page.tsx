@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import Link from "next/link";
@@ -19,6 +20,7 @@ interface JobRole {
 }
 
 export default function CareersPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<JobRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -106,12 +108,7 @@ export default function CareersPage() {
                 We're looking for passionate people to join us. We value flat hierarchies, clear communication, and full ownership to build India's most trusted insurance marketplace.
               </p>
 
-              <div className="careers-btns">
-                <a href="#jobs" className="careers-btn-orange" onClick={(e) => {
-                  e.preventDefault();
-                  document.querySelector('.careers-jobs')?.scrollIntoView({ behavior: 'smooth' });
-                }}>View Open Roles</a>
-              </div>
+
             </div>
 
             <div className="careers-mobile-visual">
@@ -143,10 +140,10 @@ export default function CareersPage() {
                   <h2 className="job-title">{job.title}</h2>
                   {/* Desktop Apply — hidden on mobile */}
                   <button
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => router.push(`/careers/${job._id}`)}
                     className="job-apply job-apply-desktop"
                   >
-                    Apply
+                    View
                   </button>
                 </div>
                 <p className="job-desc">{job.description}</p>
@@ -180,10 +177,10 @@ export default function CareersPage() {
                   )}
                   {/* Mobile Apply — shown only on mobile, sits next to tags */}
                   <button
-                    onClick={() => setSelectedJob(job)}
+                    onClick={() => router.push(`/careers/${job._id}`)}
                     className="job-apply job-apply-mobile"
                   >
-                    Apply
+                    View
                   </button>
                 </div>
               </div>
@@ -225,6 +222,8 @@ export default function CareersPage() {
             </div>
           )}
         </section>
+
+
 
         <TransindiaFooter />
       </div>
@@ -503,7 +502,7 @@ const CSS = `
   /* ── Jobs section ── */
   .careers-jobs {
     flex: 1;
-    padding: 80px 80px 80px;
+    padding: 48px 80px 64px;
   }
 
   /* 2-column grid */
@@ -525,7 +524,7 @@ const CSS = `
 
   .job-top {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-bottom: 8px;
@@ -577,19 +576,22 @@ const CSS = `
     justify-content: center;
     padding: 7px 18px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: #fff;
-    background: #111;
-    border-radius: 999px;
+    background: #EC4F34;
+    border: none;
+    border-radius: 8px;
     text-decoration: none;
     white-space: nowrap;
-    letter-spacing: 0.01em;
-    transition: background 0.18s, transform 0.15s;
+    cursor: pointer;
+    font-family: 'matterregular', sans-serif;
+    transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
   }
 
   .job-apply:hover {
-    background: #ec4f34;
+    background: #d44026;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(236,79,52,0.15);
   }
 
   /* ── Empty state ── */
@@ -962,4 +964,5 @@ const CSS = `
     .careers-hero { padding: 100px 14px 28px; }
     .careers-jobs { padding: 0 14px 40px; }
   }
+
 `;
