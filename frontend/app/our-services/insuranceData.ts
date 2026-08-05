@@ -934,7 +934,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       "Official Insurance Broker of the Kerala Film Chamber of Commerce.",
     certificates: [
       {
-        icon: "/images/services/SERVICE - Entertainment Insurance/certificates/irdai.png",
+        icon: "/images/cert/Tranindia-1.png",
         title: "Kerala Film Chamber of Commerce",
         subtitle: "Proudly serving as the Official Insurance Broker of the Kerala Film Chamber of Commerce, Transindia provides specialized insurance solutions for film productions, ensuring comprehensive protection from pre-production through release.",
       },

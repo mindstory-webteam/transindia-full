@@ -781,20 +781,14 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
         </div>
 
         <div className="cert-featured-card">
-          <div className="cert-featured-icon-wrap">
+          <div className="cert-featured-image-wrap">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cert.icon} alt={cert.title} className="cert-featured-icon" />
+            <img src={cert.icon} alt={cert.title} className="cert-featured-image" />
           </div>
           <div className="cert-featured-body">
             <span className="cert-featured-eyebrow">Verified Accreditation</span>
             <h3 className="cert-featured-title">{cert.title}</h3>
             <p className="cert-featured-subtitle">{cert.subtitle}</p>
-          </div>
-          <div className="cert-featured-check" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#9333EA" strokeWidth="2.4">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12.5l2.5 2.5L16 9.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
           </div>
         </div>
       </div>
@@ -839,10 +833,9 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           background: #fff;
           border: 1.5px solid #E9D5FF;
           border-radius: 20px;
-          padding: 36px 40px;
           display: flex;
-          align-items: center;
-          gap: 28px;
+          align-items: stretch;
+          overflow: hidden;
           box-shadow: 0 16px 40px rgba(147,51,234,0.08);
           transition: transform 0.2s, box-shadow 0.2s;
         }
@@ -850,20 +843,30 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           transform: translateY(-3px);
           box-shadow: 0 20px 48px rgba(147,51,234,0.14);
         }
-        .cert-featured-icon-wrap {
-          flex-shrink: 0;
-          width: 96px;
-          height: 96px;
-          border-radius: 20px;
+        .cert-featured-image-wrap {
+          flex: 0 0 38%;
           background: linear-gradient(150deg, #F3E8FF 0%, #FAF5FF 100%);
-          border: 1px solid #E9D5FF;
+          border-right: 1px solid #E9D5FF;
           display: flex;
           align-items: center;
           justify-content: center;
-          overflow: hidden;
+          padding: 32px;
+          min-height: 280px;
         }
-        .cert-featured-icon { width: 52px; height: 52px; object-fit: contain; }
-        .cert-featured-body { flex: 1; min-width: 0; }
+        .cert-featured-image {
+          width: 100%;
+          max-width: 220px;
+          height: auto;
+          object-fit: contain;
+        }
+        .cert-featured-body {
+          flex: 1;
+          min-width: 0;
+          padding: 40px 44px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
         .cert-featured-eyebrow {
           display: block;
           font-size: 11px;
@@ -871,39 +874,39 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           letter-spacing: 0.08em;
           color: #9333EA;
           text-transform: uppercase;
-          margin-bottom: 8px;
+          margin-bottom: 10px;
         }
         .cert-featured-title {
-          font-size: 20px;
+          font-size: 22px;
           font-weight: 900;
           color: #0B1F4D;
-          margin: 0 0 8px;
+          margin: 0 0 12px;
         }
         .cert-featured-subtitle {
-          font-size: 14px;
+          font-size: 14.5px;
           color: #6B7280;
-          line-height: 1.6;
+          line-height: 1.7;
           margin: 0;
-        }
-        .cert-featured-check {
-          flex-shrink: 0;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: #F3E8FF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
         }
 
         @media (max-width: 700px) {
           .cert-section { padding: 48px 24px; }
           .cert-featured-card {
             flex-direction: column;
-            text-align: center;
-            padding: 28px 24px;
           }
-          .cert-featured-check { position: absolute; top: 20px; right: 20px; }
+          .cert-featured-image-wrap {
+            flex: none;
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid #E9D5FF;
+            min-height: 200px;
+            padding: 28px;
+          }
+          .cert-featured-body {
+            padding: 28px 24px;
+            text-align: center;
+            align-items: center;
+          }
         }
         @media (max-width: 480px) {
           .cert-section { padding: 40px 16px; }
