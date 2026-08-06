@@ -33,6 +33,7 @@ export interface CertificateItem {
   icon: string;   // image path to the certificate/badge logo
   title: string;
   subtitle: string;
+  logos?: string[];
 }
 
 // ─── NEW: Movies We've Insured section (entertainment-insurance only) ────────
@@ -937,6 +938,10 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
         icon: "/images/cert/Tranindia-1.png",
         title: "Kerala Film Chamber of Commerce",
         subtitle: "Proudly serving as the Official Insurance Broker of the Kerala Film Chamber of Commerce, Transindia provides specialized insurance solutions for film productions, ensuring comprehensive protection from pre-production through release.",
+        logos: [
+          "/images/logo/transindia.png",
+          "/images/logo/cert.jpeg",
+        ],
       },
     ],
     // ─── NEW: Movies We've Insured section data (entertainment-insurance only) ──

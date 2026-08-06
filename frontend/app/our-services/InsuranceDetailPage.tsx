@@ -759,6 +759,7 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
   const certs = data.certificates || [];
   if (certs.length === 0) return null;
   const cert = certs[0]; // single-certificate featured layout
+  const logos = cert.logos || [];
 
   return (
     <section className="cert-section">
@@ -781,15 +782,31 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
         </div>
 
         <div className="cert-featured-card">
-          <div className="cert-featured-image-wrap">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cert.icon} alt={cert.title} className="cert-featured-image" />
+          <div className="cert-featured-top">
+            <div className="cert-featured-image-wrap">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cert.icon} alt={cert.title} className="cert-featured-image" />
+            </div>
+            <div className="cert-featured-body">
+              <span className="cert-featured-eyebrow">Verified Accreditation</span>
+              <h3 className="cert-featured-title">{cert.title}</h3>
+              <p className="cert-featured-subtitle">{cert.subtitle}</p>
+            </div>
           </div>
-          <div className="cert-featured-body">
-            <span className="cert-featured-eyebrow">Verified Accreditation</span>
-            <h3 className="cert-featured-title">{cert.title}</h3>
-            <p className="cert-featured-subtitle">{cert.subtitle}</p>
-          </div>
+
+          {logos.length > 0 && (
+            <div className="cert-featured-logos">
+              {logos.map((logoSrc, idx) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={idx}
+                  src={logoSrc}
+                  alt={`${cert.title} partner logo ${idx + 1}`}
+                  className="cert-featured-logo"
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -799,7 +816,7 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           padding: 72px 48px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
-        .cert-inner { max-width: 900px; margin: 0 auto; }
+        .cert-inner { max-width: 1120px; margin: 0 auto; }
         .cert-header { text-align: center; margin-bottom: 40px; }
         .cert-badge {
           display: inline-block;
@@ -832,9 +849,7 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           position: relative;
           background: #fff;
           border: 1.5px solid #E9D5FF;
-          border-radius: 20px;
-          display: flex;
-          align-items: stretch;
+          border-radius: 24px;
           overflow: hidden;
           box-shadow: 0 16px 40px rgba(147,51,234,0.08);
           transition: transform 0.2s, box-shadow 0.2s;
@@ -843,6 +858,11 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           transform: translateY(-3px);
           box-shadow: 0 20px 48px rgba(147,51,234,0.14);
         }
+
+        .cert-featured-top {
+          display: flex;
+          align-items: stretch;
+        }
         .cert-featured-image-wrap {
           flex: 0 0 38%;
           background: linear-gradient(150deg, #F3E8FF 0%, #FAF5FF 100%);
@@ -850,48 +870,73 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 32px;
-          min-height: 280px;
+          padding: 40px;
+          min-height: 340px;
         }
         .cert-featured-image {
           width: 100%;
-          max-width: 220px;
+          max-width: 260px;
           height: auto;
           object-fit: contain;
         }
         .cert-featured-body {
           flex: 1;
           min-width: 0;
-          padding: 40px 44px;
+          padding: 48px 52px;
           display: flex;
           flex-direction: column;
           justify-content: center;
         }
         .cert-featured-eyebrow {
           display: block;
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.08em;
           color: #9333EA;
           text-transform: uppercase;
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
         .cert-featured-title {
-          font-size: 22px;
+          font-size: 26px;
           font-weight: 900;
           color: #0B1F4D;
-          margin: 0 0 12px;
+          margin: 0 0 14px;
         }
         .cert-featured-subtitle {
-          font-size: 14.5px;
+          font-size: 15.5px;
           color: #6B7280;
-          line-height: 1.7;
+          line-height: 1.75;
           margin: 0;
+        }
+
+        /* ── Bottom logos row ── */
+        .cert-featured-logos {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 56px;
+          flex-wrap: wrap;
+          padding: 28px 44px;
+          border-top: 1px solid #E9D5FF;
+          background: #FBF8FF;
+        }
+        .cert-featured-logo {
+          height: 44px;
+          width: auto;
+          max-width: 160px;
+          object-fit: contain;
+          filter: grayscale(15%);
+          opacity: 0.9;
+          transition: opacity 0.2s, filter 0.2s;
+        }
+        .cert-featured-logo:hover {
+          opacity: 1;
+          filter: grayscale(0%);
         }
 
         @media (max-width: 700px) {
           .cert-section { padding: 48px 24px; }
-          .cert-featured-card {
+          .cert-featured-top {
             flex-direction: column;
           }
           .cert-featured-image-wrap {
@@ -899,13 +944,20 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
             width: 100%;
             border-right: none;
             border-bottom: 1px solid #E9D5FF;
-            min-height: 200px;
+            min-height: 220px;
             padding: 28px;
           }
           .cert-featured-body {
             padding: 28px 24px;
             text-align: center;
             align-items: center;
+          }
+          .cert-featured-logos {
+            gap: 32px;
+            padding: 22px 24px;
+          }
+          .cert-featured-logo {
+            height: 34px;
           }
         }
         @media (max-width: 480px) {
@@ -915,7 +967,6 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
     </section>
   );
 }
-
 // ═════════════════════════════════════════════════════════════════════════════
 // MOVIES WE'VE INSURED SECTION — entertainment-insurance only (white theme)
 // ═════════════════════════════════════════════════════════════════════════════
