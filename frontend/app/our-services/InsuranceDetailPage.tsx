@@ -754,12 +754,12 @@ function GetCoveredStepsSection() {
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CERTIFICATE SECTION — entertainment-insurance only (single-certificate design)
+// Layout v2: open editorial layout — floating tilted document + unboxed copy
 // ═════════════════════════════════════════════════════════════════════════════
 function CertificatesSection({ data }: { data: InsuranceDetailData }) {
   const certs = data.certificates || [];
   if (certs.length === 0) return null;
   const cert = certs[0]; // single-certificate featured layout
-  const logos = cert.logos || [];
 
   return (
     <section className="cert-section">
@@ -781,43 +781,53 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           )}
         </div>
 
-        <div className="cert-featured-card">
-          <div className="cert-featured-top">
-            <div className="cert-featured-image-wrap">
+        <div className="cert-card">
+          <div className="cert-card-image">
+            <div className="cert-doc-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cert.icon} alt={cert.title} className="cert-featured-image" />
-            </div>
-            <div className="cert-featured-body">
-              <span className="cert-featured-eyebrow">Verified Accreditation</span>
-              <h3 className="cert-featured-title">{cert.title}</h3>
-              <p className="cert-featured-subtitle">{cert.subtitle}</p>
+              <img src={cert.icon} alt={cert.title} className="cert-doc-image" />
             </div>
           </div>
 
-          {logos.length > 0 && (
-            <div className="cert-featured-logos">
-              {logos.map((logoSrc, idx) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={idx}
-                  src={logoSrc}
-                  alt={`${cert.title} partner logo ${idx + 1}`}
-                  className="cert-featured-logo"
-                />
-              ))}
-            </div>
-          )}
+          <div className="cert-card-copy">
+            <span className="cert-featured-eyebrow">Verified Accreditation</span>
+            <h3 className="cert-featured-title">{cert.title}</h3>
+            <div className="cert-title-rule" />
+            <p className="cert-featured-subtitle">{cert.subtitle}</p>
+          </div>
         </div>
       </div>
 
       <style>{`
         .cert-section {
-          background: #FAF5FF;
-          padding: 72px 48px;
+          background: linear-gradient(115deg, #FDECEA 0%, #FBF3F1 22%, #F7F3F6 45%, #EFF6F8 68%, #E7F6FA 100%);
+          padding: 88px 48px 64px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+          position: relative;
+          overflow: hidden;
         }
-        .cert-inner { max-width: 1120px; margin: 0 auto; }
-        .cert-header { text-align: center; margin-bottom: 40px; }
+        .cert-section::before {
+          content: "";
+          position: absolute;
+          top: -120px;
+          left: -80px;
+          width: 360px;
+          height: 360px;
+          background: radial-gradient(circle, rgba(251,146,120,0.16) 0%, rgba(251,146,120,0) 70%);
+          pointer-events: none;
+        }
+        .cert-section::after {
+          content: "";
+          position: absolute;
+          bottom: -140px;
+          right: -100px;
+          width: 420px;
+          height: 420px;
+          background: radial-gradient(circle, rgba(56,189,248,0.14) 0%, rgba(56,189,248,0) 70%);
+          pointer-events: none;
+        }
+        .cert-inner { max-width: 1120px; margin: 0 auto; position: relative; z-index: 1; }
+        .cert-header { text-align: center; margin-bottom: 64px; }
         .cert-badge {
           display: inline-block;
           background: #F3E8FF;
@@ -845,123 +855,91 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           line-height: 1.6;
         }
 
-        .cert-featured-card {
-          position: relative;
-          background: #fff;
-          border: 1.5px solid #E9D5FF;
-          border-radius: 24px;
+        /* ── Single unified featured card ── */
+        .cert-card {
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          align-items: stretch;
+          background: #ffffff;
+          border: 1.5px solid #EDE4F7;
+          border-radius: 28px;
           overflow: hidden;
-          box-shadow: 0 16px 40px rgba(147,51,234,0.08);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .cert-featured-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 20px 48px rgba(147,51,234,0.14);
+          box-shadow: 0 28px 60px rgba(147,51,234,0.12), 0 6px 18px rgba(251,146,120,0.08);
         }
 
-        .cert-featured-top {
+        .cert-card-image {
+          position: relative;
           display: flex;
           align-items: stretch;
-        }
-        .cert-featured-image-wrap {
-          flex: 0 0 38%;
-          background: linear-gradient(150deg, #F3E8FF 0%, #FAF5FF 100%);
-          border-right: 1px solid #E9D5FF;
-          display: flex;
-          align-items: center;
           justify-content: center;
-          padding: 40px;
-          min-height: 340px;
+          padding: 0;
+          background: linear-gradient(150deg, #FDF3F1 0%, #F3EEF8 55%, #EAF6FA 100%);
         }
-        .cert-featured-image {
+        .cert-doc-frame {
+          position: relative;
           width: 100%;
-          max-width: 260px;
-          height: auto;
-          object-fit: contain;
+          height: 100%;
         }
-        .cert-featured-body {
-          flex: 1;
-          min-width: 0;
-          padding: 48px 52px;
+        .cert-doc-image {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .cert-card-copy {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          align-items: flex-start;
+          text-align: left;
+          padding: 48px 56px;
         }
         .cert-featured-eyebrow {
-          display: block;
           font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.08em;
           color: #9333EA;
           text-transform: uppercase;
-          margin-bottom: 12px;
+          margin-bottom: 14px;
         }
         .cert-featured-title {
-          font-size: 26px;
+          font-size: 30px;
           font-weight: 900;
           color: #0B1F4D;
-          margin: 0 0 14px;
+          margin: 0;
+          line-height: 1.2;
+        }
+        .cert-title-rule {
+          width: 56px;
+          height: 3px;
+          background: #9333EA;
+          border-radius: 2px;
+          margin: 20px 0;
         }
         .cert-featured-subtitle {
           font-size: 15.5px;
           color: #6B7280;
-          line-height: 1.75;
+          line-height: 1.8;
           margin: 0;
+          max-width: 480px;
         }
 
-        /* ── Bottom logos row ── */
-        .cert-featured-logos {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 56px;
-          flex-wrap: wrap;
-          padding: 28px 44px;
-          border-top: 1px solid #E9D5FF;
-          background: #FBF8FF;
-        }
-        .cert-featured-logo {
-          height: 44px;
-          width: auto;
-          max-width: 160px;
-          object-fit: contain;
-          filter: grayscale(15%);
-          opacity: 0.9;
-          transition: opacity 0.2s, filter 0.2s;
-        }
-        .cert-featured-logo:hover {
-          opacity: 1;
-          filter: grayscale(0%);
-        }
 
+        @media (max-width: 820px) {
+          .cert-card {
+            grid-template-columns: 1fr;
+          }
+          .cert-card-copy { text-align: center; align-items: center; padding: 32px 28px; }
+          .cert-title-rule { margin: 20px auto; }
+        }
         @media (max-width: 700px) {
-          .cert-section { padding: 48px 24px; }
-          .cert-featured-top {
-            flex-direction: column;
-          }
-          .cert-featured-image-wrap {
-            flex: none;
-            width: 100%;
-            border-right: none;
-            border-bottom: 1px solid #E9D5FF;
-            min-height: 220px;
-            padding: 28px;
-          }
-          .cert-featured-body {
-            padding: 28px 24px;
-            text-align: center;
-            align-items: center;
-          }
-          .cert-featured-logos {
-            gap: 32px;
-            padding: 22px 24px;
-          }
-          .cert-featured-logo {
-            height: 34px;
-          }
+          .cert-section { padding: 56px 24px 48px; }
+          .cert-header { margin-bottom: 44px; }
+          .cert-card-image { height: 260px; }
         }
         @media (max-width: 480px) {
-          .cert-section { padding: 40px 16px; }
+          .cert-section { padding: 48px 16px 40px; }
         }
       `}</style>
     </section>
