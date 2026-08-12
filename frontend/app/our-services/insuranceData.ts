@@ -801,8 +801,8 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       { iconBg: "bg-orange-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Electronic Equipment.png", title: "Electronic Equipment", description: "All-risk cover for computers, servers, medical devices, and sensitive electronics against damage and breakdown." },
       { iconBg: "bg-teal-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Workmen's Compensation.png", title: "Workmen's Compensation", description: "Covers your statutory liability to pay compensation to employees for work-related injury, disability, or death." },
       // ── NEW ──
-      { iconBg: "bg-sky-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Health Insurance.png", title: "Group Health Insurance", description: "Provides comprehensive health coverage for employees, including hospitalization, medical expenses, and other healthcare needs, ensuring financial protection for your team." },
-      { iconBg: "bg-amber-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Personal Accident.png", title: "Group Personal Accident", description: "Provides financial protection to employees against accidental injuries, disability, or death arising from unforeseen accidents during or outside working hours." },
+      { iconBg: "bg-sky-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Health Insurance.png", title: "Group Health Insurance", description: "Covers employees for hospitalization, medical expenses, and healthcare needs" },
+      { iconBg: "bg-amber-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Personal Accident.png", title: "Group Personal Accident", description: "Protects employees against accidental injury, disability, or death." },
     ],
     stagesBadge: "WHO NEEDS THESE COVERS",
     stagesTitle: "Tailored protection for",
