@@ -167,7 +167,7 @@ export default function ClaimSupportPage() {
       c.policyNumber || "",
       c.claimType || "",
       c.mobile || "",
-      c.incident || "—",
+      c.incident || "N/A",
       STATUSES.find(s => s.value === (c.status || "new"))?.label || c.status || "New",
     ]);
 

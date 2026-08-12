@@ -52,9 +52,9 @@ function Badge({ label, map }) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "N/A";
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
@@ -121,7 +121,7 @@ function DetailModal({ claim, onClose }) {
           ].map(([label, val]) => (
             <div key={label}>
               <p style={{ fontSize: 11, color: "#94A3B8", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", margin: "0 0 3px" }}>{label}</p>
-              <p style={{ fontSize: 13, color: "#0F172A", fontWeight: 600, margin: 0 }}>{val || "—"}</p>
+              <p style={{ fontSize: 13, color: "#0F172A", fontWeight: 600, margin: 0 }}>{val || "N/A"}</p>
             </div>
           ))}
         </div>
@@ -357,12 +357,12 @@ export default function ClaimLeadsPage() {
       c.policyNumber || "",
       c.insuranceType || "",
       c.claimType || "",
-      c.isUrgent ? "Yes" : "—",
+      c.isUrgent ? "Yes" : "N/A",
       c.status || "",
       fmtDate(c.createdAt),
       c.documents?.length
         ? c.documents.map((d, i) => d.originalName || `Document ${i + 1}`).join("\n")
-        : "—",
+        : "N/A",
     ]);
 
     const PAD = 4;
@@ -540,18 +540,18 @@ export default function ClaimLeadsPage() {
                     </td>
 
                     {/* Mobile */}
-                    <td style={{ padding: "12px 16px", color: "#334155", whiteSpace: "nowrap" }}>{c.mobile}</td>
+                    <td style={{ padding: "12px 16px", color: "#334155", whiteSpace: "nowrap" }}>{c.mobile || "N/A"}</td>
 
                     {/* Policy */}
-                    <td style={{ padding: "12px 16px", color: "#334155", fontFamily: "monospace", fontSize: 12 }}>{c.policyNumber}</td>
+                    <td style={{ padding: "12px 16px", color: "#334155", fontFamily: "monospace", fontSize: 12 }}>{c.policyNumber || "N/A"}</td>
 
                     {/* Insurance type */}
                     <td style={{ padding: "12px 16px" }}>
-                      <Badge label={c.insuranceType} map={INSURANCE_COLORS} />
+                      <Badge label={c.insuranceType || "N/A"} map={INSURANCE_COLORS} />
                     </td>
 
                     {/* Claim type */}
-                    <td style={{ padding: "12px 16px", color: "#334155", whiteSpace: "nowrap" }}>{c.claimType}</td>
+                    <td style={{ padding: "12px 16px", color: "#334155", whiteSpace: "nowrap" }}>{c.claimType || "N/A"}</td>
 
                     {/* Urgent */}
                     <td style={{ padding: "12px 16px" }}>
@@ -560,7 +560,7 @@ export default function ClaimLeadsPage() {
                           <AlertCircle size={13} /> Yes
                         </span>
                       ) : (
-                        <span style={{ color: "#94A3B8", fontSize: 12 }}>—</span>
+                        <span style={{ color: "#94A3B8", fontSize: 12 }}>N/A</span>
                       )}
                     </td>
 

@@ -229,6 +229,7 @@ exports.createServiceLead = async (req, res, next) => {
       vehicleType: b.vehicleType,
 
       // ── Fire / entertainment / miscellaneous ──
+      category: (b.category || "").trim(),
       industries: b.industries,
       insuranceType: b.insuranceType,
       insuranceTypes: combinedRequirements,

@@ -244,11 +244,11 @@ export default function SettingsPage() {
               <div className="account-grid">
                 <div className="account-field">
                   <label><User size={12} /> Name</label>
-                  <p>{admin?.name || "—"}</p>
+                  <p>{admin?.name || "N/A"}</p>
                 </div>
                 <div className="account-field">
                   <label><Mail size={12} /> Email</label>
-                  <p>{admin?.email || "—"}</p>
+                  <p>{admin?.email || "N/A"}</p>
                 </div>
                 {admin?.role && (
                   <div className="account-field">

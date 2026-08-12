@@ -167,7 +167,7 @@ export default function ComplaintPage() {
       c.policyRef || "",
       c.category || "",
       c.mobile || "",
-      c.details || "—",
+      c.details || "N/A",
       STATUSES.find(s => s.value === (c.status || "new"))?.label || c.status || "New",
     ]);
 

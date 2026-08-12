@@ -528,9 +528,9 @@ function getBmiBadgeClass(category) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "N/A";
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
@@ -747,7 +747,7 @@ export default function LeadsPage() {
             l.phone || "",
             l.email || "",
             l.city || "",
-            l.bmi != null ? `${l.bmi}${l.bmiCategory ? " · " + l.bmiCategory : ""}` : "—",
+            l.bmi != null ? `${l.bmi}${l.bmiCategory ? " · " + l.bmiCategory : ""}` : "N/A",
             l.status || "",
             fmtDate(l.createdAt),
           ]);
@@ -942,7 +942,7 @@ export default function LeadsPage() {
                       <td>
                         <span className="ins-badge">{lead.insuranceType}</span>
                       </td>
-                      <td className="td-city">{lead.sumInsured || <span className="dash">—</span>}</td>
+                      <td className="td-city">{lead.sumInsured || <span className="dash">N/A</span>}</td>
                       <td>
                         <select
                           value={lead.status || "new"}
@@ -954,7 +954,7 @@ export default function LeadsPage() {
                           ))}
                         </select>
                       </td>
-                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—"}</td>
+                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "N/A"}</td>
                       <td className="td-actions">
                         <div className="actions-group">
                           <a href={`tel:+91${lead.mobile}`} className="action-btn call" title="Call lead">
@@ -995,17 +995,17 @@ export default function LeadsPage() {
                         <div className="td-email">{lead.email}</div>
                         <div className="td-phone">{lead.phone}</div>
                       </td>
-                      <td className="td-city">{lead.city || <span className="dash">—</span>}</td>
+                      <td className="td-city">{lead.city || <span className="dash">N/A</span>}</td>
                       <td>
                         {lead.bmi != null ? (
                           <span className={`bmi-badge ${getBmiBadgeClass(lead.bmiCategory)}`}>
                             {lead.bmi}{lead.bmiCategory ? ` · ${lead.bmiCategory}` : ""}
                           </span>
                         ) : (
-                          <span className="dash">—</span>
+                          <span className="dash">N/A</span>
                         )}
                       </td>
-                      <td className="td-message">{lead.message || "—"}</td>
+                      <td className="td-message">{lead.message || "N/A"}</td>
                       <td>
                         <select
                           value={lead.status || "new"}
@@ -1017,7 +1017,7 @@ export default function LeadsPage() {
                           ))}
                         </select>
                       </td>
-                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "—"}</td>
+                      <td>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "N/A"}</td>
                       <td className="td-actions">
                         <div className="actions-group">
                           <Link to={`/leads/${lead._id}`} className="action-btn" title="View details">

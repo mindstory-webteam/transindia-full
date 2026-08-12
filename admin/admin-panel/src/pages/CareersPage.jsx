@@ -345,7 +345,7 @@ export default function CareersPage() {
       app.jobId?.title || "Unknown Role",
       app.message || "",
       new Date(app.createdAt).toLocaleDateString("en-IN"),
-      app.resumeUrl ? "View Resume" : "—",
+      app.resumeUrl ? "View Resume" : "N/A",
     ]);
 
     const PAD = 4;
@@ -628,6 +628,8 @@ export default function CareersPage() {
                     <option value="Freelance">Freelance</option>
                     <option value="Internships">Internships</option>
                     <option value="Contract/Temporary">Contract/Temporary</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Hybrid">Hybrid</option>
                   </select>
                 </div>
               </div>

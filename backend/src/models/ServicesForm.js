@@ -90,6 +90,7 @@ const serviceLeadSchema = new mongoose.Schema(
     insuranceDocuments: { type: [documentSchema], default: [] },
 
     // ── Fire / entertainment / miscellaneous ────────────────────
+    category: { type: String, trim: true },      // coverage / business category dropdown
     industries: { type: String, trim: true },    // fire form
     insuranceType: { type: String, trim: true },  // fire / entertainment (singular)
     insuranceTypes: { type: String, trim: true }, // miscellaneous (plural)

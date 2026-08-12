@@ -1701,6 +1701,18 @@ function CategoryDropdown({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Guarantee dropdown closes whenever value changes
+  useEffect(() => {
+    setOpen(false);
+  }, [value]);
+
+  const handleSelect = (e: React.MouseEvent, opt: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onChange(opt);
+    setOpen(false);
+  };
+
   return (
     <div ref={ref} style={{ position: "relative", width: "100%" }}>
       <button
@@ -1762,10 +1774,8 @@ function CategoryDropdown({
           }}
         >
           <div
-            onClick={() => {
-              onChange("");
-              setOpen(false);
-            }}
+            onMouseDown={(e) => handleSelect(e, "")}
+            onClick={(e) => handleSelect(e, "")}
             style={{
               padding: "8px 14px",
               fontSize: 13,
@@ -1779,10 +1789,8 @@ function CategoryDropdown({
           {CATEGORY_OPTIONS.map((opt) => (
             <div
               key={opt}
-              onClick={() => {
-                onChange(opt);
-                setOpen(false);
-              }}
+              onMouseDown={(e) => handleSelect(e, opt)}
+              onClick={(e) => handleSelect(e, opt)}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
               onMouseLeave={(e) =>
                 (e.currentTarget.style.backgroundColor = value === opt ? "#EFF6FF" : "transparent")

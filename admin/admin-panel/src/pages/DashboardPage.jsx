@@ -662,7 +662,7 @@ export default function DashboardPage() {
                     onMouseEnter={e => e.currentTarget.style.background = "#FAFBFD"}
                     onMouseLeave={e => e.currentTarget.style.background = ""}
                   >
-                    <td style={{ padding: "13px 22px", color: C.ink, fontWeight: 600 }}>{s.title || s.name || "—"}</td>
+                    <td style={{ padding: "13px 22px", color: C.ink, fontWeight: 600 }}>{s.title || s.name || "N/A"}</td>
                     <td style={{ padding: "13px 16px", textAlign: "center" }}>
                       <span style={{
                         display: "inline-block", padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 700,
