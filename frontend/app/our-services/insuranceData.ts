@@ -786,7 +786,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
     ],
     whyImage: "/images/services/SERVICE - Miscellaneous Insurance/Some risks don't fit.png",
     benefitsBadge: "THE COVERS",
-    benefitsTitle: "8 specialised covers",
+    benefitsTitle: "10 specialised covers",
     benefitsTitleAccent: "under one roof",
     benefitsTitleAccentColor: "#4F46E5",
     benefitsSubtitle:
@@ -800,6 +800,9 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       { iconBg: "bg-rose-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Public Liability.png", title: "Public Liability", description: "Covers legal liability for third-party injury or property damage arising from your business operations or premises." },
       { iconBg: "bg-orange-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Electronic Equipment.png", title: "Electronic Equipment", description: "All-risk cover for computers, servers, medical devices, and sensitive electronics against damage and breakdown." },
       { iconBg: "bg-teal-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Workmen's Compensation.png", title: "Workmen's Compensation", description: "Covers your statutory liability to pay compensation to employees for work-related injury, disability, or death." },
+      // ── NEW ──
+      { iconBg: "bg-sky-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Health Insurance.png", title: "Group Health Insurance", description: "Provides comprehensive health coverage for employees, including hospitalization, medical expenses, and other healthcare needs, ensuring financial protection for your team." },
+      { iconBg: "bg-amber-100", emoji: "/images/services/SERVICE - Miscellaneous Insurance/Group Personal Accident.png", title: "Group Personal Accident", description: "Provides financial protection to employees against accidental injuries, disability, or death arising from unforeseen accidents during or outside working hours." },
     ],
     stagesBadge: "WHO NEEDS THESE COVERS",
     stagesTitle: "Tailored protection for",
@@ -818,6 +821,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       "A machinery breakdown halts production for weeks",
       "A negligence claim threatens your professional savings",
       "A third-party injury lawsuit is paid from your pocket",
+      "Staff medical bills and accident costs hit the company directly",
     ],
     withTitle: "With Specialised Cover",
     withItems: [
@@ -827,6 +831,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       "Equipment breakdown repairs covered, downtime reduced",
       "Professional indemnity defends and settles negligence claims",
       "Public liability handles third-party injury and damage costs",
+      "Group health and accident cover protect your team and your payroll",
     ],
     ctaHeading: "Not sure which cover you need?",
     ctaBody: "Our advisors map your exact exposures and build the right mix — free of charge.",
@@ -838,6 +843,7 @@ export const INSURANCE_DATA: Record<string, InsuranceDetailData> = {
       { question: "What is fidelity guarantee insurance?", answer: "Fidelity guarantee covers a business against financial loss caused by fraud, theft, embezzlement, or dishonesty committed by its own employees. It's vital for businesses where staff handle cash, stock, or sensitive accounts." },
       { question: "What does machinery breakdown insurance cover?", answer: "It covers sudden and unforeseen physical damage to plant and machinery from internal causes — electrical faults, mechanical failure, short circuits, and similar breakdowns — including the cost of repair or replacement. It complements fire insurance, which excludes such failures." },
       { question: "Who needs professional indemnity insurance?", answer: "Professionals who give advice or provide services — doctors, architects, engineers, lawyers, chartered accountants, and consultants — need it. It protects against claims of negligence, errors, or omissions in their professional work and covers legal defence costs." },
+      { question: "What's the difference between group health and group personal accident cover?", answer: "Group health insurance pays for hospitalisation and medical treatment for illness or injury, while group personal accident pays a lump sum for accidental death, permanent disability, or injury — including accidents outside working hours. Most employers offer both together." },
       { question: "Can these covers be combined into one policy?", answer: "Yes. Many of these covers can be bundled into a package policy (such as a shopkeeper's or office package), which is often more cost-effective than buying each separately. We help you assemble the right combination for your risk profile." },
     ],
   },

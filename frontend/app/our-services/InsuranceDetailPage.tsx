@@ -2196,6 +2196,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
         {slug === "health-insurance" && <GetCoveredStepsSection />}
 
         {/* ── BENEFITS ── */}
+        {/* ── BENEFITS ── */}
         <section className="bg-slate-50 py-16 px-6 md:px-12">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
@@ -2211,7 +2212,11 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
                 {data.benefitsSubtitle}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${
+                data.benefits.length % 5 === 0 ? "lg:grid-cols-5" : "lg:grid-cols-4"
+              }`}
+            >
               {data.benefits.map((b) => (
                 <div key={b.title} className="bg-white rounded-2xl p-6 text-center shadow-sm">
                   <div className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden`}>
