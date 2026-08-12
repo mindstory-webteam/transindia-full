@@ -40,6 +40,7 @@ const contactCards = [
     badgeColor: "#6b7280",
   },
 ];
+import ContactCards from "../ContactCards";
 
 export default function ContactHero() {
   return (
@@ -86,39 +87,7 @@ export default function ContactHero() {
         </section>
 
         {/* ── Contact Cards bar (outside section so hero bg doesn't bleed onto cards) ── */}
-        <div className="contact-cards-bar">
-          <div className="contact-cards-inner">
-            {contactCards.map((card) => (
-              <div key={card.label} className="contact-card">
-                <div className="contact-card-icon">
-                  <img src={card.icon} alt={card.label} width={44} height={44} />
-                </div>
-                <p className="contact-card-label">{card.label}</p>
-                <p className="contact-card-sub">{card.sub}</p>
-
-                {card.cta && (
-                  
-                  <a  href={card.ctaHref}
-                    className="contact-card-cta"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {card.cta}
-                  </a>
-                )}
-                {card.highlight && (
-                  <a href={card.highlightHref} className="contact-card-highlight">
-                    {card.highlight}
-                  </a>
-                )}
-
-                <p className="contact-card-badge" style={{ color: card.badgeColor }}>
-                  {card.badge}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* <ContactCards /> */}
       </div>
     </>
   );
@@ -180,94 +149,22 @@ const CSS = `
     margin: 0;
   }
 
-  /* ── Cards bar: anchored to wrapper bottom = section bottom on desktop ── */
-  .contact-cards-bar {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translate(-50%, 50%);
-    width: calc(100% - 64px);
-    max-width: 1300px;
-    z-index: 20;
-  }
-
-  .contact-cards-inner {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-  }
-
-  .contact-card {
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-    background: #fff;
-    border-radius: 26px;
-    box-shadow: 0 8px 32px rgba(10, 31, 110, 0.10), 0 2px 8px rgba(0,0,0,0.06);
-  }
-
-  .contact-card-icon {
-    margin-bottom: 6px;
-  }
-
-  .contact-card-label {
-    font-size: 15px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0;
-  }
-
-  .contact-card-sub {
-    font-size: 12px;
-    color: #6b7280;
-    margin: 0;
-  }
-
-  .contact-card-cta {
-    display: inline-block;
-    margin-top: 4px;
-    background: #FF6B35;
-    color: #fff;
-    text-decoration: none;
-    padding: 7px 22px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 10px rgba(255, 107, 53, 0.55);
-  }
-
-  .contact-card-highlight {
-    display: inline-block;
-    margin-top: 4px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #0A3D91;
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .contact-card-badge {
-    font-size: 12px;
-    font-weight: 500;
-    margin: 0;
-  }
-
   /* ── Large-screen banner ── */
   .contact-lg-banner {
     position: absolute;
+    top: 0;
+    bottom: 0;
     right: 12%;
-    bottom: -20px;
     width: 700px;
     pointer-events: none;
     z-index: 1;
+    overflow: hidden;
   }
   .contact-lg-banner-img {
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
     display: block;
   }
 
@@ -290,14 +187,6 @@ const CSS = `
     }
     .contact-hero {
       background: #0b1240;
-    }
-    .contact-cards-inner {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    .contact-card:nth-child(2) { border-right: none; }
-    .contact-card:nth-child(1),
-    .contact-card:nth-child(2) {
-      border-bottom: 1px solid #e8ecf4;
     }
   }
 
@@ -326,19 +215,21 @@ const CSS = `
     .contact-sm-banner {
       display: block;
       position: absolute;
+      top: 0;
       right: 30px;
       bottom: 100px;
       width: 42%;
       max-width: 420px;
       pointer-events: none;
       z-index: 1;
+      overflow: hidden;
     }
     .contact-sm-banner-img {
       width: 100%;
-      height: auto;
+      height: 100%;
       display: block;
-      object-fit: contain;
-      object-position: bottom right;
+      object-fit: cover;
+      object-position: top right;
     }
   }
 
@@ -372,49 +263,5 @@ const CSS = `
       display: block;
       object-fit: cover;
     }
-
-    /* Mobile: pull cards bar up so first card half-overlaps the banner */
-    .contact-cards-bar {
-      position: relative;
-      bottom: auto;
-      left: auto;
-      transform: none;
-      width: 100%;
-      max-width: 100%;
-      margin-top: -110px;
-      padding: 0 16px;
-      box-sizing: border-box;
-      z-index: 10;
-    }
-    .contact-cards-inner {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: auto;
-      gap: 12px;
-      background: transparent;
-      box-shadow: none;
-      border-radius: 0;
-      overflow: visible;
-    }
-    .contact-card {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      height: auto;
-      padding: 28px 24px;
-      border-radius: 20px;
-      box-shadow: 0 4px 24px rgba(10, 31, 110, 0.10), 0 1px 6px rgba(0,0,0,0.06);
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 6px;
-      border-bottom: none;
-      background: #fff;
-    }
-    .contact-card:last-child { border-bottom: none; }
-    .contact-card-icon { margin-bottom: 6px; }
-    .contact-card-label { font-size: 16px; }
-    .contact-card-sub   { font-size: 13px; }
   }
 `;

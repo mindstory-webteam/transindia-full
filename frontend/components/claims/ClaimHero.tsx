@@ -99,13 +99,13 @@ export default function ClaimHero() {
             <div className="clh-bento">
 
               {/* Row 1 — Emergency Helpline */}
-              <a href="tel:18004567890" className="clh-card clh-card--full clh-card--call">
+              <a href="tel:18004258084" className="clh-card clh-card--full clh-card--call">
                 <div className="clh-card-icon">
                   <img src="/images/claims/claims-hero/Call.svg" alt="Call" width={26} height={26} />
                 </div>
                 <div className="clh-card-text">
                   <p className="clh-card-label">Emergency Claim Helpline</p>
-                  <p className="clh-card-value">1800-456-7890</p>
+                  <p className="clh-card-value">1800 425 8084</p>
                 </div>
               </a>
 
@@ -117,17 +117,17 @@ export default function ClaimHero() {
                   </div>
                   <div className="clh-card-text">
                     <p className="clh-card-label">Email for Claims</p>
-                    <p className="clh-card-value">Claim@transindia.com</p>
+                    <p className="clh-card-value">care@transindia.com</p>
                   </div>
                 </a>
 
-                <a href="https://wa.me/917510715195" className="clh-card clh-card--half clh-card--dark">
+                <a href="https://wa.me/917510400320" className="clh-card clh-card--half clh-card--dark">
                   <div className="clh-card-icon">
                     <img src="/images/claims/claims-hero/Chat.svg" alt="Chat" width={24} height={24} />
                   </div>
                   <div className="clh-card-text">
                     <p className="clh-card-label">Whatsapp Claims</p>
-                    <p className="clh-card-value">+91 7510715195</p>
+                    <p className="clh-card-value">7510400320</p>
                   </div>
                 </a>
               </div>

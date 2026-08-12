@@ -5,16 +5,20 @@ import ContactFormSection from "@/components/contact-us/ContactFormSection";
 import FaqSection from "@/components/contact-us/FaqSection";
 import ContactHero from "@/components/contact-us/ContactHero";
 import Preloader from "@/components/Preloader";
+import ContactCards from "@/components/ContactCards";
 
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
-     
+
     <Navbar />
     <ContactHero />
     <ContactFormSection/>
+    <ContactCards/>
+
     <FaqSection/>
      <ConsultationCTA/>
+     
      <TransindiaFooter />
     </div>
   );

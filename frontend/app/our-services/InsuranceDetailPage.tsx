@@ -754,6 +754,7 @@ function GetCoveredStepsSection() {
 
 // ═════════════════════════════════════════════════════════════════════════════
 // CERTIFICATE SECTION — entertainment-insurance only (single-certificate design)
+// Layout v2: open editorial layout — floating tilted document + unboxed copy
 // ═════════════════════════════════════════════════════════════════════════════
 function CertificatesSection({ data }: { data: InsuranceDetailData }) {
   const certs = data.certificates || [];
@@ -780,33 +781,53 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           )}
         </div>
 
-        <div className="cert-featured-card">
-          <div className="cert-featured-icon-wrap">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cert.icon} alt={cert.title} className="cert-featured-icon" />
+        <div className="cert-card">
+          <div className="cert-card-image">
+            <div className="cert-doc-frame">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cert.icon} alt={cert.title} className="cert-doc-image" />
+            </div>
           </div>
-          <div className="cert-featured-body">
+
+          <div className="cert-card-copy">
             <span className="cert-featured-eyebrow">Verified Accreditation</span>
             <h3 className="cert-featured-title">{cert.title}</h3>
+            <div className="cert-title-rule" />
             <p className="cert-featured-subtitle">{cert.subtitle}</p>
-          </div>
-          <div className="cert-featured-check" aria-hidden="true">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#9333EA" strokeWidth="2.4">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M8 12.5l2.5 2.5L16 9.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
           </div>
         </div>
       </div>
 
       <style>{`
         .cert-section {
-          background: #FAF5FF;
-          padding: 72px 48px;
+          background: linear-gradient(115deg, #FDECEA 0%, #FBF3F1 22%, #F7F3F6 45%, #EFF6F8 68%, #E7F6FA 100%);
+          padding: 88px 48px 64px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+          position: relative;
+          overflow: hidden;
         }
-        .cert-inner { max-width: 900px; margin: 0 auto; }
-        .cert-header { text-align: center; margin-bottom: 40px; }
+        .cert-section::before {
+          content: "";
+          position: absolute;
+          top: -120px;
+          left: -80px;
+          width: 360px;
+          height: 360px;
+          background: radial-gradient(circle, rgba(251,146,120,0.16) 0%, rgba(251,146,120,0) 70%);
+          pointer-events: none;
+        }
+        .cert-section::after {
+          content: "";
+          position: absolute;
+          bottom: -140px;
+          right: -100px;
+          width: 420px;
+          height: 420px;
+          background: radial-gradient(circle, rgba(56,189,248,0.14) 0%, rgba(56,189,248,0) 70%);
+          pointer-events: none;
+        }
+        .cert-inner { max-width: 1120px; margin: 0 auto; position: relative; z-index: 1; }
+        .cert-header { text-align: center; margin-bottom: 64px; }
         .cert-badge {
           display: inline-block;
           background: #F3E8FF;
@@ -834,85 +855,96 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           line-height: 1.6;
         }
 
-        .cert-featured-card {
-          position: relative;
-          background: #fff;
-          border: 1.5px solid #E9D5FF;
-          border-radius: 20px;
-          padding: 36px 40px;
-          display: flex;
-          align-items: center;
-          gap: 28px;
-          box-shadow: 0 16px 40px rgba(147,51,234,0.08);
-          transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .cert-featured-card:hover {
-          transform: translateY(-3px);
-          box-shadow: 0 20px 48px rgba(147,51,234,0.14);
-        }
-        .cert-featured-icon-wrap {
-          flex-shrink: 0;
-          width: 96px;
-          height: 96px;
-          border-radius: 20px;
-          background: linear-gradient(150deg, #F3E8FF 0%, #FAF5FF 100%);
-          border: 1px solid #E9D5FF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+        /* ── Single unified featured card ── */
+        .cert-card {
+          display: grid;
+          grid-template-columns: 0.9fr 1.1fr;
+          align-items: stretch;
+          background: #ffffff;
+          border: 1.5px solid #EDE4F7;
+          border-radius: 28px;
           overflow: hidden;
+          box-shadow: 0 28px 60px rgba(147,51,234,0.12), 0 6px 18px rgba(251,146,120,0.08);
         }
-        .cert-featured-icon { width: 52px; height: 52px; object-fit: contain; }
-        .cert-featured-body { flex: 1; min-width: 0; }
-        .cert-featured-eyebrow {
+
+        .cert-card-image {
+          position: relative;
+          display: flex;
+          align-items: stretch;
+          justify-content: center;
+          padding: 0;
+          background: linear-gradient(150deg, #FDF3F1 0%, #F3EEF8 55%, #EAF6FA 100%);
+        }
+        .cert-doc-frame {
+          position: relative;
+          width: 100%;
+          height: 100%;
+        }
+        .cert-doc-image {
           display: block;
-          font-size: 11px;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .cert-card-copy {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          text-align: left;
+          padding: 48px 56px;
+        }
+        .cert-featured-eyebrow {
+          font-size: 12px;
           font-weight: 800;
           letter-spacing: 0.08em;
           color: #9333EA;
           text-transform: uppercase;
-          margin-bottom: 8px;
+          margin-bottom: 14px;
         }
         .cert-featured-title {
-          font-size: 20px;
+          font-size: 30px;
           font-weight: 900;
           color: #0B1F4D;
-          margin: 0 0 8px;
+          margin: 0;
+          line-height: 1.2;
+        }
+        .cert-title-rule {
+          width: 56px;
+          height: 3px;
+          background: #9333EA;
+          border-radius: 2px;
+          margin: 20px 0;
         }
         .cert-featured-subtitle {
-          font-size: 14px;
+          font-size: 15.5px;
           color: #6B7280;
-          line-height: 1.6;
+          line-height: 1.8;
           margin: 0;
-        }
-        .cert-featured-check {
-          flex-shrink: 0;
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: #F3E8FF;
-          display: flex;
-          align-items: center;
-          justify-content: center;
+          max-width: 480px;
         }
 
-        @media (max-width: 700px) {
-          .cert-section { padding: 48px 24px; }
-          .cert-featured-card {
-            flex-direction: column;
-            text-align: center;
-            padding: 28px 24px;
+
+        @media (max-width: 820px) {
+          .cert-card {
+            grid-template-columns: 1fr;
           }
-          .cert-featured-check { position: absolute; top: 20px; right: 20px; }
+          .cert-card-copy { text-align: center; align-items: center; padding: 32px 28px; }
+          .cert-title-rule { margin: 20px auto; }
+        }
+        @media (max-width: 700px) {
+          .cert-section { padding: 56px 24px 48px; }
+          .cert-header { margin-bottom: 44px; }
+          .cert-card-image { height: 260px; }
         }
         @media (max-width: 480px) {
-          .cert-section { padding: 40px 16px; }
+          .cert-section { padding: 48px 16px 40px; }
         }
       `}</style>
     </section>
   );
 }
-
 // ═════════════════════════════════════════════════════════════════════════════
 // MOVIES WE'VE INSURED SECTION — entertainment-insurance only (white theme)
 // ═════════════════════════════════════════════════════════════════════════════
@@ -959,7 +991,7 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           padding: 72px 48px;
           font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
-        .mov-inner { max-width: 1200px; margin: 0 auto; }
+        .mov-inner { max-width: 1100px; margin: 0 auto; }
         .mov-header { text-align: center; margin-bottom: 44px; }
         .mov-badge {
           display: inline-block;
@@ -987,15 +1019,25 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           max-width: 640px;
           line-height: 1.6;
         }
+
+        /*
+          Auto-fit grid: cards size themselves between 220–250px and
+          the row wraps naturally. Fewer than 4 cards stay centered
+          instead of stretching; more than 4 wrap onto new rows.
+          justify-content:center means leftover space becomes margin,
+          not stretched cards, so 1–3 items never look sparse or huge.
+        */
         .mov-grid {
           display: grid;
-          grid-template-columns: repeat(5, 1fr);
+          grid-template-columns: repeat(auto-fit, minmax(220px, 250px));
           gap: 20px;
           justify-content: center;
         }
+
         .mov-card {
           display: flex;
           flex-direction: column;
+          width: 100%;
         }
         .mov-poster-wrap {
           position: relative;
@@ -1038,27 +1080,35 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
           text-transform: uppercase;
         }
         .mov-card-title {
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 700;
           color: #0B1F4D;
           margin: 0 0 4px;
           line-height: 1.3;
         }
         .mov-card-meta {
-          font-size: 11.5px;
+          font-size: 12px;
           color: #9CA3AF;
           margin: 0;
         }
-        @media (max-width: 1024px) {
-          .mov-grid { grid-template-columns: repeat(4, 1fr); }
-        }
+
         @media (max-width: 780px) {
           .mov-section { padding: 48px 24px; }
-          .mov-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+          .mov-grid {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 200px));
+            gap: 16px;
+          }
         }
         @media (max-width: 480px) {
           .mov-section { padding: 40px 16px; }
-          .mov-grid { grid-template-columns: repeat(2, 1fr); }
+          .mov-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+          }
+          /* a single leftover card on mobile shouldn't stretch full width */
+          .mov-grid[data-count="1"] {
+            grid-template-columns: minmax(0, 200px);
+          }
         }
       `}</style>
     </section>
@@ -2310,6 +2360,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
         {slug === "health-insurance" && <GetCoveredStepsSection />}
 
         {/* ── BENEFITS ── */}
+        {/* ── BENEFITS ── */}
         <section className="bg-slate-50 py-16 px-6 md:px-12">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
@@ -2325,7 +2376,11 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
                 {data.benefitsSubtitle}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${
+                data.benefits.length % 5 === 0 ? "lg:grid-cols-5" : "lg:grid-cols-4"
+              }`}
+            >
               {data.benefits.map((b) => (
                 <div key={b.title} className="bg-white rounded-2xl p-6 text-center shadow-sm">
                   <div className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden`}>

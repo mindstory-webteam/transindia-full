@@ -55,7 +55,7 @@ function AlertIcon() {
 function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
   const [insType, setInsType]       = useState("Health Insurance");
   const [sum,     setSum]           = useState("");
-  const [mobile,  setMobile]        = useState("7510715196");
+  const [mobile,  setMobile]        = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback]     = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -155,14 +155,14 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
             type="text"
             value={sum}
             onChange={e=>setSum(e.target.value)}
-            placeholder="e.g. ₹5 Lakhs"
+            placeholder="000000"
             style={inputStyle}
           />
         </div>
 
         <div className="ins-quote-col" style={{...colStyle,borderRight:"none"}}>
           <span style={{fontSize:10,fontWeight:400,color:"#838383",letterSpacing:1,textTransform:"uppercase"}}>Mobile Number</span>
-          <input type="tel" value={mobile} onChange={e=>setMobile(e.target.value)} maxLength={10}
+          <input  placeholder="Mobile number" type="tel" value={mobile} onChange={e=>setMobile(e.target.value)} maxLength={10}
             style={{border:"none",outline:"none",background:"transparent",fontSize:17,
               fontWeight:600,color:"#0B2563",fontFamily:"inherit",width:"100%"}} />
         </div>
