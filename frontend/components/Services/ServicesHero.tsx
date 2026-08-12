@@ -41,8 +41,15 @@ export default function ServicesHero() {
                 </p>
 
                 <div className="svc-btns">
-                  <a href="#contact" className="svc-btn-orange">Get Free Consultation</a>
-                  <a href="/services" className="svc-btn-ghost">View all services</a>
+                  <a
+                    href="https://wa.me/917510400320?text=Hello%2C%20I%27d%20like%20a%20free%20consultation%20regarding%20insurance%20coverage."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="svc-btn-orange"
+                  >
+                    Get Free Consultation
+                  </a>
+                  {/* <a href="/services" className="svc-btn-ghost">View all services</a> */}
                 </div>
               </div>
 

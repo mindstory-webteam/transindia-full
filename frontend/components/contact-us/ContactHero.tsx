@@ -8,7 +8,7 @@ const contactCards = [
     label: "Call us",
     sub: "Mon–Sat, 9:30 – 5:30",
     highlight: "1800 425 8084",
-    highlightHref: "tel:18001234567",
+    highlightHref: "tel:18004258084",
     badge: "Toll free",
     badgeColor: "#2AC764",
   },

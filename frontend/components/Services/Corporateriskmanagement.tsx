@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 interface CorporateCard {
   image: string;
@@ -85,9 +86,12 @@ const CorporateRiskManagement: React.FC = () => {
                   {card.description}
                 </p>
 
-                <button className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full py-3 transition-colors">
+                <Link
+                  href="/contact-us"
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full py-3 text-center block transition-colors"
+                >
                   Get Quote
-                </button>
+                </Link>
               </div>
             </div>
           ))}
