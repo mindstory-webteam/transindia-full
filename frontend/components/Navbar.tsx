@@ -522,7 +522,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
               );
             })}
             <div className="drawer-actions">
-              <a href="https://www.transindiainsurance.com/partner/posp-home" className="btn-outline drawer-btn">Become a PoSP</a>
+              {/* <a href="https://www.transindiainsurance.com/partner/posp-home" className="btn-outline drawer-btn">Become a PoSP</a> */}
               <a href="/claims" className="btn-fill drawer-btn">Make a claim</a>
             </div>
           </div>
