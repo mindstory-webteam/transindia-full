@@ -1,6 +1,45 @@
 "use client";
 
 import Breadcrum from "@/components/Breadcrum";
+
+const contactCards = [
+  {
+    icon: "/images/contact-us/CONTACT/Contact Icons - Call.png",
+    label: "Call us",
+    sub: "Mon–Sat, 9:30 – 5:30",
+    highlight: "1800 425 8084",
+    highlightHref: "tel:18004258084",
+    badge: "Toll free",
+    badgeColor: "#2AC764",
+  },
+  {
+    icon: "/images/contact-us/CONTACT/Contact Icons - Msg.png",
+    label: "Live chat",
+    sub: "Average wait: 2 minutes",
+    cta: "Start Chat",
+    ctaHref: "https://wa.me/917510400320",
+    badge: "Available 24/7",
+    badgeColor: "#2AC764",
+  },
+  {
+    icon: "/images/contact-us/CONTACT/Contact Icons - mail.png",
+    label: "Email Us",
+    sub: "Reply within 4 hours",
+    highlight: "care@transindia.com",
+    highlightHref: "mailto:care@transindia.com",
+    badge: "Mon–sat",
+    badgeColor: "#6b7280",
+  },
+  {
+    icon: "/images/contact-us/CONTACT/Contact Icons - Location.png",
+    label: "Visit Us",
+    sub: "Walk-in welcome",
+    highlight: "Find Nearest Branch",
+    highlightHref: "https://maps.google.com",
+    badge: "Kochi",
+    badgeColor: "#6b7280",
+  },
+];
 import ContactCards from "../ContactCards";
 
 export default function ContactHero() {

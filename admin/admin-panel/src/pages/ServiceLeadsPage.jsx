@@ -132,9 +132,9 @@ function StatCard({ label, value, icon: Icon, color, bg }) {
 }
 
 function fmtDate(iso) {
-  if (!iso) return "—";
+  if (!iso) return "N/A";
   const d = new Date(iso);
-  if (isNaN(d.getTime())) return "—";
+  if (isNaN(d.getTime())) return "N/A";
   return d.toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
 }
 
@@ -165,17 +165,27 @@ function LeadDetails({ l }) {
             <Paperclip size={12} /> {docCount} document{docCount > 1 ? "s" : ""}
           </span>
         ) : (
-          !l.insuranceNumber && !l.vehicleType && <span style={{ color: "#94A3B8" }}>—</span>
+          !l.insuranceNumber && !l.vehicleType && <span style={{ color: "#94A3B8" }}>N/A</span>
         )}
       </div>
     );
   }
 
-  if (l.insuranceTypes) {
+  const categoryVal = l.category || l.rawData?.category;
+  if (categoryVal || l.insuranceTypes) {
     return (
-      <p style={{ color: "#0F172A", maxWidth: 260, whiteSpace: "normal" }} title={l.insuranceTypes}>
-        {l.insuranceTypes.length > 90 ? l.insuranceTypes.slice(0, 90) + "…" : l.insuranceTypes}
-      </p>
+      <div>
+        {categoryVal && (
+          <span style={{ display: "inline-block", background: "#EFF6FF", color: "#2563EB", fontWeight: 700, fontSize: 11, padding: "2px 8px", borderRadius: 4, marginBottom: 4 }}>
+            {categoryVal}
+          </span>
+        )}
+        {l.insuranceTypes && (
+          <p style={{ color: "#0F172A", maxWidth: 260, whiteSpace: "normal" }} title={l.insuranceTypes}>
+            {l.insuranceTypes.length > 90 ? l.insuranceTypes.slice(0, 90) + "…" : l.insuranceTypes}
+          </p>
+        )}
+      </div>
     );
   }
 
@@ -183,7 +193,7 @@ function LeadDetails({ l }) {
     return (
       <div>
         <p style={{ color: "#0F172A", fontWeight: 600 }}>
-          {l.sumAssured || "—"}{l.policyTerm ? ` · ${l.policyTerm}` : ""}
+          {l.sumAssured || "N/A"}{l.policyTerm ? ` · ${l.policyTerm}` : ""}
         </p>
         {l.smoker       && <p style={subText}>Smoker: {l.smoker}</p>}
         {l.annualIncome && <p style={subText}>{l.annualIncome}</p>}
@@ -195,7 +205,7 @@ function LeadDetails({ l }) {
     return (
       <div>
         <p style={{ color: "#0F172A", fontWeight: 600 }}>
-          {l.sumInsured || "—"}{l.coverType ? ` · ${l.coverType}` : ""}
+          {l.sumInsured || "N/A"}{l.coverType ? ` · ${l.coverType}` : ""}
         </p>
         {l.conditions && l.conditions !== "None" && <p style={subText}>{l.conditions}</p>}
         {l.cityTier && <p style={subText}>{l.cityTier}</p>}
@@ -203,7 +213,7 @@ function LeadDetails({ l }) {
     );
   }
 
-  return <span style={{ color: "#94A3B8" }}>—</span>;
+  return <span style={{ color: "#94A3B8" }}>N/A</span>;
 }
 
 // ── Single field cell (hides empty values) ────────────────────────────────────
@@ -263,6 +273,7 @@ function LeadDetailModal({ lead: l, onClose }) {
     ["Last 4 Digits",   l.lastFour],
     ["Wants Callback",  l.wantsCallback === "true" ? "Yes" : l.wantsCallback === "false" ? "No" : ""],
     ["Agreed Terms",    l.agreeTerms === "true" ? "Yes" : l.agreeTerms === "false" ? "No" : ""],
+    ["Coverage / Category", l.category || l.rawData?.category],
     ["Requirements",    l.insuranceTypes],
     ["Coverage",        l.estimate?.coverage],
     ["Premium / Month", l.estimate?.monthly],
@@ -287,7 +298,7 @@ function LeadDetailModal({ lead: l, onClose }) {
               {l.name || "Lead details"}
             </h2>
             <p style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>
-              {l.serviceTitle || l.serviceSlug || "—"}
+              {l.serviceTitle || l.serviceSlug || "N/A"}
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
@@ -503,6 +514,7 @@ export default function ServiceLeadsPage() {
       Query:             l.query || "",
       "Interested Plan": l.plan || "",
       Documents:         docsExportText(l),
+      "Coverage / Category": l.category || l.rawData?.category || "",
       Requirements:      l.insuranceTypes || "",
       Coverage:          l.estimate?.coverage || "",
       "Premium / Month": l.estimate?.monthly || "",
@@ -533,7 +545,7 @@ export default function ServiceLeadsPage() {
       return [l.sumAssured, l.policyTerm].filter(Boolean).join(" / ");
     if (l.sumInsured || l.coverType)
       return [l.sumInsured, l.coverType].filter(Boolean).join(" / ");
-    return parts.join(", ") || "—";
+    return parts.join(", ") || "N/A";
   };
 
   const exportPDF = () => {
@@ -562,8 +574,8 @@ export default function ServiceLeadsPage() {
         l.email || "",
         l.serviceTitle || l.serviceSlug || "",
         pdfDetails(l),
-        ds.length ? (ds.length > 1 ? `${ds.length} docs` : "View doc") : "—",
-        l.estimate?.monthly || "—",
+        ds.length ? (ds.length > 1 ? `${ds.length} docs` : "View doc") : "N/A",
+        l.estimate?.monthly || "N/A",
         STATUS_META[l.status]?.label || l.status || "",
         fmtDate(l.createdAt),
       ];
@@ -729,7 +741,7 @@ export default function ServiceLeadsPage() {
                           <ChevronRight size={15} color="#94A3B8" style={{ marginTop: 2, flexShrink: 0 }} />
                           <div>
                             <p style={{ color: "#0F172A", fontWeight: 700 }}>{l.name}</p>
-                            <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "—"}</p>
+                            <p style={subText}>{[l.gender, l.maritalStatus].filter(Boolean).join(" · ") || "N/A"}</p>
                           </div>
                         </div>
                       </td>
@@ -744,7 +756,7 @@ export default function ServiceLeadsPage() {
                       </td>
 
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#0F172A", fontWeight: 500 }}>
-                        {l.serviceTitle || l.serviceSlug || "—"}
+                        {l.serviceTitle || l.serviceSlug || "N/A"}
                       </td>
 
                       <td style={{ padding: "13px 16px", verticalAlign: "top" }}>
@@ -757,7 +769,7 @@ export default function ServiceLeadsPage() {
                             <p style={{ fontWeight: 700, color: "#047857" }}>{l.estimate.monthly}<span style={{ color: "#94A3B8", fontWeight: 500 }}>/mo</span></p>
                             {l.estimate?.coverage && <p style={subText}>Cover: {l.estimate.coverage}</p>}
                           </>
-                        ) : <span style={{ color: "#94A3B8" }}>—</span>}
+                        ) : <span style={{ color: "#94A3B8" }}>N/A</span>}
                       </td>
 
                       <td style={{ padding: "13px 16px", verticalAlign: "top", color: "#64748B", whiteSpace: "nowrap" }}>

@@ -30,7 +30,7 @@ interface EventsPageProps {
 
 
 const RAW_API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
 // Normalise the base so the endpoint is always correct no matter how the env
 // is written: strip a trailing slash, and strip a trailing "/api" if present

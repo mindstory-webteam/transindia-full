@@ -58,9 +58,9 @@ const MANUAL_SERVICES: Service[] = [
   { _id: "m2",  title: "Health Insurance",        slug: "health-insurance",        isActive: true },
   { _id: "m3",  title: "Motor Insurance",         slug: "motor-insurance",         isActive: true },
   { _id: "m4",  title: "Home Insurance",          slug: "home-insurance",          isActive: true },
-
-  { _id: "m6",  title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
-  { _id: "m7",  title: "Fire Insurance",          slug: "fire-insurance",          isActive: true },
+  { _id: "m5",  title: "Commercial Insurance",    slug: "commercial-insurance",    isActive: true },
+  { _id: "m6",  title: "SME Insurance",           slug: "sme-insurance",           isActive: true },
+  { _id: "m7",  title: "Marine Insurance",        slug: "marine-insurance",        isActive: true },
   { _id: "m8",  title: "Miscellaneous Insurance", slug: "miscellaneous-insurance", isActive: true },
   { _id: "m9",  title: "Entertainment Insurance", slug: "entertainment-insurance", isActive: true },
 
@@ -137,12 +137,13 @@ export default function ChatbotWidget() {
     const name = val.trim();
     
     const lowerName = name.toLowerCase().replace(/[^\w\s]/g, "");
-    if (["hi", "hello", "hey", "hola", "greetings"].includes(lowerName)) {
+    const spamNames = ["test", "testing", "asdf", "qwerty", "admin", "bot", "dummy", "fake", "1234", "aaa", "bbb", "xyz"];
+    if (["hi", "hello", "hey", "hola", "greetings"].includes(lowerName) || spamNames.includes(lowerName) || /^\d+$/.test(lowerName)) {
       pushUserMsg(name);
       setIsLoading(true);
       setTimeout(() => {
         setIsLoading(false);
-        pushAssistantMsg("Hello! Could you please tell me your name so we can proceed?");
+        pushAssistantMsg("Please enter your real full name so our team can address you properly.");
       }, 400);
       return;
     }
@@ -160,7 +161,8 @@ export default function ChatbotWidget() {
   const handleSubmitPhone = (val: string) => {
     if (!val.trim()) return;
     const phone = val.trim();
-    if (!/^[6-9]\d{9}$/.test(phone)) {
+    const spamPhones = ["1234567890", "9876543210", "0000000000", "1111111111", "9999999999", "1234512345"];
+    if (!/^[6-9]\d{9}$/.test(phone) || spamPhones.includes(phone)) {
       pushUserMsg(phone);
       setTimeout(() => pushAssistantMsg("Please enter a valid 10-digit Indian mobile number (starting with 6–9)."), 400);
       return;
@@ -178,9 +180,11 @@ export default function ChatbotWidget() {
   const handleSubmitEmail = (val: string) => {
     if (!val.trim()) return;
     const email = val.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const disallowedDomains = ["test.com", "example.com", "tempmail.com", "mailinator.com", "yopmail.com", "asdf.com", "fake.com"];
+    const domain = email.split("@")[1]?.toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || (domain && disallowedDomains.includes(domain))) {
       pushUserMsg(email);
-      setTimeout(() => pushAssistantMsg("That does not appear to be a valid email address. Could you double-check?"), 400);
+      setTimeout(() => pushAssistantMsg("Please enter a valid, active email address so we can send policy details."), 400);
       return;
     }
     setUserDetails(d => ({ ...d, email }));
@@ -197,8 +201,7 @@ export default function ChatbotWidget() {
     if (!val.trim()) return;
     const query = val.trim();
 
-    // Special flow: user wants an insurance quote → ask which service first,
-    // instead of submitting the lead immediately.
+    // Special flow: user wants an insurance quote → ask which service first
     if (query.toLowerCase() === "get insurance quote") {
       pushUserMsg(query);
       setUserDetails(d => ({ ...d, query }));
@@ -223,7 +226,6 @@ export default function ChatbotWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      // Store the submission date to prevent duplicate queries today
       localStorage.setItem("ti_chatbot_last_submission", new Date().toDateString());
     } catch (err) {
       console.error("Failed to save chatbot lead", err);

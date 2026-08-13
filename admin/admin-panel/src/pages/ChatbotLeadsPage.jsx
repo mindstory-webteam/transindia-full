@@ -114,7 +114,7 @@ export default function ChatbotLeadsPage() {
         q.name || "",
         q.phone || "",
         q.email || "",
-        q.service || "—",
+        q.service || "N/A",
         q.query || "",
         STATUSES.find(s => s.value === (q.status || "Pending"))?.label || q.status || "Pending",
       ];
@@ -163,8 +163,8 @@ export default function ChatbotLeadsPage() {
       q.name || "",
       q.phone || "",
       q.email || "",
-      q.service || "—",
-      q.query || "—",
+      q.service || "N/A",
+      q.query || "N/A",
       STATUSES.find(s => s.value === (q.status || "Pending"))?.label || q.status || "Pending",
     ]);
 

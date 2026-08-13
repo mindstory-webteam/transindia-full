@@ -27,6 +27,18 @@ function resolveImageUrl(image: string): string {
   return `${serverRoot}${image.startsWith("/") ? "" : "/"}${image}`;
 }
 
+// Custom service card image mappings
+const SERVICE_IMAGE_OVERWRITES: Record<string, string> = {
+  "marine-insurance":
+    "/images/services/SERVICE - MARINE INSURANCE/Marine-Insurance.png",
+  "miscellaneous-insurance":
+    "/images/services/SERVICE - Miscellaneous Insurance/Miscellaneous-Insurance.png",
+  "fire-insurance":
+    "/images/services/SERVICE - FIRE INSURANCE/Fire-Insurance.png",
+  "entertainment-insurance":
+    "/images/services/SERVICE - Entertainment Insurance/Entertainment-Insurance.png",
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 const PersonalInsuranceServices = () => {
   // All cards are derived directly from INSURANCE_DATA
@@ -44,7 +56,9 @@ const PersonalInsuranceServices = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {services.map((service) => {
-            const imgSrc = resolveImageUrl(service.whyImage);
+            const imagePath =
+              SERVICE_IMAGE_OVERWRITES[service.slug] || service.whyImage;
+            const imgSrc = resolveImageUrl(imagePath);
             // First 4 benefit titles become the feature checklist
             const features = service.benefits
               .slice(0, 4)

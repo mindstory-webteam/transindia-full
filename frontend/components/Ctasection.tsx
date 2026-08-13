@@ -137,7 +137,7 @@ export default function CtaSection() {
               <PhoneIcon />
               <span style={s.phoneText}>
                 Or call us:&nbsp;
-                <span style={s.phoneNumber}>1800 425 8084</span>
+                <a href="tel:18004258084" style={{ color: "inherit", textDecoration: "none" }}><span style={s.phoneNumber}>1800 425 8084</span></a>
                 &nbsp;(24/7 · Toll-free)
               </span>
             </div>

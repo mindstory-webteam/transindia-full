@@ -428,11 +428,11 @@ export default function LeadDetailPage() {
             <div>
               <h1>{lead.name}</h1>
               <ul className="lead-meta">
-                <li><Mail size={14} />{lead.email || "—"}</li>
-                <li><Phone size={14} />{lead.phone || "—"}</li>
+                <li><Mail size={14} />{lead.email || "N/A"}</li>
+                <li><Phone size={14} />{lead.phone || "N/A"}</li>
                 <li>
                   <Calendar size={14} />
-                  {lead.createdAt ? new Date(lead.createdAt).toLocaleString() : "—"}
+                  {lead.createdAt ? new Date(lead.createdAt).toLocaleString() : "N/A"}
                 </li>
               </ul>
             </div>

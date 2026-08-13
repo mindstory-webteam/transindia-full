@@ -503,7 +503,7 @@ export default function Banner() {
                 <a href="/contact-us" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#EC4F34] rounded-xl text-white no-underline text-[14px] sm:text-[15px] font-extrabold  whitespace-nowrap">
                   Get your quote
                 </a>
-                <a href="tel:+18004258084" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[14px] sm:text-[15px] font-extrabold backdrop-blur-md whitespace-nowrap">
+                <a href="tel:18004258084" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[14px] sm:text-[15px] font-extrabold backdrop-blur-md whitespace-nowrap">
                   Talk to an expert
                 </a>
               </div>

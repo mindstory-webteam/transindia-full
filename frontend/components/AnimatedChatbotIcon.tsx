@@ -38,14 +38,6 @@ export default function AnimatedChatbotIcon({ className = "" }: { className?: st
         fill="#8bc34a"
       />
 
-      {/* Back Arm (Waving Hand) */}
-      <path
-        d="M 65 140 C 40 120 40 95 50 90 C 60 85 75 115 75 135 Z"
-        fill="#ffffff"
-        stroke="#1a1d1c"
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
 
       {/* Body */}
       <rect x="60" y="120" width="80" height="60" rx="30" fill="#f8fafc" stroke="#1a1d1c" strokeWidth="5" />

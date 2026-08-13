@@ -167,7 +167,7 @@ export default function GeneralQueryPage() {
       q.mobile || "",
       q.email || "",
       q.insuranceType || "",
-      q.query || "—",
+      q.query || "N/A",
       q.callback ? "Yes" : "No",
       STATUSES.find(s => s.value === (q.status || "new"))?.label || q.status || "New",
     ]);

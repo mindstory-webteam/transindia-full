@@ -131,7 +131,7 @@ const TransindiaFooter: React.FC = () => {
               <img src={ICON_PHONE_SRC} alt="Phone"
                 style={{ width: 14, height: 14, objectFit: "contain", flexShrink: 0 }} />
               <p style={{ margin: 0, fontSize: 11.5, color: "#9ca3af" }}>
-                1800 425 8084 (Toll-free)
+                <a href="tel:18004258084" style={{ color: "inherit", textDecoration: "none" }}>1800 425 8084</a> (Toll-free)
               </p>
             </div>
 

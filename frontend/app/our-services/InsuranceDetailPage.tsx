@@ -1,7 +1,7 @@
 "use client";
 // app/our-services/InsuranceDetailPage.tsx
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
@@ -1664,11 +1664,161 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
   );
 }
 
+const CATEGORY_OPTIONS = [
+  "Shops & Establishments",
+  "Factories & Plants",
+  "Doctors & Consultants",
+  "SMEs & Enterprises",
+  "Workmen's Compensation",
+  "Electronic Equipment",
+  "Public Liability",
+  "Professional Indemnity",
+  "Machinery Breakdown",
+  "Money in Transit",
+  "Fidelity Guarantee",
+  "Burglary & Housebreaking",
+];
+
+function CategoryDropdown({
+  value,
+  onChange,
+  placeholder = "Select Category",
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  placeholder?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Guarantee dropdown closes whenever value changes
+  useEffect(() => {
+    setOpen(false);
+  }, [value]);
+
+  const handleSelect = (e: React.MouseEvent, opt: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onChange(opt);
+    setOpen(false);
+  };
+
+  return (
+    <div ref={ref} style={{ position: "relative", width: "100%" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        style={{
+          width: "100%",
+          padding: "10px 14px",
+          border: "1.5px solid #E2E8F0",
+          borderRadius: "8px",
+          fontSize: "14px",
+          color: value ? "#1F2937" : "#9CA3AF",
+          background: "#fff",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
+          textAlign: "left",
+          outline: "none",
+          boxSizing: "border-box",
+        }}
+      >
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {value || placeholder}
+        </span>
+        <svg
+          style={{
+            width: 14,
+            height: 14,
+            transition: "transform 0.2s",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            flexShrink: 0,
+            marginLeft: 8,
+            stroke: "#6B7280",
+          }}
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth="2"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 4px)",
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            backgroundColor: "#ffffff",
+            border: "1px solid #E2E8F0",
+            borderRadius: "8px",
+            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            maxHeight: "200px",
+            overflowY: "auto",
+            padding: "4px 0",
+          }}
+        >
+          <div
+            onMouseDown={(e) => handleSelect(e, "")}
+            onClick={(e) => handleSelect(e, "")}
+            style={{
+              padding: "8px 14px",
+              fontSize: 13,
+              color: "#9CA3AF",
+              cursor: "pointer",
+              backgroundColor: value === "" ? "#F3F4F6" : "transparent",
+            }}
+          >
+            {placeholder}
+          </div>
+          {CATEGORY_OPTIONS.map((opt) => (
+            <div
+              key={opt}
+              onMouseDown={(e) => handleSelect(e, opt)}
+              onClick={(e) => handleSelect(e, opt)}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = value === opt ? "#EFF6FF" : "transparent")
+              }
+              style={{
+                padding: "8px 14px",
+                fontSize: 13.5,
+                fontWeight: value === opt ? 600 : 400,
+                color: value === opt ? "#2563EB" : "#1F2937",
+                cursor: "pointer",
+                backgroundColor: value === opt ? "#EFF6FF" : "transparent",
+                transition: "background-color 0.15s",
+              }}
+            >
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ═════════════════════════════════════════════════════════════════════════════
 // SIMPLE FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
 function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "" });
+  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", category: "" });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -1704,7 +1854,7 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
           <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Quote sent to: <strong>{values.email}</strong></p>
         </div>
         <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "" }); }} className="li-back-btn">New Quote</button>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", category: "" }); }} className="li-back-btn">New Quote</button>
         </div>
       </div>
     );
@@ -1716,7 +1866,18 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
       <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
       <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
       <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      <label className="li-field"><span className="li-label">Phone Number</span><input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" /></label>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 13 }}>
+        <label className="li-field" style={{ marginBottom: 0 }}>
+          <span className="li-label">Phone Number</span>
+          <input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" />
+        </label>
+        <label className="li-field" style={{ marginBottom: 0 }}>
+          <span className="li-label">Coverage / Category</span>
+          <CategoryDropdown value={values.category || ""} onChange={(val) => handleChange("category", val)} />
+        </label>
+      </div>
+
       <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
@@ -1980,7 +2141,7 @@ function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; s
 // MISCELLANEOUS FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
 function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", insuranceTypes: "" });
+  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", category: "", insuranceTypes: "" });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -2018,7 +2179,7 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
           <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>We&apos;ll contact you at: <strong>{values.email}</strong></p>
         </div>
         <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceTypes: "" }); }} className="li-back-btn">New Inquiry</button>
+          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", category: "", insuranceTypes: "" }); }} className="li-back-btn">New Inquiry</button>
         </div>
       </div>
     );
@@ -2030,7 +2191,18 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
       <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
       <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
       <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      <label className="li-field"><span className="li-label">Phone Number</span><input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" /></label>
+      
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 13 }}>
+        <label className="li-field" style={{ marginBottom: 0 }}>
+          <span className="li-label">Phone Number</span>
+          <input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" />
+        </label>
+        <label className="li-field" style={{ marginBottom: 0 }}>
+          <span className="li-label">Coverage / Category</span>
+          <CategoryDropdown value={values.category || ""} onChange={(val) => handleChange("category", val)} />
+        </label>
+      </div>
+
       <label className="li-field"><span className="li-label">Insurance Types &amp; Requirements</span><textarea value={values.insuranceTypes} onChange={(e) => handleChange("insuranceTypes", e.target.value)} className="li-textarea" rows={4} placeholder="Tell us about your insurance needs. E.g., Burglary coverage, Professional indemnity, Employee welfare, etc." /></label>
       <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
       {error && <p className="li-error">{error}</p>}
@@ -2267,7 +2439,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
         
          src="/images/services/SERVICE - LIFE INSURANCE/Without.png"
         alt="worried face"
-        className="w-7 h-7"
+        className=" h-7"
       />
       <h3 className="text-lg font-bold text-rose-600">{data.withoutTitle}</h3>
     </div>
@@ -2286,7 +2458,7 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
       <img
        src="/images/services/SERVICE - LIFE INSURANCE/With.png"
         alt="smiling face"
-        className="w-7 h-7"
+        className=" h-7"
       />
       <h3 className="text-lg font-bold text-emerald-600">{data.withTitle}</h3>
     </div>
