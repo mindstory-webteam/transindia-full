@@ -1677,6 +1677,8 @@ const CATEGORY_OPTIONS = [
   "Money in Transit",
   "Fidelity Guarantee",
   "Burglary & Housebreaking",
+  "Group Health Insurance",
+  "Group Personal Accident",
 ];
 
 function CategoryDropdown({
