@@ -370,14 +370,14 @@ export default function DashboardPage() {
           >
             View Leads
           </Link>
-          <Link
+          {/* <Link
             to="/services/new"
             style={{ padding: "10px 18px", background: C.primary, color: "#fff", borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: "none", boxShadow: "0 6px 16px rgba(241,90,62,0.30)", transition: "background .15s" }}
             onMouseEnter={e => e.currentTarget.style.background = C.primaryDk}
             onMouseLeave={e => e.currentTarget.style.background = C.primary}
           >
             + Add Service
-          </Link>
+          </Link> */}
         </div>
       </div>
 
