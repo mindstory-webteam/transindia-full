@@ -6,9 +6,9 @@ const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png]";
 
 const STATS = [
   { value: "1.2L+",   label: "Policies sold"  },
-  { value: "50K+",    label: "Happy clients"  },
-  { value: "₹500Cr+", label: "Claim Settled"  },
-  { value: "15+",     label: "Years of Trust" },
+  { value: "500+",    label: "Happy clients"  },
+  { value: "₹250Cr+", label: "Claim Settled"  },
+  { value: "20+",     label: "Years of Trust" },
 ];
 
 const INSURANCE_TYPES = [
