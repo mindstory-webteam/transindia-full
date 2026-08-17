@@ -44,8 +44,8 @@ export default function AboutHero() {
             {[
               { value: "20", label: "Years of Experience" },
               { value: "20", label: "Insurer Partners" },
-              { value: "250", label: "Happy Customers" },
-              { value: "₹500Cr", label: "Claims Settled" },
+              { value: "15+", label: "Insurance Categories" },
+              { value: "100%", label: "Client-Focused Approach" },
             ].map((s) => (
               <div key={s.label} className="about-stat">
                 <p className="about-stat-value">{s.value}<span>+</span></p>
