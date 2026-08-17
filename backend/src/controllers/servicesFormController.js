@@ -4,6 +4,9 @@ const cloudinary = require("../config/cloudinary");
 const https = require("https");
 const http = require("http");
 
+// ✅ NEW: SMTP notifier (Office 365) — see utils/serviceLeadMailer.js
+const { sendServiceLeadMail } = require("../utils/serviceLeadMailer");
+
 // slug → form type, so the server never trusts the client for it.
 const SLUG_FORM_TYPE = {
   "life-insurance": "calculator",
@@ -246,6 +249,20 @@ exports.createServiceLead = async (req, res, next) => {
       estimate: normalizeEstimate(estimateRaw),
       rawData: b,
     });
+
+    // ─────────────────────────────────────────────────────────────────
+    // ✅ NEW: email the lead to the office inbox + acknowledge the customer.
+    //
+    // Fire-and-forget on purpose: the lead is already safely in MongoDB, so a
+    // slow or failing SMTP handshake must never delay or break the response
+    // the visitor sees. Failures are logged inside the mailer.
+    //
+    // If you would rather the API wait for the mail to go out, swap this for:
+    //     await sendServiceLeadMail(lead, documents);
+    // ─────────────────────────────────────────────────────────────────
+    sendServiceLeadMail(lead, documents).catch((e) =>
+      console.error("[createServiceLead] mail dispatch error:", e.message)
+    );
 
     return res.status(201).json({
       success: true,
