@@ -1,30 +1,21 @@
-// utils/serviceLeadMailer.js
-//
-// Sends every service-form submission to the office inbox over Office 365 SMTP,
-// and (optionally) an acknowledgement back to the customer.
-//
-// Install once:   npm i nodemailer
-//
-// .env
-//   SMTP_HOST=smtp.office365.com
-//   SMTP_PORT=587
-//   SMTP_USER=hr@transindia.com
-//   SMTP_PASS=your_new_app_password
-//   MAIL_FROM_NAME=TransIndia Website
-//   LEAD_MAIL_TO=hr@transindia.com            # optional, defaults to SMTP_USER
-//   LEAD_MAIL_CC=sales@transindia.com         # optional, comma separated
-//   SEND_CUSTOMER_COPY=true                   # optional, default true
-//   PUBLIC_API_URL=https://api.transindia.com # used to build document links
+
 
 const nodemailer = require("nodemailer");
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.office365.com";
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
+
+// The authenticated mailbox — this is the address mail is SENT FROM.
 const SMTP_USER = process.env.SMTP_USER || "";
 const SMTP_PASS = process.env.SMTP_PASS || "";
+
 const MAIL_FROM_NAME = process.env.MAIL_FROM_NAME || "TransIndia Website";
-const LEAD_MAIL_TO = process.env.LEAD_MAIL_TO || SMTP_USER;
+
+// ✅ Service leads are DELIVERED TO care@. Hardcoded fallback so a missing env
+// var can never silently route enquiries somewhere else.
+const LEAD_MAIL_TO = process.env.LEAD_MAIL_TO || "care@transindia.com";
 const LEAD_MAIL_CC = process.env.LEAD_MAIL_CC || "";
+
 const SEND_CUSTOMER_COPY = process.env.SEND_CUSTOMER_COPY !== "false";
 const PUBLIC_API_URL = (process.env.PUBLIC_API_URL || "").replace(/\/+$/, "");
 
@@ -68,7 +59,7 @@ async function verifyMailer() {
   }
   try {
     await t.verify();
-    console.log(`✅ [mailer] SMTP ready on ${SMTP_HOST}:${SMTP_PORT} as ${SMTP_USER}`);
+    console.log(`✅ [mailer] SMTP ready on ${SMTP_HOST}:${SMTP_PORT} — sending as ${SMTP_USER}, delivering to ${LEAD_MAIL_TO}`);
     return true;
   } catch (err) {
     console.error("❌ [mailer] SMTP verify failed:", err.message);
@@ -210,7 +201,8 @@ function internalHtml(lead, documents) {
         <p style="margin:24px 0 0;font-size:12px;color:#9CA3AF;line-height:1.7;">
           Lead ID: ${esc(lead._id)}<br/>
           Form type: ${esc(lead.formType || "-")} &middot; Source: ${esc(lead.source || "website")}<br/>
-          Received ${esc(new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }))} IST
+          Received ${esc(new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }))} IST<br/>
+          Reply to this email to write directly to the customer.
         </p>
       </div>
     </div>
@@ -262,8 +254,8 @@ function plainText(lead, documents) {
 
 // ── Public API ───────────────────────────────────────────────────────────────
 /**
- * Emails a newly created lead. Never throws — a mail failure must not lose
- * a lead that is already saved in MongoDB.
+ * Emails a newly created lead to care@. Never throws — a mail failure must not
+ * lose a lead that is already saved in MongoDB.
  *
  * @param {Object}  lead       the saved ServiceLead document
  * @param {Array}   documents  [{ url, publicId, mimeType, originalName }]
@@ -274,18 +266,14 @@ async function sendServiceLeadMail(lead, documents = []) {
     console.warn("⚠️  [mailer] Skipping lead email — SMTP not configured.");
     return { ok: false, reason: "not-configured" };
   }
-  if (!LEAD_MAIL_TO) {
-    console.warn("⚠️  [mailer] Skipping lead email — no recipient configured.");
-    return { ok: false, reason: "no-recipient" };
-  }
 
   const customerEmail = (lead.email || "").trim();
 
-  // 1️⃣ Internal notification
+  // 1️⃣ Notification to care@
   try {
     await t.sendMail({
       from: `"${MAIL_FROM_NAME}" <${SMTP_USER}>`, // must equal the authenticated mailbox on O365
-      to: LEAD_MAIL_TO,
+      to: LEAD_MAIL_TO,                           // ✅ care@transindia.com
       cc: LEAD_MAIL_CC || undefined,
       replyTo: EMAIL_RE.test(customerEmail) ? customerEmail : undefined,
       subject: `New ${lead.serviceTitle || "insurance"} lead — ${lead.name || "Website visitor"}`,
@@ -294,7 +282,7 @@ async function sendServiceLeadMail(lead, documents = []) {
     });
     console.log(`📧 [mailer] Lead ${lead._id} emailed to ${LEAD_MAIL_TO}`);
   } catch (err) {
-    console.error("❌ [mailer] Internal notification failed:", err.message);
+    console.error("❌ [mailer] Lead notification failed:", err.message);
     return { ok: false, reason: err.message };
   }
 

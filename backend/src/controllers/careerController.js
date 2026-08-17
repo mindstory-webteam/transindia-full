@@ -18,6 +18,9 @@ exports.getJobs = async (req, res, next) => {
 const cloudinary = require("../config/cloudinary");
 const { Readable } = require("stream");
 
+// ✅ NEW: SMTP notifier for career applications — see utils/careerMailer.js
+const { sendJobApplicationMail } = require("../utils/careerMailer");
+
 // @desc    Apply for a job
 // @route   POST /api/careers/jobs/:id/apply
 // @access  Public
@@ -34,6 +37,14 @@ exports.applyForJob = async (req, res, next) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: "Please upload your resume (PDF)" });
     }
+
+    // ✅ Capture the file details up front. multer keeps the resume in memory,
+    // so we can attach the actual PDF to the notification email instead of
+    // only linking to it. Held in local consts because req.file can be
+    // released once the response is sent.
+    const resumeBuffer = req.file.buffer;
+    const resumeOriginalName = req.file.originalname;
+    const resumeMimeType = req.file.mimetype;
 
     // Direct stream upload to Cloudinary (bypassing multer-storage-cloudinary issues)
     const streamUpload = (fileBuffer) => {
@@ -56,7 +67,7 @@ exports.applyForJob = async (req, res, next) => {
       });
     };
 
-    const uploadResult = await streamUpload(req.file.buffer);
+    const uploadResult = await streamUpload(resumeBuffer);
 
     const application = await JobApplication.create({
       jobId,
@@ -66,6 +77,27 @@ exports.applyForJob = async (req, res, next) => {
       message,
       resumeUrl: uploadResult.secure_url,
     });
+
+    // ─────────────────────────────────────────────────────────────────
+    // ✅ NEW: email the application (with the resume attached) to the
+    // careers inbox, and send the applicant a confirmation.
+    //
+    // Fire-and-forget on purpose: the application is already stored in
+    // MongoDB and Cloudinary, so a slow or failing SMTP handshake must not
+    // delay or break the applicant's response. Failures are logged inside
+    // the mailer.
+    //
+    // If you would rather the API wait for the mail to go out, swap this for:
+    //     await sendJobApplicationMail({ ... });
+    // ─────────────────────────────────────────────────────────────────
+    sendJobApplicationMail({
+      application,
+      jobTitle: job.title,
+      resumeUrl: uploadResult.secure_url,
+      resumeBuffer,
+      resumeOriginalName,
+      resumeMimeType,
+    }).catch((e) => console.error("[applyForJob] mail dispatch error:", e.message));
 
     res.status(201).json({
       success: true,
@@ -97,6 +129,7 @@ exports.getAdminJobs = async (req, res, next) => {
 exports.createJob = async (req, res, next) => {
   try {
     console.log("CREATE JOB PAYLOAD:", req.body);
+
     // Check if order is already used
     if (req.body.order !== undefined) {
       const existingJob = await JobRole.findOne({ order: req.body.order });
@@ -104,6 +137,7 @@ exports.createJob = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "Order number must be unique. This number is already in use." });
       }
     }
+
     const job = await JobRole.create(req.body);
     res.status(201).json({ success: true, data: job });
   } catch (error) {
@@ -117,6 +151,7 @@ exports.createJob = async (req, res, next) => {
 exports.updateJob = async (req, res, next) => {
   try {
     console.log("UPDATE JOB PAYLOAD:", req.body);
+
     // Check if order is already used
     if (req.body.order !== undefined) {
       const existingJob = await JobRole.findOne({ order: req.body.order });
@@ -124,13 +159,16 @@ exports.updateJob = async (req, res, next) => {
         return res.status(400).json({ success: false, message: "Order number must be unique. This number is already in use." });
       }
     }
+
     const job = await JobRole.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
       runValidators: true,
     });
+
     if (!job) {
       return res.status(404).json({ success: false, message: "Job role not found" });
     }
+
     res.status(200).json({ success: true, data: job });
   } catch (error) {
     next(error);
@@ -143,9 +181,11 @@ exports.updateJob = async (req, res, next) => {
 exports.deleteJob = async (req, res, next) => {
   try {
     const job = await JobRole.findByIdAndDelete(req.params.id);
+
     if (!job) {
       return res.status(404).json({ success: false, message: "Job role not found" });
     }
+
     // Optional: Delete related applications or keep them? Usually kept for records.
     res.status(200).json({ success: true, data: {} });
   } catch (error) {
@@ -162,6 +202,7 @@ exports.getApplications = async (req, res, next) => {
     const applications = await JobApplication.find()
       .populate("jobId", "title")
       .sort({ createdAt: -1 });
+
     res.status(200).json({ success: true, count: applications.length, data: applications });
   } catch (error) {
     next(error);
@@ -174,6 +215,7 @@ exports.getApplications = async (req, res, next) => {
 exports.deleteApplication = async (req, res, next) => {
   try {
     const application = await JobApplication.findById(req.params.id);
+
     if (!application) {
       return res.status(404).json({ success: false, message: "Application not found" });
     }
@@ -184,6 +226,7 @@ exports.deleteApplication = async (req, res, next) => {
         const urlObj = new URL(application.resumeUrl);
         const pathname = urlObj.pathname;
         const publicIdMatch = pathname.match(/upload\/(?:v\d+\/)?(.+)/);
+
         if (publicIdMatch && publicIdMatch[1]) {
           const publicId = publicIdMatch[1];
           // Delete from Cloudinary (resource_type: "raw" for PDFs)
@@ -200,4 +243,3 @@ exports.deleteApplication = async (req, res, next) => {
     next(error);
   }
 };
-
