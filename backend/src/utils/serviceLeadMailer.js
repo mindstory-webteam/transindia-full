@@ -1,5 +1,3 @@
-
-
 const nodemailer = require("nodemailer");
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.office365.com";
@@ -33,6 +31,7 @@ function getTransporter() {
     port: SMTP_PORT,
     secure: false,     // 587 starts plain, then upgrades
     requireTLS: true,  // STARTTLS is mandatory for Office 365
+    family: 4,         // ✅ force IPv4 — Render has no IPv6 egress (ENETUNREACH)
     auth: { user: SMTP_USER, pass: SMTP_PASS },
     tls: { minVersion: "TLSv1.2", ciphers: "TLSv1.2" },
     pool: true,

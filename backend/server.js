@@ -1,6 +1,12 @@
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
+// ── Render's containers have no IPv6 egress route. Without this, Node may
+//    resolve smtp.office365.com to an AAAA record and every SMTP connection
+//    dies with "connect ENETUNREACH 2603:1036:...:587". Forcing IPv4 first
+//    makes DNS hand back A records ahead of AAAA everywhere in the process.
+dns.setDefaultResultOrder("ipv4first");
+
 // ── CRITICAL: Load .env FIRST before any other require() that might
 //    read process.env (e.g. cloudinary config, db config) ─────────────────
 const dotenv = require("dotenv");
