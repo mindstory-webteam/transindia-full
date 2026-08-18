@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const dnsp = require("dns").promises;
 
 const SMTP_HOST = process.env.CAREER_SMTP_HOST || "smtp.office365.com";
 const SMTP_PORT = Number(process.env.CAREER_SMTP_PORT || 587);
@@ -9,9 +10,8 @@ const SMTP_PASS = process.env.CAREER_SMTP_PASS || "";
 
 const FROM_NAME = process.env.CAREER_MAIL_FROM_NAME || "TransIndia Careers";
 
-
-const MAIL_TO = process.env.CAREER_MAIL_TO || "hr@transindia.com";
-const MAIL_CC = process.env.CAREER_MAIL_CC || "";
+const MAIL_TO = (process.env.CAREER_MAIL_TO || "hr@transindia.com").trim();
+const MAIL_CC = (process.env.CAREER_MAIL_CC || "").trim();
 
 const SEND_APPLICANT_COPY = process.env.SEND_APPLICANT_COPY !== "false";
 const ATTACH_RESUME = process.env.ATTACH_RESUME !== "false";
@@ -21,21 +21,49 @@ const MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024; // 8 MB
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// ── Transport (created once, reused) ─────────────────────────────────────────
+// ── IPv4 pinning ─────────────────────────────────────────────────────────────
+// Render's containers have no IPv6 egress route. Handing nodemailer a hostname
+// lets it resolve to an AAAA record, and the connection dies with
+// "connect ENETUNREACH 2603:...:587". Neither NODE_OPTIONS=--dns-result-order
+// nor `family: 4` prevents this, because nodemailer resolves outside
+// dns.lookup. So we resolve A records ourselves and connect to the literal IP,
+// passing tls.servername so the certificate still validates against the real
+// hostname.
+const DNS_TTL_MS = 5 * 60 * 1000;
+let cachedIp = null;
+let cachedAt = 0;
+
+async function resolveIPv4(host) {
+  if (cachedIp && Date.now() - cachedAt < DNS_TTL_MS) return cachedIp;
+  const addrs = await dnsp.resolve4(host); // A records only — never AAAA
+  if (!addrs || !addrs.length) throw new Error(`No A record found for ${host}`);
+  cachedIp = addrs[0];
+  cachedAt = Date.now();
+  return cachedIp;
+}
+
+// ── Transport (rebuilt only when the resolved IP changes) ────────────────────
 let transporter = null;
 
-function getCareerTransporter() {
-  if (transporter) return transporter;
+async function getCareerTransporter() {
   if (!SMTP_USER || !SMTP_PASS) return null;
 
+  const ip = await resolveIPv4(SMTP_HOST);
+
+  // Reuse the pooled transport while the IP is unchanged.
+  if (transporter && transporter.__ip === ip) return transporter;
+  if (transporter) transporter.close(); // IP rotated — drop the stale pool
+
   transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
+    host: ip,          // ✅ IPv4 literal — no DNS lookup at connect time
     port: SMTP_PORT,
     secure: false,     // 587 starts plain, then upgrades
     requireTLS: true,  // STARTTLS is mandatory for Office 365
-    family: 4,         // ✅ force IPv4 — Render has no IPv6 egress (ENETUNREACH)
     auth: { user: SMTP_USER, pass: SMTP_PASS },
-    tls: { minVersion: "TLSv1.2", ciphers: "TLSv1.2" },
+    tls: {
+      servername: SMTP_HOST, // ✅ required: the cert is issued for the hostname, not the IP
+      minVersion: "TLSv1.2",
+    },
     pool: true,
     maxConnections: 2,
     maxMessages: 50,
@@ -43,6 +71,7 @@ function getCareerTransporter() {
     greetingTimeout: 10000,
     socketTimeout: 30000, // resumes are attached, so allow a longer upload
   });
+  transporter.__ip = ip;
 
   return transporter;
 }
@@ -53,14 +82,20 @@ function getCareerTransporter() {
  *   verifyCareerMailer();
  */
 async function verifyCareerMailer() {
-  const t = getCareerTransporter();
+  let t;
+  try {
+    t = await getCareerTransporter();
+  } catch (err) {
+    console.error("❌ [careerMailer] Could not resolve SMTP host:", err.message);
+    return false;
+  }
   if (!t) {
     console.warn("⚠️  [careerMailer] CAREER_SMTP_USER / CAREER_SMTP_PASS missing — application emails disabled.");
     return false;
   }
   try {
     await t.verify();
-    console.log(`✅ [careerMailer] SMTP ready on ${SMTP_HOST}:${SMTP_PORT} — sending as ${SMTP_USER}, delivering to ${MAIL_TO}`);
+    console.log(`✅ [careerMailer] SMTP ready on ${SMTP_HOST} (${t.__ip}):${SMTP_PORT} — sending as ${SMTP_USER}, delivering to ${MAIL_TO}`);
     return true;
   } catch (err) {
     console.error("❌ [careerMailer] SMTP verify failed:", err.message);
@@ -220,7 +255,13 @@ async function sendJobApplicationMail({
   resumeOriginalName,
   resumeMimeType,
 }) {
-  const t = getCareerTransporter();
+  let t;
+  try {
+    t = await getCareerTransporter();
+  } catch (err) {
+    console.error("❌ [careerMailer] Could not resolve SMTP host:", err.message);
+    return { ok: false, reason: err.message };
+  }
   if (!t) {
     console.warn("⚠️  [careerMailer] Skipping application email — SMTP not configured.");
     return { ok: false, reason: "not-configured" };

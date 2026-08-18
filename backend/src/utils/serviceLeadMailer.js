@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const dnsp = require("dns").promises;
 
 const SMTP_HOST = process.env.SMTP_HOST || "smtp.office365.com";
 const SMTP_PORT = Number(process.env.SMTP_PORT || 587);
@@ -19,21 +20,49 @@ const PUBLIC_API_URL = (process.env.PUBLIC_API_URL || "").replace(/\/+$/, "");
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// ── Transport (created once, reused) ─────────────────────────────────────────
+// ── IPv4 pinning ─────────────────────────────────────────────────────────────
+// Render's containers have no IPv6 egress route. Handing nodemailer a hostname
+// lets it resolve to an AAAA record, and the connection dies with
+// "connect ENETUNREACH 2603:...:587". Neither NODE_OPTIONS=--dns-result-order
+// nor `family: 4` prevents this, because nodemailer resolves outside
+// dns.lookup. So we resolve A records ourselves and connect to the literal IP,
+// passing tls.servername so the certificate still validates against the real
+// hostname.
+const DNS_TTL_MS = 5 * 60 * 1000;
+let cachedIp = null;
+let cachedAt = 0;
+
+async function resolveIPv4(host) {
+  if (cachedIp && Date.now() - cachedAt < DNS_TTL_MS) return cachedIp;
+  const addrs = await dnsp.resolve4(host); // A records only — never AAAA
+  if (!addrs || !addrs.length) throw new Error(`No A record found for ${host}`);
+  cachedIp = addrs[0];
+  cachedAt = Date.now();
+  return cachedIp;
+}
+
+// ── Transport (rebuilt only when the resolved IP changes) ────────────────────
 let transporter = null;
 
-function getTransporter() {
-  if (transporter) return transporter;
+async function getTransporter() {
   if (!SMTP_USER || !SMTP_PASS) return null;
 
+  const ip = await resolveIPv4(SMTP_HOST);
+
+  // Reuse the pooled transport while the IP is unchanged.
+  if (transporter && transporter.__ip === ip) return transporter;
+  if (transporter) transporter.close(); // IP rotated — drop the stale pool
+
   transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
+    host: ip,          // ✅ IPv4 literal — no DNS lookup at connect time
     port: SMTP_PORT,
     secure: false,     // 587 starts plain, then upgrades
     requireTLS: true,  // STARTTLS is mandatory for Office 365
-    family: 4,         // ✅ force IPv4 — Render has no IPv6 egress (ENETUNREACH)
     auth: { user: SMTP_USER, pass: SMTP_PASS },
-    tls: { minVersion: "TLSv1.2", ciphers: "TLSv1.2" },
+    tls: {
+      servername: SMTP_HOST, // ✅ required: the cert is issued for the hostname, not the IP
+      minVersion: "TLSv1.2",
+    },
     pool: true,
     maxConnections: 3,
     maxMessages: 50,
@@ -41,6 +70,7 @@ function getTransporter() {
     greetingTimeout: 10000,
     socketTimeout: 20000,
   });
+  transporter.__ip = ip;
 
   return transporter;
 }
@@ -51,14 +81,20 @@ function getTransporter() {
  *   verifyMailer();
  */
 async function verifyMailer() {
-  const t = getTransporter();
+  let t;
+  try {
+    t = await getTransporter();
+  } catch (err) {
+    console.error("❌ [mailer] Could not resolve SMTP host:", err.message);
+    return false;
+  }
   if (!t) {
     console.warn("⚠️  [mailer] SMTP_USER / SMTP_PASS missing — lead emails disabled.");
     return false;
   }
   try {
     await t.verify();
-    console.log(`✅ [mailer] SMTP ready on ${SMTP_HOST}:${SMTP_PORT} — sending as ${SMTP_USER}, delivering to ${LEAD_MAIL_TO}`);
+    console.log(`✅ [mailer] SMTP ready on ${SMTP_HOST} (${t.__ip}):${SMTP_PORT} — sending as ${SMTP_USER}, delivering to ${LEAD_MAIL_TO}`);
     return true;
   } catch (err) {
     console.error("❌ [mailer] SMTP verify failed:", err.message);
@@ -260,7 +296,13 @@ function plainText(lead, documents) {
  * @param {Array}   documents  [{ url, publicId, mimeType, originalName }]
  */
 async function sendServiceLeadMail(lead, documents = []) {
-  const t = getTransporter();
+  let t;
+  try {
+    t = await getTransporter();
+  } catch (err) {
+    console.error("❌ [mailer] Could not resolve SMTP host:", err.message);
+    return { ok: false, reason: err.message };
+  }
   if (!t) {
     console.warn("⚠️  [mailer] Skipping lead email — SMTP not configured.");
     return { ok: false, reason: "not-configured" };
