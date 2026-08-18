@@ -11,8 +11,7 @@ const SMTP_PASS = process.env.CAREER_SMTP_PASS || "";
 
 const FROM_NAME = process.env.CAREER_MAIL_FROM_NAME || "TransIndia Careers";
 
-// ✅ Applications are DELIVERED TO hr@. Hardcoded fallback so a missing env var
-// can never silently route applications somewhere else.
+
 const MAIL_TO = process.env.CAREER_MAIL_TO || "hr@transindia.com";
 const MAIL_CC = process.env.CAREER_MAIL_CC || "";
 
