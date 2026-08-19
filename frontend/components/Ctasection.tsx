@@ -1,6 +1,7 @@
 "use client"
 
 import React from "react";
+import Link from "next/link";
 
 const SHIELD_SRC = "/images/home/HOME/FAMILY PROTECTION VISUAL.png";
 
@@ -63,6 +64,13 @@ export default function CtaSection() {
           transition: background 0.15s;
           font-family: 'matterregular', sans-serif;
           letter-spacing: 0.01em;
+          text-decoration: none;
+          text-align: center;
+        }
+
+        .cta-btn:focus-visible {
+          outline: 2px solid #1A1A2E;
+          outline-offset: 3px;
         }
 
         /* ── Tablet (≤900px) ── */
@@ -125,13 +133,14 @@ export default function CtaSection() {
               life and budget. Free consultation, no pressure.
             </p>
 
-            <button
+            <Link
+              href="/contact-us"
               className="cta-btn"
               onMouseEnter={e => (e.currentTarget.style.background = "#EA580C")}
               onMouseLeave={e => (e.currentTarget.style.background = "#F97316")}
             >
               Get free advice
-            </button>
+            </Link>
 
             <div className="cta-phone-row" style={s.phoneRow}>
               <PhoneIcon />
