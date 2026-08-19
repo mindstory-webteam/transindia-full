@@ -24,7 +24,7 @@ export default function AboutHero() {
             </p>
 
             <div className="about-btns">
-              <a href="#contact" className="about-btn-orange">Talk to an Expert</a>
+              <a href="/contact-us" className="about-btn-orange">Talk to an Expert</a>
               <a href="/careers" className="about-btn-ghost">Join Our Team</a>
             </div>
           </div>
