@@ -108,10 +108,10 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
         console.error("Lead save failed:", res.status, errBody);
         setFeedback({ type: "error", text: errBody.message || "Could not save your request. Please try again." });
         setSubmitting(false);
-        return; // don't open WhatsApp if the save failed — keeps behaviour honest
+        return;
       }
 
-      setFeedback({ type: "success", text: "Got it! Opening WhatsApp to connect you with an expert…" });
+      setFeedback({ type: "success", text: "Got it! Our expert will get in touch with you shortly." });
     } catch (err) {
       console.error("Failed to save lead:", err);
       setFeedback({ type: "error", text: "Network error — could not reach the server." });
@@ -120,10 +120,6 @@ function QuoteBar({ innerRef }: { innerRef?: React.Ref<HTMLDivElement> }) {
     }
 
     setSubmitting(false);
-
-    const whatsappNumber = "7510400320";
-    const message = `Hello, I'm interested in an insurance .\n\n*Insurance Type:* ${insType}\n*Sum Insured:* ${sum}\n*Mobile Number:* ${mobile}`;
-    window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   return (
