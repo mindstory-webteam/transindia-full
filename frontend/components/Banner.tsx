@@ -16,43 +16,34 @@ const INSURANCE_TYPES = [
   "Term Insurance","Travel Insurance",
 ];
 
-/* ---------- Auto-changing headline ----------
-   Edit this list to change what rotates through the hero heading.
-   Each entry has two parts (line1 / line2) so it keeps the two-line
-   layout, and each "word" in line2 can carry its own accent color. */
+
 
 type HeadlineWord = { text: string; color?: string };
 type Headline = { line1: string; line2: HeadlineWord[] };
 
 const HEADLINES: Headline[] = [
   {
-    line1: "Protection for",
+    line1: "For Every Life. ",
     line2: [
-      { text: "Every ", color: "#F15A40" },
-      { text: "stage of life.", color: "#20BEC6" },
+      { text: "For Every ", color: "#F15A40" },
+      { text: "Tomorrow. ", color: "#20BEC6" },
     ],
   },
   {
-    line1: "Coverage that",
+    line1: "ഓരോ ജീവിതത്തിനും. ",
     line2: [
-      { text: "Never ", color: "#20BEC6" },
-      { text: "lets you down.", color: "#F15A40" },
+      { text: " ഓരോ ", color: "#20BEC6" },
+      { text: "നാളെക്കും.", color: "#F15A40" },
     ],
   },
   {
-    line1: "Peace of mind,",
+    line1: "हर जीवन के लिए। ",
     line2: [
-      { text: "Every ", color: "#F15A40" },
-      { text: "single day.", color: "#20BEC6" },
+      { text: "हर कल  ", color: "#F15A40" },
+      { text: "के लिए.", color: "#20BEC6" },
     ],
   },
-  {
-    line1: "Insurance built",
-    line2: [
-      { text: "Around ", color: "#20BEC6" },
-      { text: "your family.", color: "#F15A40" },
-    ],
-  },
+  
 ];
 
 const HEADLINE_INTERVAL_MS = 4000;
@@ -208,12 +199,14 @@ function InsuranceCards() {
             minHeight: 128,
             padding: "20px 14px",
             borderRadius: 18,
-            border: `5px solid ${accent}`,
-            background: "#F6F1EA",
+            border: `2px solid ${accent}55`,
+            background: "rgba(255,255,255,0.05)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
             textDecoration: "none",
             cursor: "pointer",
-            boxShadow: "0 8px 22px rgba(0,0,0,0.30)",
-            transition: "transform .22s ease, box-shadow .22s ease",
+         
+            transition: "transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease",
           }}
         >
           <span
@@ -236,7 +229,7 @@ function InsuranceCards() {
                 display: "block",
                 fontSize: 13,
                 fontWeight: 800,
-                color: "#0B2563",
+                color: "#fff",
                 lineHeight: 1.25,
               }}
             >
@@ -254,7 +247,7 @@ function InsuranceCards() {
                 marginTop: 8,
                 fontSize: 11.5,
                 lineHeight: 1.45,
-                color: "#6B7280",
+                color: "rgba(255,255,255,0.55)",
                 fontWeight: 500,
               }}
             >
@@ -574,7 +567,8 @@ export default function Banner() {
         .ins-card:hover{
           transform:translateY(-7px);
           box-shadow:0 18px 38px rgba(0,0,0,0.42)!important;
-          background:#FFFDF9!important;
+          background:rgba(255,255,255,0.1)!important;
+          border-color:rgba(255,255,255,0.5)!important;
         }
         .ins-card:hover .ins-card-icon{ transform:scale(1.18) rotate(-4deg); }
         .ins-card:active{ transform:translateY(-2px); }
@@ -716,9 +710,9 @@ export default function Banner() {
                 trusted advisors, and dependable claim support whenever you need it.
               </p>
               <div className="ins-cta-row flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap justify-center lg:justify-start mb-10 sm:mb-14">
-                {/* <a href="/contact-us" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#EC4F34] rounded-xl text-white no-underline text-[14px] sm:text-[15px] font-extrabold whitespace-nowrap">
+                <a href="/contact-us" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#EC4F34] rounded-xl text-white no-underline text-[14px] sm:text-[15px] font-extrabold whitespace-nowrap">
                   Get your quote
-                </a> */}
+                </a>
                 <a href="tel:18004258084" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[14px] sm:text-[15px] font-extrabold backdrop-blur-md whitespace-nowrap">
                   Talk to an expert
                 </a>

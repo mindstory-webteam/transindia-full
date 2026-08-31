@@ -10,13 +10,13 @@ export type PreloaderLine = {
 };
 
 type Props = {
-  /** Path to the logo (put the file in /public). */
+ 
   logoSrc?: string;
-  /** The three short lines shown to the right of the divider. */
+
   lines?: PreloaderLine[];
-  /** Minimum time the preloader stays on screen, in ms. */
+ 
   duration?: number;
-  /** Length of the final fade-out, in ms. */
+ 
   fadeDuration?: number;
   /** Also wait for window "load" before hiding. */
   waitForLoad?: boolean;
@@ -31,26 +31,12 @@ const ORANGE = '#f15a40';
 const TEAL = '#20bec6';
 
 const DEFAULT_LINES: PreloaderLine[] = [
-  { lead: 'For the', accent: 'Insured' },
-  { lead: 'Of the', accent: 'Insured' },
-  { lead: 'By the', accent: 'Insured' },
+  { lead: 'For Every', accent: ' Life.' },
+  { lead: 'For Every', accent: '  Tomorrow.' },
+  
 ];
 
-/**
- * Full-screen preloader for transindia.
- *
- * Sequence:
- *  1. White overlay covers the page.
- *  2. The logo is revealed left-to-right by a clip wipe, with a coloured
- *     line riding the leading edge.
- *  3. The line lands at the logo's right edge, stretches tall and stays
- *     there as a divider.
- *  4. Three short lines fade in one after another beside the divider.
- *  5. A shimmer loops across the logo while loading continues, then the
- *     overlay fades out.
- *
- * No dependencies — pure CSS.
- */
+
 export function Preloader({
   logoSrc = '/images/logo/transindia.png',
   lines = DEFAULT_LINES,
