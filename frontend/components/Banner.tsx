@@ -16,6 +16,10 @@ const INSURANCE_TYPES = [
   "Term Insurance","Travel Insurance",
 ];
 
+/* Route prefix the service pages live under. The slugs below are the same
+   ones the navigation uses, so a card and a nav item always resolve to the
+   same page — change the prefix here only, never in the card list. */
+const SERVICE_BASE = "/our-services";
 
 
 type HeadlineWord = { text: string; color?: string };
@@ -151,18 +155,21 @@ function FireIcon({ size = 34, color = "#F15A40" }: IconProps) {
 const TEAL   = "#20BEC6";
 const ORANGE = "#F15A40";
 
+/* `slug` matches the navigation entries exactly (m1–m4, m6, m7). The two
+   remaining nav services — miscellaneous-insurance and entertainment-insurance
+   — have no card here yet; they need an icon before they can be added. */
 const INSURANCE_CARDS = [
-  { l1: "Life",   l2: "Insurance", accent: TEAL,   href: "/services/life-insurance",   Icon: LifeIcon,
+  { l1: "Life",   l2: "Insurance", accent: TEAL,   slug: "life-insurance",   Icon: LifeIcon,
     desc: "Secure your family's future with dependable life cover." },
-  { l1: "Health", l2: "Insurance", accent: ORANGE, href: "/services/health-insurance", Icon: HealthIcon,
+  { l1: "Health", l2: "Insurance", accent: ORANGE, slug: "health-insurance", Icon: HealthIcon,
     desc: "Comprehensive medical coverage for you and your family." },
-  { l1: "Motor",  l2: "Insurance", accent: ORANGE, href: "/services/motor-insurance",  Icon: MotorIcon,
+  { l1: "Motor",  l2: "Insurance", accent: ORANGE, slug: "motor-insurance",  Icon: MotorIcon,
     desc: "Complete protection for your car and two-wheeler." },
-  { l1: "Home",   l2: "Insurance", accent: TEAL,   href: "/services/home-insurance",   Icon: HomeIcon,
+  { l1: "Home",   l2: "Insurance", accent: TEAL,   slug: "home-insurance",   Icon: HomeIcon,
     desc: "Safeguard your home against unexpected risks and loss." },
-  { l1: "Marine", l2: "Insurance", accent: TEAL,   href: "/services/marine-insurance", Icon: MarineIcon,
+  { l1: "Marine", l2: "Insurance", accent: TEAL,   slug: "marine-insurance", Icon: MarineIcon,
     desc: "Coverage for cargo and goods in transit by sea or land." },
-  { l1: "Fire",   l2: "Insurance", accent: ORANGE, href: "/services/fire-insurance",   Icon: FireIcon,
+  { l1: "Fire",   l2: "Insurance", accent: ORANGE, slug: "fire-insurance",   Icon: FireIcon,
     desc: "Protect your property from fire and related damage." },
 ];
 
@@ -184,10 +191,10 @@ function InsuranceCards() {
         width: "100%",
       }}
     >
-      {INSURANCE_CARDS.map(({ l1, l2, accent, href, Icon, desc }) => (
-        <a
-          key={l1}
-          href={href}
+      {INSURANCE_CARDS.map(({ l1, l2, accent, slug, Icon, desc }) => (
+        
+        <a  key={slug}
+          href={`${SERVICE_BASE}/${slug}`}
           className="ins-card"
           style={{
             display: "flex",
