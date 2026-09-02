@@ -10,13 +10,13 @@ export type PreloaderLine = {
 };
 
 type Props = {
- 
+
   logoSrc?: string;
 
   lines?: PreloaderLine[];
- 
+
   duration?: number;
- 
+
   fadeDuration?: number;
   /** Also wait for window "load" before hiding. */
   waitForLoad?: boolean;
@@ -33,7 +33,7 @@ const TEAL = '#20bec6';
 const DEFAULT_LINES: PreloaderLine[] = [
   { lead: 'For Every', accent: ' Life.' },
   { lead: 'For Every', accent: '  Tomorrow.' },
-  
+
 ];
 
 
@@ -109,7 +109,7 @@ export function Preloader({
 
       <div className="ti-stage">
         <div className="ti-logo">
-          {/* Only this inner box is clipped, so the line can grow past it. */}
+          {/* Only this inner box is clipped, so the reveal can wipe across it. */}
           <div className="ti-logo-clip">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={logoSrc} alt="transindia" draggable={false} />
@@ -121,8 +121,6 @@ export function Preloader({
               }}
             />
           </div>
-          {/* Rides the wipe, then parks at the right edge as the divider. */}
-          <span className="ti-rule" aria-hidden="true" />
         </div>
 
         <ul className="ti-lines">
@@ -169,20 +167,20 @@ export function Preloader({
         }
 
         .ti-stage {
-          /* Space between the logo and the divider. The stage gap is twice
-             this, so the divider ends up centred in the gutter. */
-          --ti-gap: 16px;
+          /* Space between the logo and the copy below it. */
+          --ti-gap: 18px;
           position: relative;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          gap: calc(var(--ti-gap) * 2);
+          gap: var(--ti-gap);
         }
 
         /* ---- logo ---- */
         .ti-logo {
           position: relative;
           flex: 0 0 auto;
-          width: min(230px, 44vw);
+          width: min(300px, 56vw);
         }
         .ti-logo-clip {
           position: relative;
@@ -213,38 +211,28 @@ export function Preloader({
           animation: ti-shine 1.9s ease-in-out 1600ms infinite;
         }
 
-        /* ---- travelling line, then divider ---- */
-        .ti-rule {
-          position: absolute;
-          left: 0;
-          top: 34%;
-          bottom: 34%;
-          width: 2px;
-          margin-left: -1px;
-          border-radius: 2px;
-          background: linear-gradient(180deg, ${ORANGE}, ${TEAL});
-          opacity: 0;
-          transform: translateX(0);
-          animation: ti-rule 1240ms cubic-bezier(.65,0,.35,1) 180ms forwards;
-        }
-
-        /* ---- copy ---- */
+        /* ---- copy, one line under the logo ---- */
         .ti-lines {
           list-style: none;
           margin: 0;
           padding: 0;
           display: flex;
-          flex-direction: column;
-          gap: 8px;
-          font-size: clamp(12px, 1.6vw, 14px);
+          flex-direction: row;
+          align-items: baseline;
+          justify-content: center;
+          flex-wrap: nowrap;
+          gap: 18px;
+          font-size: clamp(15px, 2.2vw, 19px);
+          line-height: 1.15;
           font-weight: 600;
           letter-spacing: 0.01em;
           color: #1d2b32;
           white-space: nowrap;
+          text-align: center;
         }
         .ti-lines li {
           opacity: 0;
-          transform: translateX(-6px);
+          transform: translateY(6px);
           animation: ti-line 420ms cubic-bezier(.2,.7,.3,1) forwards;
         }
         .ti-lines b {
@@ -256,14 +244,8 @@ export function Preloader({
           from { clip-path: inset(0 100% 0 0); }
           to   { clip-path: inset(0 0 0 0); }
         }
-        @keyframes ti-rule {
-          0%   { left: 0%;   top: 34%;  bottom: 34%;  opacity: 0; transform: translateX(0); }
-          10%  { opacity: 1; }
-          68%  { left: 100%; top: 34%;  bottom: 34%;  opacity: 1; transform: translateX(0); }
-          100% { left: 100%; top: -52%; bottom: -52%; opacity: 1; transform: translateX(var(--ti-gap)); }
-        }
         @keyframes ti-line {
-          to { opacity: 1; transform: translateX(0); }
+          to { opacity: 1; transform: translateY(0); }
         }
         @keyframes ti-shine {
           0%   { background-position: 130% 0; }
@@ -272,16 +254,13 @@ export function Preloader({
         }
 
         @media (max-width: 480px) {
-          .ti-stage { --ti-gap: 11px; }
+          .ti-stage { --ti-gap: 12px; }
+          .ti-lines { gap: 10px; }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .ti-logo-clip { clip-path: none; animation: none; }
           .ti-shine { display: none; }
-          .ti-rule {
-            opacity: 1; left: 100%; top: -52%; bottom: -52%;
-            transform: translateX(var(--ti-gap)); animation: none;
-          }
           .ti-lines li { opacity: 1; transform: none; animation: none; }
         }
       `}</style>

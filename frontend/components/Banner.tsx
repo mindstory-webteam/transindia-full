@@ -173,6 +173,38 @@ const INSURANCE_CARDS = [
     desc: "Protect your property from fire and related damage." },
 ];
 
+/* ---------- Sliding stats strip ----------
+   This row used to be a plain overflow-x flex, so in a narrow column the first
+   and last figures got sliced clean through. It is a marquee now: the list is
+   rendered twice and the track slides exactly one copy's width, so it loops
+   with no visible jump. The container edges are feathered with a mask instead
+   of hard-clipped, so a figure fades rather than being cut mid-character.
+   Below 600px it drops back to the static 2x2 grid. */
+
+function StatsStrip() {
+  const loop = [...STATS, ...STATS];
+
+  return (
+    <div className="ins-stats-wrap">
+      <div className="ins-stats-track">
+        {loop.map((s, i) => {
+          const isDupe = i >= STATS.length;
+          return (
+            <div
+              key={`${s.label}-${i}`}
+              className={`ins-stat${isDupe ? " ins-stat-dupe" : ""}`}
+              aria-hidden={isDupe || undefined}
+            >
+              <div className="ins-stat-value">{s.value}</div>
+              <div className="ins-stat-label">{s.label}</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ---------- 6-up insurance card row (sits in the bottom panel now) ---------- */
 
 function InsuranceCards() {
@@ -571,6 +603,67 @@ export default function Banner() {
           transform:translateY(0);
         }
 
+        /* ---- stats: seamless sliding strip, feathered at both ends ---- */
+        .ins-stats-wrap{
+          width:100%;
+          max-width:100%;
+          overflow:hidden;
+          position:relative;
+          padding:2px 0;
+          /* feathered edges — figures fade out instead of being sliced */
+          -webkit-mask-image:linear-gradient(90deg,
+            transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+                  mask-image:linear-gradient(90deg,
+            transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+        }
+        .ins-stats-track{
+          display:flex;
+          align-items:flex-start;
+          width:max-content;
+          will-change:transform;
+          animation:ins-stats-slide 24s linear infinite;
+        }
+        /* the track holds two identical copies, so moving exactly half its
+           width lands on an identical frame — the loop has no visible jump */
+        @keyframes ins-stats-slide{
+          from{ transform:translateX(0); }
+          to  { transform:translateX(-50%); }
+        }
+        .ins-stats-wrap:hover .ins-stats-track{ animation-play-state:paused; }
+
+        .ins-stat{
+          flex:0 0 auto;
+          padding:0 26px;
+          border-left:1px solid rgba(255,255,255,0.15);
+          text-align:left;
+        }
+        .ins-stat-value{
+          font-size:clamp(18px,2vw,24px);
+          font-weight:900;
+          color:#fff;
+          line-height:1.15;
+          white-space:nowrap;
+        }
+        .ins-stat-label{
+          font-size:11.5px;
+          color:rgba(255,255,255,0.5);
+          margin-top:4px;
+          white-space:nowrap;
+        }
+
+        /* less motion requested: a plain swipeable row, still never mid-cut */
+        @media (prefers-reduced-motion: reduce){
+          .ins-stats-track{ animation:none; }
+          .ins-stats-wrap{
+            overflow-x:auto;
+            scrollbar-width:none;
+            -webkit-mask-image:none;
+                    mask-image:none;
+          }
+          .ins-stats-wrap::-webkit-scrollbar{ display:none; }
+          .ins-stat-dupe{ display:none; }
+        }
+
         .ins-card:hover{
           transform:translateY(-7px);
           box-shadow:0 18px 38px rgba(0,0,0,0.42)!important;
@@ -625,11 +718,9 @@ export default function Banner() {
           .ins-left p{ font-size:13px!important; text-align:left!important; }
           .ins-cta-row{ justify-content:flex-start!important; }
           .ins-cta-row a { padding: 10px 18px!important; font-size: 13px!important; }
-          .ins-stats{ justify-content:space-between!important; flex-wrap: nowrap!important; gap: 4px!important; overflow: hidden!important; width: 100%!important; }
-          .ins-stats > div { padding-right: 0!important; }
-          .ins-stats .text-left > div:first-child { font-size: 13px!important; }
-          .ins-stats .text-left > div:last-child { font-size: 9px!important; }
-          .ins-stats .w-\\[1px\\] { display: none!important; }
+          .ins-stat{ padding:0 20px!important; }
+          .ins-stat-value{ font-size:20px!important; }
+          .ins-stat-label{ font-size:11px!important; }
           .ins-center{ flex:1 1 100%!important; order:2!important; }
           .ins-center img{ max-width:380px!important; }
           .ins-right{ flex:1 1 100%!important; order:3!important; max-width:420px; margin:0 auto; }
@@ -667,23 +758,28 @@ export default function Banner() {
             padding:14px 18px!important;
             font-size:14.5px!important;
           }
-          .ins-stats{
+          /* phones get the static 2x2 grid — it all fits, so nothing slides */
+          .ins-stats-wrap{
+            overflow:visible!important;
+            -webkit-mask-image:none!important;
+                    mask-image:none!important;
+          }
+          .ins-stats-track{
             display:grid!important;
-            grid-template-columns:repeat(2, 1fr)!important;
+            grid-template-columns:repeat(2,1fr)!important;
+            width:100%!important;
             row-gap:20px!important;
             column-gap:12px!important;
-            width:100%!important;
-            overflow:visible!important;
-            flex-wrap:unset!important;
+            animation:none!important;
+            transform:none!important;
           }
-          .ins-stats > div{
-            padding-right:0!important;
-            gap:0!important;
-            flex-shrink:1!important;
+          .ins-stat-dupe{ display:none!important; }
+          .ins-stat{
+            padding:0!important;
+            border-left:none!important;
           }
-          .ins-stats .w-\\[1px\\]{ display:none!important; }
-          .ins-stats .text-left > div:first-child { font-size: 20px!important; }
-          .ins-stats .text-left > div:last-child { font-size: 11.5px!important; margin-top:3px!important; }
+          .ins-stat-value{ font-size:20px!important; }
+          .ins-stat-label{ font-size:11.5px!important; margin-top:3px!important; }
           .ins-center img{ max-width:230px!important; }
           .ins-cards-wrap{ padding:0 16px 36px!important; margin-top:36px!important; }
           .ins-cards-panel{ padding:22px 16px 24px!important; border-radius:18px!important; }
@@ -724,24 +820,14 @@ export default function Banner() {
                   Talk to an expert
                 </a>
               </div>
-              <div className="ins-stats flex items-start flex-nowrap overflow-x-auto justify-start md:justify-start gap-4 sm:gap-0" style={{ scrollbarWidth: "none" }}>
-                <style>{`.ins-stats::-webkit-scrollbar { display: none; }`}</style>
-                {STATS.map((s, i) => (
-                  <div key={s.label} className="flex items-start gap-[10px] sm:gap-[18px] pr-2 sm:pr-[18px] flex-shrink-0">
-                    {i !== 0 && <div className="block w-[1px] h-10 bg-white/15 shrink-0 mt-0.5" />}
-                    <div className="text-left">
-                      <div className="text-[clamp(17px,2vw,23px)] font-black text-white leading-tight">{s.value}</div>
-                      <div className="text-[11px] text-white/50 mt-1 whitespace-nowrap">{s.label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+              <StatsStrip />
             </div>
 
             {/* ---- center: family image ---- */}
             <div className="ins-center">
               <img
-                src="/images/banner/banner-4.png"
+                src="/images/banner/banner-5.png"
                 alt="Insurance coverage"
                 className="w-full h-auto object-contain max-w-[640px] mx-auto"
               />
