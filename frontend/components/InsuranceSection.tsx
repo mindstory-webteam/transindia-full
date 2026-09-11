@@ -201,14 +201,12 @@ const CSS = `
     display: flex;
     flex-direction: column;
     height: 100%;
-    box-shadow: 0 4px 28px rgba(0,0,0,0.08);
     transition: transform 0.28s ease, box-shadow 0.28s ease;
     position: relative;
   }
 
   .ins-card:hover {
     transform: translateY(-7px);
-    box-shadow: 0 22px 56px rgba(0,0,0,0.13);
   }
 
   /* Disable hover lift on touch devices */

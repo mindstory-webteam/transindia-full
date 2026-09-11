@@ -587,8 +587,8 @@ export default function Banner() {
           align-items:center;
           gap:24px;
         }
-        .ins-left{ flex:0 1 34%; min-width:0; }
-        .ins-center{ flex:1 1 40%; min-width:0; display:flex; align-items:center; justify-content:center; }
+        .ins-left{ flex:0 1 36%; min-width:0; }
+        .ins-center{ flex:1 1 38%; min-width:0; display:flex; align-items:center; justify-content:center; }
         .ins-right{ flex:0 0 280px; }
 
         .ins-headline{
@@ -664,14 +664,14 @@ export default function Banner() {
           .ins-stat-dupe{ display:none; }
         }
 
-        .ins-card:hover{
+        .ins-cards-panel .ins-card:hover{
           transform:translateY(-7px);
-          box-shadow:0 18px 38px rgba(0,0,0,0.42)!important;
-          background:rgba(255,255,255,0.1)!important;
-          border-color:rgba(255,255,255,0.5)!important;
+          box-shadow:0 18px 38px rgba(0,0,0,0.42);
+          background:rgba(255,255,255,0.1);
+          border-color:rgba(255,255,255,0.5);
         }
-        .ins-card:hover .ins-card-icon{ transform:scale(1.18) rotate(-4deg); }
-        .ins-card:active{ transform:translateY(-2px); }
+        .ins-cards-panel .ins-card:hover .ins-card-icon{ transform:scale(1.18) rotate(-4deg); }
+        .ins-cards-panel .ins-card:active{ transform:translateY(-2px); }
 
         .ins-quote-cta:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(242,89,23,0.35); }
 
@@ -716,8 +716,8 @@ export default function Banner() {
           .ins-left{ text-align:left!important; }
           .ins-left h1{ font-size:clamp(26px, 4vw, 40px)!important; text-align:left!important; white-space:normal!important; }
           .ins-left p{ font-size:13px!important; text-align:left!important; }
-          .ins-cta-row{ justify-content:flex-start!important; }
-          .ins-cta-row a { padding: 10px 18px!important; font-size: 13px!important; }
+          .ins-cta-row{ justify-content:flex-start!important; flex-direction:row!important; flex-wrap:nowrap!important; }
+          .ins-cta-row a { padding: 10px 18px!important; font-size: 13px!important; white-space:nowrap!important; }
           .ins-stat{ padding:0 20px!important; }
           .ins-stat-value{ font-size:20px!important; }
           .ins-stat-label{ font-size:11px!important; }
@@ -725,7 +725,7 @@ export default function Banner() {
           .ins-center img{ max-width:380px!important; }
           .ins-right{ flex:1 1 100%!important; order:3!important; max-width:420px; margin:0 auto; }
           .ins-cards-wrap{ padding:0 32px 44px!important; }
-          .ins-cards .ins-card{ min-width:150px!important; }
+          .ins-cards-panel .ins-cards .ins-card{ min-width:150px!important; }
         }
 
         @media(max-width:600px){
@@ -743,20 +743,23 @@ export default function Banner() {
             margin-bottom:26px!important;
           }
           .ins-cta-row{
-            flex-direction:column!important;
-            align-items:stretch!important;
+            flex-direction:row!important;
+            flex-wrap:nowrap!important;
+            align-items:center!important;
             justify-content:center!important;
-            gap:12px!important;
+            gap:10px!important;
             margin-bottom:32px!important;
           }
           .ins-cta-row a{
-            width:100%!important;
+            flex:1 1 0!important;
+            width:auto!important;
             text-align:center!important;
             box-sizing:border-box!important;
             justify-content:center!important;
-            display:flex!important;
-            padding:14px 18px!important;
-            font-size:14.5px!important;
+            display:inline-flex!important;
+            padding:12px 10px!important;
+            font-size:13px!important;
+            white-space:nowrap!important;
           }
           /* phones get the static 2x2 grid — it all fits, so nothing slides */
           .ins-stats-wrap{
@@ -783,8 +786,8 @@ export default function Banner() {
           .ins-center img{ max-width:230px!important; }
           .ins-cards-wrap{ padding:0 16px 36px!important; margin-top:36px!important; }
           .ins-cards-panel{ padding:22px 16px 24px!important; border-radius:18px!important; }
-          .ins-cards .ins-card{ min-width:150px!important; padding:16px 12px!important; }
-          .ins-cards .ins-card-icon svg{ width:26px!important; height:26px!important; }
+          .ins-cards-panel .ins-cards .ins-card{ min-width:150px!important; padding:16px 12px!important; }
+          .ins-cards-panel .ins-cards .ins-card-icon svg{ width:26px!important; height:26px!important; }
         }
       `}</style>
 
@@ -812,11 +815,11 @@ export default function Banner() {
                 We help families find the right insurance coverage with easy processes,
                 trusted advisors, and dependable claim support whenever you need it.
               </p>
-              <div className="ins-cta-row flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap justify-center lg:justify-start mb-10 sm:mb-14">
-                <a href="/contact-us" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#EC4F34] rounded-xl text-white no-underline text-[14px] sm:text-[15px] font-extrabold whitespace-nowrap">
+              <div className="ins-cta-row flex flex-row gap-3 sm:gap-4 flex-nowrap items-center justify-center lg:justify-start mb-10 sm:mb-14">
+                <a href="/contact-us" className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5">
                   Get your quote
                 </a>
-                <a href="tel:18004258084" className="py-3 sm:py-3.5 px-6 sm:px-9 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[14px] sm:text-[15px] font-extrabold backdrop-blur-md whitespace-nowrap">
+                <a href="tel:18004258084" className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[13.5px] sm:text-[14.5px] font-extrabold backdrop-blur-md whitespace-nowrap text-center transition-all duration-200 hover:bg-white hover:-translate-y-0.5">
                   Talk to an expert
                 </a>
               </div>
@@ -827,7 +830,7 @@ export default function Banner() {
             {/* ---- center: family image ---- */}
             <div className="ins-center">
               <img
-                src="/images/banner/banner-5.png"
+                src="/images/banner/banner-6.png"
                 alt="Insurance coverage"
                 className="w-full h-auto object-contain max-w-[640px] mx-auto"
               />
