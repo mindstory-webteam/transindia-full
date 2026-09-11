@@ -1,25 +1,25 @@
 import React from "react";
 
 const partners = [
-  { id: 1,  name: "iffcotokio",         image: "./images/partners/iffcotokio.webp" },
-  { id: 2,  name: "starhealthinsurance",     image: "./images/partners/starhealthinsurance.webp" },
-  { id: 3,  name: "TATAAIA",          image: "./images/partners/TATAAIA.webp" },
-  { id: 4,  name: "UnitedIndia",          image: "./images/partners/UnitedIndia.webp" },
-  { id: 5,  name: "TheOrientalInsurance",       image: "./images/partners/TheOrientalInsurance.png" },
-  { id: 6,  name: "Cholamandalam-MS-General-Insurance",         image: "./images/partners/cholams.png" },
-  { id: 7,  name: "SBILife",     image: "./images/partners/SBILife.webp" },
-  { id: 8,  name: "NivaLogo",          image: "./images/partners/NivaLogo.webp" },
-  { id: 9,  name: "partnerFutureGenerali",         image: "./images/partners/partnerFutureGenerali.webp" },
-  { id: 10, name: "Reliance General",  image: "./images/partners/partnerHDFCErgo.webp" },
-  { id: 11, name: "partnerIciciLombard",         image: "./images/partners/partnerICICILombard.webp" },
-  { id: 12, name: "newindia",               image: "./images/partners/newindia.png" },
-  { id: 13, name: "MAGMAHDI",               image: "./images/partners/MAGMAHDI.png" },
-  { id: 14, name: "digit",               image: "./images/partners/digit.png" },
-  { id: 15, name: "royalsundaram",               image: "./images/partners/royalsundaram.png" },
-  { id: 16, name: "Reliancegeneral",               image: "./images/partners/Reliancegeneral.png" },
-  { id: 17, name: "AdityaBirla",               image: "./images/partners/AdityaBirla.png" },
-  { id: 18, name: "HDFCLIFE",               image: "./images/partners/HDFCLIFE.png" },
-  { id: 19, name: "sbigeneralinsurance",               image: "./images/partners/sbigeneralinsurance.png" },
+  { id: 1,  name: "iffcotokio",         image: "/images/partners/iffcotokio.webp" },
+  { id: 2,  name: "starhealthinsurance",     image: "/images/partners/starhealthinsurance.webp" },
+  { id: 3,  name: "TATAAIA",          image: "/images/partners/TATAAIA.webp" },
+  { id: 4,  name: "UnitedIndia",          image: "/images/partners/UnitedIndia.webp" },
+  { id: 5,  name: "TheOrientalInsurance",       image: "/images/partners/TheOrientalInsurance.png" },
+  { id: 6,  name: "Cholamandalam-MS-General-Insurance",         image: "/images/partners/cholams.png" },
+  { id: 7,  name: "SBILife",     image: "/images/partners/SBILife.webp" },
+  { id: 8,  name: "NivaLogo",          image: "/images/partners/NivaLogo.webp" },
+  { id: 9,  name: "partnerFutureGenerali",         image: "/images/partners/partnerFutureGenerali.webp" },
+  { id: 10, name: "Reliance General",  image: "/images/partners/partnerHDFCErgo.webp" },
+  { id: 11, name: "partnerIciciLombard",         image: "/images/partners/partnerICICILombard.webp" },
+  { id: 12, name: "newindia",               image: "/images/partners/newindia.png" },
+  { id: 13, name: "MAGMAHDI",               image: "/images/partners/MAGMAHDI.png" },
+  { id: 14, name: "digit",               image: "/images/partners/digit.png" },
+  { id: 15, name: "royalsundaram",               image: "/images/partners/royalsundaram.png" },
+  { id: 16, name: "Reliancegeneral",               image: "/images/partners/Reliancegeneral.png" },
+  { id: 17, name: "AdityaBirla",               image: "/images/partners/AdityaBirla.png" },
+  { id: 18, name: "HDFCLIFE",               image: "/images/partners/HDFCLIFE.png" },
+  { id: 19, name: "sbigeneralinsurance",               image: "/images/partners/sbigeneralinsurance.png" },
 ];
 
 export default function InsurerPartners() {
@@ -64,7 +64,7 @@ export default function InsurerPartners() {
 const CSS = `
   .ip-section {
     background-color: #ffffff;
-    padding: 0px 62px 90px 88px;
+    padding: 0 0 90px;
     font-family: 'matterregular', sans-serif;
   }
 
@@ -72,7 +72,7 @@ const CSS = `
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 100px;
+    padding: 0 60px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
