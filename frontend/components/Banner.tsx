@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
 const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png]";
 
 const STATS = [
-  { value: "1.2L+",   label: "Policies sold"  },
-  { value: "500+",    label: "Happy clients"  },
-  { value: "₹250Cr+", label: "Claim Settled"  },
-  { value: "20+",     label: "Years of Trust" },
+  {value: "1.2L+", label: "Policies sold"},
+  {value: "500+", label: "Happy clients"},
+  {value: "₹250Cr+", label: "Claim Settled"},
+  {value: "20+", label: "Years of Trust"},
 ];
 
 const INSURANCE_TYPES = [
-  "Health Insurance","Life Insurance","Motor Insurance",
-  "Term Insurance","Travel Insurance",
+  "Health Insurance",
+  "Life Insurance",
+  "Motor Insurance",
+  "Term Insurance",
+  "Travel Insurance",
 ];
 
 /* Route prefix the service pages live under. The slugs below are the same
@@ -21,33 +24,38 @@ const INSURANCE_TYPES = [
    same page — change the prefix here only, never in the card list. */
 const SERVICE_BASE = "/our-services";
 
-
-type HeadlineWord = { text: string; color?: string };
-type Headline = { line1: string; line2: HeadlineWord[] };
+type HeadlineWord = {text: string; color?: string};
+type Headline = {
+  line1: string;
+  line2: HeadlineWord[];
+  font?: string;
+  className?: string;
+};
 
 const HEADLINES: Headline[] = [
   {
     line1: "For Every Life. ",
     line2: [
-      { text: "For Every ", color: "#F15A40" },
-      { text: "Tomorrow. ", color: "#20BEC6" },
+      {text: "For Every ", color: "#F15A40"},
+      {text: "Tomorrow. ", color: "#20BEC6"},
     ],
   },
   {
     line1: "ഓരോ ജീവിതത്തിനും. ",
     line2: [
-      { text: " ഓരോ ", color: "#20BEC6" },
-      { text: "നാളെക്കും.", color: "#F15A40" },
+      {text: " ഓരോ ", color: "#20BEC6"},
+      {text: "നാളെക്കും.", color: "#F15A40"},
     ],
+    font: "'BalooChettan2', sans-serif",
+    className: "ins-headline-malayalam",
   },
   {
     line1: "हर जीवन के लिए। ",
     line2: [
-      { text: "हर कल  ", color: "#F15A40" },
-      { text: "के लिए.", color: "#20BEC6" },
+      {text: "हर कल  ", color: "#F15A40"},
+      {text: "के लिए.", color: "#20BEC6"},
     ],
   },
-  
 ];
 
 const HEADLINE_INTERVAL_MS = 4000;
@@ -62,7 +70,7 @@ function useRotatingHeadline(list: Headline[], intervalMs: number) {
     const timer = setInterval(() => {
       setVisible(false); // fade out
       setTimeout(() => {
-        setIndex(prev => (prev + 1) % list.length);
+        setIndex((prev) => (prev + 1) % list.length);
         setVisible(true); // fade in next headline
       }, 300); // matches CSS transition duration below
     }, intervalMs);
@@ -70,107 +78,256 @@ function useRotatingHeadline(list: Headline[], intervalMs: number) {
     return () => clearInterval(timer);
   }, [list.length, intervalMs]);
 
-  return { headline: list[index], visible };
+  return {headline: list[index], visible};
 }
 
 /* ---------- Icons (soft-filled, drawn on a 32 grid) ---------- */
 
-type IconProps = { size?: number; color?: string };
+type IconProps = {size?: number; color?: string};
 
-function LifeIcon({ size = 34, color = "#20BEC6" }: IconProps) {
+function LifeIcon({size = 34, color = "#20BEC6"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
       <circle cx="16" cy="14" r="2.9" fill={color} />
-      <path d="M10.7 22.4a5.6 5.6 0 0 1 10.6 0" stroke={color} strokeWidth={2} strokeLinecap="round" />
+      <path
+        d="M10.7 22.4a5.6 5.6 0 0 1 10.6 0"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function HealthIcon({ size = 34, color = "#F15A40" }: IconProps) {
+function HealthIcon({size = 34, color = "#F15A40"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M16 27.5S4.8 20.6 4.8 13.2A6 6 0 0 1 16 10a6 6 0 0 1 11.2 3.2c0 7.4-11.2 14.3-11.2 14.3Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-      <path d="M9.4 16.6h3.4l1.7-3 2.6 5.4 1.7-2.4h3.8"
-        stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M16 27.5S4.8 20.6 4.8 13.2A6 6 0 0 1 16 10a6 6 0 0 1 11.2 3.2c0 7.4-11.2 14.3-11.2 14.3Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9.4 16.6h3.4l1.7-3 2.6 5.4 1.7-2.4h3.8"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function MotorIcon({ size = 34, color = "#F15A40" }: IconProps) {
+function MotorIcon({size = 34, color = "#F15A40"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M4.6 20.4h22.8v3.1a1.4 1.4 0 0 1-1.4 1.4h-2.1a1.4 1.4 0 0 1-1.4-1.4v-1.2H8.5v1.2a1.4 1.4 0 0 1-1.4 1.4H5a1.4 1.4 0 0 1-1.4-1.4v-3.1Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-      <path d="M4.6 20.4v-4.1l2.3-.8 2.2-4.6a2.1 2.1 0 0 1 1.9-1.2h10a2.1 2.1 0 0 1 1.9 1.2l2.2 4.6 2.3.8v4.1"
-        stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M8 15.5h16" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M4.6 20.4h22.8v3.1a1.4 1.4 0 0 1-1.4 1.4h-2.1a1.4 1.4 0 0 1-1.4-1.4v-1.2H8.5v1.2a1.4 1.4 0 0 1-1.4 1.4H5a1.4 1.4 0 0 1-1.4-1.4v-3.1Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M4.6 20.4v-4.1l2.3-.8 2.2-4.6a2.1 2.1 0 0 1 1.9-1.2h10a2.1 2.1 0 0 1 1.9 1.2l2.2 4.6 2.3.8v4.1"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 15.5h16"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
       <circle cx="9.6" cy="18" r="1.3" fill={color} />
       <circle cx="22.4" cy="18" r="1.3" fill={color} />
     </svg>
   );
 }
 
-function HomeIcon({ size = 34, color = "#20BEC6" }: IconProps) {
+function HomeIcon({size = 34, color = "#20BEC6"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M6.4 14.6 16 6.6l9.6 8v11.2a1.6 1.6 0 0 1-1.6 1.6H8a1.6 1.6 0 0 1-1.6-1.6V14.6Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-      <path d="M3.6 15.8 16 5.2l12.4 10.6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13 27.4v-6.2h6v6.2" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M6.4 14.6 16 6.6l9.6 8v11.2a1.6 1.6 0 0 1-1.6 1.6H8a1.6 1.6 0 0 1-1.6-1.6V14.6Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M3.6 15.8 16 5.2l12.4 10.6"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M13 27.4v-6.2h6v6.2"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function MarineIcon({ size = 34, color = "#20BEC6" }: IconProps) {
+function MarineIcon({size = 34, color = "#20BEC6"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M5.4 17.6 16 14.2l10.6 3.4-2.2 6a2.6 2.6 0 0 1-2.5 1.7h-11.8a2.6 2.6 0 0 1-2.5-1.7l-2.2-6Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-      <path d="M9 16.4v-5.6h14v5.6" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 10.8V6.4M12.8 8.6h6.4" stroke={color} strokeWidth={2} strokeLinecap="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M5.4 17.6 16 14.2l10.6 3.4-2.2 6a2.6 2.6 0 0 1-2.5 1.7h-11.8a2.6 2.6 0 0 1-2.5-1.7l-2.2-6Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M9 16.4v-5.6h14v5.6"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 10.8V6.4M12.8 8.6h6.4"
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-function FireIcon({ size = 34, color = "#F15A40" }: IconProps) {
+function FireIcon({size = 34, color = "#F15A40"}: IconProps) {
   const f = color + "33";
   return (
-    <svg viewBox="0 0 32 32" width={size} height={size} fill="none" style={{ display: "block" }}>
-      <path d="M16 3.6c3.6 3.4 6.9 6.6 6.9 11.4a6.9 6.9 0 1 1-13.8 0c0-2.5 1.1-4.6 2.7-6.5.7 1.4 1.7 2.3 2.8 2.8 0-3 .4-5.5 1.4-7.7Z"
-        fill={f} stroke={color} strokeWidth={2} strokeLinejoin="round" />
-      <path d="M16 24.6a3.1 3.1 0 0 1-1.8-5.6c.9.8 1.5.8 1.8.3.5.9 1.2 1.5 1.9 2.2a3.1 3.1 0 0 1-1.9 3.1Z"
-        fill={color} stroke={color} strokeWidth={1.4} strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      fill="none"
+      style={{display: "block"}}
+    >
+      <path
+        d="M16 3.6c3.6 3.4 6.9 6.6 6.9 11.4a6.9 6.9 0 1 1-13.8 0c0-2.5 1.1-4.6 2.7-6.5.7 1.4 1.7 2.3 2.8 2.8 0-3 .4-5.5 1.4-7.7Z"
+        fill={f}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <path
+        d="M16 24.6a3.1 3.1 0 0 1-1.8-5.6c.9.8 1.5.8 1.8.3.5.9 1.2 1.5 1.9 2.2a3.1 3.1 0 0 1-1.9 3.1Z"
+        fill={color}
+        stroke={color}
+        strokeWidth={1.4}
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-const TEAL   = "#20BEC6";
+const TEAL = "#20BEC6";
 const ORANGE = "#F15A40";
 
 /* `slug` matches the navigation entries exactly (m1–m4, m6, m7). The two
    remaining nav services — miscellaneous-insurance and entertainment-insurance
    — have no card here yet; they need an icon before they can be added. */
 const INSURANCE_CARDS = [
-  { l1: "Life",   l2: "Insurance", accent: TEAL,   slug: "life-insurance",   Icon: LifeIcon,
-    desc: "Secure your family's future with dependable life cover." },
-  { l1: "Health", l2: "Insurance", accent: ORANGE, slug: "health-insurance", Icon: HealthIcon,
-    desc: "Comprehensive medical coverage for you and your family." },
-  { l1: "Motor",  l2: "Insurance", accent: ORANGE, slug: "motor-insurance",  Icon: MotorIcon,
-    desc: "Complete protection for your car and two-wheeler." },
-  { l1: "Home",   l2: "Insurance", accent: TEAL,   slug: "home-insurance",   Icon: HomeIcon,
-    desc: "Safeguard your home against unexpected risks and loss." },
-  { l1: "Marine", l2: "Insurance", accent: TEAL,   slug: "marine-insurance", Icon: MarineIcon,
-    desc: "Coverage for cargo and goods in transit by sea or land." },
-  { l1: "Fire",   l2: "Insurance", accent: ORANGE, slug: "fire-insurance",   Icon: FireIcon,
-    desc: "Protect your property from fire and related damage." },
+  {
+    l1: "Life",
+    l2: "Insurance",
+    accent: TEAL,
+    slug: "life-insurance",
+    Icon: LifeIcon,
+    desc: "Secure your family's future with dependable life cover.",
+  },
+  {
+    l1: "Health",
+    l2: "Insurance",
+    accent: ORANGE,
+    slug: "health-insurance",
+    Icon: HealthIcon,
+    desc: "Comprehensive medical coverage for you and your family.",
+  },
+  {
+    l1: "Motor",
+    l2: "Insurance",
+    accent: ORANGE,
+    slug: "motor-insurance",
+    Icon: MotorIcon,
+    desc: "Complete protection for your car and two-wheeler.",
+  },
+  {
+    l1: "Home",
+    l2: "Insurance",
+    accent: TEAL,
+    slug: "home-insurance",
+    Icon: HomeIcon,
+    desc: "Safeguard your home against unexpected risks and loss.",
+  },
+  {
+    l1: "Marine",
+    l2: "Insurance",
+    accent: TEAL,
+    slug: "marine-insurance",
+    Icon: MarineIcon,
+    desc: "Coverage for cargo and goods in transit by sea or land.",
+  },
+  {
+    l1: "Fire",
+    l2: "Insurance",
+    accent: ORANGE,
+    slug: "fire-insurance",
+    Icon: FireIcon,
+    desc: "Protect your property from fire and related damage.",
+  },
 ];
 
 /* ---------- Sliding stats strip ----------
@@ -218,14 +375,14 @@ function InsuranceCards() {
         gap: 16,
         overflowX: "auto",
         overflowY: "visible", // was "hidden" — this clipped the card on hover-lift
-        paddingTop: 12,       // room for the hover translateY(-7px) + shadow
+        paddingTop: 12, // room for the hover translateY(-7px) + shadow
         paddingBottom: 2,
         width: "100%",
       }}
     >
-      {INSURANCE_CARDS.map(({ l1, l2, accent, slug, Icon, desc }) => (
-        
-        <a  key={slug}
+      {INSURANCE_CARDS.map(({l1, l2, accent, slug, Icon, desc}) => (
+        <a
+          key={slug}
           href={`${SERVICE_BASE}/${slug}`}
           className="ins-card"
           style={{
@@ -244,8 +401,9 @@ function InsuranceCards() {
             WebkitBackdropFilter: "blur(6px)",
             textDecoration: "none",
             cursor: "pointer",
-         
-            transition: "transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease",
+
+            transition:
+              "transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease",
           }}
         >
           <span
@@ -262,7 +420,7 @@ function InsuranceCards() {
             <Icon size={32} color={accent} />
           </span>
 
-          <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <span style={{display: "flex", flexDirection: "column", minWidth: 0}}>
             <span
               style={{
                 display: "block",
@@ -301,35 +459,75 @@ function InsuranceCards() {
 
 /* ---------- misc small icons ---------- */
 
-function ChevronDown({ color = "#0B2563" }: { color?: string }) {
+function ChevronDown({color = "#0B2563"}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2.2}>
-      <polyline points="5 8 10 13 15 8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke={color}
+      strokeWidth={2.2}
+    >
+      <polyline
+        points="5 8 10 13 15 8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function ArrowRight() {
   return (
-    <svg viewBox="0 0 20 20" width={18} height={18} fill="none" stroke="#fff" strokeWidth={2.2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={18}
+      height={18}
+      fill="none"
+      stroke="#fff"
+      strokeWidth={2.2}
+    >
       <line x1="4" y1="10" x2="16" y2="10" strokeLinecap="round" />
-      <polyline points="11 5 16 10 11 15" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        points="11 5 16 10 11 15"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function CheckCircleIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#16A34A" strokeWidth={2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke="#16A34A"
+      strokeWidth={2}
+    >
       <circle cx="10" cy="10" r="8" />
-      <polyline points="6.5 10.5 9 13 13.5 7.5" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        points="6.5 10.5 9 13 13.5 7.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function AlertIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#DC2626" strokeWidth={2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke="#DC2626"
+      strokeWidth={2}
+    >
       <circle cx="10" cy="10" r="8" />
       <line x1="10" y1="6" x2="10" y2="11" strokeLinecap="round" />
       <circle cx="10" cy="14" r="0.6" fill="#DC2626" stroke="none" />
@@ -340,26 +538,51 @@ function AlertIcon() {
 function ShieldBadgeIcon() {
   return (
     <svg viewBox="0 0 32 32" width={22} height={22} fill="none">
-      <path d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
-        fill="#fff" fillOpacity={0.18} stroke="#fff" strokeWidth={2} strokeLinejoin="round" />
-      <polyline points="11.3 16.2 14.4 19.2 20.7 12.4" stroke="#fff" strokeWidth={2}
-        strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
+        fill="#fff"
+        fillOpacity={0.18}
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinejoin="round"
+      />
+      <polyline
+        points="11.3 16.2 14.4 19.2 20.7 12.4"
+        stroke="#fff"
+        strokeWidth={2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-function TypeFieldIcon({ color = TEAL }: { color?: string }) {
+function TypeFieldIcon({color = TEAL}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={15} height={15} fill="none" stroke={color} strokeWidth={1.8}>
+    <svg
+      viewBox="0 0 20 20"
+      width={15}
+      height={15}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.8}
+    >
       <circle cx="10" cy="6.4" r="2.6" />
       <path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" strokeLinecap="round" />
     </svg>
   );
 }
 
-function RupeeFieldIcon({ color = TEAL }: { color?: string }) {
+function RupeeFieldIcon({color = TEAL}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={15} height={15} fill="none" stroke={color} strokeWidth={1.8}>
+    <svg
+      viewBox="0 0 20 20"
+      width={15}
+      height={15}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.8}
+    >
       <line x1="5" y1="4.5" x2="15" y2="4.5" strokeLinecap="round" />
       <line x1="5" y1="8" x2="15" y2="8" strokeLinecap="round" />
       <path d="M5 4.5c4 0 6 1.4 6 3.5S9 11.5 5 11.5" strokeLinecap="round" />
@@ -368,18 +591,35 @@ function RupeeFieldIcon({ color = TEAL }: { color?: string }) {
   );
 }
 
-function PhoneFieldIcon({ color = TEAL }: { color?: string }) {
+function PhoneFieldIcon({color = TEAL}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={15} height={15} fill="none" stroke={color} strokeWidth={1.8}>
-      <path d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
-        strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 20 20"
+      width={15}
+      height={15}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.8}
+    >
+      <path
+        d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function LockFieldIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={13} height={13} fill="none" stroke="#0B2563" strokeWidth={1.8}>
+    <svg
+      viewBox="0 0 20 20"
+      width={13}
+      height={13}
+      fill="none"
+      stroke="#0B2563"
+      strokeWidth={1.8}
+    >
       <rect x="4.5" y="9" width="11" height="7.5" rx="1.6" />
       <path d="M6.8 9V6.4a3.2 3.2 0 0 1 6.4 0V9" strokeLinecap="round" />
     </svg>
@@ -389,53 +629,82 @@ function LockFieldIcon() {
 /* ---------- Right-hand "Get Insured Fast" quote form ---------- */
 
 function QuotePanel() {
-  const [insType, setInsType]       = useState("Health Insurance");
-  const [sum,     setSum]           = useState("");
-  const [mobile,  setMobile]        = useState("");
+  const [insType, setInsType] = useState("Health Insurance");
+  const [sum, setSum] = useState("");
+  const [mobile, setMobile] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback]     = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const fieldLabelStyle: React.CSSProperties = {
-    display: "flex", alignItems: "center", gap: 6,
-    fontSize: 10.5, fontWeight: 600, color: "#838383",
-    letterSpacing: 1, textTransform: "uppercase", marginBottom: 6,
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+    fontSize: 10.5,
+    fontWeight: 600,
+    color: "#838383",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    marginBottom: 6,
   };
   const fieldWrapStyle: React.CSSProperties = {
-    border: "1.5px solid #E5E9F2", borderRadius: 12,
-    padding: "12px 14px", marginBottom: 14,
+    border: "1.5px solid #E5E9F2",
+    borderRadius: 12,
+    padding: "12px 14px",
+    marginBottom: 14,
   };
   const selectStyle: React.CSSProperties = {
-    appearance: "none", WebkitAppearance: "none", border: "none",
-    background: "transparent", fontSize: 15, fontWeight: 600,
-    color: "#0B2563", fontFamily: "inherit", cursor: "pointer",
-    paddingRight: 24, outline: "none", width: "100%",
+    appearance: "none",
+    WebkitAppearance: "none",
+    border: "none",
+    background: "transparent",
+    fontSize: 15,
+    fontWeight: 600,
+    color: "#0B2563",
+    fontFamily: "inherit",
+    cursor: "pointer",
+    paddingRight: 24,
+    outline: "none",
+    width: "100%",
   };
   const inputStyle: React.CSSProperties = {
-    border: "none", outline: "none", background: "transparent",
-    fontSize: 15, fontWeight: 600, color: "#0B2563",
-    fontFamily: "inherit", width: "100%",
+    border: "none",
+    outline: "none",
+    background: "transparent",
+    fontSize: 15,
+    fontWeight: 600,
+    color: "#0B2563",
+    fontFamily: "inherit",
+    width: "100%",
   };
 
   const handleGetQuote = async () => {
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setFeedback({ type: "error", text: "Please enter a valid 10-digit mobile number" });
+      setFeedback({
+        type: "error",
+        text: "Please enter a valid 10-digit mobile number",
+      });
       return;
     }
 
     if (!sum.trim()) {
-      setFeedback({ type: "error", text: "Please enter the sum insured amount" });
+      setFeedback({type: "error", text: "Please enter the sum insured amount"});
       return;
     }
 
     setSubmitting(true);
     setFeedback(null);
 
-    const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api").replace(/\/$/, "");
+    const apiUrl = (
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+    ).replace(/\/$/, "");
 
     try {
       const res = await fetch(`${apiUrl}/quoteleads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
           insuranceType: insType,
           sumInsured: sum,
@@ -446,15 +715,25 @@ function QuotePanel() {
       if (!res.ok) {
         const errBody = await res.json().catch(() => ({}));
         console.error("Lead save failed:", res.status, errBody);
-        setFeedback({ type: "error", text: errBody.message || "Could not save your request. Please try again." });
+        setFeedback({
+          type: "error",
+          text:
+            errBody.message || "Could not save your request. Please try again.",
+        });
         setSubmitting(false);
         return;
       }
 
-      setFeedback({ type: "success", text: "Got it! Our expert will get in touch with you shortly." });
+      setFeedback({
+        type: "success",
+        text: "Got it! Our expert will get in touch with you shortly.",
+      });
     } catch (err) {
       console.error("Failed to save lead:", err);
-      setFeedback({ type: "error", text: "Network error — could not reach the server." });
+      setFeedback({
+        type: "error",
+        text: "Network error — could not reach the server.",
+      });
       setSubmitting(false);
       return;
     }
@@ -473,53 +752,89 @@ function QuotePanel() {
         width: "100%",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 12,
-          background: "#0B2563",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          flexShrink: 0,
-        }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 20,
+        }}
+      >
+        <div
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: 12,
+            background: "#0B2563",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
           <ShieldBadgeIcon />
         </div>
         <div>
-          <div style={{ fontSize: 16.5, fontWeight: 900, color: "#0B2563", lineHeight: 1.2 }}>
+          <div
+            style={{
+              fontSize: 16.5,
+              fontWeight: 900,
+              color: "#0B2563",
+              lineHeight: 1.2,
+            }}
+          >
             Get Insured Fast
           </div>
-          <div style={{ fontSize: 12, color: "#838383", fontWeight: 500 }}>
+          <div style={{fontSize: 12, color: "#838383", fontWeight: 500}}>
             Quick. Simple. Secure.
           </div>
         </div>
       </div>
 
       <div style={fieldWrapStyle}>
-        <div style={fieldLabelStyle}><TypeFieldIcon /> Insurance Type</div>
-        <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-          <select value={insType} onChange={e => setInsType(e.target.value)} style={selectStyle}>
-            {INSURANCE_TYPES.map(t => <option key={t}>{t}</option>)}
+        <div style={fieldLabelStyle}>
+          <TypeFieldIcon /> Insurance Type
+        </div>
+        <div
+          style={{position: "relative", display: "flex", alignItems: "center"}}
+        >
+          <select
+            value={insType}
+            onChange={(e) => setInsType(e.target.value)}
+            style={selectStyle}
+          >
+            {INSURANCE_TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
           </select>
-          <div style={{ position: "absolute", right: 0, pointerEvents: "none" }}><ChevronDown /></div>
+          <div style={{position: "absolute", right: 0, pointerEvents: "none"}}>
+            <ChevronDown />
+          </div>
         </div>
       </div>
 
       <div style={fieldWrapStyle}>
-        <div style={fieldLabelStyle}><RupeeFieldIcon /> Sum Insured (₹)</div>
+        <div style={fieldLabelStyle}>
+          <RupeeFieldIcon /> Sum Insured (₹)
+        </div>
         <input
           type="text"
           value={sum}
-          onChange={e => setSum(e.target.value)}
+          onChange={(e) => setSum(e.target.value)}
           placeholder="Enter Sum Insured"
           style={inputStyle}
         />
       </div>
 
-      <div style={{ ...fieldWrapStyle, marginBottom: 20 }}>
-        <div style={fieldLabelStyle}><PhoneFieldIcon /> Mobile Number</div>
+      <div style={{...fieldWrapStyle, marginBottom: 20}}>
+        <div style={fieldLabelStyle}>
+          <PhoneFieldIcon /> Mobile Number
+        </div>
         <input
           placeholder="Enter 10-digit mobile number"
           type="tel"
           value={mobile}
-          onChange={e => setMobile(e.target.value)}
+          onChange={(e) => setMobile(e.target.value)}
           maxLength={10}
           style={inputStyle}
         />
@@ -530,21 +845,45 @@ function QuotePanel() {
         disabled={submitting}
         onClick={handleGetQuote}
         style={{
-          width: "100%", padding: "15px 20px", background: "#F25917",
-          border: "none", borderRadius: 12, color: "#fff", fontSize: 15.5,
-          fontWeight: 800, cursor: submitting ? "not-allowed" : "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          gap: 10, fontFamily: "inherit", transition: "transform 0.2s, box-shadow 0.2s",
+          width: "100%",
+          padding: "15px 20px",
+          background: "#F25917",
+          border: "none",
+          borderRadius: 12,
+          color: "#fff",
+          fontSize: 15.5,
+          fontWeight: 800,
+          cursor: submitting ? "not-allowed" : "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 10,
+          fontFamily: "inherit",
+          transition: "transform 0.2s, box-shadow 0.2s",
           opacity: submitting ? 0.7 : 1,
         }}
       >
-        {submitting ? "Sending..." : <>Get Quote <ArrowRight /></>}
+        {submitting ? (
+          "Sending..."
+        ) : (
+          <>
+            Get Quote <ArrowRight />
+          </>
+        )}
       </button>
 
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-        marginTop: 14, fontSize: 11.5, color: "#838383", fontWeight: 500,
-      }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 6,
+          marginTop: 14,
+          fontSize: 11.5,
+          color: "#838383",
+          fontWeight: 500,
+        }}
+      >
         <LockFieldIcon /> Your information is secure and encrypted
       </div>
 
@@ -573,13 +912,55 @@ function QuotePanel() {
 }
 
 export default function Banner() {
-  const { headline, visible } = useRotatingHeadline(HEADLINES, HEADLINE_INTERVAL_MS);
+  const {headline, visible} = useRotatingHeadline(
+    HEADLINES,
+    HEADLINE_INTERVAL_MS,
+  );
 
   return (
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap');
+        @font-face {
+          font-family: 'BalooChettan2';
+          src: url('/BalooChettan2-Medium.ttf') format('truetype');
+          font-weight: 100 900;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'BalooChettan2';
+          src: url('/BalooChettan2-Medium.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'BalooChettan2';
+          src: url('/BalooChettan2-Medium.ttf') format('truetype');
+          font-weight: 500;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'BalooChettan2';
+          src: url('/BalooChettan2-Medium.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'BalooChettan2';
+          src: url('/BalooChettan2-Medium.ttf') format('truetype');
+          font-weight: 900;
+          font-style: normal;
+          font-display: swap;
+        }
         .ins-root *{box-sizing:border-box;font-family: var(--font-sora), "Sora", sans-serif;}
+        .ins-headline-malayalam,
+        .ins-headline-malayalam * {
+          font-family: 'BalooChettan2', sans-serif !important;
+        }
 
         /* ---- three-column hero: left content | center image | right quote panel ---- */
         .ins-inner{
@@ -792,34 +1173,53 @@ export default function Banner() {
       `}</style>
 
       <div className="ins-root">
-        <section className="ins-section" style={{
-          background: "#001a5a",
-          position: "relative", overflow: "visible",
-          paddingTop: 88,
-          paddingBottom: 56,
-        }}>
-
+        <section
+          className="ins-section"
+          style={{
+            background: "#001a5a",
+            position: "relative",
+            overflow: "visible",
+            paddingTop: 88,
+            paddingBottom: 56,
+          }}
+        >
           <div className="ins-inner max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-16 relative z-10">
-
             {/* ---- left: headline, copy, CTAs, stats ---- */}
             <div className="ins-left text-center lg:text-left">
               <h1
-                className={`ins-headline ${visible ? "ins-headline-visible" : "ins-headline-hidden"} text-[clamp(30px,2.4vw,44px)] font-black text-white leading-[1.15] mb-4 sm:mb-5 tracking-tight whitespace-nowrap`}
+                className={`ins-headline ${visible ? "ins-headline-visible" : "ins-headline-hidden"} ${headline.className || ""} text-[clamp(30px,2.4vw,44px)] font-black text-white leading-[1.15] mb-4 sm:mb-5 tracking-tight whitespace-nowrap`}
+                style={headline.font ? {fontFamily: headline.font} : undefined}
               >
-                {headline.line1}<br />
+                {headline.line1}
+                <br />
                 {headline.line2.map((word, i) => (
-                  <span key={i} style={{ color: word.color }}>{word.text}</span>
+                  <span
+                    key={i}
+                    style={{
+                      color: word.color,
+                      fontFamily: headline.font ? "inherit" : undefined,
+                    }}
+                  >
+                    {word.text}
+                  </span>
                 ))}
               </h1>
               <p className="text-[13.5px] sm:text-[14px] text-white/70 leading-relaxed mb-6 sm:mb-9 max-w-[460px] mx-auto lg:mx-0">
-                We help families find the right insurance coverage with easy processes,
-                trusted advisors, and dependable claim support whenever you need it.
+                We help families find the right insurance coverage with easy
+                processes, trusted advisors, and dependable claim support
+                whenever you need it.
               </p>
               <div className="ins-cta-row flex flex-row gap-3 sm:gap-4 flex-nowrap items-center justify-center lg:justify-start mb-10 sm:mb-14">
-                <a href="/contact-us" className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5">
+                <a
+                  href="/contact-us"
+                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5"
+                >
                   Get your quote
                 </a>
-                <a href="tel:18004258084" className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[13.5px] sm:text-[14.5px] font-extrabold backdrop-blur-md whitespace-nowrap text-center transition-all duration-200 hover:bg-white hover:-translate-y-0.5">
+                <a
+                  href="tel:18004258084"
+                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[13.5px] sm:text-[14.5px] font-extrabold backdrop-blur-md whitespace-nowrap text-center transition-all duration-200 hover:bg-white hover:-translate-y-0.5"
+                >
                   Talk to an expert
                 </a>
               </div>
@@ -846,7 +1246,9 @@ export default function Banner() {
           <div className="ins-cards-wrap px-4 sm:px-8 lg:px-12 mt-10 sm:mt-14">
             <div className="max-w-7xl mx-auto">
               <div className="ins-cards-panel">
-                <div className="ins-cards-title">What would you like to protect?</div>
+                <div className="ins-cards-title">
+                  What would you like to protect?
+                </div>
                 <InsuranceCards />
               </div>
             </div>

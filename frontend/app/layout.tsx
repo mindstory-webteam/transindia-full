@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono, Sora } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist, Geist_Mono, Sora} from "next/font/google";
 import "./globals.css";
 import ChatbotWidget from "@/components/ChatbotWidget";
 
@@ -37,6 +37,18 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} antialiased`}
       suppressHydrationWarning
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Anek+Malayalam:wght@100..800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         {children}
         <ChatbotWidget />
