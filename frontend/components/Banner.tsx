@@ -2,14 +2,13 @@
 
 import {useEffect, useState} from "react";
 
-const FAMILY_IMAGE_SRC = "/images/banner/Layer 2.png]";
+/* ---------- brand ---------- */
+const NAVY = "#001a5a";
+const TEAL = "#20BEC6";
+const ORANGE = "#EC4F34";
 
-const STATS = [
-  {value: "1.2L+", label: "Policies sold"},
-  {value: "500+", label: "Happy clients"},
-  {value: "₹250Cr+", label: "Claim Settled"},
-  {value: "20+", label: "Years of Trust"},
-];
+const SERVICE_BASE = "/our-services";
+const HERO_IMAGE = "/images/banner/banner-6.png";
 
 const INSURANCE_TYPES = [
   "Health Insurance",
@@ -18,11 +17,6 @@ const INSURANCE_TYPES = [
   "Term Insurance",
   "Travel Insurance",
 ];
-
-/* Route prefix the service pages live under. The slugs below are the same
-   ones the navigation uses, so a card and a nav item always resolve to the
-   same page — change the prefix here only, never in the card list. */
-const SERVICE_BASE = "/our-services";
 
 type HeadlineWord = {text: string; color?: string};
 type Headline = {
@@ -36,24 +30,24 @@ const HEADLINES: Headline[] = [
   {
     line1: "For Every Life. ",
     line2: [
-      {text: "For Every ", color: "#F15A40"},
-      {text: "Tomorrow. ", color: "#20BEC6"},
+      {text: "For Every ", color: ORANGE},
+      {text: "Tomorrow. ", color: TEAL},
     ],
   },
   {
     line1: "ഓരോ ജീവിതത്തിനും. ",
     line2: [
-      {text: " ഓരോ ", color: "#20BEC6"},
-      {text: "നാളെക്കും.", color: "#F15A40"},
+      {text: " ഓരോ ", color: TEAL},
+      {text: "നാളെക്കും.", color: ORANGE},
     ],
     font: "'BalooChettan2', sans-serif",
-    className: "ins-headline-malayalam",
+    className: "hero-headline-malayalam",
   },
   {
     line1: "हर जीवन के लिए। ",
     line2: [
-      {text: "हर कल  ", color: "#F15A40"},
-      {text: "के लिए.", color: "#20BEC6"},
+      {text: "हर कल ", color: ORANGE},
+      {text: "के लिए.", color: TEAL},
     ],
   },
 ];
@@ -66,225 +60,218 @@ function useRotatingHeadline(list: Headline[], intervalMs: number) {
 
   useEffect(() => {
     if (list.length <= 1) return;
-
     const timer = setInterval(() => {
-      setVisible(false); // fade out
+      setVisible(false);
       setTimeout(() => {
         setIndex((prev) => (prev + 1) % list.length);
-        setVisible(true); // fade in next headline
-      }, 300); // matches CSS transition duration below
+        setVisible(true);
+      }, 300);
     }, intervalMs);
-
     return () => clearInterval(timer);
   }, [list.length, intervalMs]);
 
-  return {headline: list[index], visible};
+  return {headline: list[index], index, visible};
 }
 
-const TEAL = "#20BEC6";
-
-/* `slug` matches the navigation entries exactly (m1–m4, m6, m7). The two
-   remaining nav services — miscellaneous-insurance and entertainment-insurance
-   — have no bubble here yet; they need artwork before they can be added. */
-/* `img` is the artwork shown inside the bubble — square, transparent PNGs at
-   about 256x256, subject centred with a little breathing room.
-
-   `x`, `y` and `size` place each bubble inside the cluster box as a percentage
-   of its width, so the cascade scales with the column instead of being pinned
-   to pixels. `delay` staggers the float so the six never bob in unison. */
-const BUBBLE_IMG_BASE = "/images/banner/bubbles";
-
-const INSURANCE_CARDS = [
-  {
-    title: "Life Insurance",
-    slug: "life-insurance",
-    img: `${BUBBLE_IMG_BASE}/life.png`,
-    size: 30,
-    x: 4,
-    y: 0,
-    delay: 0,
-    duration: 6.5,
-  },
-  {
-    title: "Health Insurance",
-    slug: "health-insurance",
-    img: `${BUBBLE_IMG_BASE}/health.png`,
-    size: 24,
-    x: 46,
-    y: 14,
-    delay: 1.1,
-    duration: 5.4,
-  },
-  {
-    title: "Motor Insurance",
-    slug: "motor-insurance",
-    img: `${BUBBLE_IMG_BASE}/motor.png`,
-    size: 32,
-    x: 0,
-    y: 33,
-    delay: 2.3,
-    duration: 7.2,
-  },
-  {
-    title: "Home Insurance",
-    slug: "home-insurance",
-    img: `${BUBBLE_IMG_BASE}/home.png`,
-    size: 27,
-    x: 45,
-    y: 44,
-    delay: 0.6,
-    duration: 6.1,
-  },
-  {
-    title: "Fire Insurance",
-    slug: "fire-insurance",
-    img: `${BUBBLE_IMG_BASE}/fire.png`,
-    size: 25,
-    x: 10,
-    y: 68,
-    delay: 3.1,
-    duration: 6.8,
-  },
-  {
-    title: "Marine Insurance",
-    slug: "marine-insurance",
-    img: `${BUBBLE_IMG_BASE}/marine.png`,
-    size: 22,
-    x: 53,
-    y: 74,
-    delay: 1.8,
-    duration: 5.8,
-  },
-];
-
-/* ---------- Sliding stats strip ----------
-   This row used to be a plain overflow-x flex, so in a narrow column the first
-   and last figures got sliced clean through. It is a marquee now: the list is
-   rendered twice and the track slides exactly one copy's width, so it loops
-   with no visible jump. The container edges are feathered with a mask instead
-   of hard-clipped, so a figure fades rather than being cut mid-character.
-   Below 600px it drops back to the static 2x2 grid. */
-
-function StatsStrip() {
-  const loop = [...STATS, ...STATS];
-
+/* Every headline is rendered into the same grid cell — the live one on top, the
+   others invisible ghosts underneath. The cell is therefore always as tall as
+   the tallest translation, so swapping languages can't push the copy below it
+   up and down. */
+function headlineContent(h: Headline) {
   return (
-    <div className="ins-stats-wrap">
-      <div className="ins-stats-track">
-        {loop.map((s, i) => {
-          const isDupe = i >= STATS.length;
-          return (
-            <div
-              key={`${s.label}-${i}`}
-              className={`ins-stat${isDupe ? " ins-stat-dupe" : ""}`}
-              aria-hidden={isDupe || undefined}
-            >
-              <div className="ins-stat-value">{s.value}</div>
-              <div className="ins-stat-label">{s.label}</div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ---------- Floating service bubbles ----------
-   Six glass bubbles cascading down the right of the hero, echoing the ones the
-   mascot is holding. The artwork is an <img> per bubble; the service name is
-   carried by hidden link text and a tooltip, so the picture stays clean.
-   Positions are absolute percentages inside the cluster box. */
-
-function InsuranceBubbles() {
-  return (
-    <div className="ins-bubbles">
-      {INSURANCE_CARDS.map(({title, slug, img, size, x, y, delay, duration}) => (
-        <a
-          key={slug}
-          href={`${SERVICE_BASE}/${slug}`}
-          className="ins-bubble-link"
-          title={title}
-          style={{
-            position: "absolute",
-            left: `${x}%`,
-            top: `${y}%`,
-            width: `${size}%`,
-            textDecoration: "none",
-            animationDuration: `${duration}s`,
-            animationDelay: `${delay}s`,
-          }}
-        >
-          <span className="ins-bubble">
-            <span className="ins-bubble-gloss" aria-hidden="true" />
-            <img
-              src={img}
-              alt=""
-              aria-hidden="true"
-              className="ins-bubble-img"
-              width={256}
-              height={256}
-              loading="lazy"
-              draggable={false}
-            />
-          </span>
-          <span className="ins-sr-only">{title}</span>
-        </a>
+    <>
+      {h.line1}
+      <br />
+      {h.line2.map((word, i) => (
+        <span key={i} style={{color: word.color}}>
+          {word.text}
+        </span>
       ))}
-    </div>
+    </>
   );
 }
 
-/* ---------- misc small icons ---------- */
+/* ---------- line icons (24 grid, stroked — matches the reference set) ---------- */
 
-function ChevronDown({color = "#0B2563"}: {color?: string}) {
+type IconProps = {size?: number; color?: string; stroke?: number};
+
+const box = (size: number) => ({
+  width: size,
+  height: size,
+  display: "block" as const,
+});
+
+function LifeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={16}
-      height={16}
-      fill="none"
-      stroke={color}
-      strokeWidth={2.2}
-    >
-      <polyline
-        points="5 8 10 13 15 8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="7.2" r="2.6" />
+      <path d="M7.6 16.6a4.4 4.4 0 0 1 8.8 0" />
+      <circle cx="5" cy="10.6" r="1.9" />
+      <path d="M2 17.4a3.1 3.1 0 0 1 3.6-3" />
+      <circle cx="19" cy="10.6" r="1.9" />
+      <path d="M22 17.4a3.1 3.1 0 0 0-3.6-3" />
+      <path d="M7.6 19.8h8.8" />
     </svg>
   );
 }
 
-function ArrowRight() {
+function HealthIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={18}
-      height={18}
-      fill="none"
-      stroke="#fff"
-      strokeWidth={2.2}
-    >
-      <line x1="4" y1="10" x2="16" y2="10" strokeLinecap="round" />
-      <polyline
-        points="11 5 16 10 11 15"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 20.4S3.6 15.2 3.6 9.6a4.5 4.5 0 0 1 8.4-2.3 4.5 4.5 0 0 1 8.4 2.3c0 5.6-8.4 10.8-8.4 10.8Z" />
+      <path d="M6.6 12h2.6l1.3-2.3 2 4.2 1.3-1.9h3" />
     </svg>
   );
 }
 
-function CloseIcon() {
+function MotorIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={16}
-      height={16}
-      fill="none"
-      stroke="#0B2563"
-      strokeWidth={2.2}
-    >
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.4 15.4v-3l1.7-.6 1.7-3.5A1.6 1.6 0 0 1 8.2 7.4h7.6a1.6 1.6 0 0 1 1.4.9l1.7 3.5 1.7.6v3" />
+      <path d="M3.4 15.4h17.2v1.8a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-.8H6.8v.8a1 1 0 0 1-1 1H4.4a1 1 0 0 1-1-1Z" />
+      <path d="M6 11.8h12" />
+      <circle cx="7.2" cy="13.6" r=".9" fill={color} stroke="none" />
+      <circle cx="16.8" cy="13.6" r=".9" fill={color} stroke="none" />
+    </svg>
+  );
+}
+
+function HomeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.4 10.8 12 4.2l8.6 6.6" />
+      <path d="M5.6 12.4v7a1.2 1.2 0 0 0 1.2 1.2h10.4a1.2 1.2 0 0 0 1.2-1.2v-7" />
+      <path d="M9.8 20.6v-4.8h4.4v4.8" />
+    </svg>
+  );
+}
+
+function MarineIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 13.6 12 11l8 2.6-1.7 4.5a2 2 0 0 1-1.9 1.3H7.6a2 2 0 0 1-1.9-1.3Z" />
+      <path d="M7 12.4V8.2h10v4.2" />
+      <path d="M12 8.2V4.8M9.6 6.4h4.8" />
+    </svg>
+  );
+}
+
+function FireIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3.4c2.7 2.5 5.2 5 5.2 8.6a5.2 5.2 0 1 1-10.4 0c0-1.9.8-3.5 2-4.9.6 1.1 1.3 1.8 2.1 2.1 0-2.3.3-4.1 1.1-5.8Z" />
+      <path d="M12 18.4a2.3 2.3 0 0 1-1.4-4.2c.7.6 1.2.6 1.4.2.4.7.9 1.2 1.4 1.7a2.3 2.3 0 0 1-1.4 2.3Z" />
+    </svg>
+  );
+}
+
+function MiscIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14.4 3.4H6.8a1.4 1.4 0 0 0-1.4 1.4v14.4a1.4 1.4 0 0 0 1.4 1.4h5" />
+      <path d="M8.2 8h6M8.2 11.4h4.4M8.2 14.8h2.6" />
+      <path d="M17.6 11.4 21.4 13v3.2c0 2-1.6 3.7-3.8 4.4-2.2-.7-3.8-2.4-3.8-4.4V13Z" />
+    </svg>
+  );
+}
+
+function EntertainmentIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7.4h8v5.4a4 4 0 0 1-8 0Z" />
+      <path d="M5.4 9.8h.01M8.6 9.8h.01" />
+      <path d="M5.6 12.4a2.4 2.4 0 0 0 2.8 0" />
+      <path d="M13 7.4h8v5.4a4 4 0 0 1-8 0Z" />
+      <path d="M15.4 9.8h.01M18.6 9.8h.01" />
+      <path d="M15.6 12.8a2.4 2.4 0 0 1 2.8 0" />
+    </svg>
+  );
+}
+
+/* stat + ui icons */
+
+function ShieldCheckIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3 4.8 5.6v5.6c0 4.3 3 8 7.2 9 4.2-1 7.2-4.7 7.2-9V5.6Z" />
+      <path d="m9.2 12 2 2.1 3.6-4" />
+    </svg>
+  );
+}
+
+function UsersIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="9.4" cy="8.4" r="3" />
+      <path d="M3.6 19a5.8 5.8 0 0 1 11.6 0" />
+      <path d="M16 6.2a3 3 0 0 1 0 5.8M17.4 19a5.4 5.4 0 0 0-2-4.2" />
+    </svg>
+  );
+}
+
+function CheckBadgeIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="m8.2 12.4 2.6 2.6 5-5.4" />
+    </svg>
+  );
+}
+
+function ClockIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M12 7.4V12l3 1.8" />
+    </svg>
+  );
+}
+
+function ArrowCircleIcon({size = 20, color = "#fff"}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.6 12h6.8M12.6 9.2 15.4 12l-2.8 2.8" />
+    </svg>
+  );
+}
+
+function HeadsetIcon({size = 18, color = "#fff"}: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.4 15v-3a7.6 7.6 0 0 1 15.2 0v3" />
+      <path d="M4.4 13.4h1.8a1.4 1.4 0 0 1 1.4 1.4v2.4a1.4 1.4 0 0 1-1.4 1.4H5.8a1.4 1.4 0 0 1-1.4-1.4Z" />
+      <path d="M19.6 13.4h-1.8a1.4 1.4 0 0 0-1.4 1.4v2.4a1.4 1.4 0 0 0 1.4 1.4h.4a1.4 1.4 0 0 0 1.4-1.4Z" />
+      <path d="M18.2 18.6v.4a2 2 0 0 1-2 2H13" />
+    </svg>
+  );
+}
+
+function ChevronDown({color = "rgba(255,255,255,0.75)"}: {color?: string}) {
+  return (
+    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2}>
+      <polyline points="5 8 10 13 15 8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function CloseIcon({color = "#fff"}: {color?: string}) {
+  return (
+    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2.2}>
       <line x1="5.5" y1="5.5" x2="14.5" y2="14.5" strokeLinecap="round" />
       <line x1="14.5" y1="5.5" x2="5.5" y2="14.5" strokeLinecap="round" />
     </svg>
@@ -293,89 +280,35 @@ function CloseIcon() {
 
 function CheckCircleIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={16}
-      height={16}
-      fill="none"
-      stroke="#16A34A"
-      strokeWidth={2}
-    >
+    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#34D399" strokeWidth={2}>
       <circle cx="10" cy="10" r="8" />
-      <polyline
-        points="6.5 10.5 9 13 13.5 7.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <polyline points="6.5 10.5 9 13 13.5 7.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
 function AlertIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={16}
-      height={16}
-      fill="none"
-      stroke="#DC2626"
-      strokeWidth={2}
-    >
+    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#FCA5A5" strokeWidth={2}>
       <circle cx="10" cy="10" r="8" />
       <line x1="10" y1="6" x2="10" y2="11" strokeLinecap="round" />
-      <circle cx="10" cy="14" r="0.6" fill="#DC2626" stroke="none" />
+      <circle cx="10" cy="14" r="0.6" fill="#FCA5A5" stroke="none" />
     </svg>
   );
 }
 
-function ShieldBadgeIcon() {
+function TypeFieldIcon() {
   return (
-    <svg viewBox="0 0 32 32" width={22} height={22} fill="none">
-      <path
-        d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
-        fill="#fff"
-        fillOpacity={0.18}
-        stroke="#fff"
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <polyline
-        points="11.3 16.2 14.4 19.2 20.7 12.4"
-        stroke="#fff"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function TypeFieldIcon({color = TEAL}: {color?: string}) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      width={15}
-      height={15}
-      fill="none"
-      stroke={color}
-      strokeWidth={1.8}
-    >
+    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
       <circle cx="10" cy="6.4" r="2.6" />
       <path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" strokeLinecap="round" />
     </svg>
   );
 }
 
-function RupeeFieldIcon({color = TEAL}: {color?: string}) {
+function RupeeFieldIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={15}
-      height={15}
-      fill="none"
-      stroke={color}
-      strokeWidth={1.8}
-    >
+    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
       <line x1="5" y1="4.5" x2="15" y2="4.5" strokeLinecap="round" />
       <line x1="5" y1="8" x2="15" y2="8" strokeLinecap="round" />
       <path d="M5 4.5c4 0 6 1.4 6 3.5S9 11.5 5 11.5" strokeLinecap="round" />
@@ -384,45 +317,108 @@ function RupeeFieldIcon({color = TEAL}: {color?: string}) {
   );
 }
 
-function PhoneFieldIcon({color = TEAL}: {color?: string}) {
+function PhoneFieldIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={15}
-      height={15}
-      fill="none"
-      stroke={color}
-      strokeWidth={1.8}
-    >
-      <path
-        d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
+      <path d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
+        strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
 function LockFieldIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      width={13}
-      height={13}
-      fill="none"
-      stroke="#0B2563"
-      strokeWidth={1.8}
-    >
+    <svg viewBox="0 0 20 20" width={12} height={12} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth={1.7}>
       <rect x="4.5" y="9" width="11" height="7.5" rx="1.6" />
       <path d="M6.8 9V6.4a3.2 3.2 0 0 1 6.4 0V9" strokeLinecap="round" />
     </svg>
   );
 }
 
-/* ---------- "Get Insured Fast" quote form (now shown inside the modal) ---------- */
+function ShieldBadgeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke={TEAL}
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3 4.8 5.6v5.6c0 4.3 3 8 7.2 9 4.2-1 7.2-4.7 7.2-9V5.6Z" />
+      <path d="m9.2 12 2 2.1 3.6-4" />
+    </svg>
+  );
+}
+
+/* ---------- content ---------- */
+
+const STATS = [
+  {value: "1.2L+", label: "Policies Sold", Icon: ShieldCheckIcon},
+  {value: "500+", label: "Happy Clients", Icon: UsersIcon},
+  {value: "₹250Cr+", label: "Claim Settled", Icon: CheckBadgeIcon},
+  {value: "20+", label: "Years of Trust", Icon: ClockIcon},
+];
+
+/* the eight nav services, in nav order */
+const SERVICES = [
+  {l1: "Life", l2: "Insurance", slug: "life-insurance", Icon: LifeIcon},
+  {l1: "Health", l2: "Insurance", slug: "health-insurance", Icon: HealthIcon},
+  {l1: "Motor", l2: "Insurance", slug: "motor-insurance", Icon: MotorIcon},
+  {l1: "Home", l2: "Insurance", slug: "home-insurance", Icon: HomeIcon},
+  {l1: "Marine", l2: "Insurance", slug: "marine-insurance", Icon: MarineIcon},
+  {l1: "Fire", l2: "Insurance", slug: "fire-insurance", Icon: FireIcon},
+  {l1: "Miscellaneous", l2: "Insurance", slug: "miscellaneous-insurance", Icon: MiscIcon},
+  {l1: "Entertainment", l2: "Insurance", slug: "entertainment-insurance", Icon: EntertainmentIcon},
+];
+
+/* ---------- stats row ---------- */
+
+function StatsRow() {
+  return (
+    <div className="hero-stats">
+      {STATS.map(({value, label, Icon}) => (
+        <div className="hero-stat" key={label}>
+          <span className="hero-stat-chip">
+            <Icon size={18} />
+          </span>
+          <span>
+            <span className="hero-stat-value">{value}</span>
+            <span className="hero-stat-label">{label}</span>
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ---------- bottom service grid ---------- */
+
+function ServiceGrid() {
+  return (
+    <div className="hero-services-panel">
+      <div className="hero-services-head">
+        <span className="hero-rule" />
+        <h2 className="hero-services-title">What would you like to protect?</h2>
+        <span className="hero-rule" />
+      </div>
+
+      <div className="hero-services">
+        {SERVICES.map(({l1, l2, slug, Icon}) => (
+          <a key={slug} href={`${SERVICE_BASE}/${slug}`} className="hero-service">
+            <span className="hero-service-icon">
+              <Icon size={30} />
+            </span>
+            <span className="hero-service-label">
+              {l1}
+              <br />
+              {l2}
+            </span>
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- quote form ---------- */
 
 function QuotePanel({onClose}: {onClose?: () => void}) {
-  const [insType, setInsType] = useState("Health Insurance");
+  const [insType, setInsType] = useState("");
   const [sum, setSum] = useState("");
   const [mobile, setMobile] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -431,59 +427,17 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
     text: string;
   } | null>(null);
 
-  const fieldLabelStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-    fontSize: 10.5,
-    fontWeight: 600,
-    color: "#838383",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-    marginBottom: 6,
-  };
-  const fieldWrapStyle: React.CSSProperties = {
-    border: "1.5px solid #E5E9F2",
-    borderRadius: 12,
-    padding: "12px 14px",
-    marginBottom: 14,
-  };
-  const selectStyle: React.CSSProperties = {
-    appearance: "none",
-    WebkitAppearance: "none",
-    border: "none",
-    background: "transparent",
-    fontSize: 15,
-    fontWeight: 600,
-    color: "#0B2563",
-    fontFamily: "inherit",
-    cursor: "pointer",
-    paddingRight: 24,
-    outline: "none",
-    width: "100%",
-  };
-  const inputStyle: React.CSSProperties = {
-    border: "none",
-    outline: "none",
-    background: "transparent",
-    fontSize: 15,
-    fontWeight: 600,
-    color: "#0B2563",
-    fontFamily: "inherit",
-    width: "100%",
-  };
-
   const handleGetQuote = async () => {
-    if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setFeedback({
-        type: "error",
-        text: "Please enter a valid 10-digit mobile number",
-      });
+    if (!insType) {
+      setFeedback({type: "error", text: "Please choose an insurance type"});
       return;
     }
-
     if (!sum.trim()) {
       setFeedback({type: "error", text: "Please enter the sum insured amount"});
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      setFeedback({type: "error", text: "Please enter a valid 10-digit mobile number"});
       return;
     }
 
@@ -498,11 +452,7 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
       const res = await fetch(`${apiUrl}/quoteleads`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          insuranceType: insType,
-          sumInsured: sum,
-          mobile,
-        }),
+        body: JSON.stringify({insuranceType: insType, sumInsured: sum, mobile}),
       });
 
       if (!res.ok) {
@@ -510,8 +460,7 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
         console.error("Lead save failed:", res.status, errBody);
         setFeedback({
           type: "error",
-          text:
-            errBody.message || "Could not save your request. Please try again.",
+          text: errBody.message || "Could not save your request. Please try again.",
         });
         setSubmitting(false);
         return;
@@ -523,10 +472,7 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
       });
     } catch (err) {
       console.error("Failed to save lead:", err);
-      setFeedback({
-        type: "error",
-        text: "Network error — could not reach the server.",
-      });
+      setFeedback({type: "error", text: "Network error — could not reach the server."});
       setSubmitting(false);
       return;
     }
@@ -535,179 +481,89 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
   };
 
   return (
-    <div
-      className="ins-quotepanel"
-      style={{
-        position: "relative",
-        background: "#fff",
-        borderRadius: 20,
-        boxShadow: "0 8px 48px rgba(0,0,0,0.28)",
-        padding: "24px 24px 20px",
-        width: "100%",
-      }}
-    >
+    <div className="hero-quote">
       {onClose && (
-        <button
-          type="button"
-          className="ins-modal-close"
-          onClick={onClose}
-          aria-label="Close quote form"
-        >
+        <button type="button" className="hero-modal-close" onClick={onClose} aria-label="Close quote form">
           <CloseIcon />
         </button>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          marginBottom: 20,
-        }}
-      >
-        <div
-          style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: "#0B2563",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-        >
+      <div className="hero-quote-head">
+        <span className="hero-quote-badge">
           <ShieldBadgeIcon />
-        </div>
-        <div>
-          <div
-            style={{
-              fontSize: 16.5,
-              fontWeight: 900,
-              color: "#0B2563",
-              lineHeight: 1.2,
-            }}
-          >
-            Get Insured Fast
-          </div>
-          <div style={{fontSize: 12, color: "#838383", fontWeight: 500}}>
-            Quick. Simple. Secure.
-          </div>
-        </div>
+        </span>
+        <span>
+          <span className="hero-quote-title">Get Insured Fast</span>
+          <span className="hero-quote-sub">Quick. Simple. Secure.</span>
+        </span>
       </div>
 
-      <div style={fieldWrapStyle}>
-        <div style={fieldLabelStyle}>
-          <TypeFieldIcon /> Insurance Type
-        </div>
-        <div
-          style={{position: "relative", display: "flex", alignItems: "center"}}
+      <label className="hero-field-label" htmlFor="hero-type">
+        <TypeFieldIcon /> Insurance Type
+      </label>
+      <div className="hero-field">
+        <select
+          id="hero-type"
+          className="hero-input hero-select"
+          value={insType}
+          onChange={(e) => setInsType(e.target.value)}
         >
-          <select
-            value={insType}
-            onChange={(e) => setInsType(e.target.value)}
-            style={selectStyle}
-          >
-            {INSURANCE_TYPES.map((t) => (
-              <option key={t}>{t}</option>
-            ))}
-          </select>
-          <div style={{position: "absolute", right: 0, pointerEvents: "none"}}>
-            <ChevronDown />
-          </div>
-        </div>
+          <option value="">Select Insurance Type</option>
+          {INSURANCE_TYPES.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+        <span className="hero-field-chevron">
+          <ChevronDown />
+        </span>
       </div>
 
-      <div style={fieldWrapStyle}>
-        <div style={fieldLabelStyle}>
-          <RupeeFieldIcon /> Sum Insured (₹)
-        </div>
+      <label className="hero-field-label" htmlFor="hero-sum">
+        <RupeeFieldIcon /> Sum Insured (₹)
+      </label>
+      <div className="hero-field">
         <input
+          id="hero-sum"
+          className="hero-input"
           type="text"
+          inputMode="numeric"
           value={sum}
           onChange={(e) => setSum(e.target.value)}
           placeholder="Enter Sum Insured"
-          style={inputStyle}
         />
       </div>
 
-      <div style={{...fieldWrapStyle, marginBottom: 20}}>
-        <div style={fieldLabelStyle}>
-          <PhoneFieldIcon /> Mobile Number
-        </div>
+      <label className="hero-field-label" htmlFor="hero-mobile">
+        <PhoneFieldIcon /> Mobile Number
+      </label>
+      <div className="hero-field">
+        <span className="hero-field-lead">
+          <PhoneFieldIcon />
+        </span>
         <input
-          placeholder="Enter 10-digit mobile number"
+          id="hero-mobile"
+          className="hero-input"
           type="tel"
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
           maxLength={10}
-          style={inputStyle}
+          placeholder="Enter 10-digit mobile number"
         />
       </div>
 
-      <button
-        className="ins-quote-cta"
-        disabled={submitting}
-        onClick={handleGetQuote}
-        style={{
-          width: "100%",
-          padding: "15px 20px",
-          background: "#F25917",
-          border: "none",
-          borderRadius: 12,
-          color: "#fff",
-          fontSize: 15.5,
-          fontWeight: 800,
-          cursor: submitting ? "not-allowed" : "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 10,
-          fontFamily: "inherit",
-          transition: "transform 0.2s, box-shadow 0.2s",
-          opacity: submitting ? 0.7 : 1,
-        }}
-      >
-        {submitting ? (
-          "Sending..."
-        ) : (
-          <>
-            Get Quote <ArrowRight />
-          </>
-        )}
+      <button className="hero-quote-cta" disabled={submitting} onClick={handleGetQuote}>
+        {submitting ? "Sending..." : "Get Quote"}
+        {!submitting && <ArrowCircleIcon size={19} />}
       </button>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 6,
-          marginTop: 14,
-          fontSize: 11.5,
-          color: "#838383",
-          fontWeight: 500,
-        }}
-      >
+      <div className="hero-quote-note">
         <LockFieldIcon /> Your information is secure and encrypted
       </div>
 
       {feedback && (
-        <div
-          style={{
-            marginTop: 14,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 14px",
-            borderRadius: 10,
-            fontSize: 12.5,
-            fontWeight: 600,
-            background: feedback.type === "success" ? "#ECFDF5" : "#FEF2F2",
-            color: feedback.type === "success" ? "#047857" : "#DC2626",
-            border: `1px solid ${feedback.type === "success" ? "#A7F3D0" : "#FECACA"}`,
-          }}
-        >
+        <div className={`hero-feedback hero-feedback-${feedback.type}`}>
           {feedback.type === "success" ? <CheckCircleIcon /> : <AlertIcon />}
           {feedback.text}
         </div>
@@ -716,9 +572,7 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
   );
 }
 
-/* ---------- Modal shell ----------
-   Closes on backdrop click and on Escape, and locks the page behind it so the
-   hero doesn't scroll under the form. */
+/* ---------- modal (the hero CTA opens the same form) ---------- */
 
 function QuoteModal({onClose}: {onClose: () => void}) {
   useEffect(() => {
@@ -726,25 +580,23 @@ function QuoteModal({onClose}: {onClose: () => void}) {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-
-    const prevOverflow = document.body.style.overflow;
+    const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prevOverflow;
+      document.body.style.overflow = prev;
     };
   }, [onClose]);
 
   return (
     <div
-      className="ins-modal-backdrop"
+      className="hero-modal-backdrop"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Get an insurance quote"
     >
-      <div className="ins-modal" onClick={(e) => e.stopPropagation()}>
+      <div className="hero-modal" onClick={(e) => e.stopPropagation()}>
         <QuotePanel onClose={onClose} />
       </div>
     </div>
@@ -752,7 +604,7 @@ function QuoteModal({onClose}: {onClose: () => void}) {
 }
 
 export default function Banner() {
-  const {headline, visible} = useRotatingHeadline(
+  const {headline, index, visible} = useRotatingHeadline(
     HEADLINES,
     HEADLINE_INTERVAL_MS,
   );
@@ -761,430 +613,341 @@ export default function Banner() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;0,800;0,900;1,800;1,900&display=swap');
-        @font-face {
-          font-family: 'BalooChettan2';
-          src: url('/BalooChettan2-Medium.ttf') format('truetype');
-          font-weight: 100 900;
-          font-style: normal;
-          font-display: swap;
+        @font-face{font-family:'BalooChettan2' !important;src:url('/BalooChettan2-Medium.ttf') format('truetype') !important;font-weight:100 900 !important;font-style:normal !important;font-display:swap !important;}
+
+        .hero-root, .hero-root *{ box-sizing:border-box !important; font-family:var(--font-sora),"Sora",sans-serif !important; }
+        .hero-headline-malayalam, .hero-headline-malayalam *{ font-family:'BalooChettan2',sans-serif!important; }
+
+        .hero-section{
+          position:relative !important;
+          background:${NAVY} !important;
+          padding:88px 0 56px !important;
+          overflow:hidden !important;
         }
-        @font-face {
-          font-family: 'BalooChettan2';
-          src: url('/BalooChettan2-Medium.ttf') format('truetype');
-          font-weight: normal;
-          font-style: normal;
-          font-display: swap;
+        /* soft light behind the artwork, as in the reference */
+        .hero-section::before{
+          content:"" !important;
+          position:absolute !important;
+          top:-10% !important;
+          right:8% !important;
+          width:52% !important;
+          height:90% !important;
+          background:radial-gradient(circle, rgba(32,190,198,0.16) 0%, rgba(0,26,90,0) 68%) !important;
+          pointer-events:none !important;
         }
-        @font-face {
-          font-family: 'BalooChettan2';
-          src: url('/BalooChettan2-Medium.ttf') format('truetype');
-          font-weight: 500;
-          font-style: normal;
-          font-display: swap;
+        .hero-wrap{ position:relative !important; z-index:1 !important; max-width:1280px !important; margin:0 auto !important; padding:0 24px !important; }
+
+        /* ---- hero: copy | artwork | quote form ---- */
+        .hero-hero{ display:flex !important; align-items:center !important; gap:28px !important; }
+        .hero-copy{ flex:1 1 42% !important; min-width:0 !important; }
+        .hero-art{ flex:1 1 30% !important; min-width:0 !important; display:flex !important; justify-content:center !important; }
+        .hero-art img{ width:100% !important; max-width:520px !important; height:auto !important; object-fit:contain !important; }
+        .hero-form{ flex:0 0 330px !important; min-width:0 !important; }
+
+        .hero-headline{
+          font-size:clamp(32px,3.2vw,52px) !important;
+          font-weight:900 !important;
+          line-height:1.1 !important;
+          letter-spacing:-1px !important;
+          color:#fff !important;
+          margin:0 !important;
+          transition:opacity .3s ease, transform .3s ease !important;
         }
-        @font-face {
-          font-family: 'BalooChettan2';
-          src: url('/BalooChettan2-Medium.ttf') format('truetype');
-          font-weight: 700;
-          font-style: normal;
-          font-display: swap;
-        }
-        @font-face {
-          font-family: 'BalooChettan2';
-          src: url('/BalooChettan2-Medium.ttf') format('truetype');
-          font-weight: 900;
-          font-style: normal;
-          font-display: swap;
-        }
-        .ins-root *{box-sizing:border-box;font-family: var(--font-sora), "Sora", sans-serif;}
-        .ins-headline-malayalam,
-        .ins-headline-malayalam * {
-          font-family: 'BalooChettan2', sans-serif !important;
+        .hero-headline-stack{ display:grid !important; margin:0 0 16px !important; }
+        .hero-headline-stack > *{ grid-area:1 / 1 !important; margin:0 !important; }
+        .hero-headline-ghost{ visibility:hidden !important; pointer-events:none !important; }
+        .hero-headline-hidden{ opacity:0 !important; transform:translateY(6px) !important; }
+        .hero-headline-visible{ opacity:1 !important; transform:translateY(0) !important; }
+        .hero-lede{
+          max-width:440px !important;
+          margin:0 0 26px !important;
+          font-size:14.5px !important;
+          line-height:1.7 !important;
+          color:rgba(255,255,255,0.72) !important;
         }
 
-        /* ---- three-column hero: left content | center image | right service cards ---- */
-        .ins-inner{
-          display:flex;
-          align-items:center;
-          gap:24px;
+        /* ---- CTAs ---- */
+        .hero-ctas{ display:flex !important; gap:14px !important; margin-bottom:34px !important; flex-wrap:wrap !important; }
+        .hero-cta{
+          display:inline-flex !important;
+          align-items:center !important;
+          gap:9px !important;
+          padding:13px 22px !important;
+          border-radius:12px !important;
+          font-size:14.5px !important;
+          font-weight:700 !important;
+          text-decoration:none !important;
+          border:none !important;
+          cursor:pointer !important;
+          font-family:inherit !important;
+          transition:transform .18s ease, box-shadow .18s ease, background .18s ease !important;
         }
-        .ins-left{ flex:0 1 34%; min-width:0; }
-        .ins-center{ flex:1 1 36%; min-width:0; display:flex; align-items:center; justify-content:center; }
-        .ins-right{ flex:0 0 296px; min-width:0; }
+        .hero-cta-primary{ background:${ORANGE} !important; color:#fff !important; }
+        .hero-cta-primary:hover{ transform:translateY(-2px) !important; box-shadow:0 12px 24px rgba(236,79,52,0.32) !important; }
+        .hero-cta-ghost{
+          background:rgba(255,255,255,0.06) !important;
+          border:1.5px solid rgba(255,255,255,0.24) !important;
+          color:#fff !important;
+        }
+        .hero-cta-ghost:hover{ background:rgba(255,255,255,0.12) !important; transform:translateY(-2px) !important; }
 
-        .ins-headline{
-          transition: opacity .3s ease, transform .3s ease;
+        /* ---- stats ---- */
+        .hero-stats{ display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:0 !important; }
+        .hero-stat{
+          display:flex !important;
+          align-items:center !important;
+          gap:10px !important;
+          padding:0 20px !important;
+          border-left:1px solid rgba(255,255,255,0.14) !important;
         }
-        .ins-headline.ins-headline-hidden{
-          opacity:0;
-          transform:translateY(6px);
+        .hero-stat:first-child{ padding-left:0 !important; border-left:none !important; }
+        .hero-stat-chip{
+          display:flex !important;
+          align-items:center !important;
+          justify-content:center !important;
+          width:36px !important;
+          height:36px !important;
+          border-radius:10px !important;
+          flex:0 0 auto !important;
+          background:rgba(32,190,198,0.12) !important;
+          border:1px solid rgba(32,190,198,0.28) !important;
         }
-        .ins-headline.ins-headline-visible{
-          opacity:1;
-          transform:translateY(0);
-        }
+        .hero-stat-value{ display:block !important; font-size:19px !important; font-weight:800 !important; color:#fff !important; line-height:1.15 !important; white-space:nowrap !important; }
+        .hero-stat-label{ display:block !important; font-size:11.5px !important; color:rgba(255,255,255,0.55) !important; margin-top:2px !important; white-space:nowrap !important; }
 
-        /* ---- stats: seamless sliding strip, feathered at both ends ---- */
-        .ins-stats-wrap{
-          width:100%;
-          max-width:100%;
-          overflow:hidden;
-          position:relative;
-          padding:2px 0;
-          /* feathered edges — figures fade out instead of being sliced */
-          -webkit-mask-image:linear-gradient(90deg,
-            transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
-                  mask-image:linear-gradient(90deg,
-            transparent 0, #000 40px, #000 calc(100% - 40px), transparent 100%);
+        /* ---- quote form (glass, on-theme) ---- */
+        .hero-quote{
+          position:relative !important;
+          border-radius:18px !important;
+          padding:22px 22px 20px !important;
+          background:rgba(255,255,255,0.055) !important;
+          border:1px solid rgba(255,255,255,0.14) !important;
+          backdrop-filter:blur(10px) !important;
+          -webkit-backdrop-filter:blur(10px) !important;
+          box-shadow:0 18px 48px rgba(0,6,40,0.42) !important;
         }
-        .ins-stats-track{
-          display:flex;
-          align-items:flex-start;
-          width:max-content;
-          will-change:transform;
-          animation:ins-stats-slide 24s linear infinite;
+        .hero-quote-head{ display:flex !important; align-items:center !important; gap:12px !important; margin-bottom:18px !important; }
+        .hero-quote-badge{
+          display:flex !important; align-items:center !important; justify-content:center !important;
+          width:42px !important; height:42px !important; border-radius:12px !important; flex:0 0 auto !important;
+          background:rgba(32,190,198,0.14) !important;
+          border:1px solid rgba(32,190,198,0.3) !important;
         }
-        /* the track holds two identical copies, so moving exactly half its
-           width lands on an identical frame — the loop has no visible jump */
-        @keyframes ins-stats-slide{
-          from{ transform:translateX(0); }
-          to  { transform:translateX(-50%); }
-        }
-        .ins-stats-wrap:hover .ins-stats-track{ animation-play-state:paused; }
+        .hero-quote-title{ display:block !important; font-size:17px !important; font-weight:800 !important; color:#fff !important; line-height:1.2 !important; }
+        .hero-quote-sub{ display:block !important; font-size:12px !important; color:rgba(255,255,255,0.6) !important; margin-top:2px !important; }
 
-        .ins-stat{
-          flex:0 0 auto;
-          padding:0 26px;
-          border-left:1px solid rgba(255,255,255,0.15);
-          text-align:left;
+        .hero-field-label{
+          display:flex !important; align-items:center !important; gap:6px !important;
+          font-size:11.5px !important; font-weight:600 !important;
+          color:rgba(255,255,255,0.72) !important;
+          margin-bottom:7px !important;
         }
-        .ins-stat-value{
-          font-size:clamp(18px,2vw,24px);
-          font-weight:900;
-          color:#fff;
-          line-height:1.15;
-          white-space:nowrap;
+        .hero-field{
+          position:relative !important;
+          display:flex !important; align-items:center !important; gap:8px !important;
+          padding:11px 14px !important;
+          margin-bottom:15px !important;
+          border-radius:11px !important;
+          background:rgba(255,255,255,0.05) !important;
+          border:1px solid rgba(255,255,255,0.16) !important;
+          transition:border-color .18s ease, background .18s ease !important;
         }
-        .ins-stat-label{
-          font-size:11.5px;
-          color:rgba(255,255,255,0.5);
-          margin-top:4px;
-          white-space:nowrap;
+        .hero-field:focus-within{ border-color:${TEAL} !important; background:rgba(255,255,255,0.08) !important; }
+        .hero-field-lead{ display:flex !important; flex:0 0 auto !important; }
+        .hero-field-chevron{ position:absolute !important; right:14px !important; pointer-events:none !important; display:flex !important; }
+        .hero-input{
+          width:100% !important; min-width:0 !important;
+          border:none !important; outline:none !important; background:transparent !important;
+          font-family:inherit !important; font-size:14px !important; font-weight:500 !important; color:#fff !important;
         }
+        .hero-input::placeholder{ color:rgba(255,255,255,0.42) !important; }
+        .hero-select{ appearance:none !important; -webkit-appearance:none !important; padding-right:22px !important; cursor:pointer !important; }
+        .hero-select option{ color:#0B2563 !important; background:#fff !important; }
 
-        /* less motion requested: a plain swipeable row, still never mid-cut */
+        .hero-quote-cta{
+          width:100% !important;
+          display:flex !important; align-items:center !important; justify-content:center !important; gap:9px !important;
+          margin-top:4px !important; padding:14px 20px !important;
+          border:none !important; border-radius:12px !important;
+          background:${ORANGE} !important; color:#fff !important;
+          font-family:inherit !important; font-size:15px !important; font-weight:800 !important;
+          cursor:pointer !important;
+          transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease !important;
+        }
+        .hero-quote-cta:hover:not(:disabled){ transform:translateY(-2px) !important; box-shadow:0 12px 24px rgba(236,79,52,0.34) !important; }
+        .hero-quote-cta:disabled{ opacity:.65 !important; cursor:not-allowed !important; }
+        .hero-quote-note{
+          display:flex !important; align-items:center !important; justify-content:center !important; gap:6px !important;
+          margin-top:13px !important; font-size:11.5px !important; color:rgba(255,255,255,0.55) !important;
+        }
+        .hero-feedback{
+          display:flex !important; align-items:center !important; gap:8px !important;
+          margin-top:13px !important; padding:10px 13px !important; border-radius:10px !important;
+          font-size:12.5px !important; font-weight:600 !important;
+        }
+        .hero-feedback-success{ background:rgba(16,185,129,0.14) !important; border:1px solid rgba(52,211,153,0.4) !important; color:#6EE7B7 !important; }
+        .hero-feedback-error{ background:rgba(220,38,38,0.14) !important; border:1px solid rgba(252,165,165,0.4) !important; color:#FCA5A5 !important; }
+
+        /* ---- bottom services panel ---- */
+        .hero-services-panel{
+          margin-top:48px !important;
+          padding:26px 26px 28px !important;
+          border-radius:22px !important;
+          border:1px solid rgba(255,255,255,0.12) !important;
+          background:rgba(255,255,255,0.025) !important;
+        }
+        .hero-services-head{ display:flex !important; align-items:center !important; gap:18px !important; margin-bottom:22px !important; }
+        .hero-rule{ flex:1 1 auto !important; height:1px !important; background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.22) 100%) !important; }
+        .hero-services-head .hero-rule:last-child{ background:linear-gradient(90deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%) !important; }
+        .hero-services-title{ margin:0 !important; font-size:16px !important; font-weight:700 !important; color:#fff !important; white-space:nowrap !important; }
+
+        .hero-services{ display:grid !important; grid-template-columns:repeat(8,minmax(0,1fr)) !important; gap:14px !important; }
+        .hero-service{
+          display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
+          gap:14px !important; min-height:126px !important; padding:20px 10px !important;
+          border-radius:14px !important;
+          border:1px solid rgba(255,255,255,0.12) !important;
+          background:rgba(255,255,255,0.04) !important;
+          text-decoration:none !important;
+          transition:transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
+        }
+        .hero-service-icon{ display:flex !important; transition:transform .25s cubic-bezier(.34,1.5,.64,1) !important; }
+        .hero-service-label{
+          text-align:center !important; font-size:12.5px !important; font-weight:600 !important;
+          line-height:1.35 !important; color:rgba(255,255,255,0.92) !important;
+        }
+        .hero-service:hover{
+          transform:translateY(-4px) !important;
+          border-color:rgba(32,190,198,0.55) !important;
+          background:rgba(255,255,255,0.07) !important;
+          box-shadow:0 16px 30px rgba(0,6,40,0.4) !important;
+        }
+        .hero-service:hover .hero-service-icon{ transform:scale(1.1) !important; }
+        .hero-service:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
+
+        /* ---- modal ---- */
+        .hero-modal-backdrop{
+          position:fixed !important; inset:0 !important; z-index:1000 !important;
+          display:flex !important; align-items:center !important; justify-content:center !important;
+          padding:20px !important; overflow-y:auto !important;
+          background:rgba(0,10,45,0.7) !important;
+          backdrop-filter:blur(5px) !important; -webkit-backdrop-filter:blur(5px) !important;
+          animation:hero-fade .18s ease !important;
+        }
+        .hero-modal{ width:100% !important; max-width:380px !important; margin:auto !important; animation:hero-pop .24s cubic-bezier(.34,1.3,.64,1) !important; }
+        .hero-modal .hero-quote{ background:rgba(10,32,86,0.96) !important; }
+        .hero-modal-close{
+          position:absolute !important; top:14px !important; right:14px !important;
+          width:30px !important; height:30px !important;
+          display:flex !important; align-items:center !important; justify-content:center !important;
+          border:1px solid rgba(255,255,255,0.18) !important; border-radius:9px !important;
+          background:rgba(255,255,255,0.08) !important; cursor:pointer !important;
+          transition:background .18s ease !important;
+        }
+        .hero-modal-close:hover{ background:rgba(255,255,255,0.16) !important; }
+        @keyframes hero-fade{ from{opacity:0} to{opacity:1} }
+        @keyframes hero-pop{ from{opacity:0; transform:translateY(10px) scale(.98)} to{opacity:1; transform:none} }
+
         @media (prefers-reduced-motion: reduce){
-          .ins-stats-track{ animation:none; }
-          .ins-stats-wrap{
-            overflow-x:auto;
-            scrollbar-width:none;
-            -webkit-mask-image:none;
-                    mask-image:none;
-          }
-          .ins-stats-wrap::-webkit-scrollbar{ display:none; }
-          .ins-stat-dupe{ display:none; }
+          .hero-headline, .hero-service, .hero-service-icon, .hero-cta, .hero-quote-cta{ transition:none !important; }
+          .hero-modal-backdrop, .hero-modal{ animation:none !important; }
         }
 
-        /* ---- right column: floating service bubbles ---- */
-        .ins-cards-panel{ padding:0; min-width:0; }
-        .ins-sr-only{
-          position:absolute;
-          width:1px;height:1px;
-          padding:0;margin:-1px;
-          overflow:hidden;
-          clip:rect(0 0 0 0);
-          white-space:nowrap;
-          border:0;
+        /* ---- responsive ---- */
+        @media(max-width:1180px){
+          .hero-hero{ flex-wrap:wrap !important; }
+          .hero-copy{ flex:1 1 100% !important; order:1 !important; }
+          .hero-art{ flex:1 1 48% !important; order:2 !important; }
+          .hero-form{ flex:1 1 44% !important; order:3 !important; max-width:420px !important; }
+          .hero-services{ grid-template-columns:repeat(4,minmax(0,1fr)) !important; }
         }
-        .ins-bubbles{
-          position:relative;
-          width:100%;
-          max-width:300px;
-          margin:0 auto;
-          aspect-ratio:1 / 1.35;
+        @media(max-width:820px){
+          .hero-section{ padding:64px 0 44px !important; }
+          .hero-wrap{ padding:0 18px !important; }
+          .hero-art{ flex:1 1 100% !important; }
+          .hero-art img{ max-width:380px !important; }
+          .hero-form{ flex:1 1 100% !important; max-width:460px !important; margin:0 auto !important; }
+          .hero-stats{ flex-wrap:wrap !important; gap:16px 0 !important; }
+          .hero-stat{ padding:0 16px !important; }
+          .hero-services-head{ gap:12px !important; }
+          .hero-services-title{ font-size:15px !important; white-space:normal !important; text-align:center !important; }
         }
-        .ins-bubble-link{
-          display:block;
-          animation-name:ins-bubble-float;
-          animation-timing-function:ease-in-out;
-          animation-iteration-count:infinite;
-        }
-        /* translucent glass, lit from the upper left, with a faint cool glow
-           around it so it separates from the navy without going solid white */
-        .ins-bubble{
-          position:relative;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          width:100%;
-          aspect-ratio:1 / 1;
-          border-radius:50%;
-          border:1px solid rgba(255,255,255,0.45);
-          background:
-            radial-gradient(circle at 30% 26%,
-              rgba(255,255,255,0.97) 0%,
-              rgba(255,255,255,0.88) 38%,
-              rgba(232,243,252,0.72) 70%,
-              rgba(186,214,238,0.55) 100%);
-          backdrop-filter:blur(3px);
-          -webkit-backdrop-filter:blur(3px);
-          box-shadow:
-            0 16px 30px rgba(0,6,40,0.34),
-            0 0 22px rgba(120,190,230,0.18),
-            inset 0 -10px 18px rgba(255,255,255,0.7),
-            inset 0 8px 16px rgba(130,170,210,0.22);
-          transition:transform .25s ease, box-shadow .25s ease;
-        }
-        .ins-bubble-img{
-          width:60%;
-          height:60%;
-          object-fit:contain;
-          user-select:none;
-          -webkit-user-drag:none;
-        }
-        /* specular highlight */
-        .ins-bubble-gloss{
-          position:absolute;
-          top:10%;
-          left:15%;
-          width:32%;
-          height:20%;
-          border-radius:50%;
-          background:rgba(255,255,255,0.95);
-          filter:blur(4px);
-          opacity:.95;
-          pointer-events:none;
-        }
-        .ins-bubble-link:hover .ins-bubble{
-          transform:scale(1.08);
-          box-shadow:
-            0 22px 38px rgba(0,6,40,0.42),
-            0 0 30px rgba(120,190,230,0.28),
-            inset 0 -10px 18px rgba(255,255,255,0.75),
-            inset 0 8px 16px rgba(130,170,210,0.22);
-        }
-        .ins-bubble-link:hover{ animation-play-state:paused; }
-        .ins-bubble-link:focus-visible{
-          outline:2px solid #20BEC6;
-          outline-offset:4px;
-          border-radius:50%;
-        }
-        @keyframes ins-bubble-float{
-          0%   { transform:translate3d(0,0,0); }
-          50%  { transform:translate3d(0,-12px,0); }
-          100% { transform:translate3d(0,0,0); }
-        }
-        @media (prefers-reduced-motion: reduce){
-          .ins-bubble-link{ animation:none; }
-          .ins-bubble{ transition:none; }
-        }
-
-        .ins-quote-cta:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(242,89,23,0.35); }
-
-        /* ---- quote modal ---- */
-        .ins-modal-backdrop{
-          position:fixed;
-          inset:0;
-          z-index:1000;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          padding:20px;
-          overflow-y:auto;
-          background:rgba(0,10,45,0.62);
-          backdrop-filter:blur(5px);
-          -webkit-backdrop-filter:blur(5px);
-          animation:ins-modal-fade .18s ease;
-        }
-        .ins-modal{
-          width:100%;
-          max-width:400px;
-          margin:auto;
-          animation:ins-modal-pop .24s cubic-bezier(.34,1.3,.64,1);
-        }
-        .ins-modal-close{
-          position:absolute;
-          top:14px;
-          right:14px;
-          width:30px;
-          height:30px;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          border:none;
-          border-radius:9px;
-          background:#F1F3F8;
-          cursor:pointer;
-          transition:background .18s ease;
-        }
-        .ins-modal-close:hover{ background:#E2E6F0; }
-        @keyframes ins-modal-fade{ from{opacity:0} to{opacity:1} }
-        @keyframes ins-modal-pop{
-          from{ opacity:0; transform:translateY(10px) scale(.98); }
-          to  { opacity:1; transform:none; }
-        }
-        @media (prefers-reduced-motion: reduce){
-          .ins-modal-backdrop, .ins-modal{ animation:none; }
-        }
-
-        @media(max-width:1200px){
-          .ins-inner{ flex-wrap:wrap; }
-          .ins-left{ flex:1 1 100%; order:1; }
-          .ins-center{ flex:1 1 45%; order:2; }
-          .ins-right{ flex:1 1 50%; order:3; }
-        }
-
-        @media(max-width:1024px){
-          .ins-section{ padding-top:72px!important; }
-          .ins-inner{ padding:32px 32px 0!important; gap:28px!important; }
-          .ins-left{ text-align:left!important; }
-          .ins-left h1{ font-size:clamp(26px, 4vw, 40px)!important; text-align:left!important; white-space:normal!important; }
-          .ins-left p{ font-size:13px!important; text-align:left!important; }
-          .ins-cta-row{ justify-content:flex-start!important; flex-direction:row!important; flex-wrap:nowrap!important; }
-          .ins-cta-row a, .ins-cta-row button { padding: 10px 18px!important; font-size: 13px!important; white-space:nowrap!important; }
-          .ins-stat{ padding:0 20px!important; }
-          .ins-stat-value{ font-size:20px!important; }
-          .ins-stat-label{ font-size:11px!important; }
-          .ins-center{ flex:1 1 100%!important; order:2!important; }
-          .ins-center img{ max-width:380px!important; }
-          .ins-right{ flex:1 1 100%!important; order:3!important; }
-          .ins-bubbles{ max-width:340px!important; }
-        }
-
         @media(max-width:600px){
-          .ins-section{ padding-top:56px!important; }
-          .ins-inner{ padding:28px 20px 0!important; }
-          .ins-left h1{
-            font-size:clamp(32px,10vw,44px)!important;
-            line-height:1.14!important;
-            margin-bottom:18px!important;
-            white-space:normal!important;
-          }
-          .ins-left p{
-            font-size:14.5px!important;
-            line-height:1.6!important;
-            margin-bottom:26px!important;
-          }
-          .ins-cta-row{
-            flex-direction:row!important;
-            flex-wrap:nowrap!important;
-            align-items:center!important;
-            justify-content:center!important;
-            gap:10px!important;
-            margin-bottom:32px!important;
-          }
-          .ins-cta-row a, .ins-cta-row button{
-            flex:1 1 0!important;
-            width:auto!important;
-            text-align:center!important;
-            box-sizing:border-box!important;
-            justify-content:center!important;
-            display:inline-flex!important;
-            padding:12px 10px!important;
-            font-size:13px!important;
-            white-space:nowrap!important;
-          }
-          /* phones get the static 2x2 grid — it all fits, so nothing slides */
-          .ins-stats-wrap{
-            overflow:visible!important;
-            -webkit-mask-image:none!important;
-                    mask-image:none!important;
-          }
-          .ins-stats-track{
-            display:grid!important;
-            grid-template-columns:repeat(2,1fr)!important;
-            width:100%!important;
-            row-gap:20px!important;
-            column-gap:12px!important;
-            animation:none!important;
-            transform:none!important;
-          }
-          .ins-stat-dupe{ display:none!important; }
-          .ins-stat{
-            padding:0!important;
-            border-left:none!important;
-          }
-          .ins-stat-value{ font-size:20px!important; }
-          .ins-stat-label{ font-size:11.5px!important; margin-top:3px!important; }
-          .ins-center img{ max-width:230px!important; }
-          .ins-bubbles{ max-width:280px!important; }
-          .ins-modal-backdrop{ padding:14px!important; }
+          .hero-headline{ font-size:clamp(30px,8.5vw,40px) !important; }
+          .hero-lede{ font-size:14px !important; }
+          .hero-ctas{ gap:10px !important; }
+          .hero-cta{ flex:1 1 0 !important; justify-content:center !important; padding:12px 14px !important; font-size:13.5px !important; white-space:nowrap !important; }
+          .hero-stats{ display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:18px 10px !important; }
+          .hero-stat{ padding:0!important; border-left:none!important; }
+          .hero-services-panel{ margin-top:34px !important; padding:20px 14px 22px !important; border-radius:18px !important; }
+          .hero-services{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; }
+          .hero-service{ min-height:112px !important; padding:16px 8px !important; gap:10px !important; }
+          .hero-modal-backdrop{ padding:14px !important; }
         }
       `}</style>
 
-      <div className="ins-root">
-        <section
-          className="ins-section"
-          style={{
-            background: "#001a5a",
-            position: "relative",
-            overflow: "visible",
-            paddingTop: 88,
-            paddingBottom: 64,
-          }}
-        >
-          <div className="ins-inner max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-16 relative z-10">
-            {/* ---- left: headline, copy, CTAs, stats ---- */}
-            <div className="ins-left text-center lg:text-left">
-              <h1
-                className={`ins-headline ${visible ? "ins-headline-visible" : "ins-headline-hidden"} ${headline.className || ""} text-[clamp(30px,2.4vw,44px)] font-black text-white leading-[1.15] mb-4 sm:mb-5 tracking-tight whitespace-nowrap`}
-                style={headline.font ? {fontFamily: headline.font} : undefined}
-              >
-                {headline.line1}
-                <br />
-                {headline.line2.map((word, i) => (
-                  <span
-                    key={i}
-                    style={{
-                      color: word.color,
-                      fontFamily: headline.font ? "inherit" : undefined,
-                    }}
+      <div className="hero-root">
+        <section className="hero-section" style={{background: NAVY}}>
+          <div className="hero-wrap">
+            <div className="hero-hero">
+              {/* ---- left: headline, copy, CTAs, stats ---- */}
+              <div className="hero-copy">
+                <div className="hero-headline-stack">
+                  {/* height reservers — never seen, never read out */}
+                  {HEADLINES.map((h, i) => (
+                    <div
+                      key={`ghost-${i}`}
+                      aria-hidden="true"
+                      className={`hero-headline hero-headline-ghost ${h.className || ""}`}
+                      style={h.font ? {fontFamily: h.font} : undefined}
+                    >
+                      {headlineContent(h)}
+                    </div>
+                  ))}
+
+                  <h1
+                    className={`hero-headline hero-headline-live ${visible ? "hero-headline-visible" : "hero-headline-hidden"} ${headline.className || ""}`}
+                    style={headline.font ? {fontFamily: headline.font} : undefined}
                   >
-                    {word.text}
-                  </span>
-                ))}
-              </h1>
-              <p className="text-[13.5px] sm:text-[14px] text-white/70 leading-relaxed mb-6 sm:mb-9 max-w-[460px] mx-auto lg:mx-0">
-                We help families find the right insurance coverage with easy
-                processes, trusted advisors, and dependable claim support
-                whenever you need it.
-              </p>
-              <div className="ins-cta-row flex flex-row gap-3 sm:gap-4 flex-nowrap items-center justify-center lg:justify-start mb-10 sm:mb-14">
-                {/* opens the quote form in a modal instead of navigating away */}
-                <button
-                  type="button"
-                  onClick={() => setQuoteOpen(true)}
-                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5 cursor-pointer"
-                >
-                  Get your quote
-                </button>
-                <a
-                  href="tel:18004258084"
-                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[13.5px] sm:text-[14.5px] font-extrabold backdrop-blur-md whitespace-nowrap text-center transition-all duration-200 hover:bg-white hover:-translate-y-0.5"
-                >
-                  Talk to an expert
-                </a>
+                    {headlineContent(HEADLINES[index])}
+                  </h1>
+                </div>
+
+                <p className="hero-lede">
+                  We help families and businesses find the right insurance
+                  solutions with trusted guidance, simple processes, and claims
+                  you can rely on.
+                </p>
+
+                <div className="hero-ctas">
+                  <button
+                    type="button"
+                    className="hero-cta hero-cta-primary"
+                    onClick={() => setQuoteOpen(true)}
+                  >
+                    Get your quote <ArrowCircleIcon size={19} />
+                  </button>
+                  <a href="tel:18004258084" className="hero-cta hero-cta-ghost">
+                    Talk to an expert <HeadsetIcon size={18} />
+                  </a>
+                </div>
+
+                <StatsRow />
               </div>
 
-              <StatsStrip />
-            </div>
+              {/* ---- middle: artwork ---- */}
+              <div className="hero-art">
+                <img src={HERO_IMAGE} alt="Insurance coverage for your family" />
+              </div>
 
-            {/* ---- center: family image ---- */}
-            <div className="ins-center">
-              <img
-                src="/images/banner/banner-7.png"
-                alt="Insurance coverage"
-                className="w-full h-auto object-contain max-w-[640px] mx-auto"
-              />
-            </div>
-
-            {/* ---- right: service cards (moved up from the old bottom strip) ---- */}
-            <div className="ins-right">
-              <div className="ins-cards-panel">
-                <InsuranceBubbles />
+              {/* ---- right: quote form ---- */}
+              <div className="hero-form">
+                <QuotePanel />
               </div>
             </div>
+
+            {/* ---- bottom: eight services ---- */}
+            <ServiceGrid />
           </div>
         </section>
       </div>
