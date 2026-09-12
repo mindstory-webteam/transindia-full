@@ -724,7 +724,7 @@ export default function Banner() {
           border:1px solid rgba(255,255,255,0.14) !important;
           backdrop-filter:blur(10px) !important;
           -webkit-backdrop-filter:blur(10px) !important;
-          box-shadow:0 18px 48px rgba(0,6,40,0.42) !important;
+         
         }
         .hero-quote-head{ display:flex !important; align-items:center !important; gap:12px !important; margin-bottom:18px !important; }
         .hero-quote-badge{
