@@ -401,7 +401,7 @@ function ServiceGrid() {
         {SERVICES.map(({l1, l2, slug, Icon}) => (
           <a key={slug} href={`${SERVICE_BASE}/${slug}`} className="hero-service">
             <span className="hero-service-icon">
-              <Icon size={30} />
+              <Icon size={55} stroke={1.5} />
             </span>
             <span className="hero-service-label">
               {l1}
@@ -724,7 +724,7 @@ export default function Banner() {
           border:1px solid rgba(255,255,255,0.14) !important;
           backdrop-filter:blur(10px) !important;
           -webkit-backdrop-filter:blur(10px) !important;
-         
+          box-shadow:0 18px 48px rgba(0,6,40,0.42) !important;
         }
         .hero-quote-head{ display:flex !important; align-items:center !important; gap:12px !important; margin-bottom:18px !important; }
         .hero-quote-badge{
@@ -790,7 +790,7 @@ export default function Banner() {
 
         /* ---- bottom services panel ---- */
         .hero-services-panel{
-          margin-top:10px !important;
+          margin-top:18px !important;
           padding:26px 26px 28px !important;
           border-radius:22px !important;
           border:1px solid rgba(255,255,255,0.12) !important;
@@ -804,7 +804,7 @@ export default function Banner() {
         .hero-services{ display:grid !important; grid-template-columns:repeat(8,minmax(0,1fr)) !important; gap:14px !important; }
         .hero-service{
           display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
-          gap:14px !important; min-height:126px !important; padding:20px 10px !important;
+          gap:14px !important; min-height:142px !important; padding:22px 10px !important;
           border-radius:14px !important;
           border:1px solid rgba(255,255,255,0.12) !important;
           background:rgba(255,255,255,0.04) !important;
@@ -881,7 +881,8 @@ export default function Banner() {
           .hero-stat{ padding:0!important; border-left:none!important; }
           .hero-services-panel{ margin-top:34px !important; padding:20px 14px 22px !important; border-radius:18px !important; }
           .hero-services{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; }
-          .hero-service{ min-height:112px !important; padding:16px 8px !important; gap:10px !important; }
+          .hero-service{ min-height:122px !important; padding:18px 8px !important; gap:12px !important; }
+          .hero-service-icon svg{ width:36px !important; height:36px !important; }
           .hero-modal-backdrop{ padding:14px !important; }
         }
       `}</style>
