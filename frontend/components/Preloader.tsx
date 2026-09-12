@@ -7,6 +7,8 @@ export type PreloaderLine = {
   lead: string;
   /** Coloured word that carries the meaning, e.g. "Insured" */
   accent: string;
+  /** Colour of the accent word. Falls back to the brand alternation below. */
+  color?: string;
 };
 
 type Props = {
@@ -30,9 +32,13 @@ type Props = {
 const ORANGE = '#f15a40';
 const TEAL = '#20bec6';
 
+/* Accent words alternate orange, teal — the same order as "trans" / "india"
+   in the wordmark above them. A line can override this with its own `color`. */
+const ACCENT_CYCLE = [ORANGE, TEAL];
+
 const DEFAULT_LINES: PreloaderLine[] = [
-  { lead: 'For Every', accent: ' Life.' },
-  { lead: 'For Every', accent: '  Tomorrow.' },
+  { lead: 'For Every', accent: ' Life.', color: ORANGE },
+  { lead: 'For Every', accent: '  Tomorrow.', color: TEAL },
 
 ];
 
@@ -129,7 +135,10 @@ export function Preloader({
               key={`${line.lead}-${line.accent}-${i}`}
               style={{ animationDelay: `${1240 + i * 130}ms` }}
             >
-              {line.lead} <b>{line.accent}</b>
+              {line.lead}{' '}
+              <b style={{ color: line.color ?? ACCENT_CYCLE[i % ACCENT_CYCLE.length] }}>
+                {line.accent}
+              </b>
             </li>
           ))}
         </ul>
@@ -235,8 +244,9 @@ export function Preloader({
           transform: translateY(6px);
           animation: ti-line 420ms cubic-bezier(.2,.7,.3,1) forwards;
         }
+        /* colour comes from the line data — this is only the fallback */
         .ti-lines b {
-          color: ${ORANGE};
+          color: ${TEAL};
           font-weight: 700;
         }
 

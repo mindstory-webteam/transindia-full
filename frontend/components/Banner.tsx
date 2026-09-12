@@ -7,6 +7,14 @@ const NAVY = "#001a5a";
 const TEAL = "#20BEC6";
 const ORANGE = "#EC4F34";
 
+/* Buttons: solid navy with a light hairline, exactly like the reference chip.
+   Hover lifts to a lighter tint of the brand teal, with dark text so the label
+   stays readable on the pale fill. */
+const BTN_BG = "#0B2260";
+const BTN_BORDER = "rgba(255,255,255,0.30)";
+const BTN_HOVER_BG = "#6ef8ff5a";
+const BTN_HOVER_TEXT = "#ffff";
+
 const SERVICE_BASE = "/our-services";
 const HERO_IMAGE = "/images/banner/banner-6.png";
 
@@ -239,7 +247,7 @@ function ClockIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
   );
 }
 
-function ArrowCircleIcon({size = 20, color = "#fff"}: IconProps) {
+function ArrowCircleIcon({size = 20, color = "currentColor"}: IconProps) {
   return (
     <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -249,7 +257,7 @@ function ArrowCircleIcon({size = 20, color = "#fff"}: IconProps) {
   );
 }
 
-function HeadsetIcon({size = 18, color = "#fff"}: IconProps) {
+function HeadsetIcon({size = 18, color = "currentColor"}: IconProps) {
   return (
     <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
@@ -680,10 +688,26 @@ export default function Banner() {
           border:none !important;
           cursor:pointer !important;
           font-family:inherit !important;
-          transition:transform .18s ease, box-shadow .18s ease, background .18s ease !important;
+          transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease !important;
         }
-        .hero-cta-primary{ background:#1899A0 !important; color:#fff !important; }
-        .hero-cta-primary:hover{ transform:translateY(-2px) !important; background:#20BEC6 !important; }
+
+        /* "Get your quote" — navy chip with a light hairline, lifting to a
+           lighter tint of the brand teal on hover. The label goes dark there,
+           because white on that pale fill is unreadable. */
+        .hero-cta-primary{
+          background:${BTN_BG} !important;
+          border:1.5px solid ${BTN_BORDER} !important;
+          color:#fff !important;
+        }
+        .hero-cta-primary:hover{
+          background:${BTN_HOVER_BG} !important;
+          border-color:${BTN_HOVER_BG} !important;
+          color:${BTN_HOVER_TEXT} !important;
+          transform:translateY(-2px) !important;
+        }
+        .hero-cta-primary:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
+
+        /* "Talk to an expert" — unchanged */
         .hero-cta-ghost{
           background:rgba(255,255,255,0.06) !important;
           border:1.5px solid rgba(255,255,255,0.24) !important;
@@ -768,13 +792,21 @@ export default function Banner() {
           width:100% !important;
           display:flex !important; align-items:center !important; justify-content:center !important; gap:9px !important;
           margin-top:4px !important; padding:14px 20px !important;
-          border:none !important; border-radius:12px !important;
-          background:#1899A0 !important; color:#fff !important;
+          border-radius:12px !important;
+          background:${BTN_BG} !important;
+          border:1.5px solid ${BTN_BORDER} !important;
+          color:#fff !important;
           font-family:inherit !important; font-size:15px !important; font-weight:800 !important;
           cursor:pointer !important;
-          transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease !important;
+          transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease !important;
         }
-        .hero-quote-cta:hover:not(:disabled){ transform:translateY(-2px) !important; background:#20BEC6 !important;  }
+        .hero-quote-cta:hover:not(:disabled){
+          transform:translateY(-2px) !important;
+          background:${BTN_HOVER_BG} !important;
+          border-color:${BTN_HOVER_BG} !important;
+          color:${BTN_HOVER_TEXT} !important;
+        }
+        .hero-quote-cta:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
         .hero-quote-cta:disabled{ opacity:.65 !important; cursor:not-allowed !important; }
         .hero-quote-note{
           display:flex !important; align-items:center !important; justify-content:center !important; gap:6px !important;
