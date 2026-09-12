@@ -65,11 +65,11 @@ export default function InsuranceSection() {
           {/* ── Heading ── */}
           <div className="ins-heading animate-in" style={{ "--delay": "0s" } as React.CSSProperties}>
             <h2 className="ins-title">
-              Insurance Made
-              <br />
-              <span style={{ color: "#F15A3E",}}>Simple</span>
-              <span className="ins-amp"> &amp; </span>
-              <span style={{ color: "#00BCD4", }}>Transparent</span>
+              Why   
+             
+            <span style={{ color: "#F15A3E",}}> Choose </span>
+              
+              <span style={{ color: "#00BCD4", }}>Transindia</span>
             </h2>
             <p className="ins-subtitle">
               We cut through the complexity so you always know exactly what
