@@ -246,15 +246,7 @@ const CSS = `
     color: #00b8c4;
   }
 
-  .core-values-heading::after {
-    content: '';
-    display: block;
-    width: 52px;
-    height: 4px;
-    background: linear-gradient(90deg, #00b8c4, #0D47A1);
-    border-radius: 2px;
-    margin-top: 16px;
-  }
+
 
   .core-values-subtitle {
     font-size: 15px;

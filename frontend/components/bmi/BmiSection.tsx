@@ -144,7 +144,6 @@ export default function BmiSection() {
           border-radius: 12px;
           padding: 15px 26px;
           cursor: pointer;
-          box-shadow: 0 8px 20px rgba(239,75,43,0.28);
           transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
         }
         .bmi-cta:hover {

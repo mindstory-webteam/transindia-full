@@ -133,7 +133,6 @@ const CSS = `
     font-size: 13px;
     font-weight: 600;
     transition: background 0.2s, box-shadow 0.2s;
-    box-shadow: 0 4px 10px rgba(255, 107, 53, 0.55);
   }
 
   .contact-card-highlight {

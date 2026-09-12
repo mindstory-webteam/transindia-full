@@ -1,13 +1,13 @@
 "use client";
 // app/our-services/InsuranceDetailPage.tsx
 
-import { useState, useEffect, useRef } from "react";
+import {useState, useEffect, useRef} from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import ConsultationCTA from "@/components/about/ConsultationCTA";
 import Breadcrum from "@/components/Breadcrum";
-import { InsuranceDetailData } from "./insuranceData";
+import {InsuranceDetailData} from "./insuranceData";
 import Preloader from "@/components/Preloader";
 
 interface Props {
@@ -23,8 +23,24 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 // SERVICE FORM TYPE DEFINITIONS
 // ═════════════════════════════════════════════════════════════════════════════
 
-type FieldType = "text" | "email" | "tel" | "date" | "select" | "textarea" | "file" | "number";
-type FormType = "calculator" | "motor" | "miscellaneous" | "simple" | "life-simple" | "fire-simple" | "entertainment-simple" | "health-hero";
+type FieldType =
+  | "text"
+  | "email"
+  | "tel"
+  | "date"
+  | "select"
+  | "textarea"
+  | "file"
+  | "number";
+type FormType =
+  | "calculator"
+  | "motor"
+  | "miscellaneous"
+  | "simple"
+  | "life-simple"
+  | "fire-simple"
+  | "entertainment-simple"
+  | "health-hero";
 
 interface CalcFieldDef {
   label: string;
@@ -79,13 +95,16 @@ const fmt = (n: number, symbol = "₹"): string =>
 const GST = 1.18;
 
 const CONTACT_FIELDS: CalcFieldDef[] = [
-  { label: "Full Name", type: "text", stateKey: "name", defaultValue: "" },
-  { label: "Email Address", type: "email", stateKey: "email", defaultValue: "" },
-  { label: "Phone Number", type: "tel", stateKey: "phone", defaultValue: "" },
+  {label: "Full Name", type: "text", stateKey: "name", defaultValue: ""},
+  {label: "Email Address", type: "email", stateKey: "email", defaultValue: ""},
+  {label: "Phone Number", type: "tel", stateKey: "phone", defaultValue: ""},
 ];
 
 const PINCODE_FIELD: CalcFieldDef = {
-  label: "Pincode", type: "number", stateKey: "pincode", defaultValue: "",
+  label: "Pincode",
+  type: "number",
+  stateKey: "pincode",
+  defaultValue: "",
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -100,9 +119,21 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     submitBg: "#1B8A3A",
     aboutTitle: "Tell us about yourself",
     aboutFields: [
-      { label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: "" },
-      { label: "Marital Status", type: "select", options: ["Married", "Unmarried"], stateKey: "marital", defaultValue: "Unmarried" },
-      { label: "Gender", type: "select", options: ["Male", "Female"], stateKey: "gender", defaultValue: "Male" },
+      {label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: ""},
+      {
+        label: "Marital Status",
+        type: "select",
+        options: ["Married", "Unmarried"],
+        stateKey: "marital",
+        defaultValue: "Unmarried",
+      },
+      {
+        label: "Gender",
+        type: "select",
+        options: ["Male", "Female"],
+        stateKey: "gender",
+        defaultValue: "Male",
+      },
       PINCODE_FIELD,
     ],
   },
@@ -113,32 +144,100 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     submitBg: "#0D9488",
     aboutTitle: "Tell us about yourself",
     aboutFields: [
-      { label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: "" },
-      { label: "Gender", type: "select", options: ["Male", "Female"], stateKey: "gender", defaultValue: "Male" },
+      {label: "Date of Birth", type: "date", stateKey: "dob", defaultValue: ""},
+      {
+        label: "Gender",
+        type: "select",
+        options: ["Male", "Female"],
+        stateKey: "gender",
+        defaultValue: "Male",
+      },
       PINCODE_FIELD,
     ],
     quoteFields: [
-      { label: "Cover Type", type: "select", options: ["Individual", "Family Floater", "Senior Citizen"], stateKey: "coverType", defaultValue: "Individual" },
-      { label: "Sum Insured", type: "select", options: ["₹3 lakh", "₹5 lakh", "₹10 lakh", "₹25 lakh", "₹50 lakh"], stateKey: "sumInsured", defaultValue: "₹5 lakh" },
-      { label: "Pre-existing Conditions", type: "select", options: ["None", "Diabetes", "Hypertension", "Both"], stateKey: "conditions", defaultValue: "None" },
-      { label: "City Tier", type: "select", options: ["Tier 1 (Metro)", "Tier 2", "Tier 3"], stateKey: "cityTier", defaultValue: "Tier 1 (Metro)" },
+      {
+        label: "Cover Type",
+        type: "select",
+        options: ["Individual", "Family Floater", "Senior Citizen"],
+        stateKey: "coverType",
+        defaultValue: "Individual",
+      },
+      {
+        label: "Sum Insured",
+        type: "select",
+        options: ["₹3 lakh", "₹5 lakh", "₹10 lakh", "₹25 lakh", "₹50 lakh"],
+        stateKey: "sumInsured",
+        defaultValue: "₹5 lakh",
+      },
+      {
+        label: "Pre-existing Conditions",
+        type: "select",
+        options: ["None", "Diabetes", "Hypertension", "Both"],
+        stateKey: "conditions",
+        defaultValue: "None",
+      },
+      {
+        label: "City Tier",
+        type: "select",
+        options: ["Tier 1 (Metro)", "Tier 2", "Tier 3"],
+        stateKey: "cityTier",
+        defaultValue: "Tier 1 (Metro)",
+      },
     ],
     compute: (v) => {
-      const siMap: Record<string, number> = { "₹3 lakh": 300000, "₹5 lakh": 500000, "₹10 lakh": 1000000, "₹25 lakh": 2500000, "₹50 lakh": 5000000 };
+      const siMap: Record<string, number> = {
+        "₹3 lakh": 300000,
+        "₹5 lakh": 500000,
+        "₹10 lakh": 1000000,
+        "₹25 lakh": 2500000,
+        "₹50 lakh": 5000000,
+      };
       const si = siMap[v.sumInsured] ?? 500000;
       const age = ageFromDOB(v.dob) ?? 30;
-      const rate = age <= 25 ? 10 : age <= 35 ? 14 : age <= 45 ? 22 : age <= 55 ? 38 : age <= 65 ? 60 : 95;
-      const coverFactor = v.coverType === "Family Floater" ? 1.6 : v.coverType === "Senior Citizen" ? 1.8 : 1;
-      const condFactor = v.conditions === "Diabetes" ? 1.25 : v.conditions === "Hypertension" ? 1.2 : v.conditions === "Both" ? 1.45 : 1;
-      const cityFactor = v.cityTier.startsWith("Tier 1") ? 1.15 : v.cityTier.startsWith("Tier 2") ? 1 : 0.9;
-      const yearly = (si / 1000) * rate * coverFactor * condFactor * cityFactor * GST;
+      const rate =
+        age <= 25
+          ? 10
+          : age <= 35
+            ? 14
+            : age <= 45
+              ? 22
+              : age <= 55
+                ? 38
+                : age <= 65
+                  ? 60
+                  : 95;
+      const coverFactor =
+        v.coverType === "Family Floater"
+          ? 1.6
+          : v.coverType === "Senior Citizen"
+            ? 1.8
+            : 1;
+      const condFactor =
+        v.conditions === "Diabetes"
+          ? 1.25
+          : v.conditions === "Hypertension"
+            ? 1.2
+            : v.conditions === "Both"
+              ? 1.45
+              : 1;
+      const cityFactor = v.cityTier.startsWith("Tier 1")
+        ? 1.15
+        : v.cityTier.startsWith("Tier 2")
+          ? 1
+          : 0.9;
+      const yearly =
+        (si / 1000) * rate * coverFactor * condFactor * cityFactor * GST;
       return {
         coverageCaption: "Sum insured",
         coverageLabel: v.sumInsured,
-        primaryAmount: fmt(yearly / 12), primaryUnit: "per month",
-        secondaryAmount: fmt(yearly), secondaryUnit: "per year",
-        totalLabel: "First-year premium", total: fmt(yearly),
-        disclaimer: "Estimated premium incl. 18% GST. Final price depends on medical history & insurer underwriting.",
+        primaryAmount: fmt(yearly / 12),
+        primaryUnit: "per month",
+        secondaryAmount: fmt(yearly),
+        secondaryUnit: "per year",
+        totalLabel: "First-year premium",
+        total: fmt(yearly),
+        disclaimer:
+          "Estimated premium incl. 18% GST. Final price depends on medical history & insurer underwriting.",
       };
     },
   },
@@ -147,35 +246,40 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     cardTitle: "Get your motor insurance quote",
     submitLabel: "Submit Motor Quote",
     submitBg: "#EA580C",
-    description: "Provide your vehicle details and policy information for a quick quote.",
+    description:
+      "Provide your vehicle details and policy information for a quick quote.",
   },
   "home-insurance": {
     formType: "simple",
     cardTitle: "Get your home insurance quote",
     submitLabel: "Get Home Quote",
     submitBg: "#7C3AED",
-    description: "Our insurance experts will help you find the perfect home coverage. Share your details and we'll prepare a personalized quote.",
+    description:
+      "Our insurance experts will help you find the perfect home coverage. Share your details and we'll prepare a personalized quote.",
   },
   "travel-insurance": {
     formType: "simple",
     cardTitle: "Plan your travel cover",
     submitLabel: "Get Travel Quote",
     submitBg: "#0891B2",
-    description: "Get instant travel insurance quotes for domestic and international trips. Quick approval, hassle-free claims.",
+    description:
+      "Get instant travel insurance quotes for domestic and international trips. Quick approval, hassle-free claims.",
   },
   "marine-insurance": {
     formType: "simple",
     cardTitle: "Get your marine quote",
     submitLabel: "Get Marine Quote",
     submitBg: "#0369A1",
-    description: "Protect your cargo with comprehensive marine insurance. Our experts will assess your cargo and provide the best coverage.",
+    description:
+      "Protect your cargo with comprehensive marine insurance. Our experts will assess your cargo and provide the best coverage.",
   },
   "fire-insurance": {
     formType: "fire-simple",
     cardTitle: "Calculate fire premium",
     submitLabel: "Get Fire Quote",
     submitBg: "#DC2626",
-    description: "Safeguard your property and business assets with our fire insurance. Get a customized quote in minutes.",
+    description:
+      "Safeguard your property and business assets with our fire insurance. Get a customized quote in minutes.",
   },
   "miscellaneous-insurance": {
     formType: "miscellaneous",
@@ -189,21 +293,31 @@ const SERVICE_CALCS: Record<string, ServiceCalc> = {
     cardTitle: "Insure your production",
     submitLabel: "Get Production Quote",
     submitBg: "#9333EA",
-    description: "Complete insurance coverage for your film, TV, and entertainment productions. Protect your cast, crew, and equipment.",
+    description:
+      "Complete insurance coverage for your film, TV, and entertainment productions. Protect your cast, crew, and equipment.",
   },
   "risk-consultation": {
     formType: "simple",
     cardTitle: "Book your free assessment",
     submitLabel: "Book Free Session",
     submitBg: "#1E293B",
-    description: "Get a personalized risk assessment and portfolio review from our experts. Free consultation, no obligation.",
+    description:
+      "Get a personalized risk assessment and portfolio review from our experts. Free consultation, no obligation.",
   },
 };
 
 // ═════════════════════════════════════════════════════════════════════════════
 // HEALTH HERO FORM — matches Image 1 design
 // ═════════════════════════════════════════════════════════════════════════════
-function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+function HealthHeroForm({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
   const [values, setValues] = useState<Values>({
     name: "",
     phone: "",
@@ -217,7 +331,7 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (key: string, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
+    setValues((prev) => ({...prev, [key]: value}));
     setError(null);
   };
 
@@ -225,10 +339,22 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
-    if (!name) { setError("Please enter your name."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (values.agreeTerms !== "true") { setError("Please agree to the Terms & Conditions and Privacy Policy."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (values.agreeTerms !== "true") {
+      setError("Please agree to the Terms & Conditions and Privacy Policy.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -239,8 +365,13 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
     try {
       await fetch(`${API_BASE}/serviceleads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
       });
       setSubmitted(true);
     } catch (e) {
@@ -254,21 +385,49 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
   if (submitted) {
     return (
       <div className="hhf-card">
-        <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: 12, padding: 24, textAlign: "center" }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>✅</div>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 8, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 12 }}>
+        <div
+          style={{
+            background: "#F0FDF4",
+            border: "1px solid #BBF7D0",
+            borderRadius: 12,
+            padding: 24,
+            textAlign: "center",
+          }}
+        >
+          <div style={{fontSize: 40, marginBottom: 12}}>✅</div>
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 8,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 12}}>
             Our health insurance expert will call you back shortly.
           </p>
-          <p style={{ color: "#9CA3AF", fontSize: 12, marginBottom: 0 }}>
+          <p style={{color: "#9CA3AF", fontSize: 12, marginBottom: 0}}>
             We&apos;ll also send details to <strong>{values.email}</strong>
           </p>
         </div>
         <button
           type="button"
-          onClick={() => { setSubmitted(false); setValues({ name: "", phone: "", email: "", query: "", wantsCallback: "true", agreeTerms: "false" }); }}
+          onClick={() => {
+            setSubmitted(false);
+            setValues({
+              name: "",
+              phone: "",
+              email: "",
+              query: "",
+              wantsCallback: "true",
+              agreeTerms: "false",
+            });
+          }}
           className="hhf-submit"
-          style={{ background: config.submitBg, marginTop: 14 }}
+          style={{background: config.submitBg, marginTop: 14}}
         >
           Get Another Quote
         </button>
@@ -279,12 +438,16 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
   return (
     <div className="hhf-card">
       <h2 className="hhf-title">
-        FIND YOUR IDEAL HEALTH INSURANCE<br />IN JUST A FEW CLICKS:
+        FIND YOUR IDEAL HEALTH INSURANCE
+        <br />
+        IN JUST A FEW CLICKS:
       </h2>
 
       {/* Name */}
       <div className="hhf-field">
-        <label className="hhf-label">Your Name <span className="hhf-req">*</span></label>
+        <label className="hhf-label">
+          Your Name <span className="hhf-req">*</span>
+        </label>
         <input
           type="text"
           className="hhf-input"
@@ -296,7 +459,9 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
 
       {/* Phone */}
       <div className="hhf-field">
-        <label className="hhf-label">Your Phone Number <span className="hhf-req">*</span></label>
+        <label className="hhf-label">
+          Your Phone Number <span className="hhf-req">*</span>
+        </label>
         <div className="hhf-phone-wrap">
           <span className="hhf-phone-prefix">
             <span className="hhf-flag">🇮🇳</span>
@@ -315,7 +480,9 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
 
       {/* Email */}
       <div className="hhf-field">
-        <label className="hhf-label">Your Email <span className="hhf-req">*</span></label>
+        <label className="hhf-label">
+          Your Email <span className="hhf-req">*</span>
+        </label>
         <input
           type="email"
           className="hhf-input"
@@ -340,26 +507,62 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
       {/* Callback checkbox */}
       <div
         className={`hhf-checkbox-banner${values.wantsCallback === "true" ? " hhf-checkbox-banner--active" : ""}`}
-        onClick={() => handleChange("wantsCallback", values.wantsCallback === "true" ? "false" : "true")}
+        onClick={() =>
+          handleChange(
+            "wantsCallback",
+            values.wantsCallback === "true" ? "false" : "true",
+          )
+        }
       >
-        <span className={`hhf-custom-checkbox${values.wantsCallback === "true" ? " hhf-custom-checkbox--checked" : ""}`}>
-          {values.wantsCallback === "true" && <span className="hhf-check-inner">✓</span>}
+        <span
+          className={`hhf-custom-checkbox${values.wantsCallback === "true" ? " hhf-custom-checkbox--checked" : ""}`}
+        >
+          {values.wantsCallback === "true" && (
+            <span className="hhf-check-inner">✓</span>
+          )}
         </span>
         <span className="hhf-checkbox-text">
-          <span style={{ color: "#0D9488", fontWeight: 800 }}>✅ Yes, I want a callback</span> from a TransIndia health insurance expert
+          <span style={{color: "#0D9488", fontWeight: 800}}>
+            ✅ Yes, I want a callback
+          </span>{" "}
+          from a TransIndia health insurance expert
         </span>
       </div>
 
       {/* Terms checkbox */}
-      <div className="hhf-terms-row" onClick={() => handleChange("agreeTerms", values.agreeTerms === "true" ? "false" : "true")}>
-        <span className={`hhf-custom-checkbox hhf-custom-checkbox--sm${values.agreeTerms === "true" ? " hhf-custom-checkbox--checked" : ""}`}>
-          {values.agreeTerms === "true" && <span className="hhf-check-inner">✓</span>}
+      <div
+        className="hhf-terms-row"
+        onClick={() =>
+          handleChange(
+            "agreeTerms",
+            values.agreeTerms === "true" ? "false" : "true",
+          )
+        }
+      >
+        <span
+          className={`hhf-custom-checkbox hhf-custom-checkbox--sm${values.agreeTerms === "true" ? " hhf-custom-checkbox--checked" : ""}`}
+        >
+          {values.agreeTerms === "true" && (
+            <span className="hhf-check-inner">✓</span>
+          )}
         </span>
         <span className="hhf-terms-text">
           I agree to the{" "}
-          <a href="/terms" onClick={(e) => e.stopPropagation()} style={{ color: "#0D9488", textDecoration: "underline" }}>Terms &amp; Conditions</a>
-          {" "}and{" "}
-          <a href="/privacy" onClick={(e) => e.stopPropagation()} style={{ color: "#0D9488", textDecoration: "underline" }}>Privacy Policy</a>
+          <a
+            href="/terms"
+            onClick={(e) => e.stopPropagation()}
+            style={{color: "#0D9488", textDecoration: "underline"}}
+          >
+            Terms &amp; Conditions
+          </a>{" "}
+          and{" "}
+          <a
+            href="/privacy"
+            onClick={(e) => e.stopPropagation()}
+            style={{color: "#0D9488", textDecoration: "underline"}}
+          >
+            Privacy Policy
+          </a>
         </span>
       </div>
 
@@ -368,7 +571,11 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
       <button
         type="button"
         className="hhf-submit"
-        style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
         onClick={handleSubmit}
         disabled={submitting}
       >
@@ -381,7 +588,15 @@ function HealthHeroForm({ slug, serviceTitle, config }: { slug: string; serviceT
 // ═════════════════════════════════════════════════════════════════════════════
 // EXACT QUOTE MODAL — shown when "GET EXACT QUOTE" is clicked in PremiumCalculator (Image 2)
 // ═════════════════════════════════════════════════════════════════════════════
-function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void; slug: string; serviceTitle: string }) {
+function ExactQuoteModal({
+  onClose,
+  slug,
+  serviceTitle,
+}: {
+  onClose: () => void;
+  slug: string;
+  serviceTitle: string;
+}) {
   const [values, setValues] = useState<Values>({
     name: "",
     email: "",
@@ -395,7 +610,7 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (key: string, value: string) => {
-    setValues((prev) => ({ ...prev, [key]: value }));
+    setValues((prev) => ({...prev, [key]: value}));
     setError(null);
   };
 
@@ -404,10 +619,22 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
     const lastFour = (values.lastFour || "").replace(/\D/g, "");
-    if (!name) { setError("Please enter your full name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (lastFour.length !== 4) { setError("Please enter the last 4 digits of your phone number."); return false; }
+    if (!name) {
+      setError("Please enter your full name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (lastFour.length !== 4) {
+      setError("Please enter the last 4 digits of your phone number.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -418,8 +645,13 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
     try {
       await fetch(`${API_BASE}/serviceleads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "exact-quote-modal" }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "exact-quote-modal",
+        }),
       });
       setSubmitted(true);
     } catch (e) {
@@ -431,46 +663,107 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
   };
 
   return (
-    <div className="eqm-overlay" onClick={(e) => { if ((e.target as HTMLElement).classList.contains("eqm-overlay")) onClose(); }}>
+    <div
+      className="eqm-overlay"
+      onClick={(e) => {
+        if ((e.target as HTMLElement).classList.contains("eqm-overlay"))
+          onClose();
+      }}
+    >
       <div className="eqm-modal">
-        <button type="button" className="eqm-close" onClick={onClose} aria-label="Close">✕</button>
+        <button
+          type="button"
+          className="eqm-close"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          ✕
+        </button>
 
         {submitted ? (
-          <div style={{ textAlign: "center", padding: "16px 0" }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>✅</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#047857", marginBottom: 10, marginTop: 0 }}>We&apos;ll be in touch!</h2>
-            <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>
-              Our team will contact you at <strong>{values.phone}</strong> with your exact health insurance quote.
+          <div style={{textAlign: "center", padding: "16px 0"}}>
+            <div style={{fontSize: 48, marginBottom: 16}}>✅</div>
+            <h2
+              style={{
+                fontSize: 20,
+                fontWeight: 800,
+                color: "#047857",
+                marginBottom: 10,
+                marginTop: 0,
+              }}
+            >
+              We&apos;ll be in touch!
+            </h2>
+            <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+              Our team will contact you at <strong>{values.phone}</strong> with
+              your exact health insurance quote.
             </p>
-            <button type="button" onClick={onClose} className="eqm-submit" style={{ background: "#0D9488" }}>Close</button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="eqm-submit"
+              style={{background: "#0D9488"}}
+            >
+              Close
+            </button>
           </div>
         ) : (
           <>
             <h2 className="eqm-title">Get Your Exact Quote</h2>
-            <p className="eqm-subtitle">Our experts will call you with personalised plans from 19+ insurers.</p>
+            <p className="eqm-subtitle">
+              Our experts will call you with personalised plans from 19+
+              insurers.
+            </p>
 
             <div className="eqm-field">
-              <label className="eqm-label">Full Name <span className="eqm-req">*</span></label>
-              <input type="text" className="eqm-input" placeholder="Enter your full name" value={values.name} onChange={(e) => handleChange("name", e.target.value)} />
+              <label className="eqm-label">
+                Full Name <span className="eqm-req">*</span>
+              </label>
+              <input
+                type="text"
+                className="eqm-input"
+                placeholder="Enter your full name"
+                value={values.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+              />
             </div>
 
             <div className="eqm-field">
-              <label className="eqm-label">Email Address <span className="eqm-req">*</span></label>
-              <input type="email" className="eqm-input" placeholder="you@example.com" value={values.email} onChange={(e) => handleChange("email", e.target.value)} />
+              <label className="eqm-label">
+                Email Address <span className="eqm-req">*</span>
+              </label>
+              <input
+                type="email"
+                className="eqm-input"
+                placeholder="you@example.com"
+                value={values.email}
+                onChange={(e) => handleChange("email", e.target.value)}
+              />
             </div>
 
             <div className="eqm-field">
-              <label className="eqm-label">Phone Number <span className="eqm-req">*</span></label>
+              <label className="eqm-label">
+                Phone Number <span className="eqm-req">*</span>
+              </label>
               <div className="eqm-phone-wrap">
                 <span className="eqm-phone-prefix">+91</span>
-                <input type="tel" inputMode="tel" className="eqm-input eqm-phone-input" placeholder="98765 43210" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} />
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  className="eqm-input eqm-phone-input"
+                  placeholder="98765 43210"
+                  value={values.phone}
+                  onChange={(e) => handleChange("phone", e.target.value)}
+                />
               </div>
             </div>
 
             {/* Last 4 digits confirm — shown once phone is filled */}
             {(values.phone || "").replace(/\D/g, "").length >= 7 && (
               <div className="eqm-verify-box">
-                <label className="eqm-verify-label">Confirm last 4 digits of your number</label>
+                <label className="eqm-verify-label">
+                  Confirm last 4 digits of your number
+                </label>
                 <div className="eqm-otp-wrap">
                   {[0, 1, 2, 3].map((i) => (
                     <input
@@ -481,25 +774,37 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
                       className="eqm-otp-input"
                       value={values.lastFour[i] || ""}
                       onChange={(e) => {
-                        const val = e.target.value.replace(/\D/g, "").slice(0, 1);
-                        const arr = (values.lastFour || "    ").split("").slice(0, 4);
+                        const val = e.target.value
+                          .replace(/\D/g, "")
+                          .slice(0, 1);
+                        const arr = (values.lastFour || "    ")
+                          .split("")
+                          .slice(0, 4);
                         arr[i] = val || " ";
                         handleChange("lastFour", arr.join("").trimEnd());
                         if (val && i < 3) {
-                          const next = document.querySelector<HTMLInputElement>(`.eqm-otp-input:nth-child(${i + 2})`);
+                          const next = document.querySelector<HTMLInputElement>(
+                            `.eqm-otp-input:nth-child(${i + 2})`,
+                          );
                           next?.focus();
                         }
                       }}
                     />
                   ))}
                 </div>
-                <p className="eqm-verify-hint">This helps us ensure we reach the right person</p>
+                <p className="eqm-verify-hint">
+                  This helps us ensure we reach the right person
+                </p>
               </div>
             )}
 
             <div className="eqm-field">
               <label className="eqm-label">Interested Plan</label>
-              <select className="eqm-select" value={values.plan} onChange={(e) => handleChange("plan", e.target.value)}>
+              <select
+                className="eqm-select"
+                value={values.plan}
+                onChange={(e) => handleChange("plan", e.target.value)}
+              >
                 <option value="">Select a plan (optional)</option>
                 <option>Individual Plan</option>
                 <option>Family Floater Plan</option>
@@ -511,13 +816,23 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
 
             <div
               className={`eqm-callback-banner${values.wantsCallback === "true" ? " eqm-callback-banner--active" : ""}`}
-              onClick={() => handleChange("wantsCallback", values.wantsCallback === "true" ? "false" : "true")}
+              onClick={() =>
+                handleChange(
+                  "wantsCallback",
+                  values.wantsCallback === "true" ? "false" : "true",
+                )
+              }
             >
-              <span className={`eqm-custom-cb${values.wantsCallback === "true" ? " eqm-custom-cb--checked" : ""}`}>
+              <span
+                className={`eqm-custom-cb${values.wantsCallback === "true" ? " eqm-custom-cb--checked" : ""}`}
+              >
                 {values.wantsCallback === "true" && "✓"}
               </span>
               <span className="eqm-cb-text">
-                <span style={{ color: "#0D9488", fontWeight: 800 }}>✅ Yes, I want a callback</span> from TransIndia regarding health insurance plans
+                <span style={{color: "#0D9488", fontWeight: 800}}>
+                  ✅ Yes, I want a callback
+                </span>{" "}
+                from TransIndia regarding health insurance plans
               </span>
             </div>
 
@@ -526,7 +841,11 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
             <button
               type="button"
               className="eqm-submit"
-              style={{ background: "#0D9488", opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+              style={{
+                background: "#0D9488",
+                opacity: submitting ? 0.7 : 1,
+                cursor: submitting ? "not-allowed" : "pointer",
+              }}
               onClick={handleSubmit}
               disabled={submitting}
             >
@@ -545,10 +864,10 @@ function ExactQuoteModal({ onClose, slug, serviceTitle }: { onClose: () => void;
 
 function HealthStatsBar() {
   const stats = [
-    { value: "19+", label: "INSURER PARTNERS" },
-    { value: "10,000+", label: "NETWORK HOSPITALS" },
-    { value: "98%", label: "CLAIM SETTLEMENT" },
-    { value: "24/7", label: "CUSTOMER SUPPORT" },
+    {value: "19+", label: "INSURER PARTNERS"},
+    {value: "10,000+", label: "NETWORK HOSPITALS"},
+    {value: "98%", label: "CLAIM SETTLEMENT"},
+    {value: "24/7", label: "CUSTOMER SUPPORT"},
   ];
 
   return (
@@ -635,7 +954,9 @@ function GetCoveredStepsSection() {
       <div className="gcs-inner">
         <div className="gcs-header">
           <h2 className="gcs-title">GET COVERED IN 4 SIMPLE STEPS</h2>
-          <p className="gcs-subtitle">From inquiry to policy — we keep it fast and frictionless.</p>
+          <p className="gcs-subtitle">
+            From inquiry to policy — we keep it fast and frictionless.
+          </p>
         </div>
 
         <div className="gcs-steps">
@@ -756,7 +1077,7 @@ function GetCoveredStepsSection() {
 // CERTIFICATE SECTION — entertainment-insurance only (single-certificate design)
 // Layout v2: open editorial layout — floating tilted document + unboxed copy
 // ═════════════════════════════════════════════════════════════════════════════
-function CertificatesSection({ data }: { data: InsuranceDetailData }) {
+function CertificatesSection({data}: {data: InsuranceDetailData}) {
   const certs = data.certificates || [];
   if (certs.length === 0) return null;
   const cert = certs[0]; // single-certificate featured layout
@@ -771,7 +1092,9 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           <h2 className="cert-title">
             {data.certificatesTitle}{" "}
             {data.certificatesTitleAccent && (
-              <span style={{ color: data.certificatesTitleAccentColor || "#9333EA" }}>
+              <span
+                style={{color: data.certificatesTitleAccentColor || "#9333EA"}}
+              >
                 {data.certificatesTitleAccent}
               </span>
             )}
@@ -785,12 +1108,18 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           <div className="cert-card-image">
             <div className="cert-doc-frame">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cert.icon} alt={cert.title} className="cert-doc-image" />
+              <img
+                src={cert.icon}
+                alt={cert.title}
+                className="cert-doc-image"
+              />
             </div>
           </div>
 
           <div className="cert-card-copy">
-            <span className="cert-featured-eyebrow">Verified Accreditation</span>
+            <span className="cert-featured-eyebrow">
+              Verified Accreditation
+            </span>
             <h3 className="cert-featured-title">{cert.title}</h3>
             <div className="cert-title-rule" />
             <p className="cert-featured-subtitle">{cert.subtitle}</p>
@@ -910,13 +1239,7 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
           margin: 0;
           line-height: 1.2;
         }
-        .cert-title-rule {
-          width: 56px;
-          height: 3px;
-          background: #9333EA;
-          border-radius: 2px;
-          margin: 20px 0;
-        }
+     
         .cert-featured-subtitle {
           font-size: 15.5px;
           color: #6B7280;
@@ -948,7 +1271,7 @@ function CertificatesSection({ data }: { data: InsuranceDetailData }) {
 // ═════════════════════════════════════════════════════════════════════════════
 // MOVIES WE'VE INSURED SECTION — entertainment-insurance only (white theme)
 // ═════════════════════════════════════════════════════════════════════════════
-function MoviesSection({ data }: { data: InsuranceDetailData }) {
+function MoviesSection({data}: {data: InsuranceDetailData}) {
   const movies = data.movies || [];
   if (movies.length === 0) return null;
 
@@ -956,16 +1279,20 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
     <section className="mov-section">
       <div className="mov-inner">
         <div className="mov-header">
-          {data.moviesBadge && <span className="mov-badge">{data.moviesBadge}</span>}
+          {data.moviesBadge && (
+            <span className="mov-badge">{data.moviesBadge}</span>
+          )}
           <h2 className="mov-title">
             {data.moviesTitle}{" "}
             {data.moviesTitleAccent && (
-              <span style={{ color: data.moviesTitleAccentColor || "#9333EA" }}>
+              <span style={{color: data.moviesTitleAccentColor || "#9333EA"}}>
                 {data.moviesTitleAccent}
               </span>
             )}
           </h2>
-          {data.moviesSubtitle && <p className="mov-subtitle">{data.moviesSubtitle}</p>}
+          {data.moviesSubtitle && (
+            <p className="mov-subtitle">{data.moviesSubtitle}</p>
+          )}
         </div>
 
         <div className="mov-grid" data-count={movies.length}>
@@ -979,7 +1306,9 @@ function MoviesSection({ data }: { data: InsuranceDetailData }) {
                 </div>
               </div>
               <h3 className="mov-card-title">{m.title}</h3>
-              <p className="mov-card-meta">{m.year} · {m.genre}</p>
+              <p className="mov-card-meta">
+                {m.year} · {m.genre}
+              </p>
             </div>
           ))}
         </div>
@@ -1126,82 +1455,274 @@ type PCSIBand = "5L-10L" | "15L-20L" | "25L-50L" | "1Cr+";
 type PCCombo = "1A" | "1A+1C" | "2A" | "2A+1C" | "2A+2C" | "2A+3C";
 type PCRange = [number, number] | null;
 
-const PC_AGE_BANDS: { value: PCAgeBand; label: string }[] = [
-  { value: "25-35", label: "25 to 35" },
-  { value: "31-35", label: "31 to 35" },
-  { value: "36-45", label: "36 to 45" },
-  { value: "46-55", label: "46 to 55" },
-  { value: "56-65", label: "56 to 65" },
-  { value: "66-70", label: "66 to 70" },
+const PC_AGE_BANDS: {value: PCAgeBand; label: string}[] = [
+  {value: "25-35", label: "25 to 35"},
+  {value: "31-35", label: "31 to 35"},
+  {value: "36-45", label: "36 to 45"},
+  {value: "46-55", label: "46 to 55"},
+  {value: "56-65", label: "56 to 65"},
+  {value: "66-70", label: "66 to 70"},
 ];
 
-const PC_SI_BANDS: { value: PCSIBand; label: string }[] = [
-  { value: "5L-10L", label: "5 Lakhs to 10 Lakhs" },
-  { value: "15L-20L", label: "15 Lakhs to 20 Lakhs" },
-  { value: "25L-50L", label: "25 Lakhs to 50 Lakhs" },
-  { value: "1Cr+", label: "1 Cr to Unlimited" },
+const PC_SI_BANDS: {value: PCSIBand; label: string}[] = [
+  {value: "5L-10L", label: "5 Lakhs to 10 Lakhs"},
+  {value: "15L-20L", label: "15 Lakhs to 20 Lakhs"},
+  {value: "25L-50L", label: "25 Lakhs to 50 Lakhs"},
+  {value: "1Cr+", label: "1 Cr to Unlimited"},
 ];
 
-const PC_COMBOS: { value: PCCombo; label: string; icon: string }[] = [
-  { value: "1A", label: "1 Adult", icon: "/images/icon/1A.png" },
-  { value: "1A+1C", label: "1 Adult + 1 Child", icon: "/images/icon/1A1C.png" },
-  { value: "2A", label: "2 Adults", icon: "/images/icon/2A.png" },
-  { value: "2A+1C", label: "2 Adults + 1 Child", icon: "/images/icon/2A1C.png" },
-  { value: "2A+2C", label: "2 Adults + 2 Children", icon: "/images/icon/2A2C.png" },
-  { value: "2A+3C", label: "2 Adults + 3 Children", icon: "/images/icon/2A3C.png" },
+const PC_COMBOS: {value: PCCombo; label: string; icon: string}[] = [
+  {value: "1A", label: "1 Adult", icon: "/images/icon/1A.png"},
+  {value: "1A+1C", label: "1 Adult + 1 Child", icon: "/images/icon/1A1C.png"},
+  {value: "2A", label: "2 Adults", icon: "/images/icon/2A.png"},
+  {value: "2A+1C", label: "2 Adults + 1 Child", icon: "/images/icon/2A1C.png"},
+  {
+    value: "2A+2C",
+    label: "2 Adults + 2 Children",
+    icon: "/images/icon/2A2C.png",
+  },
+  {
+    value: "2A+3C",
+    label: "2 Adults + 3 Children",
+    icon: "/images/icon/2A3C.png",
+  },
 ];
 
-const PC_TABLE: Record<PCSIBand, Record<PCCombo, Record<PCAgeBand, PCRange>>> = {
+const PC_TABLE: Record<
+  PCSIBand,
+  Record<PCCombo, Record<PCAgeBand, PCRange>>
+> = {
   "5L-10L": {
-    "1A":    { "25-35": [6500, 8000],  "31-35": [7000, 8000],   "36-45": [8000, 9500],   "46-55": [13000, 15000], "56-65": [16000, 18500], "66-70": [21000, 23000] },
-    "1A+1C": { "25-35": [9000, 11000], "31-35": [9500, 12000],  "36-45": [11000, 13500], "46-55": [15500, 18000], "56-65": null,            "66-70": null },
-    "2A":    { "25-35": [9500, 11700], "31-35": [10000, 12000], "36-45": [11000, 13200], "46-55": [17000, 19200], "56-65": [25000, 27500], "66-70": [33500, 39000] },
-    "2A+1C": { "25-35": [12000, 15000],"31-35": [13000, 16000], "36-45": [14750, 17750], "46-55": [20700, 23700], "56-65": null,            "66-70": null },
-    "2A+2C": { "25-35": [14500, 18000],"31-35": [14000, 18000], "36-45": [17000, 21500], "46-55": [23000, 27500], "56-65": null,            "66-70": null },
-    "2A+3C": { "25-35": [17500, 22000],"31-35": [18000, 23000], "36-45": [20000, 24500], "46-55": [38500, 43000], "56-65": null,            "66-70": null },
+    "1A": {
+      "25-35": [6500, 8000],
+      "31-35": [7000, 8000],
+      "36-45": [8000, 9500],
+      "46-55": [13000, 15000],
+      "56-65": [16000, 18500],
+      "66-70": [21000, 23000],
+    },
+    "1A+1C": {
+      "25-35": [9000, 11000],
+      "31-35": [9500, 12000],
+      "36-45": [11000, 13500],
+      "46-55": [15500, 18000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A": {
+      "25-35": [9500, 11700],
+      "31-35": [10000, 12000],
+      "36-45": [11000, 13200],
+      "46-55": [17000, 19200],
+      "56-65": [25000, 27500],
+      "66-70": [33500, 39000],
+    },
+    "2A+1C": {
+      "25-35": [12000, 15000],
+      "31-35": [13000, 16000],
+      "36-45": [14750, 17750],
+      "46-55": [20700, 23700],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+2C": {
+      "25-35": [14500, 18000],
+      "31-35": [14000, 18000],
+      "36-45": [17000, 21500],
+      "46-55": [23000, 27500],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+3C": {
+      "25-35": [17500, 22000],
+      "31-35": [18000, 23000],
+      "36-45": [20000, 24500],
+      "46-55": [38500, 43000],
+      "56-65": null,
+      "66-70": null,
+    },
   },
   "15L-20L": {
-    "1A":    { "25-35": [9600, 10700], "31-35": [10000, 11000], "36-45": [13000, 14100], "46-55": [20000, 22500], "56-65": [22000, 24000], "66-70": [25000, 27000] },
-    "1A+1C": { "25-35": [13000, 15000],"31-35": [14000, 16000], "36-45": [17000, 19000], "46-55": [23500, 25500], "56-65": null,            "66-70": null },
-    "2A":    { "25-35": [14000, 16000],"31-35": [14500, 16000], "36-45": [16000, 18000], "46-55": [25800, 27800], "56-65": [30000, 32000], "66-70": [40000, 43000] },
-    "2A+1C": { "25-35": [18000, 20000],"31-35": [19000, 21000], "36-45": [22000, 24000], "46-55": [31000, 33000], "56-65": null,            "66-70": null },
-    "2A+2C": { "25-35": [21000, 24000],"31-35": [22000, 24000], "36-45": [25000, 28000], "46-55": [34500, 37500], "56-65": null,            "66-70": null },
-    "2A+3C": { "25-35": [26200, 29000],"31-35": [27000, 30000], "36-45": [30000, 32800], "46-55": [38700, 41500], "56-65": null,            "66-70": null },
+    "1A": {
+      "25-35": [9600, 10700],
+      "31-35": [10000, 11000],
+      "36-45": [13000, 14100],
+      "46-55": [20000, 22500],
+      "56-65": [22000, 24000],
+      "66-70": [25000, 27000],
+    },
+    "1A+1C": {
+      "25-35": [13000, 15000],
+      "31-35": [14000, 16000],
+      "36-45": [17000, 19000],
+      "46-55": [23500, 25500],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A": {
+      "25-35": [14000, 16000],
+      "31-35": [14500, 16000],
+      "36-45": [16000, 18000],
+      "46-55": [25800, 27800],
+      "56-65": [30000, 32000],
+      "66-70": [40000, 43000],
+    },
+    "2A+1C": {
+      "25-35": [18000, 20000],
+      "31-35": [19000, 21000],
+      "36-45": [22000, 24000],
+      "46-55": [31000, 33000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+2C": {
+      "25-35": [21000, 24000],
+      "31-35": [22000, 24000],
+      "36-45": [25000, 28000],
+      "46-55": [34500, 37500],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+3C": {
+      "25-35": [26200, 29000],
+      "31-35": [27000, 30000],
+      "36-45": [30000, 32800],
+      "46-55": [38700, 41500],
+      "56-65": null,
+      "66-70": null,
+    },
   },
   "25L-50L": {
-    "1A":    { "25-35": [11000, 13200],"31-35": [11800, 14200], "36-45": [14500, 16700], "46-55": [22500, 25000], "56-65": [24500, 26000], "66-70": [28000, 32000] },
-    "1A+1C": { "25-35": [15000, 18000],"31-35": [16000, 20000], "36-45": [19000, 22000], "46-55": [27000, 30000], "56-65": null,            "66-70": null },
-    "2A":    { "25-35": [16000, 19200],"31-35": [17000, 20000], "36-45": [19000, 22200], "46-55": [29500, 32700], "56-65": [34000, 37200], "66-70": [45000, 52000] },
-    "2A+1C": { "25-35": [21000, 25000],"31-35": [22000, 26000], "36-45": [25000, 29000], "46-55": [35500, 39500], "56-65": null,            "66-70": null },
-    "2A+2C": { "25-35": [25000, 30000],"31-35": [25000, 28000], "36-45": [29000, 34000], "46-55": [39400, 44000], "56-65": null,            "66-70": null },
-    "2A+3C": { "25-35": [30000, 36000],"31-35": [30000, 36000], "36-45": [34000, 40000], "46-55": [44200, 47000], "56-65": null,            "66-70": null },
+    "1A": {
+      "25-35": [11000, 13200],
+      "31-35": [11800, 14200],
+      "36-45": [14500, 16700],
+      "46-55": [22500, 25000],
+      "56-65": [24500, 26000],
+      "66-70": [28000, 32000],
+    },
+    "1A+1C": {
+      "25-35": [15000, 18000],
+      "31-35": [16000, 20000],
+      "36-45": [19000, 22000],
+      "46-55": [27000, 30000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A": {
+      "25-35": [16000, 19200],
+      "31-35": [17000, 20000],
+      "36-45": [19000, 22200],
+      "46-55": [29500, 32700],
+      "56-65": [34000, 37200],
+      "66-70": [45000, 52000],
+    },
+    "2A+1C": {
+      "25-35": [21000, 25000],
+      "31-35": [22000, 26000],
+      "36-45": [25000, 29000],
+      "46-55": [35500, 39500],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+2C": {
+      "25-35": [25000, 30000],
+      "31-35": [25000, 28000],
+      "36-45": [29000, 34000],
+      "46-55": [39400, 44000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+3C": {
+      "25-35": [30000, 36000],
+      "31-35": [30000, 36000],
+      "36-45": [34000, 40000],
+      "46-55": [44200, 47000],
+      "56-65": null,
+      "66-70": null,
+    },
   },
   "1Cr+": {
-    "1A":    { "25-35": [15000, 18000],"31-35": [16200, 20000], "36-45": [20000, 26000], "46-55": [31000, 34000], "56-65": [32000, 35000], "66-70": [36000, 39500] },
-    "1A+1C": { "25-35": [21000, 26000],"31-35": [22000, 28000], "36-45": [26500, 31500], "46-55": [37000, 42000], "56-65": null,            "66-70": null },
-    "2A":    { "25-35": [22000, 27500],"31-35": [23000, 28500], "36-45": [26000, 31000], "46-55": [40500, 46000], "56-65": [44000, 49500], "66-70": [58500, 71000] },
-    "2A+1C": { "25-35": [29000, 36400],"31-35": [30000, 38000], "36-45": [34600, 42000], "46-55": [48600, 56000], "56-65": null,            "66-70": null },
-    "2A+2C": { "25-35": [34000, 43000],"31-35": [35000, 43000], "36-45": [39000, 48000], "46-55": [54000, 63000], "56-65": null,            "66-70": null },
-    "2A+3C": { "25-35": [41000, 51000],"31-35": [41000, 51000], "36-45": [44000, 54000], "46-55": [60500, 70500], "56-65": null,            "66-70": null },
+    "1A": {
+      "25-35": [15000, 18000],
+      "31-35": [16200, 20000],
+      "36-45": [20000, 26000],
+      "46-55": [31000, 34000],
+      "56-65": [32000, 35000],
+      "66-70": [36000, 39500],
+    },
+    "1A+1C": {
+      "25-35": [21000, 26000],
+      "31-35": [22000, 28000],
+      "36-45": [26500, 31500],
+      "46-55": [37000, 42000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A": {
+      "25-35": [22000, 27500],
+      "31-35": [23000, 28500],
+      "36-45": [26000, 31000],
+      "46-55": [40500, 46000],
+      "56-65": [44000, 49500],
+      "66-70": [58500, 71000],
+    },
+    "2A+1C": {
+      "25-35": [29000, 36400],
+      "31-35": [30000, 38000],
+      "36-45": [34600, 42000],
+      "46-55": [48600, 56000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+2C": {
+      "25-35": [34000, 43000],
+      "31-35": [35000, 43000],
+      "36-45": [39000, 48000],
+      "46-55": [54000, 63000],
+      "56-65": null,
+      "66-70": null,
+    },
+    "2A+3C": {
+      "25-35": [41000, 51000],
+      "31-35": [41000, 51000],
+      "36-45": [44000, 54000],
+      "46-55": [60500, 70500],
+      "56-65": null,
+      "66-70": null,
+    },
   },
 };
 
-function pcLookup(siBand: PCSIBand, combo: PCCombo, ageBand: PCAgeBand): PCRange {
+function pcLookup(
+  siBand: PCSIBand,
+  combo: PCCombo,
+  ageBand: PCAgeBand,
+): PCRange {
   return PC_TABLE[siBand]?.[combo]?.[ageBand] ?? null;
 }
 
-const fmtRange = (min: number, max: number): string => `${fmt(min)} - ${fmt(max)}`;
+const fmtRange = (min: number, max: number): string =>
+  `${fmt(min)} - ${fmt(max)}`;
 
-function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; serviceTitle: string }) {
+function PremiumCalculatorSection({
+  slug,
+  serviceTitle,
+}: {
+  slug: string;
+  serviceTitle: string;
+}) {
   const [ageBand, setAgeBand] = useState<PCAgeBand>("25-35");
   const [combo, setCombo] = useState<PCCombo>("2A");
   const [siBand, setSiBand] = useState<PCSIBand>("5L-10L");
   const [showModal, setShowModal] = useState(false);
 
   const range = pcLookup(siBand, combo, ageBand);
-  const ageBandLabel = PC_AGE_BANDS.find((a) => a.value === ageBand)?.label ?? ageBand;
+  const ageBandLabel =
+    PC_AGE_BANDS.find((a) => a.value === ageBand)?.label ?? ageBand;
   const comboLabel = PC_COMBOS.find((c) => c.value === combo)?.label ?? combo;
-  const siBandLabel = PC_SI_BANDS.find((s) => s.value === siBand)?.label ?? siBand;
+  const siBandLabel =
+    PC_SI_BANDS.find((s) => s.value === siBand)?.label ?? siBand;
 
   return (
     <>
@@ -1217,7 +1738,10 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
         <div className="pc-inner">
           <div className="pc-header">
             <h2 className="pc-title">PREMIUM CALCULATOR</h2>
-            <p className="pc-subtitle">Get an instant estimate of your health insurance premium in seconds.</p>
+            <p className="pc-subtitle">
+              Get an instant estimate of your health insurance premium in
+              seconds.
+            </p>
           </div>
 
           <div className="pc-card">
@@ -1231,23 +1755,29 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
                   className="pc-select"
                 >
                   {PC_AGE_BANDS.map((a) => (
-                    <option key={a.value} value={a.value}>{a.label}</option>
+                    <option key={a.value} value={a.value}>
+                      {a.label}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div className="pc-field">
                 <span className="pc-label">ADULTS / CHILDREN</span>
-                <div className="pc-cover-row" style={{ flexWrap: "wrap" }}>
+                <div className="pc-cover-row" style={{flexWrap: "wrap"}}>
                   {PC_COMBOS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
                       className={`pc-cover-btn${combo === opt.value ? " pc-cover-btn--active" : ""}`}
-                      style={{ flex: "1 1 30%", minWidth: 84 }}
+                      style={{flex: "1 1 30%", minWidth: 84}}
                       onClick={() => setCombo(opt.value)}
                     >
-                      <img src={opt.icon} alt={opt.label} className="pc-cover-icon" />
+                      <img
+                        src={opt.icon}
+                        alt={opt.label}
+                        className="pc-cover-icon"
+                      />
                       <span className="pc-cover-label">{opt.value}</span>
                     </button>
                   ))}
@@ -1262,7 +1792,9 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
                   className="pc-select"
                 >
                   {PC_SI_BANDS.map((s) => (
-                    <option key={s.value} value={s.value}>{s.label}</option>
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -1275,23 +1807,37 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
               {range ? (
                 <>
                   <div className="pc-est-amount">
-                    <span className="pc-est-value" style={{ fontSize: "clamp(24px, 3vw, 34px)" }}>
+                    <span
+                      className="pc-est-value"
+                      style={{fontSize: "clamp(24px, 3vw, 34px)"}}
+                    >
                       {fmtRange(range[0], range[1])}
                     </span>
                     <span className="pc-est-unit">/year*</span>
                   </div>
                   <p className="pc-est-sub">
-                    or {fmtRange(Math.round(range[0] / 12), Math.round(range[1] / 12))}/month
+                    or{" "}
+                    {fmtRange(
+                      Math.round(range[0] / 12),
+                      Math.round(range[1] / 12),
+                    )}
+                    /month
                   </p>
                 </>
               ) : (
                 <>
                   <div className="pc-est-amount">
-                    <span className="pc-est-value" style={{ fontSize: "clamp(16px, 2vw, 20px)" }}>
+                    <span
+                      className="pc-est-value"
+                      style={{fontSize: "clamp(16px, 2vw, 20px)"}}
+                    >
                       Custom Quote
                     </span>
                   </div>
-                  <p className="pc-est-sub">This combination needs a personalised quote from our experts.</p>
+                  <p className="pc-est-sub">
+                    This combination needs a personalised quote from our
+                    experts.
+                  </p>
                 </>
               )}
 
@@ -1319,7 +1865,10 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
                 GET EXACT QUOTE →
               </button>
 
-              <p className="pc-disclaimer">*Premium range as per current insurer rate card. Final price depends on insurer underwriting.</p>
+              <p className="pc-disclaimer">
+                *Premium range as per current insurer rate card. Final price
+                depends on insurer underwriting.
+              </p>
             </div>
           </div>
         </div>
@@ -1525,32 +2074,60 @@ function PremiumCalculatorSection({ slug, serviceTitle }: { slug: string; servic
 // ═════════════════════════════════════════════════════════════════════════════
 // LIFE INSURANCE TWO-STEP FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
+function LifeSimpleFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
   const step1Fields = CONTACT_FIELDS;
   const step2Fields = config.aboutFields || [];
-  
+
   const [step, setStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
   const [values, setValues] = useState<Values>({
-    name: "", email: "", phone: "", dob: "", marital: "Unmarried", gender: "Male", pincode: "",
+    name: "",
+    email: "",
+    phone: "",
+    dob: "",
+    marital: "Unmarried",
+    gender: "Male",
+    pincode: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const validateContact = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
     setError(null);
     return true;
   };
 
-  const goToStep2 = () => { if (validateContact()) setStep(2); };
+  const goToStep2 = () => {
+    if (validateContact()) setStep(2);
+  };
 
   const handleSubmit = async () => {
     if (!validateContact()) return;
@@ -1558,8 +2135,13 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
     try {
       await fetch(`${API_BASE}/serviceleads`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }),
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
       });
       setSubmitted(true);
     } catch (e) {
@@ -1576,9 +2158,27 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
         <label className="li-field" key={field.stateKey}>
           <span className="li-label">{field.label}</span>
           <div className="li-input-wrap">
-            <input type="date" value={values[field.stateKey]} onChange={(e) => handleChange(field.stateKey, e.target.value)} className="li-input" />
-            <svg className="li-calendar-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            <input
+              type="date"
+              value={values[field.stateKey]}
+              onChange={(e) => handleChange(field.stateKey, e.target.value)}
+              className="li-input"
+            />
+            <svg
+              className="li-calendar-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              fill="none"
+              stroke="#6B7280"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
           </div>
         </label>
@@ -1588,8 +2188,14 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
       return (
         <label className="li-field" key={field.stateKey}>
           <span className="li-label">{field.label}</span>
-          <select value={values[field.stateKey]} onChange={(e) => handleChange(field.stateKey, e.target.value)} className="li-select">
-            {field.options?.map((o, oi) => <option key={`${field.stateKey}-${oi}`}>{o}</option>)}
+          <select
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-select"
+          >
+            {field.options?.map((o, oi) => (
+              <option key={`${field.stateKey}-${oi}`}>{o}</option>
+            ))}
           </select>
         </label>
       );
@@ -1598,21 +2204,66 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
       return (
         <label className="li-field" key={field.stateKey}>
           <span className="li-label">{field.label}</span>
-          <input type="number" inputMode="numeric" value={values[field.stateKey]} onChange={(e) => handleChange(field.stateKey, e.target.value)} className="li-textfield" placeholder="Enter your pincode" maxLength={6} />
+          <input
+            type="number"
+            inputMode="numeric"
+            value={values[field.stateKey]}
+            onChange={(e) => handleChange(field.stateKey, e.target.value)}
+            className="li-textfield"
+            placeholder="Enter your pincode"
+            maxLength={6}
+          />
         </label>
       );
     }
     return (
       <label className="li-field" key={field.stateKey}>
         <span className="li-label">{field.label}</span>
-        <input type={field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"} inputMode={field.type === "tel" ? "tel" : undefined} value={values[field.stateKey]} onChange={(e) => handleChange(field.stateKey, e.target.value)} className="li-textfield" placeholder={field.label} />
+        <input
+          type={
+            field.type === "email"
+              ? "email"
+              : field.type === "tel"
+                ? "tel"
+                : "text"
+          }
+          inputMode={field.type === "tel" ? "tel" : undefined}
+          value={values[field.stateKey]}
+          onChange={(e) => handleChange(field.stateKey, e.target.value)}
+          className="li-textfield"
+          placeholder={field.label}
+        />
       </label>
     );
   };
 
-  const StepDot = ({ n, label }: { n: 1 | 2; label: string }) => (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 11.5, fontWeight: 700, color: step >= n ? "#0B1F4D" : "#9CA3AF", whiteSpace: "nowrap" }}>
-      <span style={{ width: 20, height: 20, borderRadius: "50%", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, fontWeight: 800, background: step >= n ? config.submitBg : "#E5E7EB", color: step >= n ? "#fff" : "#6B7280", flexShrink: 0 }}>
+  const StepDot = ({n, label}: {n: 1 | 2; label: string}) => (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        fontSize: 11.5,
+        fontWeight: 700,
+        color: step >= n ? "#0B1F4D" : "#9CA3AF",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: "50%",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: 10.5,
+          fontWeight: 800,
+          background: step >= n ? config.submitBg : "#E5E7EB",
+          color: step >= n ? "#fff" : "#6B7280",
+          flexShrink: 0,
+        }}
+      >
         {step > n ? "✓" : n}
       </span>
       {label}
@@ -1625,14 +2276,60 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>We&apos;ve received your information. Our insurance experts will reach out to you shortly with a personalized quote.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Quote sent to: <strong>{values.email}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            We&apos;ve received your information. Our insurance experts will
+            reach out to you shortly with a personalized quote.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", dob: "", marital: "Unmarried", gender: "Male", pincode: "" }); }} className="li-back-btn">New Quote</button>
-          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>Compare Plans</Link>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({
+                name: "",
+                email: "",
+                phone: "",
+                dob: "",
+                marital: "Unmarried",
+                gender: "Male",
+                pincode: "",
+              });
+            }}
+            className="li-back-btn"
+          >
+            New Quote
+          </button>
+          <Link
+            href={VIEW_PLANS_HREF}
+            className="li-submit li-submit-link"
+            style={{
+              background: config.submitBg,
+              flex: 1,
+              width: "auto",
+              marginTop: 0,
+            }}
+          >
+            Compare Plans
+          </Link>
         </div>
       </div>
     );
@@ -1640,19 +2337,56 @@ function LifeSimpleFormCard({ slug, serviceTitle, config }: { slug: string; serv
 
   return (
     <div className="li-card">
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          marginBottom: 16,
+        }}
+      >
         <StepDot n={1} label="Contact" />
-        <span style={{ flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2 }} />
+        <span
+          style={{flex: 1, height: 2, background: "#E2E8F0", borderRadius: 2}}
+        />
         <StepDot n={2} label="About you" />
       </div>
       <h2 className="li-card-title">{cardTitle}</h2>
       <>
         {currentFields.map(renderField)}
-        {step === 1 && <button className="li-submit" style={{ background: config.submitBg }} onClick={goToStep2} type="button">Continue</button>}
+        {step === 1 && (
+          <button
+            className="li-submit"
+            style={{background: config.submitBg}}
+            onClick={goToStep2}
+            type="button"
+          >
+            Continue
+          </button>
+        )}
         {step === 2 && (
-          <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-            <button type="button" onClick={() => setStep(1)} className="li-back-btn">Back</button>
-            <button className="li-submit" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">
+          <div style={{display: "flex", gap: 12, marginTop: 6}}>
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              className="li-back-btn"
+            >
+              Back
+            </button>
+            <button
+              className="li-submit"
+              style={{
+                background: config.submitBg,
+                flex: 1,
+                width: "auto",
+                marginTop: 0,
+                opacity: submitting ? 0.7 : 1,
+                cursor: submitting ? "not-allowed" : "pointer",
+              }}
+              onClick={handleSubmit}
+              disabled={submitting}
+              type="button"
+            >
               {submitting ? "Saving…" : config.submitLabel}
             </button>
           </div>
@@ -1716,7 +2450,7 @@ function CategoryDropdown({
   };
 
   return (
-    <div ref={ref} style={{ position: "relative", width: "100%" }}>
+    <div ref={ref} style={{position: "relative", width: "100%"}}>
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -1737,7 +2471,13 @@ function CategoryDropdown({
           boxSizing: "border-box",
         }}
       >
-        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span
+          style={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {value || placeholder}
         </span>
         <svg
@@ -1754,7 +2494,11 @@ function CategoryDropdown({
           viewBox="0 0 24 24"
           strokeWidth="2"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </button>
 
@@ -1769,7 +2513,8 @@ function CategoryDropdown({
             backgroundColor: "#ffffff",
             border: "1px solid #E2E8F0",
             borderRadius: "8px",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+            boxShadow:
+              "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
             maxHeight: "200px",
             overflowY: "auto",
             padding: "4px 0",
@@ -1793,9 +2538,12 @@ function CategoryDropdown({
               key={opt}
               onMouseDown={(e) => handleSelect(e, opt)}
               onClick={(e) => handleSelect(e, opt)}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#F3F4F6")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#F3F4F6")
+              }
               onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = value === opt ? "#EFF6FF" : "transparent")
+                (e.currentTarget.style.backgroundColor =
+                  value === opt ? "#EFF6FF" : "transparent")
               }
               style={{
                 padding: "8px 14px",
@@ -1819,21 +2567,46 @@ function CategoryDropdown({
 // ═════════════════════════════════════════════════════════════════════════════
 // SIMPLE FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", category: "" });
+function SimpleFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    category: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -1842,21 +2615,62 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
     if (!validateForm()) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/serviceleads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }) });
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
       setSubmitted(true);
-    } catch (e) { console.error("Service lead submit failed:", e); setError("Failed to submit. Please try again."); } finally { setSubmitting(false); }
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>We&apos;ve received your information. Our insurance experts will reach out to you shortly with a personalized quote.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Quote sent to: <strong>{values.email}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            We&apos;ve received your information. Our insurance experts will
+            reach out to you shortly with a personalized quote.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", category: "" }); }} className="li-back-btn">New Quote</button>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({name: "", email: "", phone: "", category: ""});
+            }}
+            className="li-back-btn"
+          >
+            New Quote
+          </button>
         </div>
       </div>
     );
@@ -1865,22 +2679,69 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
   return (
     <div className="li-card">
       <h2 className="li-card-title">{config.cardTitle}</h2>
-      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
-      <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
-      <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 13 }}>
-        <label className="li-field" style={{ marginBottom: 0 }}>
+      <p
+        style={{fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0}}
+      >
+        {config.description}
+      </p>
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        style={{marginBottom: 13}}
+      >
+        <label className="li-field" style={{marginBottom: 0}}>
           <span className="li-label">Phone Number</span>
-          <input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" />
+          <input
+            type="tel"
+            inputMode="tel"
+            value={values.phone}
+            onChange={(e) => handleChange("phone", e.target.value)}
+            className="li-textfield"
+            placeholder="+91"
+          />
         </label>
-        <label className="li-field" style={{ marginBottom: 0 }}>
+        <label className="li-field" style={{marginBottom: 0}}>
           <span className="li-label">Coverage / Category</span>
-          <CategoryDropdown value={values.category || ""} onChange={(val) => handleChange("category", val)} />
+          <CategoryDropdown
+            value={values.category || ""}
+            onChange={(val) => handleChange("category", val)}
+          />
         </label>
       </div>
 
-      <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
+      <button
+        className="li-submit"
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
     </div>
@@ -1890,35 +2751,72 @@ function SimpleFormCard({ slug, serviceTitle, config }: { slug: string; serviceT
 // ═════════════════════════════════════════════════════════════════════════════
 // MOTOR FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", expiryDate: "", vehicleType: "Car" });
+function MotorFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    expiryDate: "",
+    vehicleType: "Car",
+  });
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newFiles = e.target.files ? Array.from(e.target.files) : [];
     const validFiles = newFiles.filter((f) => {
-      if (f.size > 5 * 1024 * 1024) { setError(`File ${f.name} is too large (max 5MB)`); return false; }
+      if (f.size > 5 * 1024 * 1024) {
+        setError(`File ${f.name} is too large (max 5MB)`);
+        return false;
+      }
       return true;
     });
-    if (validFiles.length > 0) { setFiles((prev) => [...prev, ...validFiles]); setError(null); }
+    if (validFiles.length > 0) {
+      setFiles((prev) => [...prev, ...validFiles]);
+      setError(null);
+    }
   };
 
-  const removeFile = (index: number) => { setFiles((prev) => prev.filter((_, i) => i !== index)); };
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
     const expiryDate = (values.expiryDate || "").trim();
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!expiryDate) { setError("Please enter policy expiry date."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (!expiryDate) {
+      setError("Please enter policy expiry date.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -1936,23 +2834,75 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
       formData.append("serviceSlug", slug);
       formData.append("serviceTitle", serviceTitle);
       formData.append("source", "website");
-      files.forEach((file) => { formData.append("insuranceDocuments", file); });
-      await fetch(`${API_BASE}/serviceleads`, { method: "POST", body: formData });
+      files.forEach((file) => {
+        formData.append("insuranceDocuments", file);
+      });
+      await fetch(`${API_BASE}/serviceleads`, {method: "POST", body: formData});
       setSubmitted(true);
-    } catch (e) { console.error("Service lead submit failed:", e); setError("Failed to submit. Please try again."); } finally { setSubmitting(false); }
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Quote Request Received!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>Thank you for sharing your vehicle details. Our team will compare quotes and send you the best options shortly.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Vehicle Type: <strong>{values.vehicleType}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Quote Request Received!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            Thank you for sharing your vehicle details. Our team will compare
+            quotes and send you the best options shortly.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            Vehicle Type: <strong>{values.vehicleType}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", expiryDate: "", vehicleType: "Car" }); setFiles([]); }} className="li-back-btn">New Quote</button>
-          <Link href={VIEW_PLANS_HREF} className="li-submit li-submit-link" style={{ background: config.submitBg, flex: 1, width: "auto", marginTop: 0 }}>Compare Plans</Link>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({
+                name: "",
+                email: "",
+                phone: "",
+                expiryDate: "",
+                vehicleType: "Car",
+              });
+              setFiles([]);
+            }}
+            className="li-back-btn"
+          >
+            New Quote
+          </button>
+          <Link
+            href={VIEW_PLANS_HREF}
+            className="li-submit li-submit-link"
+            style={{
+              background: config.submitBg,
+              flex: 1,
+              width: "auto",
+              marginTop: 0,
+            }}
+          >
+            Compare Plans
+          </Link>
         </div>
       </div>
     );
@@ -1961,49 +2911,190 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
   return (
     <div className="li-card">
       <h2 className="li-card-title">{config.cardTitle}</h2>
-      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
-      <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
-      <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      <label className="li-field"><span className="li-label">Phone Number</span><input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" /></label>
+      <p
+        style={{fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0}}
+      >
+        {config.description}
+      </p>
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
       <label className="li-field">
         <span className="li-label">Policy Expiry Date</span>
         <div className="li-input-wrap">
-          <input type="date" value={values.expiryDate} onChange={(e) => handleChange("expiryDate", e.target.value)} className="li-input" />
-          <svg className="li-calendar-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+          <input
+            type="date"
+            value={values.expiryDate}
+            onChange={(e) => handleChange("expiryDate", e.target.value)}
+            className="li-input"
+          />
+          <svg
+            className="li-calendar-icon"
+            viewBox="0 0 24 24"
+            width="18"
+            height="18"
+            fill="none"
+            stroke="#6B7280"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
           </svg>
         </div>
       </label>
       <label className="li-field">
         <span className="li-label">Type of Vehicle</span>
-        <select value={values.vehicleType} onChange={(e) => handleChange("vehicleType", e.target.value)} className="li-select">
-          <option>Car</option><option>Bike</option><option>Scooter</option><option>Truck</option><option>Auto</option><option>Commercial Vehicle</option>
+        <select
+          value={values.vehicleType}
+          onChange={(e) => handleChange("vehicleType", e.target.value)}
+          className="li-select"
+        >
+          <option>Car</option>
+          <option>Bike</option>
+          <option>Scooter</option>
+          <option>Truck</option>
+          <option>Auto</option>
+          <option>Commercial Vehicle</option>
         </select>
       </label>
       <label className="li-field">
-        <span className="li-label">Upload Insurance Documents <span style={{ color: "#9CA3AF", fontWeight: 400 }}>(Optional)</span></span>
+        <span className="li-label">
+          Upload Insurance Documents{" "}
+          <span style={{color: "#9CA3AF", fontWeight: 400}}>(Optional)</span>
+        </span>
         <div className="li-file-upload">
-          <input type="file" onChange={handleFileChange} className="li-file-input" accept=".pdf,.jpg,.jpeg,.png" multiple />
+          <input
+            type="file"
+            onChange={handleFileChange}
+            className="li-file-input"
+            accept=".pdf,.jpg,.jpeg,.png"
+            multiple
+          />
           <div className="li-file-label">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
-            <span className="li-file-text">Click or drag to upload (PDF, JPG, PNG) - Multiple files allowed</span>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <span className="li-file-text">
+              Click or drag to upload (PDF, JPG, PNG) - Multiple files allowed
+            </span>
           </div>
         </div>
         {files.length > 0 && (
-          <div style={{ marginTop: 12, padding: 12, background: "#F3F4F6", borderRadius: 8 }}>
-            <p style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Uploaded Files:</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <div
+            style={{
+              marginTop: 12,
+              padding: 12,
+              background: "#F3F4F6",
+              borderRadius: 8,
+            }}
+          >
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: "#374151",
+                marginBottom: 8,
+              }}
+            >
+              Uploaded Files:
+            </p>
+            <div style={{display: "flex", flexDirection: "column", gap: 6}}>
               {files.map((file, index) => (
-                <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: 8, background: "#fff", borderRadius: 6, border: "1px solid #E5E7EB" }}>
-                  <span style={{ fontSize: 12, color: "#374151", wordBreak: "break-word" }}>{file.name}</span>
-                  <button type="button" onClick={() => removeFile(index)} style={{ fontSize: 12, color: "#EF4444", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}>✕ Remove</button>
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: 8,
+                    background: "#fff",
+                    borderRadius: 6,
+                    border: "1px solid #E5E7EB",
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      color: "#374151",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {file.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    style={{
+                      fontSize: 12,
+                      color: "#EF4444",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      fontWeight: 600,
+                    }}
+                  >
+                    ✕ Remove
+                  </button>
                 </div>
               ))}
             </div>
           </div>
         )}
       </label>
-      <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
+      <button
+        className="li-submit"
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
     </div>
@@ -2013,13 +3104,30 @@ function MotorFormCard({ slug, serviceTitle, config }: { slug: string; serviceTi
 // ═════════════════════════════════════════════════════════════════════════════
 // FIRE INSURANCE FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", industries: "", insuranceType: "" });
+function FireFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    industries: "",
+    insuranceType: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
@@ -2027,11 +3135,26 @@ function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTit
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
     const industries = (values.industries || "").trim();
     const insuranceType = (values.insuranceType || "").trim();
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!industries) { setError("Please tell us about your industries."); return false; }
-    if (!insuranceType) { setError("Please specify the type of insurance needed."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (!industries) {
+      setError("Please tell us about your industries.");
+      return false;
+    }
+    if (!insuranceType) {
+      setError("Please specify the type of insurance needed.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -2040,21 +3163,68 @@ function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTit
     if (!validateForm()) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/serviceleads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }) });
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
       setSubmitted(true);
-    } catch (e) { console.error("Service lead submit failed:", e); setError("Failed to submit. Please try again."); } finally { setSubmitting(false); }
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>We&apos;ve received your fire insurance inquiry. Our experts will review your requirements and provide a customized quote.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Quote sent to: <strong>{values.email}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            We&apos;ve received your fire insurance inquiry. Our experts will
+            review your requirements and provide a customized quote.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", industries: "", insuranceType: "" }); }} className="li-back-btn">New Quote</button>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({
+                name: "",
+                email: "",
+                phone: "",
+                industries: "",
+                insuranceType: "",
+              });
+            }}
+            className="li-back-btn"
+          >
+            New Quote
+          </button>
         </div>
       </div>
     );
@@ -2063,13 +3233,75 @@ function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTit
   return (
     <div className="li-card">
       <h2 className="li-card-title">{config.cardTitle}</h2>
-      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
-      <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
-      <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      <label className="li-field"><span className="li-label">Phone Number</span><input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" /></label>
-      <label className="li-field"><span className="li-label">Which Industries</span><textarea value={values.industries} onChange={(e) => handleChange("industries", e.target.value)} className="li-textarea" rows={3} placeholder="E.g., Manufacturing, Retail, Hospitality, etc." /></label>
-      <label className="li-field"><span className="li-label">Type of Insurance</span><textarea value={values.insuranceType} onChange={(e) => handleChange("insuranceType", e.target.value)} className="li-textarea" rows={3} placeholder="Describe the type of fire insurance coverage you need..." /></label>
-      <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
+      <p
+        style={{fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0}}
+      >
+        {config.description}
+      </p>
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Which Industries</span>
+        <textarea
+          value={values.industries}
+          onChange={(e) => handleChange("industries", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="E.g., Manufacturing, Retail, Hospitality, etc."
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Type of Insurance</span>
+        <textarea
+          value={values.insuranceType}
+          onChange={(e) => handleChange("insuranceType", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="Describe the type of fire insurance coverage you need..."
+        />
+      </label>
+      <button
+        className="li-submit"
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
     </div>
@@ -2079,23 +3311,51 @@ function FireFormCard({ slug, serviceTitle, config }: { slug: string; serviceTit
 // ═════════════════════════════════════════════════════════════════════════════
 // ENTERTAINMENT INSURANCE FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", insuranceType: "" });
+function EntertainmentFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    insuranceType: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
     const insuranceType = (values.insuranceType || "").trim();
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!insuranceType) { setError("Please specify the type of insurance needed."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (!insuranceType) {
+      setError("Please specify the type of insurance needed.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -2104,21 +3364,62 @@ function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; s
     if (!validateForm()) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/serviceleads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }) });
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
       setSubmitted(true);
-    } catch (e) { console.error("Service lead submit failed:", e); setError("Failed to submit. Please try again."); } finally { setSubmitting(false); }
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>We&apos;ve received your production insurance inquiry. Our team will review your requirements and prepare a customized quote.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>Quote sent to: <strong>{values.email}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            We&apos;ve received your production insurance inquiry. Our team will
+            review your requirements and prepare a customized quote.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            Quote sent to: <strong>{values.email}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", insuranceType: "" }); }} className="li-back-btn">New Quote</button>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({name: "", email: "", phone: "", insuranceType: ""});
+            }}
+            className="li-back-btn"
+          >
+            New Quote
+          </button>
         </div>
       </div>
     );
@@ -2127,12 +3428,65 @@ function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; s
   return (
     <div className="li-card">
       <h2 className="li-card-title">{config.cardTitle}</h2>
-      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
-      <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
-      <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      <label className="li-field"><span className="li-label">Phone Number</span><input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" /></label>
-      <label className="li-field"><span className="li-label">Type of Insurance</span><textarea value={values.insuranceType} onChange={(e) => handleChange("insuranceType", e.target.value)} className="li-textarea" rows={3} placeholder="E.g., Film production, TV show, Theater, Music event, Sports event, etc." /></label>
-      <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
+      <p
+        style={{fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0}}
+      >
+        {config.description}
+      </p>
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Phone Number</span>
+        <input
+          type="tel"
+          inputMode="tel"
+          value={values.phone}
+          onChange={(e) => handleChange("phone", e.target.value)}
+          className="li-textfield"
+          placeholder="+91"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Type of Insurance</span>
+        <textarea
+          value={values.insuranceType}
+          onChange={(e) => handleChange("insuranceType", e.target.value)}
+          className="li-textarea"
+          rows={3}
+          placeholder="E.g., Film production, TV show, Theater, Music event, Sports event, etc."
+        />
+      </label>
+      <button
+        className="li-submit"
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
     </div>
@@ -2142,23 +3496,52 @@ function EntertainmentFormCard({ slug, serviceTitle, config }: { slug: string; s
 // ═════════════════════════════════════════════════════════════════════════════
 // MISCELLANEOUS FORM CARD
 // ═════════════════════════════════════════════════════════════════════════════
-function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; serviceTitle: string; config: ServiceCalc }) {
-  const [values, setValues] = useState<Values>({ name: "", email: "", phone: "", category: "", insuranceTypes: "" });
+function MiscellaneousFormCard({
+  slug,
+  serviceTitle,
+  config,
+}: {
+  slug: string;
+  serviceTitle: string;
+  config: ServiceCalc;
+}) {
+  const [values, setValues] = useState<Values>({
+    name: "",
+    email: "",
+    phone: "",
+    category: "",
+    insuranceTypes: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (key: string, value: string) => { setValues((prev) => ({ ...prev, [key]: value })); setError(null); };
+  const handleChange = (key: string, value: string) => {
+    setValues((prev) => ({...prev, [key]: value}));
+    setError(null);
+  };
 
   const validateForm = (): boolean => {
     const name = (values.name || "").trim();
     const email = (values.email || "").trim();
     const phoneDigits = (values.phone || "").replace(/\D/g, "");
     const types = (values.insuranceTypes || "").trim();
-    if (!name) { setError("Please enter your name."); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Please enter a valid email address."); return false; }
-    if (phoneDigits.length < 10) { setError("Please enter a valid 10-digit phone number."); return false; }
-    if (!types) { setError("Please tell us about your insurance needs."); return false; }
+    if (!name) {
+      setError("Please enter your name.");
+      return false;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return false;
+    }
+    if (phoneDigits.length < 10) {
+      setError("Please enter a valid 10-digit phone number.");
+      return false;
+    }
+    if (!types) {
+      setError("Please tell us about your insurance needs.");
+      return false;
+    }
     setError(null);
     return true;
   };
@@ -2167,21 +3550,68 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
     if (!validateForm()) return;
     setSubmitting(true);
     try {
-      await fetch(`${API_BASE}/serviceleads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, serviceSlug: slug, serviceTitle, source: "website" }) });
+      await fetch(`${API_BASE}/serviceleads`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          ...values,
+          serviceSlug: slug,
+          serviceTitle,
+          source: "website",
+        }),
+      });
       setSubmitted(true);
-    } catch (e) { console.error("Service lead submit failed:", e); setError("Failed to submit. Please try again."); } finally { setSubmitting(false); }
+    } catch (e) {
+      console.error("Service lead submit failed:", e);
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="li-card">
-        <div className="li-result" style={{ background: "#F0FDF4", borderColor: "#BBF7D0" }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: "#047857", marginBottom: 12, marginTop: 0 }}>Thank you!</h2>
-          <p style={{ color: "#6B7280", fontSize: 14, marginBottom: 16 }}>We&apos;ve received your inquiry. Our insurance experts will assess your needs and provide the best coverage options.</p>
-          <p style={{ color: "#6B7280", fontSize: 12, marginBottom: 0 }}>We&apos;ll contact you at: <strong>{values.email}</strong></p>
+        <div
+          className="li-result"
+          style={{background: "#F0FDF4", borderColor: "#BBF7D0"}}
+        >
+          <h2
+            style={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: "#047857",
+              marginBottom: 12,
+              marginTop: 0,
+            }}
+          >
+            Thank you!
+          </h2>
+          <p style={{color: "#6B7280", fontSize: 14, marginBottom: 16}}>
+            We&apos;ve received your inquiry. Our insurance experts will assess
+            your needs and provide the best coverage options.
+          </p>
+          <p style={{color: "#6B7280", fontSize: 12, marginBottom: 0}}>
+            We&apos;ll contact you at: <strong>{values.email}</strong>
+          </p>
         </div>
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button type="button" onClick={() => { setSubmitted(false); setValues({ name: "", email: "", phone: "", category: "", insuranceTypes: "" }); }} className="li-back-btn">New Inquiry</button>
+        <div style={{display: "flex", gap: 12, marginTop: 16}}>
+          <button
+            type="button"
+            onClick={() => {
+              setSubmitted(false);
+              setValues({
+                name: "",
+                email: "",
+                phone: "",
+                category: "",
+                insuranceTypes: "",
+              });
+            }}
+            className="li-back-btn"
+          >
+            New Inquiry
+          </button>
         </div>
       </div>
     );
@@ -2190,23 +3620,79 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
   return (
     <div className="li-card">
       <h2 className="li-card-title">{config.cardTitle}</h2>
-      <p style={{ fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0 }}>{config.description}</p>
-      <label className="li-field"><span className="li-label">Full Name</span><input type="text" value={values.name} onChange={(e) => handleChange("name", e.target.value)} className="li-textfield" placeholder="Your name" /></label>
-      <label className="li-field"><span className="li-label">Email Address</span><input type="email" value={values.email} onChange={(e) => handleChange("email", e.target.value)} className="li-textfield" placeholder="your@email.com" /></label>
-      
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ marginBottom: 13 }}>
-        <label className="li-field" style={{ marginBottom: 0 }}>
+      <p
+        style={{fontSize: 13, color: "#6B7280", marginBottom: 18, marginTop: 0}}
+      >
+        {config.description}
+      </p>
+      <label className="li-field">
+        <span className="li-label">Full Name</span>
+        <input
+          type="text"
+          value={values.name}
+          onChange={(e) => handleChange("name", e.target.value)}
+          className="li-textfield"
+          placeholder="Your name"
+        />
+      </label>
+      <label className="li-field">
+        <span className="li-label">Email Address</span>
+        <input
+          type="email"
+          value={values.email}
+          onChange={(e) => handleChange("email", e.target.value)}
+          className="li-textfield"
+          placeholder="your@email.com"
+        />
+      </label>
+
+      <div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+        style={{marginBottom: 13}}
+      >
+        <label className="li-field" style={{marginBottom: 0}}>
           <span className="li-label">Phone Number</span>
-          <input type="tel" inputMode="tel" value={values.phone} onChange={(e) => handleChange("phone", e.target.value)} className="li-textfield" placeholder="+91" />
+          <input
+            type="tel"
+            inputMode="tel"
+            value={values.phone}
+            onChange={(e) => handleChange("phone", e.target.value)}
+            className="li-textfield"
+            placeholder="+91"
+          />
         </label>
-        <label className="li-field" style={{ marginBottom: 0 }}>
+        <label className="li-field" style={{marginBottom: 0}}>
           <span className="li-label">Coverage / Category</span>
-          <CategoryDropdown value={values.category || ""} onChange={(val) => handleChange("category", val)} />
+          <CategoryDropdown
+            value={values.category || ""}
+            onChange={(val) => handleChange("category", val)}
+          />
         </label>
       </div>
 
-      <label className="li-field"><span className="li-label">Insurance Types &amp; Requirements</span><textarea value={values.insuranceTypes} onChange={(e) => handleChange("insuranceTypes", e.target.value)} className="li-textarea" rows={4} placeholder="Tell us about your insurance needs. E.g., Burglary coverage, Professional indemnity, Employee welfare, etc." /></label>
-      <button className="li-submit" style={{ background: config.submitBg, opacity: submitting ? 0.7 : 1, cursor: submitting ? "not-allowed" : "pointer" }} onClick={handleSubmit} disabled={submitting} type="button">{submitting ? "Sending…" : config.submitLabel}</button>
+      <label className="li-field">
+        <span className="li-label">Insurance Types &amp; Requirements</span>
+        <textarea
+          value={values.insuranceTypes}
+          onChange={(e) => handleChange("insuranceTypes", e.target.value)}
+          className="li-textarea"
+          rows={4}
+          placeholder="Tell us about your insurance needs. E.g., Burglary coverage, Professional indemnity, Employee welfare, etc."
+        />
+      </label>
+      <button
+        className="li-submit"
+        style={{
+          background: config.submitBg,
+          opacity: submitting ? 0.7 : 1,
+          cursor: submitting ? "not-allowed" : "pointer",
+        }}
+        onClick={handleSubmit}
+        disabled={submitting}
+        type="button"
+      >
+        {submitting ? "Sending…" : config.submitLabel}
+      </button>
       {error && <p className="li-error">{error}</p>}
       <p className="li-disclaimer">No spam. No calls unless you want.</p>
     </div>
@@ -2216,7 +3702,7 @@ function MiscellaneousFormCard({ slug, serviceTitle, config }: { slug: string; s
 // ═════════════════════════════════════════════════════════════════════════════
 // FAQ SECTION
 // ═════════════════════════════════════════════════════════════════════════════
-function FAQSection({ data }: { data: InsuranceDetailData }) {
+function FAQSection({data}: {data: InsuranceDetailData}) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
@@ -2228,19 +3714,35 @@ function FAQSection({ data }: { data: InsuranceDetailData }) {
           </span>
           <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">
             <span className="text-slate-900">{data.faqTitle} </span>
-            <span style={{ color: data.faqTitleAccentColor }}>{data.faqTitleAccent}</span>
+            <span style={{color: data.faqTitleAccentColor}}>
+              {data.faqTitleAccent}
+            </span>
           </h2>
         </div>
         <div className="space-y-3">
           {data.faqs.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
-              <div key={faq.question} className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
-                <button onClick={() => setOpenIndex(isOpen ? null : index)} className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
-                  <span className="text-slate-900 font-semibold text-base">{faq.question}</span>
-                  <span className="text-slate-500 text-xl font-light flex-shrink-0 leading-none">{isOpen ? "−" : "+"}</span>
+              <div
+                key={faq.question}
+                className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden"
+              >
+                <button
+                  onClick={() => setOpenIndex(isOpen ? null : index)}
+                  className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left"
+                >
+                  <span className="text-slate-900 font-semibold text-base">
+                    {faq.question}
+                  </span>
+                  <span className="text-slate-500 text-xl font-light flex-shrink-0 leading-none">
+                    {isOpen ? "−" : "+"}
+                  </span>
                 </button>
-                {isOpen && <div className="px-6 pb-5 text-slate-500 text-sm leading-relaxed">{faq.answer}</div>}
+                {isOpen && (
+                  <div className="px-6 pb-5 text-slate-500 text-sm leading-relaxed">
+                    {faq.answer}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -2253,14 +3755,13 @@ function FAQSection({ data }: { data: InsuranceDetailData }) {
 // ═════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═════════════════════════════════════════════════════════════════════════════
-export default function InsuranceDetailPage({ data, slug }: Props) {
+export default function InsuranceDetailPage({data, slug}: Props) {
   const config = SERVICE_CALCS[slug] ?? SERVICE_CALCS["life-insurance"];
 
   return (
     <>
       <style>{CSS}</style>
-      <div style={{ overflowX: "hidden", width: "100%" }}>
-        
+      <div style={{overflowX: "hidden", width: "100%"}}>
         <Navbar />
 
         {/* ── HERO ── */}
@@ -2270,20 +3771,26 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
               <div className="li-trail">
                 <Breadcrum
                   crumbs={[
-                    { label: "Home", href: "/" },
-                    { label: "Our Services", href: "/our-services" },
-                    { label: data.heroBadgeText || data.title },
+                    {label: "Home", href: "/"},
+                    {label: "Our Services", href: "/our-services"},
+                    {label: data.heroBadgeText || data.title},
                   ]}
                 />
               </div>
               <h1 className="li-title">
                 {data.heroRestTitle}
                 <br />
-                <span style={{ color: data.heroAccentColor }}>{data.heroAccentWord} </span>
-                <span style={{ color: data.heroAccentColor2 }}>most</span>
+                <span style={{color: data.heroAccentColor}}>
+                  {data.heroAccentWord}{" "}
+                </span>
+                <span style={{color: data.heroAccentColor2}}>most</span>
               </h1>
               <p className="li-desc">{data.heroSubtitle}</p>
-              <Link href={CONTACT_HREF} className="li-btn-cta" style={{ background: data.heroCtaBg }}>
+              <Link
+                href={CONTACT_HREF}
+                className="li-btn-cta"
+                style={{background: data.heroCtaBg}}
+              >
                 {data.heroCtaLabel}
               </Link>
               <div className="li-stats">
@@ -2301,13 +3808,55 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
 
             {/* RIGHT — form */}
             <div className="li-right">
-              {config.formType === "health-hero" && <HealthHeroForm slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "life-simple" && <LifeSimpleFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "simple" && <SimpleFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "motor" && <MotorFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "fire-simple" && <FireFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "entertainment-simple" && <EntertainmentFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
-              {config.formType === "miscellaneous" && <MiscellaneousFormCard slug={slug} serviceTitle={data.title || data.heroBadgeText} config={config} />}
+              {config.formType === "health-hero" && (
+                <HealthHeroForm
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "life-simple" && (
+                <LifeSimpleFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "simple" && (
+                <SimpleFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "motor" && (
+                <MotorFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "fire-simple" && (
+                <FireFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "entertainment-simple" && (
+                <EntertainmentFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
+              {config.formType === "miscellaneous" && (
+                <MiscellaneousFormCard
+                  slug={slug}
+                  serviceTitle={data.title || data.heroBadgeText}
+                  config={config}
+                />
+              )}
             </div>
           </div>
         </section>
@@ -2315,55 +3864,68 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
         {/* ── HEALTH STATS BAR — inside hero area, health-insurance only (Image 3) ── */}
         {/* {slug === "health-insurance" && <HealthStatsBar />} */}
 
-
-
         {/* ── WHY SECTION ── */}
-      <section className="bg-white py-16 px-6 md:px-12">
-  <div className="max-w-7xl mx-auto">
-    <div className="flex flex-col lg:flex-row items-center gap-12">
-      <div className="flex-1 max-w-2xl">
-        <span className="inline-block bg-cyan-100 text-cyan-700 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full mb-4">
-          {data.whyBadge}
-        </span>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
-          {data.whyTitle}
-          <br />
-          <span style={{ color: data.whyTitleAccentColor }}>{data.whyTitleAccent}</span>
-        </h2>
-        <div className="space-y-5 text-slate-700 text-base leading-relaxed">
-          {data.whyBody.map((para, i) => <p key={i}>{para}</p>)}
-        </div>
-      </div>
-      <div className="flex-1 w-full">
-        {data.whyImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.whyImage} alt={data.whyTitle || "illustration"} className="w-full h-auto object-contain rounded-3xl" />
-        ) : data.benefits[0]?.emoji ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={data.benefits[0].emoji} alt={data.whyTitle || "illustration"} className="w-full h-auto object-contain rounded-3xl" />
-        ) : (
-          <div className="w-full h-96 flex items-center justify-center text-6xl">
-            🛡️
+        <section className="bg-white py-16 px-6 md:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col lg:flex-row items-center gap-12">
+              <div className="flex-1 max-w-2xl">
+                <span className="inline-block bg-cyan-100 text-cyan-700 text-xs font-bold tracking-wider px-3 py-1.5 rounded-full mb-4">
+                  {data.whyBadge}
+                </span>
+                <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
+                  {data.whyTitle}
+                  <br />
+                  <span style={{color: data.whyTitleAccentColor}}>
+                    {data.whyTitleAccent}
+                  </span>
+                </h2>
+                <div className="space-y-5 text-slate-700 text-base leading-relaxed">
+                  {data.whyBody.map((para, i) => (
+                    <p key={i}>{para}</p>
+                  ))}
+                </div>
+              </div>
+              <div className="flex-1 w-full">
+                {data.whyImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={data.whyImage}
+                    alt={data.whyTitle || "illustration"}
+                    className="w-full h-auto object-contain rounded-3xl"
+                  />
+                ) : data.benefits[0]?.emoji ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={data.benefits[0].emoji}
+                    alt={data.whyTitle || "illustration"}
+                    className="w-full h-auto object-contain rounded-3xl"
+                  />
+                ) : (
+                  <div className="w-full h-96 flex items-center justify-center text-6xl">
+                    🛡️
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    </div>
-  </div>
-</section>
+        </section>
 
         {/* ── CERTIFICATES SECTION — entertainment-insurance only ── */}
-        {slug === "entertainment-insurance" && data.certificates && data.certificates.length > 0 && (
-          <CertificatesSection data={data} />
-        )}
+        {slug === "entertainment-insurance" &&
+          data.certificates &&
+          data.certificates.length > 0 && <CertificatesSection data={data} />}
 
         {/* ── MOVIES WE'VE INSURED SECTION — NEW, entertainment-insurance only ── */}
-        {slug === "entertainment-insurance" && data.movies && data.movies.length > 0 && (
-          <MoviesSection data={data} />
-        )}
+        {slug === "entertainment-insurance" &&
+          data.movies &&
+          data.movies.length > 0 && <MoviesSection data={data} />}
 
         {/* ── PREMIUM CALCULATOR (health-insurance only) ── */}
         {slug === "health-insurance" && (
-          <PremiumCalculatorSection slug={slug} serviceTitle={data.title || data.heroBadgeText} />
+          <PremiumCalculatorSection
+            slug={slug}
+            serviceTitle={data.title || data.heroBadgeText}
+          />
         )}
 
         {/* ── GET COVERED IN 4 STEPS (health-insurance only, Image 4) ── */}
@@ -2380,7 +3942,9 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 leading-tight mb-6">
                 {data.benefitsTitle}
                 <br />
-                <span style={{ color: data.benefitsTitleAccentColor }}>{data.benefitsTitleAccent}</span>
+                <span style={{color: data.benefitsTitleAccentColor}}>
+                  {data.benefitsTitleAccent}
+                </span>
               </h2>
               <p className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
                 {data.benefitsSubtitle}
@@ -2388,17 +3952,32 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
             </div>
             <div
               className={`grid grid-cols-1 sm:grid-cols-2 gap-6 ${
-                data.benefits.length % 5 === 0 ? "lg:grid-cols-5" : "lg:grid-cols-4"
+                data.benefits.length % 5 === 0
+                  ? "lg:grid-cols-5"
+                  : "lg:grid-cols-4"
               }`}
             >
               {data.benefits.map((b) => (
-                <div key={b.title} className="bg-white rounded-2xl p-6 text-center shadow-sm">
-                  <div className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden`}>
+                <div
+                  key={b.title}
+                  className="bg-white rounded-2xl p-6 text-center shadow-sm"
+                >
+                  <div
+                    className={`${b.iconBg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4 overflow-hidden`}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={b.icon || b.emoji} alt={b.title} className="w-8 h-8 object-contain" />
+                    <img
+                      src={b.icon || b.emoji}
+                      alt={b.title}
+                      className="w-8 h-8 object-contain"
+                    />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{b.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{b.description}</p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">
+                    {b.title}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">
+                    {b.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -2421,66 +4000,101 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border border-slate-200 rounded-2xl overflow-hidden mb-10">
               {data.stages.map((stage, i) => (
-                <div key={stage.title} className={`${stage.bg} p-6 ${i !== 0 ? "lg:border-l border-slate-200" : ""} ${i % 2 !== 0 ? "sm:border-l border-slate-200" : ""}`}>
+                <div
+                  key={stage.title}
+                  className={`${stage.bg} p-6 ${i !== 0 ? "lg:border-l border-slate-200" : ""} ${i % 2 !== 0 ? "sm:border-l border-slate-200" : ""}`}
+                >
                   <div className="mb-6 h-10 flex items-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={stage.icon || stage.emoji} alt={stage.title} className="w-10 h-10 object-contain" />
+                    <img
+                      src={stage.icon || stage.emoji}
+                      alt={stage.title}
+                      className="w-10 h-10 object-contain"
+                    />
                   </div>
-                  <div className={`${stage.ageColor} text-xs font-bold tracking-wider mb-2`}>{stage.age}</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">{stage.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed mb-4">{stage.description}</p>
-                  <div className={`${stage.linkColor} text-sm font-bold`}>→ {stage.linkText}</div>
+                  <div
+                    className={`${stage.ageColor} text-xs font-bold tracking-wider mb-2`}
+                  >
+                    {stage.age}
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">
+                    {stage.title}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-4">
+                    {stage.description}
+                  </p>
+                  <div className={`${stage.linkColor} text-sm font-bold`}>
+                    → {stage.linkText}
+                  </div>
                 </div>
               ))}
             </div>
 
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-  <div className="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-2xl p-6">
-    <div className="flex items-center gap-3 mb-5">
-      <img
-        
-         src="/images/services/SERVICE - LIFE INSURANCE/Without.png"
-        alt="worried face"
-        className=" h-7"
-      />
-      <h3 className="text-lg font-bold text-rose-600">{data.withoutTitle}</h3>
-    </div>
-    <ul className="space-y-3">
-      {data.withoutItems.map((item) => (
-        <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
-          <span className="text-rose-500 font-bold flex-shrink-0">✕</span>
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+              <div className="bg-gradient-to-br from-rose-50 to-white border border-rose-100 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <img
+                    src="/images/services/SERVICE - LIFE INSURANCE/Without.png"
+                    alt="worried face"
+                    className=" h-7"
+                  />
+                  <h3 className="text-lg font-bold text-rose-600">
+                    {data.withoutTitle}
+                  </h3>
+                </div>
+                <ul className="space-y-3">
+                  {data.withoutItems.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-slate-600"
+                    >
+                      <span className="text-rose-500 font-bold flex-shrink-0">
+                        ✕
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
 
-  <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-6">
-    <div className="flex items-center gap-3 mb-5">
-      <img
-       src="/images/services/SERVICE - LIFE INSURANCE/With.png"
-        alt="smiling face"
-        className=" h-7"
-      />
-      <h3 className="text-lg font-bold text-emerald-600">{data.withTitle}</h3>
-    </div>
-    <ul className="space-y-3">
-      {data.withItems.map((item) => (
-        <li key={item} className="flex items-start gap-3 text-sm text-slate-600">
-          <span className="text-emerald-500 font-bold flex-shrink-0">✓</span>
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
-</div>
+              <div className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <img
+                    src="/images/services/SERVICE - LIFE INSURANCE/With.png"
+                    alt="smiling face"
+                    className=" h-7"
+                  />
+                  <h3 className="text-lg font-bold text-emerald-600">
+                    {data.withTitle}
+                  </h3>
+                </div>
+                <ul className="space-y-3">
+                  {data.withItems.map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm text-slate-600"
+                    >
+                      <span className="text-emerald-500 font-bold flex-shrink-0">
+                        ✓
+                      </span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
             <div className="bg-blue-950 rounded-2xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
-                <h3 className="text-white text-xl font-bold mb-1">{data.ctaHeading}</h3>
+                <h3 className="text-white text-xl font-bold mb-1">
+                  {data.ctaHeading}
+                </h3>
                 <p className="text-slate-300 text-sm">{data.ctaBody}</p>
               </div>
-              <Link href={CONTACT_HREF} className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-3 rounded-lg whitespace-nowrap transition-colors">
+              <Link
+                href={CONTACT_HREF}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-3 rounded-lg whitespace-nowrap transition-colors"
+              >
                 Talk to an Expert
               </Link>
             </div>
@@ -2493,8 +4107,13 @@ export default function InsuranceDetailPage({ data, slug }: Props) {
         {/* ── OTHER SERVICES ── */}
         <section className="bg-slate-50 py-10 px-6 md:px-12">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-slate-500 text-sm mb-3">Looking for another type of cover?</p>
-            <Link href="/our-services" className="inline-flex items-center gap-2 text-blue-700 font-bold text-sm hover:underline">
+            <p className="text-slate-500 text-sm mb-3">
+              Looking for another type of cover?
+            </p>
+            <Link
+              href="/our-services"
+              className="inline-flex items-center gap-2 text-blue-700 font-bold text-sm hover:underline"
+            >
               ← View all Insurance Services
             </Link>
           </div>

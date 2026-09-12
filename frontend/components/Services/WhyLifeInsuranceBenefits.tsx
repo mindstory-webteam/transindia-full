@@ -82,7 +82,7 @@ const WhyLifeInsuranceBenefits: React.FC = () => {
           </h2>
 
           <p className="text-slate-500 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-            Life insurance isn't just about death. It's about making sure the
+            Life insurance isn&apos;t just about death. It&apos;s about making sure the
             people who depend on you never have to struggle — no matter what
             happens.
           </p>

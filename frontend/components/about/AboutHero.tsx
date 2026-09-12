@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import Image from "next/image";
 import Breadcrum from "@/components/Breadcrum";
 
 export default function AboutHero() {
@@ -14,27 +16,39 @@ export default function AboutHero() {
 
           <div className="about-content">
             <h1 className="about-title">
-              India's Most Trusted
+              India&apos;s Most Trusted
               <br />
               <span style={{ color: "#F15A40" }}>Insurance</span>{" "}
               <span style={{ color: "#20BEC6" }}>Marketplace.</span>
             </h1>
             <p className="about-desc">
-              We exist to make insurance simple, honest, and accessible for every Indian family — whether you're planning for tomorrow or protecting what you've built today.
+              We exist to make insurance simple, honest, and accessible for every Indian family — whether you&apos;re planning for tomorrow or protecting what you&apos;ve built today.
             </p>
 
             <div className="about-btns">
-              <a href="/contact-us" className="about-btn-orange">Talk to an Expert</a>
-              <a href="/careers" className="about-btn-ghost">Join Our Team</a>
+              <Link href="/contact-us" className="about-btn-orange">Talk to an Expert</Link>
+              <Link href="/careers" className="about-btn-ghost">Join Our Team</Link>
             </div>
           </div>
 
           <div className="about-mobile-visual">
-            <img src="/images/about/ABOUT/About page - Hero Baner.png" alt="About TransIndia" />
+            <Image
+              src="/images/about/ABOUT/About page - Hero Baner.png"
+              alt="About TransIndia"
+              width={1200}
+              height={896}
+              priority
+            />
           </div>
 
           <div className="about-lg-banner">
-            <img src="/images/about/ABOUT/About page - Hero Baner.png" alt="About TransIndia Banner" />
+            <Image
+              src="/images/about/ABOUT/About page - Hero Baner.png"
+              alt="About TransIndia Banner"
+              width={1200}
+              height={896}
+              priority
+            />
           </div>
         </div>
 

@@ -73,7 +73,7 @@ export default function WhyChooseUs() {
 
           {/* Sub-text */}
           <p className="wct-sub">
-            Using a broker doesn't cost more than going direct — we are paid
+            Using a broker doesn&apos;t cost more than going direct — we are paid
             brokerage by insurers for selling their products. You get expert
             advice at zero extra cost.
           </p>

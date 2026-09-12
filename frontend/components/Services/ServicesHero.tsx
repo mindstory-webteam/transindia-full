@@ -172,7 +172,6 @@ const CSS = `
     text-decoration: none;
     font-size: 14px;
     font-weight: 800;
-    box-shadow: 0 4px 26px rgba(244,98,42,0.5);
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
@@ -180,7 +179,6 @@ const CSS = `
   }
   .svc-btn-orange:hover{
     transform: translateY(-2px);
-    box-shadow: 0 8px 28px rgba(244,98,42,0.6);
   }
 
   .svc-btn-ghost{
