@@ -81,252 +81,79 @@ function useRotatingHeadline(list: Headline[], intervalMs: number) {
   return {headline: list[index], visible};
 }
 
-/* ---------- Icons (soft-filled, drawn on a 32 grid) ---------- */
-
-type IconProps = {size?: number; color?: string};
-
-function LifeIcon({size = 34, color = "#20BEC6"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M16 3.5 5.5 7.3v8.1c0 6.3 4.3 11.7 10.5 13.1 6.2-1.4 10.5-6.8 10.5-13.1V7.3L16 3.5Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <circle cx="16" cy="14" r="2.9" fill={color} />
-      <path
-        d="M10.7 22.4a5.6 5.6 0 0 1 10.6 0"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function HealthIcon({size = 34, color = "#F15A40"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M16 27.5S4.8 20.6 4.8 13.2A6 6 0 0 1 16 10a6 6 0 0 1 11.2 3.2c0 7.4-11.2 14.3-11.2 14.3Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9.4 16.6h3.4l1.7-3 2.6 5.4 1.7-2.4h3.8"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MotorIcon({size = 34, color = "#F15A40"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M4.6 20.4h22.8v3.1a1.4 1.4 0 0 1-1.4 1.4h-2.1a1.4 1.4 0 0 1-1.4-1.4v-1.2H8.5v1.2a1.4 1.4 0 0 1-1.4 1.4H5a1.4 1.4 0 0 1-1.4-1.4v-3.1Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M4.6 20.4v-4.1l2.3-.8 2.2-4.6a2.1 2.1 0 0 1 1.9-1.2h10a2.1 2.1 0 0 1 1.9 1.2l2.2 4.6 2.3.8v4.1"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M8 15.5h16"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-      <circle cx="9.6" cy="18" r="1.3" fill={color} />
-      <circle cx="22.4" cy="18" r="1.3" fill={color} />
-    </svg>
-  );
-}
-
-function HomeIcon({size = 34, color = "#20BEC6"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M6.4 14.6 16 6.6l9.6 8v11.2a1.6 1.6 0 0 1-1.6 1.6H8a1.6 1.6 0 0 1-1.6-1.6V14.6Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3.6 15.8 16 5.2l12.4 10.6"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M13 27.4v-6.2h6v6.2"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MarineIcon({size = 34, color = "#20BEC6"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M5.4 17.6 16 14.2l10.6 3.4-2.2 6a2.6 2.6 0 0 1-2.5 1.7h-11.8a2.6 2.6 0 0 1-2.5-1.7l-2.2-6Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M9 16.4v-5.6h14v5.6"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 10.8V6.4M12.8 8.6h6.4"
-        stroke={color}
-        strokeWidth={2}
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function FireIcon({size = 34, color = "#F15A40"}: IconProps) {
-  const f = color + "33";
-  return (
-    <svg
-      viewBox="0 0 32 32"
-      width={size}
-      height={size}
-      fill="none"
-      style={{display: "block"}}
-    >
-      <path
-        d="M16 3.6c3.6 3.4 6.9 6.6 6.9 11.4a6.9 6.9 0 1 1-13.8 0c0-2.5 1.1-4.6 2.7-6.5.7 1.4 1.7 2.3 2.8 2.8 0-3 .4-5.5 1.4-7.7Z"
-        fill={f}
-        stroke={color}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      />
-      <path
-        d="M16 24.6a3.1 3.1 0 0 1-1.8-5.6c.9.8 1.5.8 1.8.3.5.9 1.2 1.5 1.9 2.2a3.1 3.1 0 0 1-1.9 3.1Z"
-        fill={color}
-        stroke={color}
-        strokeWidth={1.4}
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 const TEAL = "#20BEC6";
-const ORANGE = "#F15A40";
 
 /* `slug` matches the navigation entries exactly (m1–m4, m6, m7). The two
    remaining nav services — miscellaneous-insurance and entertainment-insurance
-   — have no card here yet; they need an icon before they can be added. */
+   — have no bubble here yet; they need artwork before they can be added. */
+/* `img` is the artwork shown inside the bubble — square, transparent PNGs at
+   about 256x256, subject centred with a little breathing room.
+
+   `x`, `y` and `size` place each bubble inside the cluster box as a percentage
+   of its width, so the cascade scales with the column instead of being pinned
+   to pixels. `delay` staggers the float so the six never bob in unison. */
+const BUBBLE_IMG_BASE = "/images/banner/bubbles";
+
 const INSURANCE_CARDS = [
   {
-    l1: "Life",
-    l2: "Insurance",
-    accent: TEAL,
+    title: "Life Insurance",
     slug: "life-insurance",
-    Icon: LifeIcon,
-    desc: "Secure your family's future with dependable life cover.",
+    img: `${BUBBLE_IMG_BASE}/life.png`,
+    size: 30,
+    x: 4,
+    y: 0,
+    delay: 0,
+    duration: 6.5,
   },
   {
-    l1: "Health",
-    l2: "Insurance",
-    accent: ORANGE,
+    title: "Health Insurance",
     slug: "health-insurance",
-    Icon: HealthIcon,
-    desc: "Comprehensive medical coverage for you and your family.",
+    img: `${BUBBLE_IMG_BASE}/health.png`,
+    size: 24,
+    x: 46,
+    y: 14,
+    delay: 1.1,
+    duration: 5.4,
   },
   {
-    l1: "Motor",
-    l2: "Insurance",
-    accent: ORANGE,
+    title: "Motor Insurance",
     slug: "motor-insurance",
-    Icon: MotorIcon,
-    desc: "Complete protection for your car and two-wheeler.",
+    img: `${BUBBLE_IMG_BASE}/motor.png`,
+    size: 32,
+    x: 0,
+    y: 33,
+    delay: 2.3,
+    duration: 7.2,
   },
   {
-    l1: "Home",
-    l2: "Insurance",
-    accent: TEAL,
+    title: "Home Insurance",
     slug: "home-insurance",
-    Icon: HomeIcon,
-    desc: "Safeguard your home against unexpected risks and loss.",
+    img: `${BUBBLE_IMG_BASE}/home.png`,
+    size: 27,
+    x: 45,
+    y: 44,
+    delay: 0.6,
+    duration: 6.1,
   },
   {
-    l1: "Marine",
-    l2: "Insurance",
-    accent: TEAL,
-    slug: "marine-insurance",
-    Icon: MarineIcon,
-    desc: "Coverage for cargo and goods in transit by sea or land.",
-  },
-  {
-    l1: "Fire",
-    l2: "Insurance",
-    accent: ORANGE,
+    title: "Fire Insurance",
     slug: "fire-insurance",
-    Icon: FireIcon,
-    desc: "Protect your property from fire and related damage.",
+    img: `${BUBBLE_IMG_BASE}/fire.png`,
+    size: 25,
+    x: 10,
+    y: 68,
+    delay: 3.1,
+    duration: 6.8,
+  },
+  {
+    title: "Marine Insurance",
+    slug: "marine-insurance",
+    img: `${BUBBLE_IMG_BASE}/marine.png`,
+    size: 22,
+    x: 53,
+    y: 74,
+    delay: 1.8,
+    duration: 5.8,
   },
 ];
 
@@ -362,95 +189,45 @@ function StatsStrip() {
   );
 }
 
-/* ---------- 6-up insurance card row (sits in the bottom panel now) ---------- */
+/* ---------- Floating service bubbles ----------
+   Six glass bubbles cascading down the right of the hero, echoing the ones the
+   mascot is holding. The artwork is an <img> per bubble; the service name is
+   carried by hidden link text and a tooltip, so the picture stays clean.
+   Positions are absolute percentages inside the cluster box. */
 
-function InsuranceCards() {
+function InsuranceBubbles() {
   return (
-    <div
-      className="ins-cards"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        flexWrap: "nowrap",
-        gap: 16,
-        overflowX: "auto",
-        overflowY: "visible", // was "hidden" — this clipped the card on hover-lift
-        paddingTop: 12, // room for the hover translateY(-7px) + shadow
-        paddingBottom: 2,
-        width: "100%",
-      }}
-    >
-      {INSURANCE_CARDS.map(({l1, l2, accent, slug, Icon, desc}) => (
+    <div className="ins-bubbles">
+      {INSURANCE_CARDS.map(({title, slug, img, size, x, y, delay, duration}) => (
         <a
           key={slug}
           href={`${SERVICE_BASE}/${slug}`}
-          className="ins-card"
+          className="ins-bubble-link"
+          title={title}
           style={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "flex-start",
-            gap: 12,
-            flex: "1 1 0",
-            minWidth: 150,
-            minHeight: 128,
-            padding: "20px 14px",
-            borderRadius: 18,
-            border: `2px solid ${accent}55`,
-            background: "rgba(255,255,255,0.05)",
-            backdropFilter: "blur(6px)",
-            WebkitBackdropFilter: "blur(6px)",
+            position: "absolute",
+            left: `${x}%`,
+            top: `${y}%`,
+            width: `${size}%`,
             textDecoration: "none",
-            cursor: "pointer",
-
-            transition:
-              "transform .22s ease, box-shadow .22s ease, background .22s ease, border-color .22s ease",
+            animationDuration: `${duration}s`,
+            animationDelay: `${delay}s`,
           }}
         >
-          <span
-            className="ins-card-icon"
-            style={{
-              flexShrink: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 2,
-              transition: "transform .28s cubic-bezier(.34,1.56,.64,1)",
-            }}
-          >
-            <Icon size={32} color={accent} />
+          <span className="ins-bubble">
+            <span className="ins-bubble-gloss" aria-hidden="true" />
+            <img
+              src={img}
+              alt=""
+              aria-hidden="true"
+              className="ins-bubble-img"
+              width={256}
+              height={256}
+              loading="lazy"
+              draggable={false}
+            />
           </span>
-
-          <span style={{display: "flex", flexDirection: "column", minWidth: 0}}>
-            <span
-              style={{
-                display: "block",
-                fontSize: 13,
-                fontWeight: 800,
-                color: "#fff",
-                lineHeight: 1.25,
-              }}
-            >
-              {l1}
-              <br />
-              {l2}
-            </span>
-
-            <span
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-                marginTop: 8,
-                fontSize: 11.5,
-                lineHeight: 1.45,
-                color: "rgba(255,255,255,0.55)",
-                fontWeight: 500,
-              }}
-            >
-              {desc}
-            </span>
-          </span>
+          <span className="ins-sr-only">{title}</span>
         </a>
       ))}
     </div>
@@ -494,6 +271,22 @@ function ArrowRight() {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke="#0B2563"
+      strokeWidth={2.2}
+    >
+      <line x1="5.5" y1="5.5" x2="14.5" y2="14.5" strokeLinecap="round" />
+      <line x1="14.5" y1="5.5" x2="5.5" y2="14.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -626,9 +419,9 @@ function LockFieldIcon() {
   );
 }
 
-/* ---------- Right-hand "Get Insured Fast" quote form ---------- */
+/* ---------- "Get Insured Fast" quote form (now shown inside the modal) ---------- */
 
-function QuotePanel() {
+function QuotePanel({onClose}: {onClose?: () => void}) {
   const [insType, setInsType] = useState("Health Insurance");
   const [sum, setSum] = useState("");
   const [mobile, setMobile] = useState("");
@@ -745,6 +538,7 @@ function QuotePanel() {
     <div
       className="ins-quotepanel"
       style={{
+        position: "relative",
         background: "#fff",
         borderRadius: 20,
         boxShadow: "0 8px 48px rgba(0,0,0,0.28)",
@@ -752,6 +546,17 @@ function QuotePanel() {
         width: "100%",
       }}
     >
+      {onClose && (
+        <button
+          type="button"
+          className="ins-modal-close"
+          onClick={onClose}
+          aria-label="Close quote form"
+        >
+          <CloseIcon />
+        </button>
+      )}
+
       <div
         style={{
           display: "flex",
@@ -911,11 +716,47 @@ function QuotePanel() {
   );
 }
 
+/* ---------- Modal shell ----------
+   Closes on backdrop click and on Escape, and locks the page behind it so the
+   hero doesn't scroll under the form. */
+
+function QuoteModal({onClose}: {onClose: () => void}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="ins-modal-backdrop"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Get an insurance quote"
+    >
+      <div className="ins-modal" onClick={(e) => e.stopPropagation()}>
+        <QuotePanel onClose={onClose} />
+      </div>
+    </div>
+  );
+}
+
 export default function Banner() {
   const {headline, visible} = useRotatingHeadline(
     HEADLINES,
     HEADLINE_INTERVAL_MS,
   );
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   return (
     <>
@@ -962,15 +803,15 @@ export default function Banner() {
           font-family: 'BalooChettan2', sans-serif !important;
         }
 
-        /* ---- three-column hero: left content | center image | right quote panel ---- */
+        /* ---- three-column hero: left content | center image | right service cards ---- */
         .ins-inner{
           display:flex;
           align-items:center;
           gap:24px;
         }
-        .ins-left{ flex:0 1 36%; min-width:0; }
-        .ins-center{ flex:1 1 38%; min-width:0; display:flex; align-items:center; justify-content:center; }
-        .ins-right{ flex:0 0 280px; }
+        .ins-left{ flex:0 1 34%; min-width:0; }
+        .ins-center{ flex:1 1 36%; min-width:0; display:flex; align-items:center; justify-content:center; }
+        .ins-right{ flex:0 0 296px; min-width:0; }
 
         .ins-headline{
           transition: opacity .3s ease, transform .3s ease;
@@ -1045,50 +886,153 @@ export default function Banner() {
           .ins-stat-dupe{ display:none; }
         }
 
-        .ins-cards-panel .ins-card:hover{
-          transform:translateY(-7px);
-          box-shadow:0 18px 38px rgba(0,0,0,0.42);
-          background:rgba(255,255,255,0.1);
-          border-color:rgba(255,255,255,0.5);
+        /* ---- right column: floating service bubbles ---- */
+        .ins-cards-panel{ padding:0; min-width:0; }
+        .ins-sr-only{
+          position:absolute;
+          width:1px;height:1px;
+          padding:0;margin:-1px;
+          overflow:hidden;
+          clip:rect(0 0 0 0);
+          white-space:nowrap;
+          border:0;
         }
-        .ins-cards-panel .ins-card:hover .ins-card-icon{ transform:scale(1.18) rotate(-4deg); }
-        .ins-cards-panel .ins-card:active{ transform:translateY(-2px); }
+        .ins-bubbles{
+          position:relative;
+          width:100%;
+          max-width:300px;
+          margin:0 auto;
+          aspect-ratio:1 / 1.35;
+        }
+        .ins-bubble-link{
+          display:block;
+          animation-name:ins-bubble-float;
+          animation-timing-function:ease-in-out;
+          animation-iteration-count:infinite;
+        }
+        /* translucent glass, lit from the upper left, with a faint cool glow
+           around it so it separates from the navy without going solid white */
+        .ins-bubble{
+          position:relative;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          width:100%;
+          aspect-ratio:1 / 1;
+          border-radius:50%;
+          border:1px solid rgba(255,255,255,0.45);
+          background:
+            radial-gradient(circle at 30% 26%,
+              rgba(255,255,255,0.97) 0%,
+              rgba(255,255,255,0.88) 38%,
+              rgba(232,243,252,0.72) 70%,
+              rgba(186,214,238,0.55) 100%);
+          backdrop-filter:blur(3px);
+          -webkit-backdrop-filter:blur(3px);
+          box-shadow:
+            0 16px 30px rgba(0,6,40,0.34),
+            0 0 22px rgba(120,190,230,0.18),
+            inset 0 -10px 18px rgba(255,255,255,0.7),
+            inset 0 8px 16px rgba(130,170,210,0.22);
+          transition:transform .25s ease, box-shadow .25s ease;
+        }
+        .ins-bubble-img{
+          width:60%;
+          height:60%;
+          object-fit:contain;
+          user-select:none;
+          -webkit-user-drag:none;
+        }
+        /* specular highlight */
+        .ins-bubble-gloss{
+          position:absolute;
+          top:10%;
+          left:15%;
+          width:32%;
+          height:20%;
+          border-radius:50%;
+          background:rgba(255,255,255,0.95);
+          filter:blur(4px);
+          opacity:.95;
+          pointer-events:none;
+        }
+        .ins-bubble-link:hover .ins-bubble{
+          transform:scale(1.08);
+          box-shadow:
+            0 22px 38px rgba(0,6,40,0.42),
+            0 0 30px rgba(120,190,230,0.28),
+            inset 0 -10px 18px rgba(255,255,255,0.75),
+            inset 0 8px 16px rgba(130,170,210,0.22);
+        }
+        .ins-bubble-link:hover{ animation-play-state:paused; }
+        .ins-bubble-link:focus-visible{
+          outline:2px solid #20BEC6;
+          outline-offset:4px;
+          border-radius:50%;
+        }
+        @keyframes ins-bubble-float{
+          0%   { transform:translate3d(0,0,0); }
+          50%  { transform:translate3d(0,-12px,0); }
+          100% { transform:translate3d(0,0,0); }
+        }
+        @media (prefers-reduced-motion: reduce){
+          .ins-bubble-link{ animation:none; }
+          .ins-bubble{ transition:none; }
+        }
 
         .ins-quote-cta:hover{ transform:translateY(-2px); box-shadow:0 10px 22px rgba(242,89,23,0.35); }
 
-        /* ---- bottom "what would you like to protect" panel ---- */
-        .ins-cards-panel{
-          border:1px solid rgba(255,255,255,0.14);
-          border-radius:22px;
-          background:rgba(255,255,255,0.03);
-          padding:32px 28px 32px;
-        }
-        .ins-cards-title{
-          text-align:center;
-          color:#fff;
-          font-size:16px;
-          font-weight:800;
-          margin-bottom:22px;
-          position:relative;
-        }
-        .ins-cards{
+        /* ---- quote modal ---- */
+        .ins-modal-backdrop{
+          position:fixed;
+          inset:0;
+          z-index:1000;
           display:flex;
-          flex-wrap:nowrap;
-          gap:16px;
-          overflow-x:auto;
-          overflow-y:visible;
-          padding-top:12px;
-          padding-bottom:2px;
-          scrollbar-width:none;
+          align-items:center;
+          justify-content:center;
+          padding:20px;
+          overflow-y:auto;
+          background:rgba(0,10,45,0.62);
+          backdrop-filter:blur(5px);
+          -webkit-backdrop-filter:blur(5px);
+          animation:ins-modal-fade .18s ease;
         }
-        .ins-cards::-webkit-scrollbar{ display:none; }
-        .ins-cards .ins-card{ flex:1 1 0; min-width:150px; }
+        .ins-modal{
+          width:100%;
+          max-width:400px;
+          margin:auto;
+          animation:ins-modal-pop .24s cubic-bezier(.34,1.3,.64,1);
+        }
+        .ins-modal-close{
+          position:absolute;
+          top:14px;
+          right:14px;
+          width:30px;
+          height:30px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          border:none;
+          border-radius:9px;
+          background:#F1F3F8;
+          cursor:pointer;
+          transition:background .18s ease;
+        }
+        .ins-modal-close:hover{ background:#E2E6F0; }
+        @keyframes ins-modal-fade{ from{opacity:0} to{opacity:1} }
+        @keyframes ins-modal-pop{
+          from{ opacity:0; transform:translateY(10px) scale(.98); }
+          to  { opacity:1; transform:none; }
+        }
+        @media (prefers-reduced-motion: reduce){
+          .ins-modal-backdrop, .ins-modal{ animation:none; }
+        }
 
         @media(max-width:1200px){
           .ins-inner{ flex-wrap:wrap; }
           .ins-left{ flex:1 1 100%; order:1; }
-          .ins-center{ flex:1 1 55%; order:2; }
-          .ins-right{ flex:1 1 40%; order:3; }
+          .ins-center{ flex:1 1 45%; order:2; }
+          .ins-right{ flex:1 1 50%; order:3; }
         }
 
         @media(max-width:1024px){
@@ -1098,15 +1042,14 @@ export default function Banner() {
           .ins-left h1{ font-size:clamp(26px, 4vw, 40px)!important; text-align:left!important; white-space:normal!important; }
           .ins-left p{ font-size:13px!important; text-align:left!important; }
           .ins-cta-row{ justify-content:flex-start!important; flex-direction:row!important; flex-wrap:nowrap!important; }
-          .ins-cta-row a { padding: 10px 18px!important; font-size: 13px!important; white-space:nowrap!important; }
+          .ins-cta-row a, .ins-cta-row button { padding: 10px 18px!important; font-size: 13px!important; white-space:nowrap!important; }
           .ins-stat{ padding:0 20px!important; }
           .ins-stat-value{ font-size:20px!important; }
           .ins-stat-label{ font-size:11px!important; }
           .ins-center{ flex:1 1 100%!important; order:2!important; }
           .ins-center img{ max-width:380px!important; }
-          .ins-right{ flex:1 1 100%!important; order:3!important; max-width:420px; margin:0 auto; }
-          .ins-cards-wrap{ padding:0 32px 44px!important; }
-          .ins-cards-panel .ins-cards .ins-card{ min-width:150px!important; }
+          .ins-right{ flex:1 1 100%!important; order:3!important; }
+          .ins-bubbles{ max-width:340px!important; }
         }
 
         @media(max-width:600px){
@@ -1131,7 +1074,7 @@ export default function Banner() {
             gap:10px!important;
             margin-bottom:32px!important;
           }
-          .ins-cta-row a{
+          .ins-cta-row a, .ins-cta-row button{
             flex:1 1 0!important;
             width:auto!important;
             text-align:center!important;
@@ -1165,10 +1108,8 @@ export default function Banner() {
           .ins-stat-value{ font-size:20px!important; }
           .ins-stat-label{ font-size:11.5px!important; margin-top:3px!important; }
           .ins-center img{ max-width:230px!important; }
-          .ins-cards-wrap{ padding:0 16px 36px!important; margin-top:36px!important; }
-          .ins-cards-panel{ padding:22px 16px 24px!important; border-radius:18px!important; }
-          .ins-cards-panel .ins-cards .ins-card{ min-width:150px!important; padding:16px 12px!important; }
-          .ins-cards-panel .ins-cards .ins-card-icon svg{ width:26px!important; height:26px!important; }
+          .ins-bubbles{ max-width:280px!important; }
+          .ins-modal-backdrop{ padding:14px!important; }
         }
       `}</style>
 
@@ -1180,7 +1121,7 @@ export default function Banner() {
             position: "relative",
             overflow: "visible",
             paddingTop: 88,
-            paddingBottom: 56,
+            paddingBottom: 64,
           }}
         >
           <div className="ins-inner max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-16 relative z-10">
@@ -1210,12 +1151,14 @@ export default function Banner() {
                 whenever you need it.
               </p>
               <div className="ins-cta-row flex flex-row gap-3 sm:gap-4 flex-nowrap items-center justify-center lg:justify-start mb-10 sm:mb-14">
-                <a
-                  href="/contact-us"
-                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5"
+                {/* opens the quote form in a modal instead of navigating away */}
+                <button
+                  type="button"
+                  onClick={() => setQuoteOpen(true)}
+                  className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#EC4F34] rounded-xl text-white no-underline text-[13.5px] sm:text-[14.5px] font-extrabold whitespace-nowrap text-center transition-all duration-200 hover:brightness-105 hover:-translate-y-0.5 cursor-pointer"
                 >
                   Get your quote
-                </a>
+                </button>
                 <a
                   href="tel:18004258084"
                   className="py-3 sm:py-3.5 px-4 sm:px-6 bg-[#D5D7DA] border-[1.5px] border-white/40 rounded-xl text-black no-underline text-[13.5px] sm:text-[14.5px] font-extrabold backdrop-blur-md whitespace-nowrap text-center transition-all duration-200 hover:bg-white hover:-translate-y-0.5"
@@ -1230,31 +1173,23 @@ export default function Banner() {
             {/* ---- center: family image ---- */}
             <div className="ins-center">
               <img
-                src="/images/banner/banner-6.png"
+                src="/images/banner/banner-7.png"
                 alt="Insurance coverage"
                 className="w-full h-auto object-contain max-w-[640px] mx-auto"
               />
             </div>
 
-            {/* ---- right: get-a-quote form ---- */}
+            {/* ---- right: service cards (moved up from the old bottom strip) ---- */}
             <div className="ins-right">
-              <QuotePanel />
-            </div>
-          </div>
-
-          {/* ---- bottom: "what would you like to protect" card row ---- */}
-          <div className="ins-cards-wrap px-4 sm:px-8 lg:px-12 mt-10 sm:mt-14">
-            <div className="max-w-7xl mx-auto">
               <div className="ins-cards-panel">
-                <div className="ins-cards-title">
-                  What would you like to protect?
-                </div>
-                <InsuranceCards />
+                <InsuranceBubbles />
               </div>
             </div>
           </div>
         </section>
       </div>
+
+      {quoteOpen && <QuoteModal onClose={() => setQuoteOpen(false)} />}
     </>
   );
 }
