@@ -682,8 +682,8 @@ export default function Banner() {
           font-family:inherit !important;
           transition:transform .18s ease, box-shadow .18s ease, background .18s ease !important;
         }
-        .hero-cta-primary{ background:${ORANGE} !important; color:#fff !important; }
-        .hero-cta-primary:hover{ transform:translateY(-2px) !important; box-shadow:0 12px 24px rgba(236,79,52,0.32) !important; }
+        .hero-cta-primary{ background:#1899A0 !important; color:#fff !important; }
+        .hero-cta-primary:hover{ transform:translateY(-2px) !important; background:#20BEC6 !important; }
         .hero-cta-ghost{
           background:rgba(255,255,255,0.06) !important;
           border:1.5px solid rgba(255,255,255,0.24) !important;
@@ -769,12 +769,12 @@ export default function Banner() {
           display:flex !important; align-items:center !important; justify-content:center !important; gap:9px !important;
           margin-top:4px !important; padding:14px 20px !important;
           border:none !important; border-radius:12px !important;
-          background:${ORANGE} !important; color:#fff !important;
+          background:#1899A0 !important; color:#fff !important;
           font-family:inherit !important; font-size:15px !important; font-weight:800 !important;
           cursor:pointer !important;
           transition:transform .18s ease, box-shadow .18s ease, opacity .18s ease !important;
         }
-        .hero-quote-cta:hover:not(:disabled){ transform:translateY(-2px) !important; box-shadow:0 12px 24px rgba(236,79,52,0.34) !important; }
+        .hero-quote-cta:hover:not(:disabled){ transform:translateY(-2px) !important; background:#20BEC6 !important;  }
         .hero-quote-cta:disabled{ opacity:.65 !important; cursor:not-allowed !important; }
         .hero-quote-note{
           display:flex !important; align-items:center !important; justify-content:center !important; gap:6px !important;
