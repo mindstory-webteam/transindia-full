@@ -111,8 +111,15 @@ const box = (size: number) => ({
 
 function LifeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="7.2" r="2.6" />
       <path d="M7.6 16.6a4.4 4.4 0 0 1 8.8 0" />
       <circle cx="5" cy="10.6" r="1.9" />
@@ -126,8 +133,15 @@ function LifeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function HealthIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 20.4S3.6 15.2 3.6 9.6a4.5 4.5 0 0 1 8.4-2.3 4.5 4.5 0 0 1 8.4 2.3c0 5.6-8.4 10.8-8.4 10.8Z" />
       <path d="M6.6 12h2.6l1.3-2.3 2 4.2 1.3-1.9h3" />
     </svg>
@@ -136,8 +150,15 @@ function HealthIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function MotorIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3.4 15.4v-3l1.7-.6 1.7-3.5A1.6 1.6 0 0 1 8.2 7.4h7.6a1.6 1.6 0 0 1 1.4.9l1.7 3.5 1.7.6v3" />
       <path d="M3.4 15.4h17.2v1.8a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-.8H6.8v.8a1 1 0 0 1-1 1H4.4a1 1 0 0 1-1-1Z" />
       <path d="M6 11.8h12" />
@@ -149,8 +170,15 @@ function MotorIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function HomeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3.4 10.8 12 4.2l8.6 6.6" />
       <path d="M5.6 12.4v7a1.2 1.2 0 0 0 1.2 1.2h10.4a1.2 1.2 0 0 0 1.2-1.2v-7" />
       <path d="M9.8 20.6v-4.8h4.4v4.8" />
@@ -160,8 +188,15 @@ function HomeIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function MarineIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4 13.6 12 11l8 2.6-1.7 4.5a2 2 0 0 1-1.9 1.3H7.6a2 2 0 0 1-1.9-1.3Z" />
       <path d="M7 12.4V8.2h10v4.2" />
       <path d="M12 8.2V4.8M9.6 6.4h4.8" />
@@ -171,8 +206,15 @@ function MarineIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function FireIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 3.4c2.7 2.5 5.2 5 5.2 8.6a5.2 5.2 0 1 1-10.4 0c0-1.9.8-3.5 2-4.9.6 1.1 1.3 1.8 2.1 2.1 0-2.3.3-4.1 1.1-5.8Z" />
       <path d="M12 18.4a2.3 2.3 0 0 1-1.4-4.2c.7.6 1.2.6 1.4.2.4.7.9 1.2 1.4 1.7a2.3 2.3 0 0 1-1.4 2.3Z" />
     </svg>
@@ -181,8 +223,15 @@ function FireIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function MiscIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M14.4 3.4H6.8a1.4 1.4 0 0 0-1.4 1.4v14.4a1.4 1.4 0 0 0 1.4 1.4h5" />
       <path d="M8.2 8h6M8.2 11.4h4.4M8.2 14.8h2.6" />
       <path d="M17.6 11.4 21.4 13v3.2c0 2-1.6 3.7-3.8 4.4-2.2-.7-3.8-2.4-3.8-4.4V13Z" />
@@ -192,8 +241,15 @@ function MiscIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function EntertainmentIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M3 7.4h8v5.4a4 4 0 0 1-8 0Z" />
       <path d="M5.4 9.8h.01M8.6 9.8h.01" />
       <path d="M5.6 12.4a2.4 2.4 0 0 0 2.8 0" />
@@ -208,8 +264,15 @@ function EntertainmentIcon({size = 30, color = TEAL, stroke = 1.6}: IconProps) {
 
 function ShieldCheckIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 3 4.8 5.6v5.6c0 4.3 3 8 7.2 9 4.2-1 7.2-4.7 7.2-9V5.6Z" />
       <path d="m9.2 12 2 2.1 3.6-4" />
     </svg>
@@ -218,8 +281,15 @@ function ShieldCheckIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
 
 function UsersIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="9.4" cy="8.4" r="3" />
       <path d="M3.6 19a5.8 5.8 0 0 1 11.6 0" />
       <path d="M16 6.2a3 3 0 0 1 0 5.8M17.4 19a5.4 5.4 0 0 0-2-4.2" />
@@ -229,8 +299,15 @@ function UsersIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
 
 function CheckBadgeIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="8.6" />
       <path d="m8.2 12.4 2.6 2.6 5-5.4" />
     </svg>
@@ -239,8 +316,15 @@ function CheckBadgeIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
 
 function ClockIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="8.6" />
       <path d="M12 7.4V12l3 1.8" />
     </svg>
@@ -249,8 +333,15 @@ function ClockIcon({size = 20, color = TEAL, stroke = 1.7}: IconProps) {
 
 function ArrowCircleIcon({size = 20, color = "currentColor"}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="9" />
       <path d="M8.6 12h6.8M12.6 9.2 15.4 12l-2.8 2.8" />
     </svg>
@@ -259,8 +350,15 @@ function ArrowCircleIcon({size = 20, color = "currentColor"}: IconProps) {
 
 function HeadsetIcon({size = 18, color = "currentColor"}: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" style={box(size)} fill="none" stroke={color}
-      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      style={box(size)}
+      fill="none"
+      stroke={color}
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M4.4 15v-3a7.6 7.6 0 0 1 15.2 0v3" />
       <path d="M4.4 13.4h1.8a1.4 1.4 0 0 1 1.4 1.4v2.4a1.4 1.4 0 0 1-1.4 1.4H5.8a1.4 1.4 0 0 1-1.4-1.4Z" />
       <path d="M19.6 13.4h-1.8a1.4 1.4 0 0 0-1.4 1.4v2.4a1.4 1.4 0 0 0 1.4 1.4h.4a1.4 1.4 0 0 0 1.4-1.4Z" />
@@ -271,15 +369,33 @@ function HeadsetIcon({size = 18, color = "currentColor"}: IconProps) {
 
 function ChevronDown({color = "rgba(255,255,255,0.75)"}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2}>
-      <polyline points="5 8 10 13 15 8" strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+    >
+      <polyline
+        points="5 8 10 13 15 8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function CloseIcon({color = "#fff"}: {color?: string}) {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke={color} strokeWidth={2.2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke={color}
+      strokeWidth={2.2}
+    >
       <line x1="5.5" y1="5.5" x2="14.5" y2="14.5" strokeLinecap="round" />
       <line x1="14.5" y1="5.5" x2="5.5" y2="14.5" strokeLinecap="round" />
     </svg>
@@ -288,16 +404,34 @@ function CloseIcon({color = "#fff"}: {color?: string}) {
 
 function CheckCircleIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#34D399" strokeWidth={2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke="#34D399"
+      strokeWidth={2}
+    >
       <circle cx="10" cy="10" r="8" />
-      <polyline points="6.5 10.5 9 13 13.5 7.5" strokeLinecap="round" strokeLinejoin="round" />
+      <polyline
+        points="6.5 10.5 9 13 13.5 7.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function AlertIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={16} height={16} fill="none" stroke="#FCA5A5" strokeWidth={2}>
+    <svg
+      viewBox="0 0 20 20"
+      width={16}
+      height={16}
+      fill="none"
+      stroke="#FCA5A5"
+      strokeWidth={2}
+    >
       <circle cx="10" cy="10" r="8" />
       <line x1="10" y1="6" x2="10" y2="11" strokeLinecap="round" />
       <circle cx="10" cy="14" r="0.6" fill="#FCA5A5" stroke="none" />
@@ -307,7 +441,14 @@ function AlertIcon() {
 
 function TypeFieldIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
+    <svg
+      viewBox="0 0 20 20"
+      width={14}
+      height={14}
+      fill="none"
+      stroke={TEAL}
+      strokeWidth={1.7}
+    >
       <circle cx="10" cy="6.4" r="2.6" />
       <path d="M4 17c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" strokeLinecap="round" />
     </svg>
@@ -316,7 +457,14 @@ function TypeFieldIcon() {
 
 function RupeeFieldIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
+    <svg
+      viewBox="0 0 20 20"
+      width={14}
+      height={14}
+      fill="none"
+      stroke={TEAL}
+      strokeWidth={1.7}
+    >
       <line x1="5" y1="4.5" x2="15" y2="4.5" strokeLinecap="round" />
       <line x1="5" y1="8" x2="15" y2="8" strokeLinecap="round" />
       <path d="M5 4.5c4 0 6 1.4 6 3.5S9 11.5 5 11.5" strokeLinecap="round" />
@@ -327,16 +475,33 @@ function RupeeFieldIcon() {
 
 function PhoneFieldIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={14} height={14} fill="none" stroke={TEAL} strokeWidth={1.7}>
-      <path d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
-        strokeLinecap="round" strokeLinejoin="round" />
+    <svg
+      viewBox="0 0 20 20"
+      width={14}
+      height={14}
+      fill="none"
+      stroke={TEAL}
+      strokeWidth={1.7}
+    >
+      <path
+        d="M5.5 3.5h3l1.4 3.4-1.8 1.4a9 9 0 0 0 4.6 4.6l1.4-1.8 3.4 1.4v3a1.3 1.3 0 0 1-1.4 1.3A13 13 0 0 1 4.2 4.9a1.3 1.3 0 0 1 1.3-1.4Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
 function LockFieldIcon() {
   return (
-    <svg viewBox="0 0 20 20" width={12} height={12} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth={1.7}>
+    <svg
+      viewBox="0 0 20 20"
+      width={12}
+      height={12}
+      fill="none"
+      stroke="rgba(255,255,255,0.6)"
+      strokeWidth={1.7}
+    >
       <rect x="4.5" y="9" width="11" height="7.5" rx="1.6" />
       <path d="M6.8 9V6.4a3.2 3.2 0 0 1 6.4 0V9" strokeLinecap="round" />
     </svg>
@@ -345,8 +510,16 @@ function LockFieldIcon() {
 
 function ShieldBadgeIcon() {
   return (
-    <svg viewBox="0 0 24 24" width={22} height={22} fill="none" stroke={TEAL}
-      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      width={22}
+      height={22}
+      fill="none"
+      stroke={TEAL}
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M12 3 4.8 5.6v5.6c0 4.3 3 8 7.2 9 4.2-1 7.2-4.7 7.2-9V5.6Z" />
       <path d="m9.2 12 2 2.1 3.6-4" />
     </svg>
@@ -370,8 +543,18 @@ const SERVICES = [
   {l1: "Home", l2: "Insurance", slug: "home-insurance", Icon: HomeIcon},
   {l1: "Marine", l2: "Insurance", slug: "marine-insurance", Icon: MarineIcon},
   {l1: "Fire", l2: "Insurance", slug: "fire-insurance", Icon: FireIcon},
-  {l1: "Miscellaneous", l2: "Insurance", slug: "miscellaneous-insurance", Icon: MiscIcon},
-  {l1: "Entertainment", l2: "Insurance", slug: "entertainment-insurance", Icon: EntertainmentIcon},
+  {
+    l1: "Miscellaneous",
+    l2: "Insurance",
+    slug: "miscellaneous-insurance",
+    Icon: MiscIcon,
+  },
+  {
+    l1: "Entertainment",
+    l2: "Insurance",
+    slug: "entertainment-insurance",
+    Icon: EntertainmentIcon,
+  },
 ];
 
 /* ---------- stats row ---------- */
@@ -407,7 +590,11 @@ function ServiceGrid() {
 
       <div className="hero-services">
         {SERVICES.map(({l1, l2, slug, Icon}) => (
-          <a key={slug} href={`${SERVICE_BASE}/${slug}`} className="hero-service">
+          <a
+            key={slug}
+            href={`${SERVICE_BASE}/${slug}`}
+            className="hero-service"
+          >
             <span className="hero-service-icon">
               <Icon size={55} stroke={1.5} />
             </span>
@@ -445,7 +632,10 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
       return;
     }
     if (!/^[6-9]\d{9}$/.test(mobile)) {
-      setFeedback({type: "error", text: "Please enter a valid 10-digit mobile number"});
+      setFeedback({
+        type: "error",
+        text: "Please enter a valid 10-digit mobile number",
+      });
       return;
     }
 
@@ -468,7 +658,8 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
         console.error("Lead save failed:", res.status, errBody);
         setFeedback({
           type: "error",
-          text: errBody.message || "Could not save your request. Please try again.",
+          text:
+            errBody.message || "Could not save your request. Please try again.",
         });
         setSubmitting(false);
         return;
@@ -480,7 +671,10 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
       });
     } catch (err) {
       console.error("Failed to save lead:", err);
-      setFeedback({type: "error", text: "Network error — could not reach the server."});
+      setFeedback({
+        type: "error",
+        text: "Network error — could not reach the server.",
+      });
       setSubmitting(false);
       return;
     }
@@ -491,7 +685,12 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
   return (
     <div className="hero-quote">
       {onClose && (
-        <button type="button" className="hero-modal-close" onClick={onClose} aria-label="Close quote form">
+        <button
+          type="button"
+          className="hero-modal-close"
+          onClick={onClose}
+          aria-label="Close quote form"
+        >
           <CloseIcon />
         </button>
       )}
@@ -561,7 +760,11 @@ function QuotePanel({onClose}: {onClose?: () => void}) {
         />
       </div>
 
-      <button className="hero-quote-cta" disabled={submitting} onClick={handleGetQuote}>
+      <button
+        className="hero-quote-cta"
+        disabled={submitting}
+        onClick={handleGetQuote}
+      >
         {submitting ? "Sending..." : "Get Quote"}
         {!submitting && <ArrowCircleIcon size={19} />}
       </button>
@@ -631,17 +834,6 @@ export default function Banner() {
           background:${NAVY} !important;
           padding:88px 0 56px !important;
           overflow:hidden !important;
-        }
-        /* soft light behind the artwork, as in the reference */
-        .hero-section::before{
-          content:"" !important;
-          position:absolute !important;
-          top:-10% !important;
-          right:8% !important;
-          width:52% !important;
-          height:90% !important;
-          background:radial-gradient(circle, rgba(32,190,198,0.16) 0%, rgba(0,26,90,0) 68%) !important;
-          pointer-events:none !important;
         }
         .hero-wrap{ position:relative !important; z-index:1 !important; max-width:1280px !important; margin:0 auto !important; padding:0 24px !important; }
 
@@ -885,24 +1077,36 @@ export default function Banner() {
           .hero-modal-backdrop, .hero-modal{ animation:none !important; }
         }
 
+        /* mobile-only bricks panel — hidden on desktop by default */
+        .hero-services-sm{ display:none !important; }
+
         /* ---- responsive ---- */
         @media(max-width:1180px){
           .hero-hero{ flex-wrap:wrap !important; }
-          .hero-copy{ flex:1 1 100% !important; order:1 !important; }
-          .hero-art{ flex:1 1 48% !important; order:2 !important; }
-          .hero-form{ flex:1 1 44% !important; order:3 !important; max-width:420px !important; }
+          .hero-copy{ flex:1 1 100% !important; order:1 !important; padding-top:40px !important; }
+          .hero-art{ flex:1 1 48% !important; order:3 !important; }
+          .hero-form{ flex:1 1 44% !important; order:4 !important; max-width:420px !important; }
           .hero-services{ grid-template-columns:repeat(4,minmax(0,1fr)) !important; }
         }
-        @media(max-width:820px){
+        @media(max-width:1024px){
           .hero-section{ padding:64px 0 44px !important; }
-          .hero-wrap{ padding:0 18px !important; }
-          .hero-art{ flex:1 1 100% !important; }
-          .hero-art img{ max-width:380px !important; }
-          .hero-form{ flex:1 1 100% !important; max-width:460px !important; margin:0 auto !important; }
+          .hero-wrap{ padding:0 20px !important; }
+          .hero-hero{ flex-wrap:wrap !important; }
+          /* iPad Pro & tablets: same stacked order — copy -> bricks -> mascot -> form */
+          .hero-copy{ order:1 !important; flex:1 1 100% !important; padding-top:76px !important; }
+          .hero-services-sm{ display:block !important; flex:1 1 100% !important; order:2 !important; }
+          .hero-services-sm .hero-services-panel{ margin-top:18px !important; margin-bottom:0 !important; padding:22px 16px 24px !important; border-radius:20px !important; }
+          .hero-services-desktop{ display:none !important; }
+          .hero-art{ order:3 !important; flex:1 1 100% !important; }
+          .hero-art img{ max-width:400px !important; margin:0 auto !important; display:block !important; }
+          .hero-form{ order:4 !important; flex:1 1 100% !important; max-width:480px !important; margin:0 auto !important; }
           .hero-stats{ flex-wrap:wrap !important; gap:16px 0 !important; }
           .hero-stat{ padding:0 16px !important; }
-          .hero-services-head{ gap:12px !important; }
-          .hero-services-title{ font-size:15px !important; white-space:normal !important; text-align:center !important; }
+          .hero-services{ grid-template-columns:repeat(4,minmax(0,1fr)) !important; gap:12px !important; }
+          .hero-service{ min-height:122px !important; padding:16px 8px !important; gap:10px !important; }
+          .hero-service-icon svg{ width:38px !important; height:38px !important; }
+          .hero-services-head{ gap:14px !important; }
+          .hero-services-title{ font-size:16px !important; white-space:normal !important; text-align:center !important; }
         }
         @media(max-width:600px){
           .hero-headline{ font-size:clamp(30px,8.5vw,40px) !important; }
@@ -911,7 +1115,14 @@ export default function Banner() {
           .hero-cta{ flex:1 1 0 !important; justify-content:center !important; padding:12px 14px !important; font-size:13.5px !important; white-space:nowrap !important; }
           .hero-stats{ display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:18px 10px !important; }
           .hero-stat{ padding:0!important; border-left:none!important; }
-          .hero-services-panel{ margin-top:34px !important; padding:20px 14px 22px !important; border-radius:18px !important; }
+          .hero-copy{ padding-top:64px !important; }
+          /* show mobile bricks (below copy, above mascot), hide desktop bottom panel */
+          .hero-services-sm{ display:block !important; flex:1 1 100% !important; order:2 !important; }
+          .hero-services-sm .hero-services-panel{ margin-top:16px !important; margin-bottom:0 !important; padding:20px 14px 22px !important; border-radius:18px !important; }
+          .hero-services-desktop{ display:none !important; }
+          .hero-art{ order:3 !important; flex:1 1 100% !important; }
+          .hero-art img{ max-width:300px !important; margin:0 auto !important; display:block !important; }
+          .hero-form{ order:4 !important; flex:1 1 100% !important; max-width:100% !important; margin:0 !important; }
           .hero-services{ grid-template-columns:repeat(2,minmax(0,1fr)) !important; gap:10px !important; }
           .hero-service{ min-height:122px !important; padding:18px 8px !important; gap:12px !important; }
           .hero-service-icon svg{ width:36px !important; height:36px !important; }
@@ -940,7 +1151,9 @@ export default function Banner() {
 
                   <h1
                     className={`hero-headline hero-headline-live ${visible ? "hero-headline-visible" : "hero-headline-hidden"} ${headline.className || ""}`}
-                    style={headline.font ? {fontFamily: headline.font} : undefined}
+                    style={
+                      headline.font ? {fontFamily: headline.font} : undefined
+                    }
                   >
                     {headlineContent(HEADLINES[index])}
                   </h1>
@@ -968,9 +1181,17 @@ export default function Banner() {
                 <StatsRow />
               </div>
 
+              {/* ---- mobile-only bricks: right after hero-copy on sm screens ---- */}
+              <div className="hero-services-sm">
+                <ServiceGrid />
+              </div>
+
               {/* ---- middle: artwork ---- */}
               <div className="hero-art">
-                <img src={HERO_IMAGE} alt="Insurance coverage for your family" />
+                <img
+                  src={HERO_IMAGE}
+                  alt="Insurance coverage for your family"
+                />
               </div>
 
               {/* ---- right: quote form ---- */}
@@ -979,8 +1200,10 @@ export default function Banner() {
               </div>
             </div>
 
-            {/* ---- bottom: eight services ---- */}
-            <ServiceGrid />
+            {/* ---- bottom: eight services (desktop only) ---- */}
+            <div className="hero-services-desktop">
+              <ServiceGrid />
+            </div>
           </div>
         </section>
       </div>
