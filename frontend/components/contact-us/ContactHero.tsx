@@ -69,7 +69,7 @@ export default function ContactHero() {
             {/* ── Large-screen banner image ── */}
             <div className="contact-lg-banner">
               <img
-                src="/images/contact-us/CONTACT/Contacts page - Hero banner.png"
+                src="/images/banner/trans12.png"
                 alt="Contact us representative"
                 className="contact-lg-banner-img"
               />
@@ -103,7 +103,7 @@ const CSS = `
   .contact-hero {
     background: #00124C;
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     padding-top: 150px;
     padding-bottom: 75px;
     font-family: 'matterregular', sans-serif;
@@ -149,22 +149,27 @@ const CSS = `
     margin: 0;
   }
 
-  /* ── Large-screen banner ── */
+  /* ── Large-screen banner: anchored to the bottom, never cropped ── */
   .contact-lg-banner {
     position: absolute;
     top: 0;
     bottom: 0;
-    right: 12%;
-    width: 700px;
+    right: 6%;
+    width: 640px;
+    max-width: 48%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
     pointer-events: none;
     z-index: 1;
-    overflow: hidden;
+    overflow: visible;
   }
   .contact-lg-banner-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: top center;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: bottom center;
     display: block;
   }
 
@@ -174,7 +179,26 @@ const CSS = `
       padding-bottom: 0px;
     }
     .contact-inner {
-      min-height: 460px;
+      min-height: 520px;
+    }
+  }
+
+  /* Wide desktops: keep the mascot from drifting too far inward */
+  @media (min-width: 1500px) {
+    .contact-lg-banner {
+      right: 10%;
+      width: 680px;
+    }
+  }
+
+  /* Narrow desktops / small laptops */
+  @media (min-width: 1025px) and (max-width: 1280px) {
+    .contact-lg-banner {
+      right: 2%;
+      width: 520px;
+    }
+    .contact-inner {
+      min-height: 470px;
     }
   }
 
@@ -213,23 +237,25 @@ const CSS = `
       background: #0b1240;
     }
     .contact-sm-banner {
-      display: block;
+      display: flex;
+      align-items: flex-end;
+      justify-content: flex-end;
       position: absolute;
       top: 0;
       right: 30px;
-      bottom: 100px;
+      bottom: 0;
       width: 42%;
       max-width: 420px;
       pointer-events: none;
       z-index: 1;
-      overflow: hidden;
+      overflow: visible;
     }
     .contact-sm-banner-img {
       width: 100%;
       height: 100%;
       display: block;
-      object-fit: cover;
-      object-position: top right;
+      object-fit: contain;
+      object-position: bottom right;
     }
   }
 
@@ -261,7 +287,7 @@ const CSS = `
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
+      object-fit: contain;
     }
   }
 `;

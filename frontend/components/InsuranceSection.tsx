@@ -10,7 +10,7 @@ const cards = [
     desc: "We map your risk profile against 20+ top insurers to find the product that fits your life not a generic off-the-shelf policy.",
     cta: "Talk to an expert",
     href: "/contact-us",
-    imageSrc: "/images/home/HOME/Tailored Coverage.png",
+    imageSrc: "/images/icon/trans6.png",
     imageAlt: "Tailored Coverage illustration",
   },
   {
@@ -20,7 +20,7 @@ const cards = [
     desc: "Our dedicated claims team works alongside you to ensure faster settlements, end-to-end. Most claims resolved in 24–48 hours.",
     cta: "Make a claim",
     href: "/claims",
-    imageSrc: "/images/home/HOME/Fast Claims Support.png",
+    imageSrc: "/images/icon/trans5.png",
     imageAlt: "Fast Claims Support illustration",
   },
   {

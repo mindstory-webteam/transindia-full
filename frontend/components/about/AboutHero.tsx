@@ -33,7 +33,7 @@ export default function AboutHero() {
 
           <div className="about-mobile-visual">
             <Image
-              src="/images/about/ABOUT/About page - Hero Baner.png"
+              src="/images/banner/trans123.png"
               alt="About TransIndia"
               width={1200}
               height={896}
@@ -43,10 +43,10 @@ export default function AboutHero() {
 
           <div className="about-lg-banner">
             <Image
-              src="/images/about/ABOUT/About page - Hero Baner.png"
+              src="/images/banner/trans123.png"
               alt="About TransIndia Banner"
-              width={1200}
-              height={896}
+              width={1400}
+              height={996}
               priority
             />
           </div>
@@ -166,8 +166,8 @@ const CSS = `
     position: absolute;
     right: -50px;
     bottom: -75px; /* peek under the stats bar */
-    width: 55%;
-    max-width: 680px;
+    width: 65%;
+    max-width: 780px;
     z-index: 1;
     pointer-events: none;
   }

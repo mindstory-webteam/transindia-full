@@ -56,7 +56,7 @@ export default function ServicesHero() {
               {/* RIGHT */}
               <div className="svc-right">
                 <img
-                  src="/images/services/main-service-banner-img.png"
+                  src="/images/banner/trans1.png"
                   alt="Complete protection"
                   className="svc-visual-img"
                 />
@@ -211,7 +211,7 @@ const CSS = `
 
   .svc-visual-img{
     width: 100%;
-    max-width: 440px;
+    max-width: 740px;
     height: auto;
     object-fit: contain;
     display: block;
