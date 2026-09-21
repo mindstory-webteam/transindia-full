@@ -146,11 +146,7 @@ export default function BmiSection() {
           cursor: pointer;
           transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
         }
-        .bmi-cta:hover {
-          background: #E03D1E;
-          transform: translateY(-2px);
-          box-shadow: 0 12px 26px rgba(239,75,43,0.34);
-        }
+     
         .bmi-cta:focus-visible {
           outline: 3px solid #FBC0B0;
           outline-offset: 2px;

@@ -17,10 +17,10 @@ export default function Home() {
       <Navbar />
       <Banner />
       <InsuranceSection />
-      <InsurancePlansSection />
+      <InsuranceSections />
       {/* <ExploreToolsSection /> */}
       <BmiSection/>
-      <InsuranceSections />
+      <InsurancePlansSection />
       <TestimonialsSection />
       <CtaSection />
       <TransindiaFooter />
