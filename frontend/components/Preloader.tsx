@@ -231,7 +231,7 @@ export function Preloader({
           justify-content: center;
           flex-wrap: nowrap;
           gap: 18px;
-          font-size: clamp(15px, 2.2vw, 19px);
+          
           line-height: 1.15;
           font-weight: 600;
           letter-spacing: 0.01em;
