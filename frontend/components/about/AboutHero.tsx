@@ -56,7 +56,7 @@ export default function AboutHero() {
         <div className="about-stats-bar">
           <div className="about-stats-inner">
             {[
-              { value: "20", label: "Years of Experience" },
+              { value: "10", label: "Years of Experience" },
               { value: "20", label: "Insurer Partners" },
               { value: "500", label: "Happy Customers" },
               { value: "₹250Cr", label:"Claims Settled" },
