@@ -42,7 +42,7 @@ export default function EventBanner() {
         <div className="about-stats-bar">
           <div className="about-stats-inner">
             {[
-              { value: "20", label: "Years of Experience" },
+              { value: "10+", label: "Years of Experience" },
               { value: "20", label: "Insurer Partners" },
               { value: "250", label: "Happy Customers" },
               { value: "₹500Cr", label: "Claims Settled" },

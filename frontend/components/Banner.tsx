@@ -532,7 +532,7 @@ const STATS = [
   {value: "1.2L+", label: "Policies Sold", Icon: ShieldCheckIcon},
   {value: "500+", label: "Happy Clients", Icon: UsersIcon},
   {value: "₹250Cr+", label: "Claim Settled", Icon: CheckBadgeIcon},
-  {value: "20+", label: "Years of Trust", Icon: ClockIcon},
+  {value: "10+", label: "Years of Trust", Icon: ClockIcon},
 ];
 
 /* the eight nav services, in nav order */

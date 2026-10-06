@@ -8,7 +8,7 @@ import React, {
 
 const checkItems = [
   { id: 1, text: "IRDAI-licensed for both Life & General insurance broking" },
-  { id: 2, text: "Incorporated July 2006 — over 18 years of trusted service" },
+  { id: 2, text: "Incorporated July 2006 — over 10+ years of trusted service" },
   { id: 3, text: "100% independent broker — we work for you, not insurers" },
   { id: 4, text: "Dedicated claims assistance at no extra cost" },
 ];

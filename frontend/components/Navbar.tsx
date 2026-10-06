@@ -39,10 +39,10 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Renew existing policy", href: "/renew"      },
   { label: "Events", href: "/events"      },
   { label: "About us",              href: "/about"      },
-  { label: "Contact us",            hasDropdown: true, href: "/contact-us" },
+  { label: "Connect",               hasDropdown: true, href: "/contact-us" },
 ];
 
-// Sub-links shown under the "Contact us" dropdown.
+// Sub-links shown under the "Connect" dropdown.
 const CONTACT_ITEMS: SimpleLink[] = [
   { label: "Contact us", href: "/contact-us" },
   { label: "Careers",    href: "/careers"    },
@@ -345,7 +345,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                 );
               }
 
-              if (item.label === "Contact us") {
+              if (item.label === "Connect" || item.label === "Contact us") {
                 return (
                   <li key={item.label}>
                     <div
@@ -472,7 +472,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
                 );
               }
 
-              if (item.label === "Contact us") {
+              if (item.label === "Connect" || item.label === "Contact us") {
                 return (
                   <div key={item.label}>
                     <button

@@ -244,7 +244,7 @@ function AdvisorSection() {
           {/* Stats */}
           <div style={{ ...s.statsGrid, margin: "20px 0 0" }}>
             <div style={s.statBox}>
-              <p style={{...s.statNum , color:"#0D2B5E" }}>15+</p>
+              <p style={{...s.statNum , color:"#0D2B5E" }}>10+</p>
               <p style={s.statLabel}>Years of experience</p>
             </div>
             <div style={{ ...s.statBox, borderLeft: "1px solid #E2E8F0" }}>

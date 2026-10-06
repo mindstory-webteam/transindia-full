@@ -40,7 +40,7 @@ const companyLinks = [
 
 const supportLinks = [
   { label: "Make a claim",  href: "/claims" },
-  { label: "Contact us",    href: "/contact-us" },
+  { label: "Connect",       href: "/contact-us" },
   { label: "Privacy policy",href: "/privacy-policy" },
   { label: "Terms of use",  href: "/terms" },
 ];
