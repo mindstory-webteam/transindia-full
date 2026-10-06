@@ -14,13 +14,13 @@ export default function EventBanner() {
 
           <div className="about-content">
             <h1 className="about-title">
-              India's Most Trusted
+              Where Insurance 
               <br />
-              <span style={{ color: "#F15A40" }}>Insurance</span>{" "}
-              <span style={{ color: "#20BEC6" }}>Marketplace.</span>
+              <span style={{ color: "#F15A40" }}>Meets Innovation &</span>{" "}
+              <span style={{ color: "#20BEC6" }}>Opportunity.</span>
             </h1>
             <p className="about-desc">
-              We exist to make insurance simple, honest, and accessible for every Indian family — whether you're planning for tomorrow or protecting what you've built today.
+             From expert discussions and knowledge-sharing sessions to networking opportunities, our events bring together industry professionals, partners, and customers to learn, connect, and grow.
             </p>
 
             <div className="about-btns">
