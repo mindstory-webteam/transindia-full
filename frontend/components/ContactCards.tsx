@@ -13,7 +13,6 @@ const contactCards = [
   {
     icon: "/images/contact-us/CONTACT/Contact Icons - Msg.png",
     label: "Live chat",
-    sub: "Average wait: 2 minutes",
     cta: "Start Chat",
     ctaHref: "https://wa.me/917510400320",
     badge: "Available 24/7",
@@ -22,7 +21,6 @@ const contactCards = [
   {
     icon: "/images/contact-us/CONTACT/Contact Icons - mail.png",
     label: "Email Us",
-    sub: "Reply within 4 hours",
     highlight: "care@transindia.com",
     highlightHref: "mailto:care@transindia.com",
     badge: "Mon–sat",
@@ -50,7 +48,7 @@ export default function ContactCards() {
               <img src={card.icon} alt={card.label} width={44} height={44} />
             </div>
             <p className="contact-card-label">{card.label}</p>
-            <p className="contact-card-sub">{card.sub}</p>
+            {card.sub && <p className="contact-card-sub">{card.sub}</p>}
 
             {card.cta && (
               <a
