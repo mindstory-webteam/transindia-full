@@ -475,11 +475,6 @@ function AdvisorSection() {
       <div style={{maxWidth: 1200, margin: "56px auto 0", width: "100%"}}>
         <RelationshipBanner />
       </div>
-
-      {/* ─── Journey Strip: From Your First Question to Your Next Claim ─── */}
-      <div style={{maxWidth: 1200, margin: "40px auto 0", width: "100%"}}>
-        <JourneyStrip />
-      </div>
     </section>
   );
 }
@@ -581,28 +576,30 @@ function RelationshipBanner() {
         }}
       />
 
-      {/* LEFT: Mascot */}
-      <div className="rb-mascot-col">
-        <img
-          src={MASCOT_IMG_SRC}
-          alt="Transindia Insurance Mascot"
-          className="rb-mascot-img"
-        />
-      </div>
+      {/* TOP ROW: Mascot + Center Copy + Arc Stepper */}
+      <div className="rb-banner-top">
+        {/* LEFT: Mascot */}
+        <div className="rb-mascot-col">
+          <img
+            src={MASCOT_IMG_SRC}
+            alt="Transindia Insurance Mascot"
+            className="rb-mascot-img"
+          />
+        </div>
 
-      {/* CENTER: Main Copy & CTA */}
-      <div className="rb-center-col">
-        <h3
-          style={{
-            fontSize: "clamp(20px, 2.2vw, 26px)",
-            fontWeight: 800,
-            color: "#0B3C68",
-            lineHeight: 1.24,
-            margin: 0,
-            letterSpacing: "-0.02em",
-            fontFamily: "'Sora', sans-serif",
-          }}
-        >
+        {/* CENTER: Main Copy & CTA */}
+        <div className="rb-center-col">
+          <h3
+            style={{
+              fontSize: "clamp(20px, 2.2vw, 26px)",
+              fontWeight: 800,
+              color: "#0B3C68",
+              lineHeight: 1.24,
+              margin: 0,
+              letterSpacing: "-0.02em",
+              fontFamily: "'Sora', sans-serif",
+            }}
+          >
           Insurance Doesn&apos;t End When
           <br />
           You Buy the Policy.
@@ -797,6 +794,12 @@ function RelationshipBanner() {
             );
           })}
         </div>
+      </div>
+      </div>
+
+      {/* ─── Bottom Section Inside Banner: From Your First Question to Your Next Claim ─── */}
+      <div className="rb-bottom-journey">
+        <JourneyStrip />
       </div>
     </div>
   );
@@ -1254,17 +1257,26 @@ const RESPONSIVE_CSS = `
   .rb-banner {
     width: 100%;
     box-sizing: border-box;
-    background: linear-gradient(135deg, #EAF5FE 0%, #F5FAFE 40%, #E6F3FD 100%);
-    border: 1px solid #BAE6FD;
+    background: linear-gradient(180deg, #FFFFFF 0%, #F3FBFD 100%);
+    border: 1.5px solid #CFEFF5;
     border-radius: 28px;
     padding: clamp(24px, 4vw, 36px) clamp(20px, 3.5vw, 40px);
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 36px -8px rgba(2, 132, 199, 0.12), 0 2px 10px rgba(0, 0, 0, 0.02);
+  }
+
+  .rb-banner-top {
+    width: 100%;
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: clamp(24px, 3.5vw, 44px);
     align-items: center;
     position: relative;
-    overflow: hidden;
-    box-shadow: 0 12px 36px -8px rgba(2, 132, 199, 0.12), 0 2px 10px rgba(0, 0, 0, 0.02);
+    z-index: 1;
   }
 
   .rb-mascot-col {
@@ -1283,8 +1295,6 @@ const RESPONSIVE_CSS = `
     filter: drop-shadow(0 10px 20px rgba(2, 132, 199, 0.15));
     transition: transform 0.3s ease;
   }
-
-
 
   .rb-speech-bubble {
     position: absolute;
@@ -1307,7 +1317,7 @@ const RESPONSIVE_CSS = `
   .rb-center-col {
     display: flex;
     flex-direction: column;
-    justifyContent: center;
+    justify-content: center;
     min-width: 0;
   }
 
@@ -1318,43 +1328,40 @@ const RESPONSIVE_CSS = `
     flex-shrink: 0;
   }
 
-  /* ── Tablet (iPad Pro / 1080px) ── */
-  @media (max-width: 1080px) {
-    .rb-banner {
-      grid-template-columns: auto 1fr;
-      gap: 28px;
-    }
-    .rb-stepper-col {
-      grid-column: 1 / -1;
-      justify-content: center;
-      padding-top: 24px;
-      border-top: 1px dashed #BAE6FD;
-      width: 100%;
-    }
+  .rb-bottom-journey {
+    width: 100%;
+    border-top: 1px dashed #CFEFF5;
+    padding-top: 28px;
+    position: relative;
+    z-index: 1;
   }
 
-  /* ── Small tablet / iPad mini (≤820px) ── */
-  @media (max-width: 820px) {
+  /* ── Tablet / Mid Screens (iPad Pro & iPad Mini: 641px to 1080px) ── */
+  @media (max-width: 1080px) and (min-width: 641px) {
     .rb-banner {
+      padding: 32px 28px;
+      gap: 32px;
+    }
+    .rb-banner-top {
       grid-template-columns: 1fr;
-      text-align: center;
-      gap: 24px;
-      padding: 28px 24px;
+      gap: 28px;
+      align-items: center;
     }
     .rb-mascot-col {
       justify-content: center;
       order: 0;
     }
+    .rb-mascot-img {
+      width: clamp(200px, 28vw, 300px);
+      height: auto;
+    }
     .rb-center-col {
-      align-items: center;
       order: 1;
+      text-align: center;
+      align-items: center;
     }
     .rb-stepper-col {
-      order: 2;
-      justify-content: center;
-      border-top: 1px dashed #BAE6FD;
-      padding-top: 24px;
-      width: 100%;
+      display: none !important;
     }
   }
 
@@ -1362,14 +1369,31 @@ const RESPONSIVE_CSS = `
   @media (max-width: 640px) {
     .rb-banner {
       padding: 24px 16px;
-      gap: 20px;
+      gap: 24px;
       border-radius: 20px;
     }
+    .rb-banner-top {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 20px;
+    }
+    .rb-mascot-col {
+      order: 0;
+      justify-content: center;
+    }
     .rb-mascot-img {
-      width: clamp(180px, 55vw, 260px) !important;
+      width: clamp(180px, 55vw, 240px) !important;
       height: auto !important;
     }
+    .rb-center-col {
+      order: 1;
+      align-items: center;
+      text-align: center;
+    }
     .rb-stepper-col {
+      display: none !important;
+    }
+    .rb-bottom-journey {
       padding-top: 20px;
     }
   }
