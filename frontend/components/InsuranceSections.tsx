@@ -56,11 +56,13 @@ const iconProps = {
 };
 
 // Understand — BiBulb from react-icons
-const UnderstandIcon = () => <BiBulb size={18} color="#10B981" />;
+const UnderstandIcon = ({ size = 18, color = "#10B981" }: { size?: number; color?: string }) => (
+  <BiBulb size={size} color={color} />
+);
 
 // Compare — clipboard with two columns
-const CompareIcon = () => (
-  <svg {...iconProps} stroke="#0284C7">
+const CompareIcon = ({ size = 18, color = "#0284C7" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <rect x="4.5" y="4" width="15" height="17.5" rx="2.5" />
     <path d="M9 4v-.5A1.5 1.5 0 0 1 10.5 2h3A1.5 1.5 0 0 1 15 3.5V4" />
     <path d="M12 9v9" />
@@ -72,24 +74,24 @@ const CompareIcon = () => (
 );
 
 // Choose — shield with check
-const ChooseIcon = () => (
-  <svg {...iconProps} stroke="#2563EB">
+const ChooseIcon = ({ size = 18, color = "#2563EB" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
     <path d="M9 12l2 2 4-4" />
   </svg>
 );
 
 // Manage — gear
-const ManageIcon = () => (
-  <svg {...iconProps} stroke="#0F3A60">
+const ManageIcon = ({ size = 18, color = "#0F3A60" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
 
 // Renew — circular arrows
-const RenewIcon = () => (
-  <svg {...iconProps} stroke="#6366F1">
+const RenewIcon = ({ size = 18, color = "#6366F1" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <path d="M23 4v6h-6" />
     <path d="M1 20v-6h6" />
     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
@@ -98,8 +100,8 @@ const RenewIcon = () => (
 );
 
 // Claim — award medal
-const ClaimIcon = () => (
-  <svg {...iconProps} stroke="#9333EA">
+const ClaimIcon = ({ size = 18, color = "#9333EA" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="6" />
     <path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12" />
   </svg>
@@ -805,97 +807,60 @@ function RelationshipBanner() {
   );
 }
 
-// ─── Journey Strip: "From Your First Question to Your Next Claim" ─────────────
-const jnIconProps = {
-  width: 28,
-  height: 28,
-  viewBox: "0 0 24 24",
-  fill: "none",
-  strokeWidth: 2,
-  strokeLinecap: "round" as const,
-  strokeLinejoin: "round" as const,
-};
-
-// 01 Understand — listening ear
-const JnEarIcon = () => (
-  <svg {...jnIconProps} stroke="#0284C7">
-    <path d="M6 8.5a6.5 6.5 0 1 1 13 0c0 6-6 6-6 10a3.5 3.5 0 1 1-7 0" />
-    <path d="M15 8.5a2.5 2.5 0 0 0-5 0v1a2 2 0 1 1 0 4" />
-  </svg>
-);
-
-// 02 Compare — magnifier
-const JnSearchIcon = () => (
-  <svg {...jnIconProps} stroke="#16A34A" strokeWidth={2.4}>
-    <circle cx="11" cy="11" r="6.5" />
-    <path d="M20.5 20.5l-4.9-4.9" />
-    <path d="M8.5 11h5" />
-  </svg>
-);
-
-// 03 Choose — check mark
-const JnCheckIcon = () => (
-  <svg {...jnIconProps} stroke="#7C3AED" strokeWidth={3}>
-    <path d="M5 12.5l4.5 4.5L19 7.5" />
-  </svg>
-);
-
-// 04 Manage — gear (white on solid blue)
-const JnGearIcon = () => (
-  <svg {...jnIconProps} width={26} height={26} stroke="#FFFFFF">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-  </svg>
-);
-
-// 05 Claim — shield with check
-const JnShieldIcon = () => (
-  <svg {...jnIconProps} stroke="#1D4ED8">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <path d="M8.5 12l2.5 2.5 4.5-5" />
-  </svg>
-);
-
 const journeySteps = [
   {
     num: "01",
     title: "Understand",
     desc: "We listen to your requirements, risks and budget.",
-    icon: <BiBulb />,
-    bg: "#E0F2FE",
-    border: "#BAE6FD",
+    icon: <UnderstandIcon size={26} color="#10B981" />,
+    color: "#10B981",
+    bg: "#ECFDF5",
+    border: "#A7F3D0",
   },
   {
     num: "02",
     title: "Compare",
     desc: "We explore suitable insurance options based on your needs.",
-    icon: <JnSearchIcon />,
-    bg: "#DCFCE7",
-    border: "#BBF7D0",
+    icon: <CompareIcon size={26} color="#0284C7" />,
+    color: "#0284C7",
+    bg: "#F0F9FF",
+    border: "#BAE6FD",
   },
   {
     num: "03",
     title: "Choose",
     desc: "We explain the important details so you can make an informed decision.",
-    icon: <JnCheckIcon />,
-    bg: "#EDE9FE",
-    border: "#DDD6FE",
+    icon: <ChooseIcon size={26} color="#2563EB" />,
+    color: "#2563EB",
+    bg: "#EFF6FF",
+    border: "#BFDBFE",
   },
   {
     num: "04",
     title: "Manage",
-    desc: "From servicing and endorsements to renewals, we're here.",
-    icon: <JnGearIcon />,
-    bg: "#2563EB",
-    border: "#BFDBFE",
+    desc: "From servicing and endorsements to policy updates, we're here.",
+    icon: <ManageIcon size={26} color="#0F3A60" />,
+    color: "#0F3A60",
+    bg: "#EAF2FA",
+    border: "#B8D2EA",
   },
   {
     num: "05",
+    title: "Renew",
+    desc: "Timely reminders and seamless renewals at optimal terms.",
+    icon: <RenewIcon size={26} color="#6366F1" />,
+    color: "#6366F1",
+    bg: "#EEF2FF",
+    border: "#C7D2FE",
+  },
+  {
+    num: "06",
     title: "Claim",
     desc: "We help you navigate the claims process and coordinate with the insurer.",
-    icon: <JnShieldIcon />,
-    bg: "#E0ECFF",
-    border: "#BFDBFE",
+    icon: <ClaimIcon size={26} color="#9333EA" />,
+    color: "#9333EA",
+    bg: "#FAF5FF",
+    border: "#E9D5FF",
   },
 ];
 
@@ -915,7 +880,7 @@ const JOURNEY_CSS = `
   }
 
   .jn-track {
-    --jn-gap: clamp(28px, 3vw, 40px);
+    --jn-gap: clamp(12px, 1.8vw, 20px);
     display: flex;
     align-items: stretch;
     gap: var(--jn-gap);
@@ -936,8 +901,8 @@ const JOURNEY_CSS = `
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 10px;
-    padding: 28px 16px 22px;
+    gap: 8px;
+    padding: 24px 10px 18px;
     background: linear-gradient(180deg, #FFFFFF 0%, #F3FBFD 100%);
     border: 1.5px solid #CFEFF5;
     border-radius: 16px;
