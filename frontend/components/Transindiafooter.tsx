@@ -262,7 +262,7 @@ const TransindiaFooter: React.FC = () => {
             <div
               style={{
                 display: "flex",
-                gap: 12,
+                gap: 10,
                 flexWrap: "wrap",
                 alignItems: "center",
                 marginTop: 4,
@@ -281,7 +281,7 @@ const TransindiaFooter: React.FC = () => {
                     className="tf-social-icon"
                     style={{color: item.color}}
                   >
-                    <IconComponent size={20} />
+                    <IconComponent size={17} />
                   </a>
                 );
               })}
@@ -366,17 +366,19 @@ const RESPONSIVE_CSS = `
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
     background: transparent;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.25);
     text-decoration: none;
-    transition: transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
   }
 
   .tf-social-icon:hover {
-    transform: translateY(-2px) scale(1.15);
-    filter: brightness(1.25);
+    border-color: currentColor;
+    transform: translateY(-2px) scale(1.08);
+    filter: brightness(1.2);
   }
 
   /* Nav columns wrapper */
