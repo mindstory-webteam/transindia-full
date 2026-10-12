@@ -81,7 +81,7 @@ export default function BmiSection() {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
         .bmi-section {
-          background: #FFFFFF;
+          background: #f3f7ff;
           padding: clamp(48px, 8vw, 80px) clamp(16px, 5vw, 24px);
           font-family: 'DM Sans', sans-serif;
         }

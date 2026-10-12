@@ -177,7 +177,7 @@ export function Preloader({
 
         .ti-stage {
           /* Space between the logo and the copy below it. */
-          --ti-gap: 18px;
+          --ti-gap: 8px;
           position: relative;
           display: flex;
           flex-direction: column;
@@ -231,7 +231,7 @@ export function Preloader({
           justify-content: center;
           flex-wrap: nowrap;
           gap: 18px;
-          
+          font-size: 11px;
           line-height: 1.15;
           font-weight: 600;
           letter-spacing: 0.01em;
@@ -264,7 +264,7 @@ export function Preloader({
         }
 
         @media (max-width: 480px) {
-          .ti-stage { --ti-gap: 12px; }
+          .ti-stage { --ti-gap: 6px; }
           .ti-lines { gap: 10px; }
         }
 
