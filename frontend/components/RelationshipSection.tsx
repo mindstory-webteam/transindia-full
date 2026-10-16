@@ -7,15 +7,8 @@ import Link from "next/link";
 const NAVY = "#001A5A";
 const BORDER_COLOR = "#D8EBF8";
 
-/* ─── Inline SVG Icons ─────────────────────────────────────────────────────── */
-const ShieldCheckIcon = ({ size = 18, color = "#20BEC6" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <polyline points="9 12 11 14 15 10" />
-  </svg>
-);
-
-const BulbIcon = ({ size = 20, color = "#20BEC6" }: { size?: number; color?: string }) => (
+/* ─── Inline SVG Icons (Identical to ProcessStepsSection) ───────────────────── */
+const BulbIcon = ({ size = 18, color = "#0284C7" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <line x1="9" y1="18" x2="15" y2="18" />
     <line x1="10" y1="22" x2="14" y2="22" />
@@ -23,38 +16,50 @@ const BulbIcon = ({ size = 20, color = "#20BEC6" }: { size?: number; color?: str
   </svg>
 );
 
-const GearIcon = ({ size = 20, color = "#20BEC6" }: { size?: number; color?: string }) => (
+const SearchIcon = ({ size = 18, color = "#16A34A" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+const ShieldCheckIcon = ({ size = 18, color = "#9333EA" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    <polyline points="9 12 11 14 15 10" />
+  </svg>
+);
+
+const GearIcon = ({ size = 18, color = "#0284C7" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3" />
     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
   </svg>
 );
 
-const AwardIcon = ({ size = 20, color = "#20BEC6" }: { size?: number; color?: string }) => (
+const RefreshCwIcon = ({ size = 18, color = "#EA580C" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23 4 23 10 17 10" />
+    <polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+  </svg>
+);
+
+const AwardIcon = ({ size = 18, color = "#0D9488" }: { size?: number; color?: string }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="6" />
     <path d="M8.21 13.89L7 22l5-3 5 3-1.21-8.12" />
   </svg>
 );
 
-const FileTextIcon = ({ size = 20, color = "#20BEC6" }: { size?: number; color?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="16" y1="13" x2="8" y2="13" />
-    <line x1="16" y1="17" x2="8" y2="17" />
-    <polyline points="10 9 9 9 8 9" />
-  </svg>
-);
-
 export default function RelationshipSection() {
   const steps = [
-    { label: "Understand", icon: <BulbIcon size={15} color="#16A34A" />, bg: "#F0FDF4", border: "#BBF7D0", color: "#16A34A" },
-    { label: "Compare", icon: <FileTextIcon size={15} color="#0284C7" />, bg: "#F0F9FF", border: "#BAE6FD", color: "#0284C7" },
-    { label: "Choose", icon: <ShieldCheckIcon size={15} color="#001A5A" />, bg: "#EFF6FF", border: "#BFDBFE", color: "#001A5A" },
-    { label: "Manage", icon: <GearIcon size={15} color="#0284C7" />, bg: "#EAF2FA", border: "#B8D2EA", color: "#0284C7" },
-    { label: "Renew", icon: <AwardIcon size={15} color="#9333EA" />, bg: "#EEF2FF", border: "#C7D2FE", color: "#9333EA" },
-    { label: "Claim", icon: <ShieldCheckIcon size={15} color="#9333EA" />, bg: "#FAF5FF", border: "#E9D5FF", color: "#9333EA" },
+    { label: "Understand", icon: <BulbIcon size={16} color="#0284C7" />, bg: "#F0F9FF", border: "#BAE6FD", color: "#0284C7" },
+    { label: "Compare",    icon: <SearchIcon size={16} color="#16A34A" />, bg: "#F0FDF4", border: "#BBF7D0", color: "#16A34A" },
+    { label: "Choose",     icon: <ShieldCheckIcon size={16} color="#9333EA" />, bg: "#FAF5FF", border: "#E9D5FF", color: "#9333EA" },
+    { label: "Manage",     icon: <GearIcon size={16} color="#0284C7" />, bg: "#F0F9FF", border: "#BAE6FD", color: "#0284C7" },
+    { label: "Renew",      icon: <RefreshCwIcon size={16} color="#EA580C" />, bg: "#FFF7ED", border: "#FED7AA", color: "#EA580C" },
+    { label: "Claim",      icon: <AwardIcon size={16} color="#0D9488" />, bg: "#F0FDFA", border: "#99F6E4", color: "#0D9488" },
   ];
 
   const ARC_H = 390;
