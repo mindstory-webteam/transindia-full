@@ -10,10 +10,10 @@ const ORANGE = "#EC4F34";
 /* Buttons: solid navy with a light hairline, exactly like the reference chip.
    Hover lifts to a lighter tint of the brand teal, with dark text so the label
    stays readable on the pale fill. */
-const BTN_BG = "#0B2260";
-const BTN_BORDER = "rgba(255,255,255,0.30)";
-const BTN_HOVER_BG = "#6ef8ff5a";
-const BTN_HOVER_TEXT = "#ffff";
+const BTN_BG = "#001A5A";
+const BTN_BORDER = "#001A5A";
+const BTN_HOVER_BG = "#0B2563";
+const BTN_HOVER_TEXT = "#FFFFFF";
 
 const SERVICE_BASE = "/our-services";
 const HERO_IMAGE = "/images/banner/banner-6.png";
@@ -386,7 +386,7 @@ function ChevronDown({color = "rgba(255,255,255,0.75)"}: {color?: string}) {
   );
 }
 
-function CloseIcon({color = "#fff"}: {color?: string}) {
+function CloseIcon({color = "#001A5A"}: {color?: string}) {
   return (
     <svg
       viewBox="0 0 20 20"
@@ -499,7 +499,7 @@ function LockFieldIcon() {
       width={12}
       height={12}
       fill="none"
-      stroke="rgba(255,255,255,0.6)"
+      stroke="#64748B"
       strokeWidth={1.7}
     >
       <rect x="4.5" y="9" width="11" height="7.5" rx="1.6" />
@@ -831,9 +831,10 @@ export default function Banner() {
 
         .hero-section{
           position:relative !important;
-          background:${NAVY} !important;
-          padding:88px 0 56px !important;
+          background:#FFFFFF !important;
+          padding:100px 0 56px !important;
           overflow:hidden !important;
+          border-bottom:1px solid #E2E8F0 !important;
         }
         .hero-wrap{ position:relative !important; z-index:1 !important; max-width:1280px !important; margin:0 auto !important; padding:0 24px !important; }
 
@@ -849,7 +850,7 @@ export default function Banner() {
           font-weight:900 !important;
           line-height:1.1 !important;
           letter-spacing:-1px !important;
-          color:#fff !important;
+          color:#001A5A !important;
           margin:0 !important;
           transition:opacity .3s ease, transform .3s ease !important;
         }
@@ -863,7 +864,7 @@ export default function Banner() {
           margin:0 0 26px !important;
           font-size:14.5px !important;
           line-height:1.7 !important;
-          color:rgba(255,255,255,0.72) !important;
+          color:#2D3E6B !important;
         }
 
         /* ---- CTAs ---- */
@@ -883,29 +884,32 @@ export default function Banner() {
           transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease !important;
         }
 
-        /* "Get your quote" — navy chip with a light hairline, lifting to a
-           lighter tint of the brand teal on hover. The label goes dark there,
-           because white on that pale fill is unreadable. */
         .hero-cta-primary{
-          background:${BTN_BG} !important;
-          border:1.5px solid ${BTN_BORDER} !important;
-          color:#fff !important;
+          background:${NAVY} !important;
+          border:1.5px solid ${NAVY} !important;
+          color:#FFFFFF !important;
+          box-shadow:0 4px 14px rgba(0,26,90,0.18) !important;
         }
         .hero-cta-primary:hover{
-          background:${BTN_HOVER_BG} !important;
-          border-color:${BTN_HOVER_BG} !important;
-          color:${BTN_HOVER_TEXT} !important;
+          background:#0B2563 !important;
+          border-color:#0B2563 !important;
+          color:#FFFFFF !important;
           transform:translateY(-2px) !important;
+          box-shadow:0 8px 20px rgba(0,26,90,0.24) !important;
         }
         .hero-cta-primary:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
 
-        /* "Talk to an expert" — unchanged */
         .hero-cta-ghost{
-          background:rgba(255,255,255,0.06) !important;
-          border:1.5px solid rgba(255,255,255,0.24) !important;
-          color:#fff !important;
+          background:#FFFFFF !important;
+          border:1.5px solid #001A5A !important;
+          color:#001A5A !important;
         }
-        .hero-cta-ghost:hover{ background:rgba(255,255,255,0.12) !important; transform:translateY(-2px) !important; }
+        .hero-cta-ghost:hover{
+          background:#F0F7FF !important;
+          border-color:#001A5A !important;
+          color:#001A5A !important;
+          transform:translateY(-2px) !important;
+        }
 
         /* ---- stats ---- */
         .hero-stats{ display:flex !important; align-items:center !important; flex-wrap:nowrap !important; gap:0 !important; }
@@ -914,7 +918,7 @@ export default function Banner() {
           align-items:center !important;
           gap:10px !important;
           padding:0 20px !important;
-          border-left:1px solid rgba(255,255,255,0.14) !important;
+          border-left:1px solid #CBD5E1 !important;
         }
         .hero-stat:first-child{ padding-left:0 !important; border-left:none !important; }
         .hero-stat-chip{
@@ -928,19 +932,17 @@ export default function Banner() {
           background:rgba(32,190,198,0.12) !important;
           border:1px solid rgba(32,190,198,0.28) !important;
         }
-        .hero-stat-value{ display:block !important; font-size:19px !important; font-weight:800 !important; color:#fff !important; line-height:1.15 !important; white-space:nowrap !important; }
-        .hero-stat-label{ display:block !important; font-size:11.5px !important; color:rgba(255,255,255,0.55) !important; margin-top:2px !important; white-space:nowrap !important; }
+        .hero-stat-value{ display:block !important; font-size:19px !important; font-weight:800 !important; color:#001A5A !important; line-height:1.15 !important; white-space:nowrap !important; }
+        .hero-stat-label{ display:block !important; font-size:11.5px !important; color:#4A659D !important; margin-top:2px !important; white-space:nowrap !important; }
 
         /* ---- quote form (glass, on-theme) ---- */
         .hero-quote{
           position:relative !important;
           border-radius:18px !important;
           padding:22px 22px 20px !important;
-          background:rgba(255,255,255,0.055) !important;
-          border:1px solid rgba(255,255,255,0.14) !important;
-          backdrop-filter:blur(10px) !important;
-          -webkit-backdrop-filter:blur(10px) !important;
-          box-shadow:0 18px 48px rgba(0,6,40,0.42) !important;
+          background:#FFFFFF !important;
+          border:1.5px solid #D8EBF8 !important;
+          box-shadow:0 12px 36px rgba(0,26,90,0.08) !important;
         }
         .hero-quote-head{ display:flex !important; align-items:center !important; gap:12px !important; margin-bottom:18px !important; }
         .hero-quote-badge{
@@ -949,13 +951,13 @@ export default function Banner() {
           background:rgba(32,190,198,0.14) !important;
           border:1px solid rgba(32,190,198,0.3) !important;
         }
-        .hero-quote-title{ display:block !important; font-size:17px !important; font-weight:800 !important; color:#fff !important; line-height:1.2 !important; }
-        .hero-quote-sub{ display:block !important; font-size:12px !important; color:rgba(255,255,255,0.6) !important; margin-top:2px !important; }
+        .hero-quote-title{ display:block !important; font-size:17px !important; font-weight:800 !important; color:#001A5A !important; line-height:1.2 !important; }
+        .hero-quote-sub{ display:block !important; font-size:12px !important; color:#4A659D !important; margin-top:2px !important; }
 
         .hero-field-label{
           display:flex !important; align-items:center !important; gap:6px !important;
           font-size:11.5px !important; font-weight:600 !important;
-          color:rgba(255,255,255,0.72) !important;
+          color:#001A5A !important;
           margin-bottom:7px !important;
         }
         .hero-field{
@@ -964,20 +966,20 @@ export default function Banner() {
           padding:11px 14px !important;
           margin-bottom:15px !important;
           border-radius:11px !important;
-          background:rgba(255,255,255,0.05) !important;
-          border:1px solid rgba(255,255,255,0.16) !important;
-          transition:border-color .18s ease, background .18s ease !important;
+          background:#F8FAFC !important;
+          border:1px solid #CBD5E1 !important;
+          transition:border-color .18s ease, background .18s ease, box-shadow .18s ease !important;
         }
-        .hero-field:focus-within{ border-color:${TEAL} !important; background:rgba(255,255,255,0.08) !important; }
+        .hero-field:focus-within{ border-color:${TEAL} !important; background:#FFFFFF !important; box-shadow:0 0 0 3px rgba(32,190,198,0.15) !important; }
         .hero-field-lead{ display:flex !important; flex:0 0 auto !important; }
-        .hero-field-chevron{ position:absolute !important; right:14px !important; pointer-events:none !important; display:flex !important; }
+        .hero-field-chevron{ position:absolute !important; right:14px !important; pointer-events:none !important; display:flex !important; color:#001A5A !important; }
         .hero-input{
           width:100% !important; min-width:0 !important;
           border:none !important; outline:none !important; background:transparent !important;
-          font-family:inherit !important; font-size:14px !important; font-weight:500 !important; color:#fff !important;
+          font-family:inherit !important; font-size:14px !important; font-weight:500 !important; color:#001A5A !important;
         }
-        .hero-input::placeholder{ color:rgba(255,255,255,0.42) !important; }
-        .hero-select{ appearance:none !important; -webkit-appearance:none !important; padding-right:22px !important; cursor:pointer !important; }
+        .hero-input::placeholder{ color:#94A3B8 !important; }
+        .hero-select{ appearance:none !important; -webkit-appearance:none !important; padding-right:22px !important; cursor:pointer !important; color:#001A5A !important; }
         .hero-select option{ color:#0B2563 !important; background:#fff !important; }
 
         .hero-quote-cta{
@@ -985,66 +987,68 @@ export default function Banner() {
           display:flex !important; align-items:center !important; justify-content:center !important; gap:9px !important;
           margin-top:4px !important; padding:14px 20px !important;
           border-radius:12px !important;
-          background:${BTN_BG} !important;
-          border:1.5px solid ${BTN_BORDER} !important;
-          color:#fff !important;
+          background:${NAVY} !important;
+          border:1.5px solid ${NAVY} !important;
+          color:#FFFFFF !important;
           font-family:inherit !important; font-size:15px !important; font-weight:800 !important;
           cursor:pointer !important;
+          box-shadow:0 4px 14px rgba(0,26,90,0.18) !important;
           transition:transform .18s ease, background .18s ease, border-color .18s ease, color .18s ease, opacity .18s ease !important;
         }
         .hero-quote-cta:hover:not(:disabled){
           transform:translateY(-2px) !important;
-          background:${BTN_HOVER_BG} !important;
-          border-color:${BTN_HOVER_BG} !important;
-          color:${BTN_HOVER_TEXT} !important;
+          background:#0B2563 !important;
+          border-color:#0B2563 !important;
+          color:#FFFFFF !important;
         }
         .hero-quote-cta:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
         .hero-quote-cta:disabled{ opacity:.65 !important; cursor:not-allowed !important; }
         .hero-quote-note{
           display:flex !important; align-items:center !important; justify-content:center !important; gap:6px !important;
-          margin-top:13px !important; font-size:11.5px !important; color:rgba(255,255,255,0.55) !important;
+          margin-top:13px !important; font-size:11.5px !important; color:#64748B !important;
         }
         .hero-feedback{
           display:flex !important; align-items:center !important; gap:8px !important;
           margin-top:13px !important; padding:10px 13px !important; border-radius:10px !important;
           font-size:12.5px !important; font-weight:600 !important;
         }
-        .hero-feedback-success{ background:rgba(16,185,129,0.14) !important; border:1px solid rgba(52,211,153,0.4) !important; color:#6EE7B7 !important; }
-        .hero-feedback-error{ background:rgba(220,38,38,0.14) !important; border:1px solid rgba(252,165,165,0.4) !important; color:#FCA5A5 !important; }
+        .hero-feedback-success{ background:rgba(16,185,129,0.14) !important; border:1px solid rgba(52,211,153,0.4) !important; color:#065F46 !important; }
+        .hero-feedback-error{ background:rgba(220,38,38,0.14) !important; border:1px solid rgba(252,165,165,0.4) !important; color:#991B1B !important; }
 
         /* ---- bottom services panel ---- */
         .hero-services-panel{
-          margin-top:18px !important;
+          margin-top:24px !important;
           padding:26px 26px 28px !important;
           border-radius:22px !important;
-          border:1px solid rgba(255,255,255,0.12) !important;
-          background:rgba(255,255,255,0.025) !important;
+          border:1px solid #D8EBF8 !important;
+          background:#F8FAFD !important;
         }
         .hero-services-head{ display:flex !important; align-items:center !important; gap:18px !important; margin-bottom:22px !important; }
-        .hero-rule{ flex:1 1 auto !important; height:1px !important; background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.22) 100%) !important; }
-        .hero-services-head .hero-rule:last-child{ background:linear-gradient(90deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 100%) !important; }
-        .hero-services-title{ margin:0 !important; font-size:16px !important; font-weight:700 !important; color:#fff !important; white-space:nowrap !important; }
+        .hero-rule{ flex:1 1 auto !important; height:1px !important; background:linear-gradient(90deg, rgba(0,26,90,0) 0%, rgba(0,26,90,0.18) 100%) !important; }
+        .hero-services-head .hero-rule:last-child{ background:linear-gradient(90deg, rgba(0,26,90,0.18) 0%, rgba(0,26,90,0) 100%) !important; }
+        .hero-services-title{ margin:0 !important; font-size:16px !important; font-weight:700 !important; color:#001A5A !important; white-space:nowrap !important; }
 
         .hero-services{ display:grid !important; grid-template-columns:repeat(8,minmax(0,1fr)) !important; gap:14px !important; }
         .hero-service{
           display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
           gap:14px !important; min-height:142px !important; padding:22px 10px !important;
           border-radius:14px !important;
-          border:1px solid rgba(255,255,255,0.12) !important;
-          background:rgba(255,255,255,0.04) !important;
+          border:1px solid #D8EBF8 !important;
+          background:#FFFFFF !important;
+          box-shadow:0 2px 8px rgba(0,26,90,0.03) !important;
           text-decoration:none !important;
           transition:transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
         }
         .hero-service-icon{ display:flex !important; transition:transform .25s cubic-bezier(.34,1.5,.64,1) !important; }
         .hero-service-label{
           text-align:center !important; font-size:12.5px !important; font-weight:600 !important;
-          line-height:1.35 !important; color:rgba(255,255,255,0.92) !important;
+          line-height:1.35 !important; color:#001A5A !important;
         }
         .hero-service:hover{
           transform:translateY(-4px) !important;
-          border-color:rgba(32,190,198,0.55) !important;
-          background:rgba(255,255,255,0.07) !important;
-          box-shadow:0 16px 30px rgba(0,6,40,0.4) !important;
+          border-color:#20BEC6 !important;
+          background:#F0FDF4 !important;
+          box-shadow:0 12px 24px rgba(0,26,90,0.08) !important;
         }
         .hero-service:hover .hero-service-icon{ transform:scale(1.1) !important; }
         .hero-service:focus-visible{ outline:2px solid ${TEAL} !important; outline-offset:3px !important; }
@@ -1059,16 +1063,16 @@ export default function Banner() {
           animation:hero-fade .18s ease !important;
         }
         .hero-modal{ width:100% !important; max-width:380px !important; margin:auto !important; animation:hero-pop .24s cubic-bezier(.34,1.3,.64,1) !important; }
-        .hero-modal .hero-quote{ background:rgba(10,32,86,0.96) !important; }
+        .hero-modal .hero-quote{ background:#FFFFFF !important; }
         .hero-modal-close{
           position:absolute !important; top:14px !important; right:14px !important;
           width:30px !important; height:30px !important;
           display:flex !important; align-items:center !important; justify-content:center !important;
-          border:1px solid rgba(255,255,255,0.18) !important; border-radius:9px !important;
-          background:rgba(255,255,255,0.08) !important; cursor:pointer !important;
+          border:1px solid #CBD5E1 !important; border-radius:9px !important;
+          background:#F1F5F9 !important; cursor:pointer !important;
           transition:background .18s ease !important;
         }
-        .hero-modal-close:hover{ background:rgba(255,255,255,0.16) !important; }
+        .hero-modal-close:hover{ background:#E2E8F0 !important; }
         @keyframes hero-fade{ from{opacity:0} to{opacity:1} }
         @keyframes hero-pop{ from{opacity:0; transform:translateY(10px) scale(.98)} to{opacity:1; transform:none} }
 
@@ -1131,7 +1135,7 @@ export default function Banner() {
       `}</style>
 
       <div className="hero-root">
-        <section className="hero-section" style={{background: NAVY}}>
+        <section className="hero-section" style={{background: "#FFFFFF"}}>
           <div className="hero-wrap">
             <div className="hero-hero">
               {/* ---- left: headline, copy, CTAs, stats ---- */}

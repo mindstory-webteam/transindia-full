@@ -7,7 +7,7 @@ import { FaRobot } from "react-icons/fa";
 import { motion } from "framer-motion";
 import AnimatedChatbotIcon from "./AnimatedChatbotIcon";
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// ── Types ──
 interface Message {
   id: string;
   role: "user" | "assistant";
@@ -587,7 +587,7 @@ export default function ChatbotWidget() {
                 />
               </div>
 
-              <div style={{ textAlign: "center", marginTop: -8 }}>
+              <div style={{ textAlign: "center", marginTop: 8 }}>
                 <h2 style={{
                   fontSize: 20, fontWeight: 700, color: "#111",
                   margin: "0 0 6px",
