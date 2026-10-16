@@ -506,8 +506,8 @@ export default function InsuranceSections() {
           width: "100%",
         }}
       >
-        <ClaimSection />
-        <Divider />
+        {/* <ClaimSection />
+        <Divider /> */}
         <AdvisorSection />
         <Divider />
         <InsurerSection />

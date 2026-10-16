@@ -7,6 +7,7 @@ import InsuranceSection from "@/components/InsuranceSection";
 import InsuranceSections from "@/components/InsuranceSections";
 import Navbar from "@/components/Navbar";
 import Preloader from "@/components/Preloader";
+import TeamSection from "@/components/TeamSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import TransindiaFooter from "@/components/Transindiafooter";
 
@@ -17,6 +18,7 @@ export default function Home() {
       <Navbar />
       <Banner />
       <InsuranceSection />
+      <TeamSection />
       <InsuranceSections />
       {/* <ExploreToolsSection /> */}
       <BmiSection/>

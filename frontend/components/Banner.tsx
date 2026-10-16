@@ -831,7 +831,7 @@ export default function Banner() {
 
         .hero-section{
           position:relative !important;
-          background:#FFFFFF !important;
+          background:linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%) !important;
           padding:100px 0 56px !important;
           overflow:hidden !important;
           border-bottom:1px solid #E2E8F0 !important;
@@ -1165,7 +1165,7 @@ export default function Banner() {
       `}</style>
 
       <div className="hero-root">
-        <section className="hero-section" style={{background: "#FFFFFF"}}>
+        <section className="hero-section" style={{background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)"}}>
           <div className="hero-wrap">
             <div className="hero-hero">
               {/* ---- left: headline, copy, CTAs, stats ---- */}

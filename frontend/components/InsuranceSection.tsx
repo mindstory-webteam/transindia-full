@@ -48,7 +48,6 @@ export default function InsuranceSection() {
 
 const CSS = `
   .ins-section {
-    background: #F3F7FF;
     padding: clamp(60px, 8vw, 100px) 0;
     font-family: var(--font-sora), "Sora", sans-serif;
   }
