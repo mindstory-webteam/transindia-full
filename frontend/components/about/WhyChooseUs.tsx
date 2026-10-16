@@ -113,7 +113,7 @@ const CSS = `
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 60px;
+    padding: 0 clamp(16px, 2.5vw, 28px);
     box-sizing: border-box;
   }
 
@@ -161,8 +161,8 @@ const CSS = `
   .wct-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 10px;
+    gap: 14px;
+    padding: 0;
   }
 
   /* ── Each cell ── */
@@ -213,7 +213,7 @@ const CSS = `
   /* ── Responsive ── */
   @media (max-width: 1100px) {
     .wct-container {
-      padding: 0 48px;
+      padding: 0 clamp(16px, 2.5vw, 28px);
     }
     .wct-cell {
       padding: 28px 32px;
@@ -225,7 +225,7 @@ const CSS = `
       padding: 56px 0 64px;
     }
     .wct-container {
-      padding: 0 24px;
+      padding: 0 clamp(16px, 2.5vw, 28px);
     }
     .wct-heading {
       font-size: 28px;

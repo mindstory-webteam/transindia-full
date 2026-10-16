@@ -35,6 +35,38 @@ const ArrowRightIcon = () => (
   </svg>
 );
 
+const ClaimIntimationIcon = ({ size = 20, color = "#0284C7" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <line x1="12" y1="11" x2="12" y2="15" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
+const DocumentationIcon = ({ size = 20, color = "#0284C7" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <path d="m9 15 2 2 4-4" />
+  </svg>
+);
+
+const InsurerCoordinationIcon = ({ size = 20, color = "#0284C7" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M15 3h6v6" />
+    <path d="M10 14 21 3" />
+    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+  </svg>
+);
+
+const FollowUpSupportIcon = ({ size = 20, color = "#0284C7" }: { size?: number; color?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+    <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+  </svg>
+);
+
 export default function TeamSection() {
   const points = [
     {
@@ -54,10 +86,34 @@ export default function TeamSection() {
     },
   ];
 
+  const claimSteps = [
+    {
+      title: "Claim Intimation",
+      desc: "Guidance on initiating the claim process.",
+      icon: <ClaimIntimationIcon size={19} color="#0284C7" />,
+    },
+    {
+      title: "Documentation",
+      desc: "Help with required documents and information.",
+      icon: <DocumentationIcon size={19} color="#0284C7" />,
+    },
+    {
+      title: "Insurer Coordination",
+      desc: "We assist with communication and follow-up.",
+      icon: <InsurerCoordinationIcon size={19} color="#0284C7" />,
+    },
+    {
+      title: "Follow-Up Support",
+      desc: "We keep you informed at every step.",
+      icon: <FollowUpSupportIcon size={19} color="#0284C7" />,
+    },
+  ];
+
   return (
     <>
       <style>{CSS}</style>
       <section className="team-section-wrap">
+        {/* ── Top Row: Main Team Card + 3 Points Card ── */}
         <div className="team-section-container">
           
           {/* ── Left Main Card: Content + Team Image ── */}
@@ -105,6 +161,52 @@ export default function TeamSection() {
                 </div>
               </div>
             ))}
+          </div>
+
+        </div>
+
+        {/* ── Bottom Row: Claims Support Banner (Matching Image UI) ── */}
+        <div className="claim-support-row">
+          
+          {/* Left Card: When You Need Your Insurance... */}
+          <div className="claim-hero-card">
+            <div className="claim-dummy-img-wrap">
+              <img
+                src="/images/home/HOME/INSURANCE ADVISOR AVATAR.png"
+                alt="Claims Advisor Dummy"
+                className="claim-dummy-img"
+              />
+            </div>
+            <div className="claim-hero-content">
+              <h3 className="claim-hero-title">
+                When You Need Your Insurance,<br />
+                You Don&apos;t Have to Face It Alone.
+              </h3>
+              <p className="claim-hero-subtitle">
+                A claim can be stressful. Our team is here to help.
+              </p>
+              <div>
+                <Link href="/claims" className="claim-hero-btn">
+                  Need Claim Assistance? <span className="claim-btn-arrow">→</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Card: Our Claims Support (4 Steps Breakdown) */}
+          <div className="claim-support-card">
+            <h4 className="claim-support-title">Our Claims Support</h4>
+            <div className="claim-support-grid">
+              {claimSteps.map((step, idx) => (
+                <div key={idx} className="claim-step-item">
+                  <div className="claim-step-icon-wrap">
+                    {step.icon}
+                  </div>
+                  <h5 className="claim-step-name">{step.title}</h5>
+                  <p className="claim-step-desc">{step.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
         </div>
@@ -280,6 +382,184 @@ const CSS = `
     margin: 0;
   }
 
+  /* ── Bottom Claims Assistance Row ── */
+  .claim-support-row {
+    max-width: 1440px;
+    margin: 14px auto 0;
+    padding: 0 clamp(16px, 2.5vw, 28px);
+    display: grid;
+    grid-template-columns: 1fr 1.18fr;
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  /* Left Card: Hero Claim Assistance */
+  .claim-hero-card {
+    background: linear-gradient(135deg, #F0F8FD 0%, #F6FBFE 55%, #EDF7FD 100%);
+    border: 1.5px solid #D8EBF8;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 26, 90, 0.04);
+    padding: clamp(14px, 1.8vw, 22px) clamp(16px, 2vw, 24px);
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 1.8vw, 20px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .claim-dummy-img-wrap {
+    flex: 0 0 clamp(85px, 10vw, 125px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .claim-dummy-img {
+    width: 100%;
+    max-height: 140px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0, 26, 90, 0.12));
+    transition: transform 0.25s ease;
+  }
+
+  .claim-hero-card:hover .claim-dummy-img {
+    transform: translateY(-3px) scale(1.02);
+  }
+
+  .claim-hero-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .claim-hero-title {
+    color: #001A5A;
+    font-size: clamp(14.5px, 1.3vw, 17.5px);
+    font-weight: 800;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px 0;
+  }
+
+  .claim-hero-subtitle {
+    color: #0284C7;
+    font-size: clamp(11.5px, 0.9vw, 13px);
+    font-weight: 500;
+    line-height: 1.45;
+    margin: 0 0 14px 0;
+  }
+
+  .claim-hero-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, #0284C7 0%, #00B4D8 100%);
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 22px;
+    border-radius: 9999px;
+    text-decoration: none;
+    box-shadow: 0 3px 12px rgba(2, 132, 199, 0.28);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+    width: fit-content;
+  }
+
+  .claim-hero-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+    box-shadow: 0 6px 18px rgba(2, 132, 199, 0.36);
+  }
+
+  .claim-btn-arrow {
+    display: inline-block;
+    transition: transform 0.18s ease;
+  }
+
+  .claim-hero-btn:hover .claim-btn-arrow {
+    transform: translateX(3px);
+  }
+
+  /* Right Card: Our Claims Support */
+  .claim-support-card {
+    background: linear-gradient(135deg, #F0F8FD 0%, #F6FBFE 55%, #EDF7FD 100%);
+    border: 1.5px solid #D8EBF8;
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 26, 90, 0.04);
+    padding: clamp(14px, 1.6vw, 20px) clamp(16px, 1.8vw, 22px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .claim-support-title {
+    color: #001A5A;
+    font-size: clamp(14px, 1.2vw, 16px);
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .claim-support-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .claim-step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 clamp(6px, 0.8vw, 12px);
+    position: relative;
+  }
+
+  .claim-step-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: #D8EBF8;
+  }
+
+  .claim-step-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #E0F2FE;
+    border: 1.5px solid #BAE6FD;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12);
+    transition: transform 0.18s ease;
+  }
+
+  .claim-step-item:hover .claim-step-icon-wrap {
+    transform: translateY(-2px);
+  }
+
+  .claim-step-name {
+    color: #001A5A;
+    font-size: clamp(11.5px, 0.88vw, 12.5px);
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 0 0 4px 0;
+    letter-spacing: -0.01em;
+  }
+
+  .claim-step-desc {
+    color: #64748B;
+    font-size: clamp(10px, 0.76vw, 11px);
+    line-height: 1.35;
+    margin: 0;
+  }
+
   /* ── Responsive ── */
   @media (max-width: 1024px) {
     .team-section-container {
@@ -287,6 +567,9 @@ const CSS = `
     }
     .team-main-card {
       min-height: auto;
+    }
+    .claim-support-row {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -303,6 +586,25 @@ const CSS = `
     }
     .team-text-col {
       padding: 24px 20px;
+    }
+    .claim-hero-card {
+      flex-direction: column;
+      text-align: center;
+    }
+    .claim-dummy-img-wrap {
+      flex: 0 0 90px;
+    }
+    .claim-hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .claim-support-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px 8px;
+    }
+    .claim-step-item:not(:last-child)::after {
+      display: none;
     }
   }
 `;

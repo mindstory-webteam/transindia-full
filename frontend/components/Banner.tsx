@@ -836,7 +836,7 @@ export default function Banner() {
           overflow:hidden !important;
           border-bottom:1px solid #E2E8F0 !important;
         }
-        .hero-wrap{ position:relative !important; z-index:1 !important; max-width:1280px !important; margin:0 auto !important; padding:0 24px !important; }
+        .hero-wrap{ position:relative !important; z-index:1 !important; max-width:1440px !important; margin:0 auto !important; padding:0 clamp(16px, 2.5vw, 28px) !important; }
 
         /* ---- hero: copy | artwork | quote form ---- */
         .hero-hero{ display:flex !important; align-items:center !important; gap:28px !important; }
@@ -1124,7 +1124,7 @@ export default function Banner() {
         }
         @media(max-width:1024px){
           .hero-section{ padding:64px 0 44px !important; }
-          .hero-wrap{ padding:0 20px !important; }
+          .hero-wrap{ padding:0 clamp(16px, 2.5vw, 28px) !important; }
           .hero-hero{ flex-wrap:wrap !important; }
           /* iPad Pro & tablets: same stacked order — copy -> bricks -> mascot -> form */
           .hero-copy{ order:1 !important; flex:1 1 100% !important; padding-top:76px !important; }
