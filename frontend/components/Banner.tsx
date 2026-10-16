@@ -860,11 +860,41 @@ export default function Banner() {
         .hero-headline-hidden{ opacity:0 !important; transform:translateY(6px) !important; }
         .hero-headline-visible{ opacity:1 !important; transform:translateY(0) !important; }
         .hero-lede{
-          max-width:440px !important;
-          margin:0 0 26px !important;
-          font-size:14.5px !important;
-          line-height:1.7 !important;
+          max-width:490px !important;
+          margin:0 0 16px !important;
+          font-size:13.5px !important;
+          line-height:1.65 !important;
           color:#2D3E6B !important;
+        }
+        .hero-lede-highlight{
+          font-weight:700 !important;
+          color:#001A5A !important;
+          display:block !important;
+          margin-bottom:6px !important;
+        }
+        .hero-features-list{
+          display:flex !important;
+          flex-wrap:wrap !important;
+          gap:10px 18px !important;
+          margin:0 0 24px !important;
+        }
+        .hero-feature-item{
+          display:inline-flex !important;
+          align-items:center !important;
+          gap:7px !important;
+          font-size:12.5px !important;
+          font-weight:700 !important;
+          color:#001A5A !important;
+          letter-spacing:-0.01em !important;
+        }
+        .hero-feature-icon{
+          width:24px !important;
+          height:24px !important;
+          border-radius:50% !important;
+          display:inline-flex !important;
+          align-items:center !important;
+          justify-content:center !important;
+          flex-shrink:0 !important;
         }
 
         /* ---- CTAs ---- */
@@ -1164,10 +1194,34 @@ export default function Banner() {
                 </div>
 
                 <p className="hero-lede">
-                  We help families and businesses find the right insurance
-                  solutions with trusted guidance, simple processes, and claims
-                  you can rely on.
+                  <span className="hero-lede-highlight">
+                    We’re here for you at every step of your insurance journey.
+                  </span>
+                  From understanding your needs and finding suitable coverage to
+                  policy servicing, renewals and claims assistance, our team of
+                  trained insurance professionals is here to guide and support you.
                 </p>
+
+                <div className="hero-features-list">
+                  <div className="hero-feature-item">
+                    <span className="hero-feature-icon" style={{ background: "#E0F2FE" }}>
+                      <ShieldCheckIcon size={14} color="#0284C7" stroke={2.2} />
+                    </span>
+                    <span>Expert Guidance</span>
+                  </div>
+                  <div className="hero-feature-item">
+                    <span className="hero-feature-icon" style={{ background: "#DCFCE7" }}>
+                      <UsersIcon size={14} color="#16A34A" stroke={2.2} />
+                    </span>
+                    <span>Personalised Service</span>
+                  </div>
+                  <div className="hero-feature-item">
+                    <span className="hero-feature-icon" style={{ background: "#FFEDD5" }}>
+                      <HeadsetIcon size={14} color="#EA580C" stroke={2.2} />
+                    </span>
+                    <span>Dedicated Support</span>
+                  </div>
+                </div>
 
                 <div className="hero-ctas">
                   <button
