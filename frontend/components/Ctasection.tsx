@@ -124,13 +124,12 @@ export default function CtaSection() {
           {/* ── LEFT: text ── */}
           <div className="cta-text-col">
             <h2 style={s.heading}>
-              Finding the right insurance<br />
-              shouldn't feel complicated.
+              Whatever You&apos;re Protecting,<br />
+              We&apos;re Here to Help.
             </h2>
 
             <p style={s.body}>
-              Our advisors will assess your situation and find the right product for your
-              life and budget. Free consultation, no pressure.
+              Let&apos;s Find the right Insurance solution for you.
             </p>
 
             <Link
@@ -190,11 +189,11 @@ const s: Record<string, React.CSSProperties> = {
   },
 
   body: {
-    fontSize: 14.5,
-    color: "#6B7280",
-    lineHeight: 1.75,
+    fontSize: 16,
+    color: "#374151",
+    lineHeight: 1.6,
     margin: 0,
-    maxWidth: 460,
+    maxWidth: 480,
   },
 
   phoneRow: {
