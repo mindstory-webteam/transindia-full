@@ -254,7 +254,6 @@ const RESPONSIVE_CSS = `
     width: 100%;
     padding: clamp(48px, 7vw, 84px) clamp(16px, 4vw, 40px);
     box-sizing: border-box;
-    background: #FFFFFF;
     font-family: var(--font-sora), "Sora", sans-serif;
   }
 

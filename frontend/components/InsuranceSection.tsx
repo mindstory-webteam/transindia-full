@@ -48,14 +48,17 @@ export default function InsuranceSection() {
 
 const CSS = `
   .ins-section {
-    padding: clamp(60px, 8vw, 100px) 0;
+    width: 100%;
+    padding: clamp(40px, 6vw, 72px) 0;
     font-family: var(--font-sora), "Sora", sans-serif;
+    box-sizing: border-box;
   }
 
   .ins-container {
-    max-width: 1360px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 0 clamp(20px, 4vw, 40px);
+    padding: 0 clamp(16px, 2.5vw, 28px);
+    box-sizing: border-box;
   }
 
   .ins-heading {

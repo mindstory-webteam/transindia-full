@@ -3765,7 +3765,10 @@ export default function InsuranceDetailPage({data, slug}: Props) {
         <Navbar />
 
         {/* ── HERO ── */}
-        <section className="li-hero">
+        <section
+          className="li-hero"
+          style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+        >
           <div className="li-inner">
             <div className="li-left">
               <div className="li-trail">
@@ -4129,19 +4132,23 @@ export default function InsuranceDetailPage({data, slug}: Props) {
 const CSS = `
   /* ── base ── */
   .li-hero *{ box-sizing: border-box; font-family: 'Plus Jakarta Sans', 'Inter', sans-serif; }
-  .li-hero{ background: #001250; padding: 56px 48px; }
+  .li-hero{ background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding: 56px 48px; color: #001250; }
   .li-inner{ max-width: 1280px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 48px; }
   .li-left{ flex: 0 0 50%; max-width: 600px; min-width: 0; padding-top: 100px; }
   .li-trail{ margin-bottom: 48px; }
-  .li-title{ font-size: clamp(28px, 4vw, 52px); font-weight: 800; color: #fff; line-height: 1.15; margin: 0 0 24px; letter-spacing: -0.5px; overflow-wrap: break-word; word-break: break-word; }
-  .li-desc{ font-size: 15px; color: rgba(255,255,255,0.72); line-height: 1.75; max-width: 480px; margin: 0 0 32px; overflow-wrap: break-word; }
-  .li-btn-cta{ display: inline-flex; align-items: center; padding: 15px 34px; color: #fff; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: 800; box-shadow: 0 4px 24px rgba(0,0,0,0.3); white-space: nowrap; transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 48px; }
-  .li-btn-cta:hover{ transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.4); }
+  .li-trail .bc-link{ color: #001250 !important; }
+  .li-trail .bc-link:hover{ color: #001250 !important; opacity: 0.8; }
+  .li-trail .bc-sep{ color: #001250 !important; opacity: 0.5; }
+  .li-trail .bc-current{ color: #001250 !important; }
+  .li-title{ font-size: clamp(28px, 4vw, 52px); font-weight: 800; color: #001250; line-height: 1.15; margin: 0 0 24px; letter-spacing: -0.5px; overflow-wrap: break-word; word-break: break-word; }
+  .li-desc{ font-size: 15px; color: #001250; line-height: 1.75; max-width: 480px; margin: 0 0 32px; overflow-wrap: break-word; }
+  .li-btn-cta{ display: inline-flex; align-items: center; padding: 15px 34px; color: #fff; text-decoration: none; border-radius: 10px; font-size: 15px; font-weight: 800; box-shadow: 0 4px 24px rgba(0,0,0,0.15); white-space: nowrap; transition: transform 0.2s, box-shadow 0.2s; margin-bottom: 48px; }
+  .li-btn-cta:hover{ transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,0.25); }
   .li-stats{ display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
   .li-stat-item{ display: flex; align-items: center; gap: 24px; padding-right: 24px; }
-  .li-stat-divider{ width: 1px; height: 44px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
-  .li-stat-value{ font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: #fff; line-height: 1.1; }
-  .li-stat-label{ font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; white-space: nowrap; }
+  .li-stat-divider{ width: 1px; height: 44px; background: rgba(0, 18, 80, 0.15); flex-shrink: 0; }
+  .li-stat-value{ font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: #001250; line-height: 1.1; }
+  .li-stat-label{ font-size: 13px; color: #001250; opacity: 0.75; margin-top: 4px; white-space: nowrap; }
   .li-right{ flex: 0 0 42%; max-width: 800px; width: 100%; padding-top: 80px; }
 
   /* ── shared card base ── */

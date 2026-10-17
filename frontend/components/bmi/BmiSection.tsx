@@ -81,14 +81,17 @@ export default function BmiSection() {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
         .bmi-section {
-          background: #f3f7ff;
-          padding: clamp(48px, 8vw, 80px) clamp(16px, 5vw, 24px);
+          width: 100%;
+          padding: clamp(36px, 5vw, 64px) 0;
           font-family: 'DM Sans', sans-serif;
+          box-sizing: border-box;
         }
 
         .bmi-wrap {
-          max-width: 1180px;
+          max-width: 1440px;
           margin: 0 auto;
+          padding: 0 clamp(16px, 2.5vw, 28px);
+          box-sizing: border-box;
         }
 
         /* ── Hero: text left, image right ── */
@@ -126,7 +129,7 @@ export default function BmiSection() {
           line-height: 1.7;
           color: #535862;
           margin: 0 0 30px 0;
-          max-width: 520px;
+          max-width: 580px;
           font-weight: 400;
         }
 

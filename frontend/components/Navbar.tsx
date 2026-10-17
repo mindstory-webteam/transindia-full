@@ -635,7 +635,7 @@ const CSS = `
     max-width: 1480px;
     margin: 0 auto;
     padding: 0 32px;
-    height: 68px;
+    height: 80px;
     display: flex;
     align-items: center;
     gap: 32px;
@@ -649,7 +649,7 @@ const CSS = `
     flex-shrink: 0;
   }
   .nav-logo-img {
-    height: 40px;
+    height: 44px;
     width: auto;
     display: block;
     object-fit: contain;
@@ -934,11 +934,11 @@ const CSS = `
     .nav-links     { display: none; }
     .nav-actions   { display: none; }
     .nav-hamburger { display: flex; }
-    .nav-inner     { gap: 0; }
+    .nav-inner     { gap: 0; height: 74px; }
   }
 
   @media (max-width: 480px) {
-    .nav-inner      { padding: 0 16px; }
+    .nav-inner      { padding: 0 16px; height: 70px; }
     .drawer-actions { flex-direction: column; gap: 10px; }
     .drawer-btn     { flex: unset; width: 100%; }
   }

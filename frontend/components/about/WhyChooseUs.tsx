@@ -104,8 +104,8 @@ export default function WhyChooseUs() {
 
 const CSS = `
   .wct-section {
-    background-color: #ffffff;
-    padding: 72px 0 88px;
+    background-color: transparent;
+    padding: clamp(36px, 4vw, 64px) 0;
     font-family: 'matterregular', sans-serif;
   }
 
@@ -149,8 +149,8 @@ const CSS = `
 
   /* ── Sub text ── */
   .wct-sub {
-    margin: 0 auto 60px auto;
-    max-width: 500px;
+    margin: 0 auto 48px auto;
+    max-width: 680px;
     text-align: center;
     font-size: 18px;
     line-height: 1.7;
@@ -167,7 +167,7 @@ const CSS = `
 
   /* ── Each cell ── */
   .wct-cell {
-    padding: 36px 40px;
+    padding: clamp(24px, 2.5vw, 32px) clamp(20px, 2.2vw, 28px);
     border: 1px solid #e5e7eb;
     border-radius: 24px;
   }

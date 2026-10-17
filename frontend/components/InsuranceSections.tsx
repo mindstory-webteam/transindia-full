@@ -153,13 +153,14 @@ function BulletList({items}: {items: {bold: string; rest: string}[]}) {
 const Divider = () => (
   <div
     style={{
-      height: 1,
-      background: "#E2E8F0",
-      width: "100%",
-      maxWidth: 1280,
+      maxWidth: 1440,
       margin: "0 auto",
+      padding: "0 clamp(16px, 2.5vw, 28px)",
+      boxSizing: "border-box",
     }}
-  />
+  >
+    <div style={{height: 1, background: "#E2E8F0", width: "100%"}} />
+  </div>
 );
 
 // ─── Section 1: Claim Process ─────────────────────────────────────────────────
@@ -288,7 +289,7 @@ function ClaimSection() {
 // ─── Section 2: Advisors ──────────────────────────────────────────────────────
 function AdvisorSection() {
   return (
-    <section className="is-section" style={{background: "#F8FAFC"}}>
+    <section className="is-section" >
       <div className="is-inner is-inner--reverse">
         {/* LEFT TEXT */}
         <div style={s.textBlock}>
@@ -520,17 +521,19 @@ export default function InsuranceSections() {
 const RESPONSIVE_CSS = `
   .is-section {
     width: 100%;
-    padding: clamp(48px, 8vw, 96px) clamp(16px, 5vw, 48px);
+    padding: clamp(32px, 4vw, 56px) 0;
     box-sizing: border-box;
-    background: #fff;
+    background: transparent;
   }
 
   .is-inner {
-    max-width: 1200px;
+    max-width: 1440px;
     margin: 0 auto;
+    padding: 0 clamp(16px, 2.5vw, 28px);
+    box-sizing: border-box;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: clamp(32px, 5vw, 72px);
+    gap: clamp(24px, 3.5vw, 48px);
     align-items: center;
   }
 
