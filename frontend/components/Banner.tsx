@@ -573,7 +573,7 @@ function AnimatedNumber({
   prefix = "",
   suffix = "",
   hasComma = false,
-  duration = 1800,
+  duration = 2200,
   animate = true,
 }: {
   target: number;
@@ -586,14 +586,17 @@ function AnimatedNumber({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!animate) return;
+    if (!animate) {
+      setCount(0);
+      return;
+    }
     let startTime: number | null = null;
     let animationFrameId: number;
 
     const step = (timestamp: number) => {
       if (!startTime) startTime = timestamp;
       const progress = Math.min((timestamp - startTime) / duration, 1);
-      // smooth easeOutCubic
+      // smooth easeOutCubic curve
       const ease = 1 - Math.pow(1 - progress, 3);
       setCount(Math.round(ease * target));
 
@@ -626,25 +629,77 @@ function StatsRow() {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") {
-      setInView(true);
-      return;
-    }
     const el = ref.current;
     if (!el) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      {threshold: 0.1}
-    );
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
+    let io: IntersectionObserver | null = null;
 
-    observer.observe(el);
-    return () => observer.disconnect();
+    const triggerAnimation = () => {
+      timer = setTimeout(() => {
+        setInView(true);
+      }, 350);
+    };
+
+    // Check if the page-level Preloader overlay is present in the DOM
+    const preloaderEl = typeof document !== "undefined" ? document.querySelector(".ti-pre") : null;
+
+    if (preloaderEl) {
+      // Preloader is active: wait until it starts fading or unmounts before counting
+      observer = new MutationObserver(() => {
+        const activePreloader = document.querySelector(".ti-pre:not(.is-fading)");
+        if (!activePreloader) {
+          if (observer) observer.disconnect();
+          // Preloader is fading/gone — wait briefly then trigger counting
+          timer = setTimeout(() => {
+            setInView(true);
+          }, 400);
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
+      // Fallback timer if mutation doesn't fire (Preloader duration is ~3150ms)
+      const fallbackTimer = setTimeout(() => {
+        if (observer) observer.disconnect();
+        setInView(true);
+      }, 3400);
+
+      return () => {
+        if (observer) observer.disconnect();
+        clearTimeout(fallbackTimer);
+        if (timer) clearTimeout(timer);
+      };
+    } else {
+      // No preloader present (or already gone)
+      if (typeof IntersectionObserver === "undefined") {
+        triggerAnimation();
+        return;
+      }
+
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            triggerAnimation();
+            if (io) io.disconnect();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      io.observe(el);
+
+      return () => {
+        if (io) io.disconnect();
+        if (timer) clearTimeout(timer);
+      };
+    }
   }, []);
 
   return (
@@ -662,6 +717,7 @@ function StatsRow() {
                 suffix={suffix}
                 hasComma={hasComma}
                 animate={inView}
+                duration={2200}
               />
             </span>
             <span className="hero-stat-label">{label}</span>
