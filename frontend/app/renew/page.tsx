@@ -16,7 +16,7 @@ export default function Maintenance() {
       }}
     >
       
-      <Navbar alwaysSolid={true} />
+      <Navbar />
 
       <main
         style={{

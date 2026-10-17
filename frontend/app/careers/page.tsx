@@ -89,7 +89,7 @@ export default function CareersPage() {
       <style>{CSS}</style>
       <div className="careers-page">
         
-        <Navbar alwaysSolid={true} />
+        <Navbar />
 
         {/* Hero */}
         <section

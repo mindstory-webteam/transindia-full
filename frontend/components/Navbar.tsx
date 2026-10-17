@@ -97,7 +97,7 @@ function extractServices(data: unknown): Service[] {
 
 // ─── NAVBAR ───────────────────────────────────────────────────────────────────
 
-export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean }) {
+export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean } = {}) {
   const [scrolled,           setScrolled]           = useState(false);
   const [mobileOpen,         setMobileOpen]         = useState(false);
   const [services,           setServices]           = useState<Service[]>(MANUAL_SERVICES);
@@ -279,7 +279,7 @@ export default function Navbar({ alwaysSolid = false }: { alwaysSolid?: boolean 
     <>
       <style>{CSS}</style>
 
-      <nav className={`nav-root${alwaysSolid || scrolled || mobileOpen ? " nav-scrolled" : ""}`}>
+      <nav className={`nav-root${scrolled || mobileOpen ? " nav-scrolled" : ""}`}>
         <div className="nav-inner">
 
           {/* ── Logo / Brand ── */}

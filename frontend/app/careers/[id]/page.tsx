@@ -97,7 +97,7 @@ export default function CareerDetailPage() {
     <>
       <style>{CSS}</style>
       <div className="cd-page">
-        <Navbar alwaysSolid={true} />
+        <Navbar />
 
         {/* Hero */}
         <section

@@ -101,7 +101,7 @@ export default function CookiePolicyPage() {
       <style>{CSS}</style>
       <div className="policy-page">
         
-        <Navbar alwaysSolid={true} />
+        <Navbar />
 
         <div className="policy-wrapper">
           {/* Breadcrumb — hidden on tablet/mobile */}

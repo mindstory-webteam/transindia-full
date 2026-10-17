@@ -14,7 +14,10 @@ export default function ServicesHero() {
     <>
       <style>{CSS}</style>
       <div className="svc-root">
-        <section className="svc-section">
+        <section
+          className="svc-section"
+          style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+        >
           {/* Background glows */}
           <div className="svc-glow svc-glow-1" />
           <div className="svc-glow svc-glow-2" />
@@ -91,7 +94,7 @@ const CSS = `
   .svc-root *{ box-sizing:border-box; }
 
   .svc-section{
-    background: linear-gradient(160deg, #0B2080 0%, #0A1B6B 45%, #061448 100%);
+    background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     position: relative;
     overflow: visible;
     padding-top: 140px;
@@ -101,19 +104,13 @@ const CSS = `
   }
 
   .svc-glow{
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
+    display: none;
   }
   .svc-glow-1{
-    top: 10%; right: 20%;
-    width: 700px; height: 900px;
-    background: radial-gradient(circle, rgba(56,189,248,0.09) 0%, transparent 65%);
+    display: none;
   }
   .svc-glow-2{
-    bottom: 10%; left: 5%;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(30,80,220,0.10) 0%, transparent 65%);
+    display: none;
   }
 
   .svc-inner{
@@ -128,6 +125,11 @@ const CSS = `
     margin-bottom: 0px;
     margin-top:20px;
   }
+
+  .svc-trail-wrapper .bc-link { color: #001250 !important; }
+  .svc-trail-wrapper .bc-link:hover { color: #001250 !important; opacity: 0.8; }
+  .svc-trail-wrapper .bc-sep { color: #001250 !important; opacity: 0.5; }
+  .svc-trail-wrapper .bc-current { color: #001250 !important; font-weight: 600; }
 
   .svc-row{
     display: flex;
@@ -144,7 +146,7 @@ const CSS = `
   .svc-title{
     font-size: clamp(28px, 3.6vw, 46px);
     font-weight: 900;
-    color: #fff;
+    color: #001250;
     line-height: 1.12;
     margin: 0 0 20px;
     letter-spacing: -0.5px;
@@ -152,7 +154,7 @@ const CSS = `
 
   .svc-desc{
     font-size: 15px;
-    color: rgba(255,255,255,0.64);
+    color: #001250;
     line-height: 1.8;
     margin: 0 0 32px;
     max-width: 480px;
@@ -183,22 +185,21 @@ const CSS = `
 
   .svc-btn-ghost{
     padding: 13px 30px;
-    background: rgba(255,255,255,0.06);
-    border: 1.5px solid rgba(255,255,255,0.4);
+    background: transparent;
+    border: 1.5px solid #001250;
     border-radius: 10px;
-    color: #fff;
+    color: #001250;
     text-decoration: none;
     font-size: 14px;
     font-weight: 800;
-    backdrop-filter: blur(6px);
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     transition: border-color 0.2s, background 0.2s;
   }
   .svc-btn-ghost:hover{
-    border-color: rgba(255,255,255,0.8);
-    background: rgba(255,255,255,0.12);
+    border-color: #001250;
+    background: #F0F7FF;
   }
 
   .svc-right{
@@ -257,7 +258,7 @@ const CSS = `
   .svc-stat-value{
     font-size: 26px;
     font-weight: 800;
-    color: #0B2563;
+    color: #001250;
     line-height: 1.1;
     white-space: nowrap;
   }
