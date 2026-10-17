@@ -92,7 +92,10 @@ export default function CareersPage() {
         <Navbar alwaysSolid={true} />
 
         {/* Hero */}
-        <section className="careers-hero">
+        <section
+          className="careers-hero"
+          style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+        >
           <div className="careers-inner">
             <div className="careers-content">
               <div className="careers-trail-wrapper">
@@ -323,7 +326,7 @@ const CSS = `
 
   /* ── Hero ── */
   .careers-hero {
-    background: #000d3a;
+    background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     position: relative;
     overflow: hidden; 
     padding-top: 150px; 
@@ -346,6 +349,11 @@ const CSS = `
     margin-bottom: 20px;
   }
 
+  .careers-trail-wrapper .bc-link { color: #001250 !important; }
+  .careers-trail-wrapper .bc-link:hover { color: #001250 !important; opacity: 0.8; }
+  .careers-trail-wrapper .bc-sep { color: #001250 !important; opacity: 0.5; }
+  .careers-trail-wrapper .bc-current { color: #001250 !important; font-weight: 600; }
+
   .careers-content {
     position: relative;
     z-index: 10;
@@ -356,7 +364,7 @@ const CSS = `
   .careers-title {
     font-size: 55px;
     font-weight: 800;
-    color: #fff;
+    color: #001250;
     line-height: 1.15;
     margin: 0 0 14px 0;
     letter-spacing: -0.5px;
@@ -364,7 +372,7 @@ const CSS = `
 
   .careers-desc {
     font-size: 15px;
-    color: rgba(255,255,255,0.80);
+    color: #001250;
     line-height: 1.72;
     max-width: 540px;
     margin: 0 0 32px 0;
@@ -419,10 +427,6 @@ const CSS = `
     object-position: center right;
   }
 
-
-
-
-
   @media (max-width: 1024px) {
     .careers-trail-wrapper {
       display: none;
@@ -431,7 +435,7 @@ const CSS = `
       display: none;
     }
     .careers-hero {
-      background: #000b37;
+      background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
       padding-top: 110px;
       padding-bottom: 60px;
       overflow: visible;
@@ -472,7 +476,7 @@ const CSS = `
   }
 
   @media (max-width: 600px) {
-    .careers-hero { background: #000b37; padding-top: 100px; }
+    .careers-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding-top: 100px; }
     .careers-inner { 
       padding: 0 20px; 
       min-height: auto; 

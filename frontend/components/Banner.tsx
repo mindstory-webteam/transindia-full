@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 
 /* ---------- brand ---------- */
 const NAVY = "#001a5a";
@@ -528,11 +528,20 @@ function ShieldBadgeIcon() {
 
 /* ---------- content ---------- */
 
-const STATS = [
-  {value: "1.2L+", label: "Policies Sold", Icon: ShieldCheckIcon},
-  {value: "500+", label: "Happy Clients", Icon: UsersIcon},
-  {value: "₹250Cr+", label: "Claim Settled", Icon: CheckBadgeIcon},
-  {value: "10+", label: "Years of Trust", Icon: ClockIcon},
+type StatItem = {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  hasComma?: boolean;
+  label: string;
+  Icon: (props: IconProps) => React.ReactElement;
+};
+
+const STATS: StatItem[] = [
+  {target: 20000, suffix: "+", hasComma: true, label: "Policies Sold", Icon: ShieldCheckIcon},
+  {target: 8000, suffix: "+", hasComma: true, label: "Happy Clients", Icon: UsersIcon},
+  {target: 20, prefix: "₹", suffix: "Cr+", hasComma: false, label: "Claim Settled", Icon: CheckBadgeIcon},
+  {target: 10, suffix: "+", hasComma: false, label: "Years of Trust", Icon: ClockIcon},
 ];
 
 /* the eight nav services, in nav order */
@@ -557,18 +566,104 @@ const SERVICES = [
   },
 ];
 
+/* ---------- animated counter ---------- */
+
+function AnimatedNumber({
+  target,
+  prefix = "",
+  suffix = "",
+  hasComma = false,
+  duration = 1800,
+  animate = true,
+}: {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  hasComma?: boolean;
+  duration?: number;
+  animate?: boolean;
+}) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!animate) return;
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // smooth easeOutCubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(ease * target));
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [target, duration, animate]);
+
+  const formatted = hasComma ? count.toLocaleString("en-IN") : count.toString();
+
+  return (
+    <>
+      {prefix}
+      {formatted}
+      {suffix}
+    </>
+  );
+}
+
 /* ---------- stats row ---------- */
 
 function StatsRow() {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      {threshold: 0.1}
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="hero-stats">
-      {STATS.map(({value, label, Icon}) => (
+    <div className="hero-stats" ref={ref}>
+      {STATS.map(({target, prefix, suffix, hasComma, label, Icon}) => (
         <div className="hero-stat" key={label}>
           <span className="hero-stat-chip">
             <Icon size={18} />
           </span>
           <span>
-            <span className="hero-stat-value">{value}</span>
+            <span className="hero-stat-value">
+              <AnimatedNumber
+                target={target}
+                prefix={prefix}
+                suffix={suffix}
+                hasComma={hasComma}
+                animate={inView}
+              />
+            </span>
             <span className="hero-stat-label">{label}</span>
           </span>
         </div>
@@ -962,7 +1057,7 @@ export default function Banner() {
           background:rgba(32,190,198,0.12) !important;
           border:1px solid rgba(32,190,198,0.28) !important;
         }
-        .hero-stat-value{ display:block !important; font-size:19px !important; font-weight:800 !important; color:#001A5A !important; line-height:1.15 !important; white-space:nowrap !important; }
+        .hero-stat-value{ display:block !important; font-size:19px !important; font-weight:800 !important; color:#001A5A !important; line-height:1.15 !important; white-space:nowrap !important; font-variant-numeric:tabular-nums !important; }
         .hero-stat-label{ display:block !important; font-size:11.5px !important; color:#4A659D !important; margin-top:2px !important; white-space:nowrap !important; }
 
         /* ---- quote form (glass, on-theme) ---- */
@@ -1165,7 +1260,12 @@ export default function Banner() {
       `}</style>
 
       <div className="hero-root">
-        <section className="hero-section" style={{background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)"}}>
+        <section
+          className="hero-section"
+          style={{
+            background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)",
+          }}
+        >
           <div className="hero-wrap">
             <div className="hero-hero">
               {/* ---- left: headline, copy, CTAs, stats ---- */}
@@ -1199,24 +1299,34 @@ export default function Banner() {
                   </span>
                   From understanding your needs and finding suitable coverage to
                   policy servicing, renewals and claims assistance, our team of
-                  trained insurance professionals is here to guide and support you.
+                  trained insurance professionals is here to guide and support
+                  you.
                 </p>
 
                 <div className="hero-features-list">
                   <div className="hero-feature-item">
-                    <span className="hero-feature-icon" style={{ background: "#E0F2FE" }}>
+                    <span
+                      className="hero-feature-icon"
+                      style={{background: "#E0F2FE"}}
+                    >
                       <ShieldCheckIcon size={14} color="#0284C7" stroke={2.2} />
                     </span>
                     <span>Expert Guidance</span>
                   </div>
                   <div className="hero-feature-item">
-                    <span className="hero-feature-icon" style={{ background: "#DCFCE7" }}>
+                    <span
+                      className="hero-feature-icon"
+                      style={{background: "#DCFCE7"}}
+                    >
                       <UsersIcon size={14} color="#16A34A" stroke={2.2} />
                     </span>
                     <span>Personalised Service</span>
                   </div>
                   <div className="hero-feature-item">
-                    <span className="hero-feature-icon" style={{ background: "#FFEDD5" }}>
+                    <span
+                      className="hero-feature-icon"
+                      style={{background: "#FFEDD5"}}
+                    >
                       <HeadsetIcon size={14} color="#EA580C" stroke={2.2} />
                     </span>
                     <span>Dedicated Support</span>

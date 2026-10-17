@@ -100,7 +100,10 @@ export default function CareerDetailPage() {
         <Navbar alwaysSolid={true} />
 
         {/* Hero */}
-        <section className="cd-hero">
+        <section
+          className="cd-hero"
+          style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+        >
           <div className="cd-inner">
             <div className="cd-content">
               <div className="cd-trail-wrapper">
@@ -342,19 +345,23 @@ const CSS = `
   .cd-page { min-height: 100vh; background: #f8faff; display: flex; flex-direction: column; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif; }
   
   /* Hero */
-  .cd-hero { background: #000d3a; position: relative; overflow: hidden; padding-top: 150px; padding-bottom: 40px; }
+  .cd-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); position: relative; overflow: hidden; padding-top: 150px; padding-bottom: 40px; }
   .cd-inner { max-width: 1350px; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; min-height: 400px; position: relative; z-index: 2; }
   .cd-trail-wrapper { margin-bottom: 20px; }
+  .cd-trail-wrapper .bc-link { color: #001250 !important; }
+  .cd-trail-wrapper .bc-link:hover { color: #001250 !important; opacity: 0.8; }
+  .cd-trail-wrapper .bc-sep { color: #001250 !important; opacity: 0.5; }
+  .cd-trail-wrapper .bc-current { color: #001250 !important; font-weight: 600; }
   .cd-content { position: relative; z-index: 10; flex: 0 0 52%; padding-bottom: 48px; }
-  .cd-title { font-size: 55px; font-weight: 800; color: #fff; line-height: 1.15; margin: 0 0 14px 0; letter-spacing: -0.5px; }
-  .cd-desc { font-size: 15px; color: rgba(255,255,255,0.80); line-height: 1.72; max-width: 540px; margin: 0 0 32px 0; }
+  .cd-title { font-size: 55px; font-weight: 800; color: #001250; line-height: 1.15; margin: 0 0 14px 0; letter-spacing: -0.5px; }
+  .cd-desc { font-size: 15px; color: #001250; line-height: 1.72; max-width: 540px; margin: 0 0 32px 0; }
   .cd-mobile-visual { display: none; }
   .cd-lg-banner { position: absolute; right: 40px; top: 46%; transform: translateY(-50%); width: 50%; max-width: 650px; z-index: 1; pointer-events: none; }
   .cd-lg-banner img { width: 100%; height: auto; display: block; object-fit: contain; object-position: center right; }
   @media (max-width: 1450px) { .cd-lg-banner { right: 0; } }
   @media (max-width: 1024px) {
     .cd-trail-wrapper { display: none; } .cd-lg-banner { display: none; }
-    .cd-hero { background: #000b37; padding-top: 110px; padding-bottom: 60px; overflow: visible; }
+    .cd-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding-top: 110px; padding-bottom: 60px; overflow: visible; }
     .cd-inner { flex-direction: column; align-items: flex-start; min-height: auto; padding: 0 28px; }
     .cd-content { flex: 0 0 auto; width: 100%; padding-bottom: 20px; }
     .cd-title { font-size: 34px; } .cd-desc { max-width: 100%; margin-bottom: 24px; }
@@ -362,7 +369,7 @@ const CSS = `
     .cd-mobile-visual img { display: inline-block; max-width: 100%; height: auto; }
   }
   @media (max-width: 600px) {
-    .cd-hero { padding-top: 100px; } .cd-inner { padding: 0 20px; }
+    .cd-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding-top: 100px; } .cd-inner { padding: 0 20px; }
     .cd-content { padding-bottom: 20px; width: 100%; } .cd-title { font-size: 26px; }
     .cd-mobile-visual { display: block; width: 100%; text-align: center; margin-top: 20px; padding-bottom: 20px; }
     .cd-mobile-visual img { max-width: 100%; height: auto; }

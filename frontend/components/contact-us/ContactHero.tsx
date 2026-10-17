@@ -45,7 +45,10 @@ export default function ContactHero() {
     <>
       <style>{CSS}</style>
       <div className="contact-hero-wrapper">
-        <section className="contact-hero">
+        <section
+          className="contact-hero"
+          style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+        >
           <div className="contact-inner">
             <div className="contact-trail-wrapper">
               <Breadcrum crumbs={[{ label: "Home", href: "/" }, { label: "Contact Us" }]} />
@@ -99,7 +102,7 @@ const CSS = `
   }
 
   .contact-hero {
-    background: #00124C;
+    background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     position: relative;
     overflow: hidden;
     padding-top: 150px;
@@ -124,6 +127,11 @@ const CSS = `
     left: 32px;
   }
 
+  .contact-trail-wrapper .bc-link { color: #001250 !important; }
+  .contact-trail-wrapper .bc-link:hover { color: #001250 !important; opacity: 0.8; }
+  .contact-trail-wrapper .bc-sep { color: #001250 !important; opacity: 0.5; }
+  .contact-trail-wrapper .bc-current { color: #001250 !important; font-weight: 600; }
+
   .contact-content {
     flex: 0 0 52%;
     padding-bottom: 150px;
@@ -133,7 +141,7 @@ const CSS = `
     font-size: 55px;
     font-weight: 800;
     font-family: var(--font-sora), "Sora", sans-serif;
-    color: #fff;
+    color: #001250;
     line-height: 1.15;
     margin: 0 0 14px 0;
     letter-spacing: -0.5px;
@@ -141,7 +149,7 @@ const CSS = `
 
   .contact-desc {
     font-size: 15px;
-    color: rgba(255,255,255,0.80);
+    color: #001250;
     line-height: 1.72;
     max-width: 480px;
     margin: 0;
@@ -208,7 +216,7 @@ const CSS = `
       display: none;
     }
     .contact-hero {
-      background: #0b1240;
+      background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     }
   }
 
@@ -232,7 +240,7 @@ const CSS = `
   @media (min-width: 601px) and (max-width: 1024px) {
     .contact-hero {
       overflow: hidden;
-      background: #0b1240;
+      background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     }
     .contact-sm-banner {
       display: flex;

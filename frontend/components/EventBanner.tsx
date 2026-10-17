@@ -6,7 +6,10 @@ export default function EventBanner() {
   return (
     <>
       <style>{CSS}</style>
-      <section className="about-hero">
+      <section
+        className="about-hero"
+        style={{ background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)" }}
+      >
         <div className="about-inner">
           <div className="about-trail-wrapper">
              <Breadcrum crumbs={[{ label: "Home", href: "/" }, { label: "Events" }]} />
@@ -61,7 +64,7 @@ export default function EventBanner() {
 
 const CSS = `
   .about-hero {
-    background: #000d3a;
+    background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     position: relative;
     overflow: visible; 
     padding-top: 150px; 
@@ -86,6 +89,11 @@ const CSS = `
     left: 32px;
   }
 
+  .about-trail-wrapper .bc-link { color: #001250 !important; }
+  .about-trail-wrapper .bc-link:hover { color: #001250 !important; opacity: 0.8; }
+  .about-trail-wrapper .bc-sep { color: #001250 !important; opacity: 0.5; }
+  .about-trail-wrapper .bc-current { color: #001250 !important; font-weight: 600; }
+
   .about-content {
     position: relative;
     z-index: 10;
@@ -96,7 +104,7 @@ const CSS = `
   .about-title {
     font-size: 55px;
     font-weight: 800;
-    color: #fff;
+    color: #001250;
     line-height: 1.15;
     margin: 0 0 14px 0;
     letter-spacing: -0.5px;
@@ -104,7 +112,7 @@ const CSS = `
 
   .about-desc {
     font-size: 15px;
-    color: rgba(255,255,255,0.80);
+    color: #001250;
     line-height: 1.72;
     max-width: 540px;
     margin: 0 0 32px 0;
@@ -132,16 +140,22 @@ const CSS = `
   
   .about-btn-ghost {
     background: transparent;
-    color: #fff;
-    border: 2px solid rgba(255,255,255,0.65);
+    color: #001250;
+    border: 2px solid #001250;
     text-decoration: none;
     padding: 11px 24px;
     border-radius: 9px;
     font-size: 14px;
     font-weight: 700;
-    transition: border-color 0.2s, background 0.2s;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
     display: inline-flex;
     align-items: center;
+  }
+
+  .about-btn-ghost:hover {
+    background: #F0F7FF;
+    color: #001250;
+    border-color: #001250;
   }
 
   .about-mobile-visual {
@@ -203,7 +217,7 @@ const CSS = `
   .about-stat-value {
     font-size: 30px;
     font-weight: bold;
-    color: #000;
+    color: #001250;
     line-height: 1;
     margin-bottom: 6px;
   }
@@ -231,7 +245,7 @@ const CSS = `
       display: none;
     }
     .about-hero {
-      background: #000b37;
+      background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
       padding-top: 110px;
       padding-bottom: 60px;
       overflow: visible;
@@ -285,7 +299,7 @@ const CSS = `
   }
 
   @media (max-width: 600px) {
-    .about-hero { background: #000b37; padding-top: 100px; }
+    .about-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding-top: 100px; }
     .about-inner { 
       padding: 0 20px; 
       min-height: auto; 
