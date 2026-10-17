@@ -63,7 +63,6 @@ export default function RelationshipSection() {
   ];
 
   const ARC_H = 390;
-  const ARC_W = 230;
   const ICON = 32;
   const ICON_OFFSET = 18;
 
@@ -80,263 +79,445 @@ export default function RelationshipSection() {
   const arcPath = "M2.5 0V33.5608C47.0228 81.5232 109.355 212.243 2.5 351.424V390";
 
   return (
-    <section
-      style={{
-        background: "linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%)",
-        borderTop: `1px solid ${BORDER_COLOR}`,
-        borderBottom: `1px solid ${BORDER_COLOR}`,
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Decorative ambient atmospheric glows */}
-      <div
-        style={{
-          position: "absolute",
-          top: -20,
-          left: "20%",
-          width: 380,
-          height: "100%",
-          background: "radial-gradient(ellipse at center, rgba(224, 242, 254, 0.7) 0%, rgba(240, 249, 255, 0) 70%)",
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          bottom: -20,
-          right: "15%",
-          width: 360,
-          height: "100%",
-          background: "radial-gradient(ellipse at center, rgba(186, 230, 253, 0.5) 0%, rgba(240, 249, 255, 0) 70%)",
-          pointerEvents: "none",
-        }}
-      />
+    <>
+      <style>{CSS}</style>
+      <section className="rel-section">
+        {/* Decorative ambient atmospheric glows */}
+        <div className="rel-glow-1" />
+        <div className="rel-glow-2" />
 
-      <div
-        style={{
-          maxWidth: 1260,
-          margin: "0 auto",
-          padding: "0 24px",
-          height: ARC_H,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 20,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Left Mascot — larger scale, filling container height */}
-        <div
-          style={{
-            flex: "0 0 460px",
-            height: "100%",
-            display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "flex-start",
-            position: "relative",
-          }}
-        >
-          <img
-            src="/images/home/insurance-mascot.png"
-            alt="TransIndia Mascot with shield"
-            style={{
-              width: "100%",
-              maxWidth: 490,
-              height: "100%",
-              maxHeight: ARC_H,
-              objectFit: "contain",
-              objectPosition: "bottom left",
-              filter: "drop-shadow(0 8px 18px rgba(2, 132, 199, 0.12))",
-            }}
-          />
-        </div>
-
-        {/* Center Content */}
-        <div style={{ flex: "1 1 420px", maxWidth: 510, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <h2
-            style={{
-              color: NAVY,
-              fontSize: 24,
-              fontWeight: 800,
-              lineHeight: 1.24,
-              margin: "0 0 12px",
-              letterSpacing: "-0.015em",
-            }}
-          >
-            Insurance Doesn&apos;t End When
-            <br />
-            You Buy the Policy.
-            <br />
-            <span style={{ color: "#009BB9" }}>That&apos;s Where Our Relationship Begins.</span>
-          </h2>
-
-          <p
-            style={{
-              color: "#475569",
-              fontSize: 12.5,
-              lineHeight: 1.65,
-              margin: "0 0 18px",
-              maxWidth: 490,
-            }}
-          >
-            At TransIndia, we believe insurance is about more than a policy
-            document. It is about having the right people beside you throughout
-            your journey. Whether you&apos;re protecting your family, health,
-            vehicle, business or employees, our trained professionals are here to
-            help you understand, choose, manage and claim with confidence.
-          </p>
-
-          <div>
-            <Link
-              href="/about"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                background: "#034E7B",
-                color: "#FFFFFF",
-                fontWeight: 700,
-                fontSize: 12.5,
-                padding: "10px 24px",
-                borderRadius: 9999,
-                textDecoration: "none",
-                boxShadow: "0 3px 12px rgba(3, 78, 123, 0.22)",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#02395A";
-                e.currentTarget.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#034E7B";
-                e.currentTarget.style.transform = "translateY(0)";
-              }}
-            >
-              One Partner. One Team. End-to-End Support.
-            </Link>
+        <div className="rel-inner">
+          {/* Left Mascot */}
+          <div className="rel-mascot-col">
+            <img
+              src="/images/home/insurance-mascot.png"
+              alt="TransIndia Mascot with shield"
+              className="rel-mascot-img"
+            />
           </div>
-        </div>
 
-        {/* Right Stepper with curved arc touching top and bottom of div */}
-        <div
-          style={{
-            position: "relative",
-            width: ARC_W,
-            height: ARC_H,
-            flexShrink: 0,
-          }}
-        >
-          {/* Arc line starting at y=0 and ending at y=ARC_H (390) with straight vertical ends */}
-          <svg
-            width="64"
-            height={ARC_H}
-            viewBox="0 0 64 390"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              overflow: "visible",
-              pointerEvents: "none",
-            }}
-          >
-            {/* Soft atmospheric glow */}
-            <path
-              d={arcPath}
-              stroke="#BAE6FD"
-              strokeWidth="9"
-              strokeLinecap="round"
-              opacity="0.45"
-            />
-            {/* Main curved line with straight ends */}
-            <path
-              d={arcPath}
-              stroke="#64A9ED"
-              strokeWidth="5"
-              strokeLinecap="round"
-            />
+          {/* Center Content */}
+          <div className="rel-content-col">
+            <h2 className="rel-heading">
+              Insurance Doesn&apos;t End When
+              <br />
+              You Buy the Policy.
+              <br />
+              <span style={{ color: "#009BB9" }}>That&apos;s Where Our Relationship Begins.</span>
+            </h2>
 
+            <p className="rel-desc">
+              At TransIndia, we believe insurance is about more than a policy
+              document. It is about having the right people beside you throughout
+              your journey. Whether you&apos;re protecting your family, health,
+              vehicle, business or employees, our trained professionals are here to
+              help you understand, choose, manage and claim with confidence.
+            </p>
+
+            <div className="rel-btn-wrap">
+              <Link href="/about" className="rel-btn">
+                One Partner. One Team. End-to-End Support.
+              </Link>
+            </div>
+          </div>
+
+          {/* Right Stepper with curved arc touching top and bottom of div */}
+          <div className="rel-stepper-col">
+            <svg
+              width="64"
+              height={ARC_H}
+              viewBox="0 0 64 390"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              className="rel-stepper-svg"
+            >
+              {/* Soft atmospheric glow */}
+              <path
+                d={arcPath}
+                stroke="#BAE6FD"
+                strokeWidth="4"
+                strokeLinecap="round"
+                opacity="0.35"
+              />
+              {/* Main curved line with straight ends */}
+              <path
+                d={arcPath}
+                stroke="#64A9ED"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+
+              {steps.map((st, i) => {
+                const node = stepNodes[i];
+                return (
+                  <g key={i}>
+                    <line
+                      x1={node.x + 2}
+                      y1={node.y}
+                      x2={node.x + ICON_OFFSET}
+                      y2={node.y}
+                      stroke="#BAE6FD"
+                      strokeWidth="1"
+                      strokeLinecap="round"
+                    />
+                    <circle
+                      cx={node.x}
+                      cy={node.y}
+                      r="3.5"
+                      fill="#003783ff"
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* 6 step items following the arch curve */}
             {steps.map((st, i) => {
               const node = stepNodes[i];
               return (
-                <g key={i}>
-                  <line
-                    x1={node.x + 3}
-                    y1={node.y}
-                    x2={node.x + ICON_OFFSET}
-                    y2={node.y}
-                    stroke="#BAE6FD"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                  <circle
-                    cx={node.x}
-                    cy={node.y}
-                    r="4.5"
-                    fill="#003783ff"
-                  />
-                </g>
+                <div
+                  key={i}
+                  className="rel-step-item"
+                  style={{
+                    left: node.x + ICON_OFFSET,
+                    top: node.y - ICON / 2,
+                  }}
+                >
+                  <div
+                    className="rel-step-icon"
+                    style={{
+                      background: st.bg,
+                      border: `1.5px solid ${st.border}`,
+                      boxShadow: `0 0 0 2.5px ${st.color}15, 0 2px 8px ${st.color}20`,
+                    }}
+                  >
+                    {st.icon}
+                  </div>
+                  <span className="rel-step-label">
+                    {st.label}
+                  </span>
+                </div>
               );
             })}
-          </svg>
-
-          {/* 6 step items following the arch curve */}
-          {steps.map((st, i) => {
-            const node = stepNodes[i];
-            return (
-              <div
-                key={i}
-                style={{
-                  position: "absolute",
-                  left: node.x + ICON_OFFSET,
-                  top: node.y - ICON / 2,
-                  height: ICON,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  cursor: "default",
-                  transition: "transform 0.15s ease",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = "translateX(3px)")}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = "translateX(0)")}
-              >
-                <div
-                  style={{
-                    width: ICON,
-                    height: ICON,
-                    borderRadius: "50%",
-                    background: st.bg,
-                    border: `1.5px solid ${st.border}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    boxShadow: `0 0 0 2.5px ${st.color}15, 0 2px 8px ${st.color}20`,
-                    flexShrink: 0,
-                  }}
-                >
-                  {st.icon}
-                </div>
-                <span
-                  style={{
-                    fontSize: 13.5,
-                    fontWeight: 700,
-                    color: NAVY,
-                    letterSpacing: "-0.01em",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {st.label}
-                </span>
-              </div>
-            );
-          })}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
+
+const CSS = `
+  .rel-section {
+    background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
+    border-top: 1px solid ${BORDER_COLOR};
+    border-bottom: 1px solid ${BORDER_COLOR};
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .rel-glow-1 {
+    position: absolute;
+    top: -20px;
+    left: 20%;
+    width: 380px;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(224, 242, 254, 0.7) 0%, rgba(240, 249, 255, 0) 70%);
+    pointer-events: none;
+  }
+
+  .rel-glow-2 {
+    position: absolute;
+    bottom: -20px;
+    right: 15%;
+    width: 360px;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(186, 230, 253, 0.5) 0%, rgba(240, 249, 255, 0) 70%);
+    pointer-events: none;
+  }
+
+  .rel-inner {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 390px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+  }
+
+  .rel-mascot-col {
+    flex: 0 0 440px;
+    height: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    position: relative;
+  }
+
+  .rel-mascot-img {
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    max-height: 390px;
+    object-fit: contain;
+    object-position: bottom left;
+    filter: drop-shadow(0 8px 18px rgba(2, 132, 199, 0.12));
+    display: block;
+  }
+
+  .rel-content-col {
+    flex: 1 1 420px;
+    max-width: 510px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .rel-heading {
+    color: ${NAVY};
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.24;
+    margin: 0 0 12px;
+    letter-spacing: -0.015em;
+    font-family: var(--font-sora), "Sora", sans-serif;
+  }
+
+  .rel-desc {
+    color: #475569;
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin: 0 0 18px;
+    max-width: 490px;
+  }
+
+  .rel-btn-wrap {
+    display: block;
+  }
+
+  .rel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #034E7B;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 12.5px;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    text-decoration: none;
+    box-shadow: 0 3px 12px rgba(3, 78, 123, 0.22);
+    transition: all 0.2s ease;
+  }
+
+  .rel-btn:hover {
+    background: #02395A;
+    transform: translateY(-1px);
+  }
+
+  .rel-stepper-col {
+    position: relative;
+    width: 230px;
+    height: 390px;
+    flex-shrink: 0;
+  }
+
+  .rel-stepper-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .rel-step-item {
+    position: absolute;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: default;
+    transition: transform 0.15s ease;
+  }
+
+  .rel-step-item:hover {
+    transform: translateX(3px);
+  }
+
+  .rel-step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rel-step-label {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: ${NAVY};
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  /* ── Breakpoints ── */
+
+  /* Medium screens / Laptops (992px to 1199px) */
+  @media (max-width: 1199px) {
+    .rel-inner {
+      gap: 16px;
+      padding: 0 16px;
+    }
+    .rel-mascot-col {
+      flex: 0 0 320px;
+    }
+    .rel-mascot-img {
+      max-width: 340px;
+    }
+    .rel-heading {
+      font-size: 21px;
+    }
+    .rel-desc {
+      font-size: 12px;
+    }
+  }
+
+  /* Tablet screens (769px to 991px) */
+  @media (max-width: 991px) {
+    .rel-inner {
+      gap: 12px;
+      padding: 0 12px;
+    }
+    .rel-mascot-col {
+      flex: 0 0 240px;
+    }
+    .rel-mascot-img {
+      max-width: 250px;
+    }
+    .rel-heading {
+      font-size: 18px;
+    }
+    .rel-desc {
+      font-size: 11.5px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+    .rel-btn {
+      font-size: 11.5px;
+      padding: 8px 18px;
+    }
+    .rel-stepper-col {
+      width: 195px;
+    }
+    .rel-step-label {
+      font-size: 12px;
+    }
+  }
+
+  /* Small screens (<= 768px): Hide SVG and 6 step labels, stack content & mascot */
+  @media (max-width: 768px) {
+    .rel-stepper-col {
+      display: none !important;
+    }
+
+    .rel-inner {
+      height: auto !important;
+      flex-direction: column !important;
+      padding: 36px 20px 0 20px !important;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .rel-content-col {
+      max-width: 100% !important;
+      width: 100%;
+      align-items: center;
+      text-align: center;
+      padding: 0 4px;
+      order: 1;
+    }
+
+    .rel-heading {
+      font-size: clamp(20px, 4.5vw, 24px);
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+
+    .rel-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      margin: 0 auto 20px auto;
+      max-width: 520px;
+    }
+
+    .rel-btn-wrap {
+      margin: 0 auto;
+    }
+
+    .rel-btn {
+      font-size: 12.5px;
+      padding: 10px 22px;
+    }
+
+    .rel-mascot-col {
+      flex: unset !important;
+      width: 100% !important;
+      max-width: 320px;
+      height: auto !important;
+      margin: 0 auto;
+      justify-content: center;
+      align-items: flex-end;
+      order: 2;
+    }
+
+    .rel-mascot-img {
+      max-width: 290px;
+      max-height: 250px;
+      object-position: bottom center;
+      margin: 0 auto;
+    }
+  }
+
+  /* Extra small screens (<= 480px) */
+  @media (max-width: 480px) {
+    .rel-inner {
+      padding: 28px 16px 0 16px !important;
+      gap: 16px;
+    }
+
+    .rel-heading {
+      font-size: 18px;
+      line-height: 1.32;
+    }
+
+    .rel-desc {
+      font-size: 12px;
+      line-height: 1.55;
+      margin-bottom: 16px;
+    }
+
+    .rel-btn {
+      font-size: 11px;
+      padding: 9px 16px;
+    }
+
+    .rel-mascot-col {
+      max-width: 250px;
+    }
+
+    .rel-mascot-img {
+      max-height: 200px;
+      max-width: 240px;
+    }
+  }
+`;
 
 export { RelationshipSection };

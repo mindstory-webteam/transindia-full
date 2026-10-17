@@ -222,28 +222,33 @@ const CSS = `
 
   @media (max-width: 768px) {
     .wct-section {
-      padding: 56px 0 64px;
+      padding: 48px 0 56px;
     }
     .wct-container {
       padding: 0 clamp(16px, 2.5vw, 28px);
     }
     .wct-heading {
-      font-size: 28px;
+      font-size: clamp(24px, 5vw, 30px);
+    }
+    .wct-sub {
+      font-size: 16px;
+      margin-bottom: 36px;
     }
     .wct-grid {
       grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
     .wct-cell {
-      padding: 24px 24px;
+      padding: 22px 20px;
     }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 640px) {
     .wct-grid {
       grid-template-columns: 1fr;
     }
     .wct-cell {
-      padding: 24px;
+      padding: 24px 20px;
     }
   }
 `;
