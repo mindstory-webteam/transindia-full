@@ -43,6 +43,19 @@ const DEFAULT_LINES: PreloaderLine[] = [
 ];
 
 
+// Window-level flag to ensure Preloader only runs once per full browser reload/refresh,
+// and never runs during Next.js client-side page transitions.
+function hasAlreadyLoaded(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean((window as unknown as { __ti_has_loaded?: boolean }).__ti_has_loaded);
+}
+
+function markAsLoaded(): void {
+  if (typeof window !== 'undefined') {
+    (window as unknown as { __ti_has_loaded?: boolean }).__ti_has_loaded = true;
+  }
+}
+
 export function Preloader({
   logoSrc = '/images/logo/transindia.png',
   lines = DEFAULT_LINES,
@@ -52,12 +65,23 @@ export function Preloader({
   background = '#ffffff',
   onComplete,
 }: Props) {
+  // If already loaded in this browser window session (client-side transition), do not mount
+  const [mounted, setMounted] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return !hasAlreadyLoaded();
+  });
   const [fading, setFading] = useState(false);
-  const [mounted, setMounted] = useState(true);
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
 
   useEffect(() => {
+    if (!mounted) {
+      onCompleteRef.current?.();
+      return;
+    }
+
+    // Mark as loaded immediately so any client-side page transition will not trigger it
+    markAsLoaded();
     let hideTimer: number | undefined;
     let unmountTimer: number | undefined;
 

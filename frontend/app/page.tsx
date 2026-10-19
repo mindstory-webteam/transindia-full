@@ -6,7 +6,6 @@ import InsurancePlansSection from "@/components/InsurancePlansSection";
 import InsuranceSection from "@/components/InsuranceSection";
 import InsuranceSections from "@/components/InsuranceSections";
 import Navbar from "@/components/Navbar";
-import Preloader from "@/components/Preloader";
 import TeamSection from "@/components/TeamSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
 import TransindiaFooter from "@/components/Transindiafooter";
@@ -14,7 +13,6 @@ import TransindiaFooter from "@/components/Transindiafooter";
 export default function Home() {
   return (
     <div style={{ overflowX: "hidden", width: "100%" }}>
-      <Preloader/>
       <Navbar />
       <Banner />
       <InsuranceSection />

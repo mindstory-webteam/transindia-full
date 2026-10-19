@@ -1,5 +1,5 @@
 "use client";
-import {useState} from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
@@ -163,13 +163,185 @@ const Divider = () => (
   </div>
 );
 
+// ─── Viewport InView Hook ────────────────────────────────────────────────────
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
+
+    const startCounting = () => {
+      const activePreloader =
+        typeof document !== "undefined"
+          ? document.querySelector(".ti-pre:not(.is-fading)")
+          : null;
+
+      if (activePreloader) {
+        observer = new MutationObserver(() => {
+          if (!document.querySelector(".ti-pre:not(.is-fading)")) {
+            observer?.disconnect();
+            setInView(true);
+          }
+        });
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+        timer = setTimeout(() => {
+          observer?.disconnect();
+          setInView(true);
+        }, 3200);
+      } else {
+        setInView(true);
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startCounting();
+          io.disconnect();
+        }
+      },
+      { threshold }
+    );
+
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      observer?.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+  }, [threshold]);
+
+  return { ref, inView };
+}
+
+// ─── Counter Component ───────────────────────────────────────────────────────
+interface CounterProps {
+  target: number;
+  prefix?: string;
+  suffix?: string;
+  duration?: number;
+  decimals?: number;
+  animate?: boolean;
+}
+
+function Counter({
+  target,
+  prefix = "",
+  suffix = "",
+  duration = 2000,
+  decimals = 0,
+  animate: controlledAnimate,
+}: CounterProps) {
+  const [count, setCount] = useState(0);
+  const selfRef = useRef<HTMLSpanElement | null>(null);
+  const [selfInView, setSelfInView] = useState(false);
+
+  useEffect(() => {
+    if (controlledAnimate !== undefined) return;
+    const el = selfRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setSelfInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setSelfInView(true);
+          io.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [controlledAnimate]);
+
+  const shouldAnimate =
+    controlledAnimate !== undefined ? controlledAnimate : selfInView;
+
+  useEffect(() => {
+    if (!shouldAnimate) {
+      setCount(0);
+      return;
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setCount(target);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // smooth easeOutCubic curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = ease * target;
+
+      if (progress < 1) {
+        setCount(current);
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [shouldAnimate, target, duration]);
+
+  const display =
+    decimals > 0
+      ? count.toFixed(decimals)
+      : Math.round(count).toLocaleString("en-IN");
+
+  return (
+    <span
+      ref={selfRef}
+      style={{
+        fontVariantNumeric: "tabular-nums",
+        display: "inline-block",
+      }}
+    >
+      {prefix}
+      {display}
+      {suffix}
+    </span>
+  );
+}
+
 // ─── Section 1: Claim Process ─────────────────────────────────────────────────
 function ClaimSection() {
+  const { ref: claimCardRef, inView } = useInView(0.15);
+
   return (
     <section className="is-section">
       <div className="is-inner">
         {/* LEFT CARD */}
         <div
+          ref={claimCardRef}
           style={{
             ...s.card,
             position: "relative",
@@ -232,7 +404,9 @@ function ClaimSection() {
               style={{objectFit: "contain", flexShrink: 0}}
             />
             <div>
-              <p style={s.settlePct}>97% Claim Settlement Rate</p>
+              <p style={s.settlePct}>
+                <Counter target={97} suffix="%" animate={inView} /> Claim Settlement Rate
+              </p>
               <p style={s.settleSubtext}>
                 Across all insurance categories in 2024
               </p>
@@ -288,6 +462,8 @@ function ClaimSection() {
 
 // ─── Section 2: Advisors ──────────────────────────────────────────────────────
 function AdvisorSection() {
+  const { ref: cardRef, inView } = useInView(0.15);
+
   return (
     <section className="is-section" >
       <div className="is-inner is-inner--reverse">
@@ -320,7 +496,7 @@ function AdvisorSection() {
         </div>
 
         {/* RIGHT CARD */}
-        <div style={{...s.card, gap: 0, overflow: "visible"}}>
+        <div ref={cardRef} style={{...s.card, gap: 0, overflow: "visible"}}>
           <p style={{...s.cardHeading, padding: "24px 24px 0"}}>
             Our coverage quality scores
           </p>
@@ -340,7 +516,9 @@ function AdvisorSection() {
               }}
             >
               <div style={{flex: 1}}>
-                <p style={s.heroStat}>50K+</p>
+                <p style={s.heroStat}>
+                  <Counter target={50} suffix="K+" animate={inView} />
+                </p>
                 <p style={s.heroSubtext}>
                   Delivering reliable insurance coverage
                   <br />
@@ -387,22 +565,32 @@ function AdvisorSection() {
                 Clients Satisfaction
               </span>
               <span style={{fontWeight: 700, color: "#0EA5E9", fontSize: 16}}>
-                4.8/5
+                <Counter target={4.8} decimals={1} suffix="/5" animate={inView} />
               </span>
             </div>
             <div style={{...s.progressBg, marginTop: 12}}>
-              <div style={{...s.progressFill, width: "88%"}} />
+              <div
+                style={{
+                  ...s.progressFill,
+                  width: inView ? "88%" : "0%",
+                  transition: "width 1.5s cubic-bezier(0.16, 1, 0.3, 1)",
+                }}
+              />
             </div>
           </div>
 
           {/* Stats */}
           <div style={{...s.statsGrid, margin: "20px 0 0"}}>
             <div style={s.statBox}>
-              <p style={{...s.statNum, color: "#0D2B5E"}}>10+</p>
+              <p style={{...s.statNum, color: "#0D2B5E"}}>
+                <Counter target={10} suffix="+" animate={inView} />
+              </p>
               <p style={s.statLabel}>Years of experience</p>
             </div>
             <div style={{...s.statBox, borderLeft: "1px solid #E2E8F0"}}>
-              <p style={{...s.statNum, color: "#F5A623"}}>20+</p>
+              <p style={{...s.statNum, color: "#F5A623"}}>
+                <Counter target={20} suffix="+" animate={inView} />
+              </p>
               <p style={s.statLabel}>Insurer Partners</p>
             </div>
           </div>

@@ -1,8 +1,134 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import Breadcrum from "@/components/Breadcrum";
 
+// ─── Viewport InView Hook ────────────────────────────────────────────────────
+function useInView(threshold = 0.1) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
+
+    const startCounting = () => {
+      const activePreloader =
+        typeof document !== "undefined"
+          ? document.querySelector(".ti-pre:not(.is-fading)")
+          : null;
+
+      if (activePreloader) {
+        observer = new MutationObserver(() => {
+          if (!document.querySelector(".ti-pre:not(.is-fading)")) {
+            observer?.disconnect();
+            setInView(true);
+          }
+        });
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["class"],
+        });
+        timer = setTimeout(() => {
+          observer?.disconnect();
+          setInView(true);
+        }, 3200);
+      } else {
+        setInView(true);
+      }
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          startCounting();
+          io.disconnect();
+        }
+      },
+      { threshold }
+    );
+
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      observer?.disconnect();
+      if (timer) clearTimeout(timer);
+    };
+  }, [threshold]);
+
+  return { ref, inView };
+}
+
+// ─── Counter Component ───────────────────────────────────────────────────────
+interface CounterProps {
+  target: number;
+  duration?: number;
+  animate?: boolean;
+}
+
+function Counter({ target, duration = 2000, animate = false }: CounterProps) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!animate) {
+      setCount(0);
+      return;
+    }
+
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      setCount(target);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // smooth easeOutCubic curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const current = ease * target;
+
+      if (progress < 1) {
+        setCount(current);
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [animate, target, duration]);
+
+  return <>{Math.round(count).toLocaleString("en-IN")}</>;
+}
+
+const STATS = [
+  { target: 10, prefix: "", suffix: "", label: "Years of Experience" },
+  { target: 20, prefix: "", suffix: "", label: "Insurer Partners" },
+  { target: 250, prefix: "", suffix: "", label: "Happy Customers" },
+  { target: 500, prefix: "₹", suffix: "Cr", label: "Claims Settled" },
+];
+
 export default function EventBanner() {
+  const { ref: statsRef, inView } = useInView(0.1);
+
   return (
     <>
       <style>{CSS}</style>
@@ -42,16 +168,16 @@ export default function EventBanner() {
         </div>
 
         {/* ── .contact-lg-banner  ── */}
-        <div className="about-stats-bar">
+        <div className="about-stats-bar" ref={statsRef}>
           <div className="about-stats-inner">
-            {[
-              { value: "10", label: "Years of Experience" },
-              { value: "20", label: "Insurer Partners" },
-              { value: "250", label: "Happy Customers" },
-              { value: "₹500Cr", label: "Claims Settled" },
-            ].map((s) => (
+            {STATS.map((s) => (
               <div key={s.label} className="about-stat">
-                <p className="about-stat-value">{s.value}<span>+</span></p>
+                <p className="about-stat-value">
+                  {s.prefix}
+                  <Counter target={s.target} animate={inView} />
+                  {s.suffix}
+                  <span>+</span>
+                </p>
                 <p className="about-stat-label">{s.label}</p>
               </div>
             ))}
@@ -220,6 +346,7 @@ const CSS = `
     color: #001250;
     line-height: 1;
     margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
   }
 
   .about-stat-value span {
