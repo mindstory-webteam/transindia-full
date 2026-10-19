@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import TransindiaFooter from "@/components/Transindiafooter";
 import ConsultationCTA from "@/components/about/ConsultationCTA";
 import Breadcrum from "@/components/Breadcrum";
-import {InsuranceDetailData} from "./insuranceData";
+import {HeroStat, InsuranceDetailData} from "./insuranceData";
 import Preloader from "@/components/Preloader";
 
 interface Props {
@@ -870,12 +870,44 @@ function HealthStatsBar() {
     {value: "24/7", label: "CUSTOMER SUPPORT"},
   ];
 
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      {threshold: 0.2},
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
     <section className="hsb-section">
-      <div className="hsb-inner">
-        {stats.map((s) => (
+      <div className="hsb-inner" ref={ref}>
+        {stats.map((s, i) => (
           <div className="hsb-item" key={s.label}>
-            <div className="hsb-value">{s.value}</div>
+            <div className="hsb-value">
+              <AnimatedStatValue
+                value={s.value}
+                animate={inView}
+                duration={1600 + i * 200}
+              />
+            </div>
             <div className="hsb-label">{s.label}</div>
           </div>
         ))}
@@ -3753,6 +3785,127 @@ function FAQSection({data}: {data: InsuranceDetailData}) {
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
+// ANIMATED STAT COUNTER — parses values like "98.7%", "20+", "₹5Cr", "10,000+"
+// and counts up when the stats bar scrolls into view.
+// ═════════════════════════════════════════════════════════════════════════════
+
+const STAT_VALUE_RE = /^([^\d]*)([\d,]+(?:\.\d+)?)(.*)$/;
+
+function parseStatValue(value: string) {
+  const m = value.match(STAT_VALUE_RE);
+  if (!m) return null;
+  const [, prefix, numStr, suffix] = m;
+  const target = parseFloat(numStr.replace(/,/g, ""));
+  if (!Number.isFinite(target)) return null;
+  const decimals = numStr.includes(".") ? numStr.split(".")[1].length : 0;
+  return {prefix, target, suffix, decimals};
+}
+
+function AnimatedStatValue({
+  value,
+  animate,
+  duration = 1800,
+}: {
+  value: string;
+  animate: boolean;
+  duration?: number;
+}) {
+  const parsed = parseStatValue(value);
+  const target = parsed?.target ?? 0;
+  const decimals = parsed?.decimals ?? 0;
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!animate || target === 0) {
+      setCount(0);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // smooth easeOutCubic curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(ease * target);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [target, duration, animate]);
+
+  if (!parsed) return <>{value}</>;
+
+  return (
+    <>
+      {parsed.prefix}
+      {count.toLocaleString("en-IN", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      })}
+      {parsed.suffix}
+    </>
+  );
+}
+
+function HeroStats({stats}: {stats: HeroStat[]}) {
+  const [inView, setInView] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    // No IntersectionObserver (e.g. SSR fallback) — count immediately
+    if (typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          io.disconnect();
+        }
+      },
+      {threshold: 0.2},
+    );
+
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  return (
+    <div className="li-stats" ref={ref}>
+      {stats.map((s, i) => (
+        <div className="li-stat-item" key={s.label}>
+          {i !== 0 && <div className="li-stat-divider" />}
+          <div>
+            <div className="li-stat-value">
+              <AnimatedStatValue
+                value={s.value}
+                animate={inView}
+                duration={1600 + i * 200}
+              />
+            </div>
+            <div className="li-stat-label">{s.label}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═════════════════════════════════════════════════════════════════════════════
 export default function InsuranceDetailPage({data, slug}: Props) {
@@ -3796,17 +3949,7 @@ export default function InsuranceDetailPage({data, slug}: Props) {
               >
                 {data.heroCtaLabel}
               </Link>
-              <div className="li-stats">
-                {data.heroStats.map((s, i) => (
-                  <div className="li-stat-item" key={s.label}>
-                    {i !== 0 && <div className="li-stat-divider" />}
-                    <div>
-                      <div className="li-stat-value">{s.value}</div>
-                      <div className="li-stat-label">{s.label}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <HeroStats stats={data.heroStats} />
             </div>
 
             {/* RIGHT — form */}
@@ -4147,7 +4290,7 @@ const CSS = `
   .li-stats{ display: flex; align-items: flex-start; flex-wrap: wrap; gap: 8px; }
   .li-stat-item{ display: flex; align-items: center; gap: 24px; padding-right: 24px; }
   .li-stat-divider{ width: 1px; height: 44px; background: rgba(0, 18, 80, 0.15); flex-shrink: 0; }
-  .li-stat-value{ font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: #001250; line-height: 1.1; }
+  .li-stat-value{ font-size: clamp(32px, 4vw, 48px); font-weight: 800; color: #001250; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .li-stat-label{ font-size: 13px; color: #001250; opacity: 0.75; margin-top: 4px; white-space: nowrap; }
   .li-right{ flex: 0 0 42%; max-width: 800px; width: 100%; padding-top: 80px; }
 

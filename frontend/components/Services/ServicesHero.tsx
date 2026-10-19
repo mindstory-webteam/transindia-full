@@ -1,15 +1,139 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import Breadcrum from "@/components/Breadcrum";
 
+interface AnimatedNumberProps {
+  target: number;
+  duration?: number;
+  animate?: boolean;
+}
+
+function AnimatedNumber({
+  target,
+  duration = 1800,
+  animate = true,
+}: AnimatedNumberProps) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!animate) {
+      setCount(0);
+      return;
+    }
+    if (target === 0) {
+      setCount(0);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // smooth easeOutCubic curve
+      const ease = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.round(ease * target));
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setCount(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [target, duration, animate]);
+
+  return <>{count}</>;
+}
+
 const STATS = [
-  { value: "6",    suffix: "+",  label: "Insurance Categories",      suffixColor: "#F4622A" },
-  { value: "20",   suffix: "+",  label: "Insurer Partners",          suffixColor: "#F4622A" },
-  { value: "100",  suffix: "%",  label: "Independent Advice",        suffixColor: "#F4622A" },
-  { value: "₹0",   suffix: "",   label: "Cost to You for Advisory",  suffixColor: "#F4622A" },
+  { target: 6,   suffix: "+",  label: "Insurance Categories",     suffixColor: "#F4622A", duration: 1400 },
+  { target: 20,  suffix: "+",  label: "Insurer Partners",         suffixColor: "#F4622A", duration: 1800 },
+  { target: 100, suffix: "%",  label: "Independent Advice",       suffixColor: "#F4622A", duration: 2000 },
+  { target: 0,   prefix: "₹", suffix: "", label: "Cost to You for Advisory", suffixColor: "#F4622A", duration: 1000 },
 ];
 
 export default function ServicesHero() {
+  const [inView, setInView] = useState(false);
+  const statsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
+    let io: IntersectionObserver | null = null;
+
+    const triggerAnimation = () => {
+      timer = setTimeout(() => {
+        setInView(true);
+      }, 350);
+    };
+
+    // Check if the page-level Preloader overlay is present in the DOM
+    const preloaderEl = typeof document !== "undefined" ? document.querySelector(".ti-pre") : null;
+
+    if (preloaderEl) {
+      // Preloader is active: wait until it starts fading or unmounts before counting
+      observer = new MutationObserver(() => {
+        const activePreloader = document.querySelector(".ti-pre:not(.is-fading)");
+        if (!activePreloader) {
+          if (observer) observer.disconnect();
+          timer = setTimeout(() => {
+            setInView(true);
+          }, 400);
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
+      // Fallback timer if mutation doesn't fire (Preloader duration is ~3150ms)
+      const fallbackTimer = setTimeout(() => {
+        if (observer) observer.disconnect();
+        setInView(true);
+      }, 3400);
+
+      return () => {
+        if (observer) observer.disconnect();
+        clearTimeout(fallbackTimer);
+        if (timer) clearTimeout(timer);
+      };
+    } else {
+      // No preloader present (or already unmounted)
+      if (typeof IntersectionObserver === "undefined") {
+        triggerAnimation();
+        return;
+      }
+
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            triggerAnimation();
+            if (io) io.disconnect();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      io.observe(el);
+
+      return () => {
+        if (io) io.disconnect();
+        if (timer) clearTimeout(timer);
+      };
+    }
+  }, []);
+
   return (
     <>
       <style>{CSS}</style>
@@ -68,14 +192,19 @@ export default function ServicesHero() {
           </div>
 
           {/* ── Floating stats bar ── */}
-          <div className="svc-stats-bar">
+          <div className="svc-stats-bar" ref={statsRef}>
             <div className="svc-stats-inner">
               {STATS.map((s, i) => (
                 <div className="svc-stat" key={s.label}>
                   {i !== 0 && <div className="svc-stat-divider" />}
                   <div>
                     <div className="svc-stat-value">
-                      {s.value}
+                      {s.prefix && <span>{s.prefix}</span>}
+                      <AnimatedNumber
+                        target={s.target}
+                        animate={inView}
+                        duration={s.duration}
+                      />
                       {s.suffix && <span style={{ color: s.suffixColor }}>{s.suffix}</span>}
                     </div>
                     <div className="svc-stat-label">{s.label}</div>
@@ -246,6 +375,10 @@ const CSS = `
     display: flex;
     align-items: center;
     gap: 24px;
+    transition: transform 0.25s ease;
+  }
+  .svc-stat:hover{
+    transform: translateY(-2px);
   }
 
   .svc-stat-divider{
@@ -261,6 +394,10 @@ const CSS = `
     color: #001250;
     line-height: 1.1;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
   }
 
   .svc-stat-label{
