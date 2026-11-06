@@ -1,10 +1,114 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Breadcrum from "@/components/Breadcrum";
 
+/* ── Stats data ── */
+const STATS = [
+  { end: 20000, prefix: "", suffix: "+", label: "Policies Sold", icon: "shield" },
+  { end: 8000, prefix: "", suffix: "+", label: "Happy Clients", icon: "users" },
+  { end: 20, prefix: "₹", suffix: "Cr+", label: "Claim Settled", icon: "check" },
+  { end: 10, prefix: "", suffix: "+", label: "Years of Trust", icon: "clock" },
+];
+
+/* ── Icons ── */
+function StatIcon({ name }) {
+  const common = {
+    width: 22,
+    height: 22,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.8,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    "aria-hidden": true,
+  };
+  switch (name) {
+    case "shield":
+      return (
+        <svg {...common}>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    case "users":
+      return (
+        <svg {...common}>
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+      );
+    case "check":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+      );
+    case "clock":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="12" r="10" />
+          <path d="M12 6v6l4 2" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+/* ── Animated counter ── */
+function Counter({ end, prefix = "", suffix = "", start, duration = 1800 }) {
+  const [value, setValue] = useState(0);
+
+  useEffect(() => {
+    if (!start) return;
+    let frame;
+    const t0 = performance.now();
+    const tick = (now) => {
+      const p = Math.min((now - t0) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      setValue(Math.round(end * eased));
+      if (p < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [start, end, duration]);
+
+  return (
+    <>
+      {prefix}
+      {value.toLocaleString("en-IN")}
+      <span>{suffix}</span>
+    </>
+  );
+}
+
 export default function AboutHero() {
+  const statsRef = useRef(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = statsRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          obs.disconnect(); // animate once
+        }
+      },
+      { threshold: 0.3 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <>
       <style>{CSS}</style>
@@ -14,7 +118,7 @@ export default function AboutHero() {
       >
         <div className="about-inner">
           <div className="about-trail-wrapper">
-             <Breadcrum crumbs={[{ label: "Home", href: "/" }, { label: "About Us" }]} />
+            <Breadcrum crumbs={[{ label: "Home", href: "/" }, { label: "About Us" }]} />
           </div>
 
           <div className="about-content">
@@ -36,37 +140,41 @@ export default function AboutHero() {
 
           <div className="about-mobile-visual">
             <Image
-              src="/images/banner/trans123.png"
+              src="/images/about/ABOUT/About-banner-2.png"
               alt="About TransIndia"
               width={1200}
               height={896}
+              sizes="(max-width: 600px) 80vw, 45vw"
               priority
             />
           </div>
 
           <div className="about-lg-banner">
             <Image
-              src="/images/banner/trans123.png"
+              src="/images/about/ABOUT/About-banner-1.png"
               alt="About TransIndia Banner"
               width={1400}
               height={996}
+              sizes="(max-width: 1450px) 42vw, 600px"
               priority
             />
           </div>
         </div>
 
-        {/* ── .contact-lg-banner  ── */}
-        <div className="about-stats-bar">
+        {/* ── Stats bar ── */}
+        <div className="about-stats-bar" ref={statsRef}>
           <div className="about-stats-inner">
-            {[
-              { value: "10", label: "Years of Experience" },
-              { value: "20", label: "Insurer Partners" },
-              { value: "500", label: "Happy Customers" },
-              { value: "₹250Cr", label:"Claims Settled" },
-            ].map((s) => (
+            {STATS.map((s) => (
               <div key={s.label} className="about-stat">
-                <p className="about-stat-value">{s.value}<span>+</span></p>
-                <p className="about-stat-label">{s.label}</p>
+                <div className="about-stat-icon">
+                  <StatIcon name={s.icon} />
+                </div>
+                <div className="about-stat-text">
+                  <p className="about-stat-value">
+                    <Counter end={s.end} prefix={s.prefix} suffix={s.suffix} start={inView} />
+                  </p>
+                  <p className="about-stat-label">{s.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -80,9 +188,9 @@ const CSS = `
   .about-hero {
     background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
     position: relative;
-    overflow: visible; 
-    padding-top: 150px; 
-    padding-bottom: 75px; 
+    overflow: visible;
+    padding-top: 150px;
+    padding-bottom: 75px;
     font-family: 'matterregular', sans-serif;
   }
 
@@ -151,7 +259,7 @@ const CSS = `
     display: inline-flex;
     align-items: center;
   }
-  
+
   .about-btn-ghost {
     background: transparent;
     color: #001250;
@@ -178,28 +286,37 @@ const CSS = `
 
   .about-lg-banner {
     position: absolute;
-    right: -50px;
-    bottom: -75px; /* peek under the stats bar */
-    width: 65%;
-    max-width: 780px;
+    right: 32px;
+    bottom: -40px;
+    width: 42%;
+    max-width: 600px;
     z-index: 1;
     pointer-events: none;
-  }
-
-  @media (max-width: 1450px) {
-    .about-lg-banner {
-      right: 0;
-    }
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
   }
 
   .about-lg-banner img {
     width: 100%;
     height: auto;
+    max-height: 560px;
     display: block;
     object-fit: contain;
     object-position: bottom right;
   }
 
+  @media (max-width: 1450px) {
+    .about-lg-banner { right: 24px; width: 40%; }
+    .about-lg-banner img { max-height: 520px; }
+  }
+
+  @media (max-width: 1280px) {
+    .about-lg-banner { width: 38%; }
+    .about-lg-banner img { max-height: 470px; }
+  }
+
+  /* ── Stats bar ── */
   .about-stats-bar {
     position: absolute;
     bottom: 0;
@@ -212,10 +329,9 @@ const CSS = `
 
   .about-stats-inner {
     width: 100%;
-    padding: 28px 40px;
+    padding: 26px 36px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    text-align: center;
     gap: 20px;
     background: #fff;
     border-radius: 16px;
@@ -224,42 +340,65 @@ const CSS = `
       0 2px 8px rgba(0, 0, 0, 0.07);
   }
 
-  .about-stat + .about-stat {
-    border-left: 1px solid #e8ecf4;
+  .about-stat {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
   }
+
+  .about-stat + .about-stat {
+    border-left: 1px solid #e3e8f0;
+  }
+
+  .about-stat-icon {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 10px;
+    background: #E4F6F8;
+    border: 1px solid #C6ECEF;
+    color: #20BEC6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .about-stat-text { text-align: left; }
 
   .about-stat-value {
-    font-size: 30px;
-    font-weight: bold;
+    font-size: 28px;
+    font-weight: 800;
     color: #001250;
     line-height: 1;
-    margin-bottom: 6px;
+    margin: 0 0 6px 0;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
-  .about-stat-value span {
-    color: #e84b2a;
-  }
+  .about-stat-value span { color: #001250; }
 
   .about-stat-label {
-    font-size: 13px;
-    color: #6b7280;
+    font-size: 14px;
+    color: #4a5a85;
     font-weight: 500;
+    margin: 0;
   }
 
-  /* ── Tablets / small laptops (≤1200px): adjust breadcrumb to avoid overlap ── */
+  /* ── ≤1200px ── */
   @media (max-width: 1200px) {
-    .about-trail-wrapper {
-      top: -10px;
-    }
+    .about-trail-wrapper { top: -10px; }
+    .about-title { font-size: 46px; }
+    .about-stats-inner { padding: 24px 24px; }
+    .about-stat { gap: 12px; }
+    .about-stat-value { font-size: 24px; }
+    .about-stat-label { font-size: 13px; }
   }
 
-  /* ── iPad Pro & Mini / tablets (≤1024px): side-by-side layout ── */
+  /* ── Tablets (≤1024px) ── */
   @media (max-width: 1024px) {
-    .about-lg-banner {
-      display: none;
-    }
+    .about-lg-banner { display: none; }
     .about-hero {
-      background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%);
       padding-top: 110px;
       padding-bottom: 60px;
       overflow: visible;
@@ -271,16 +410,12 @@ const CSS = `
       min-height: 400px;
       padding: 0 28px;
     }
+    .about-trail-wrapper { display: none; }
 
-    /* Breadcrumb */
-    .about-trail-wrapper {
-      display: none;
-    }
-
-    .about-content { 
-      flex: 0 0 50%; 
-      padding-bottom: 60px; 
-      text-align: left; 
+    .about-content {
+      flex: 0 0 52%;
+      padding-bottom: 60px;
+      text-align: left;
     }
     .about-title { font-size: 34px; }
     .about-desc { max-width: 100%; margin-bottom: 24px; margin-left: 0; }
@@ -288,14 +423,16 @@ const CSS = `
 
     .about-mobile-visual {
       display: block;
-      flex: 0 0 45%;
+      flex: 0 0 44%;
       text-align: right;
       padding-bottom: 60px;
       margin-top: 0;
     }
     .about-mobile-visual img {
       display: inline-block;
-      max-width: 100%;
+      width: 100%;
+      max-width: 360px;
+      max-height: 380px;
       height: auto;
       object-fit: contain;
     }
@@ -304,26 +441,28 @@ const CSS = `
 
     .about-stats-inner {
       grid-template-columns: repeat(2, 1fr);
-      gap: 24px 16px;
+      gap: 0;
+      padding: 8px 20px;
     }
+    .about-stat { justify-content: flex-start; padding: 18px 16px; }
     .about-stat + .about-stat { border-left: none; }
-    .about-stat { border-bottom: 1px solid #e8ecf4; padding-bottom: 24px; }
-    .about-stat:nth-child(3), .about-stat:nth-child(4) { border-bottom: none; padding-bottom: 0; }
-    .about-stat:nth-child(even) { border-left: 1px solid #e8ecf4; padding-left: 16px; }
+    .about-stat:nth-child(even) { border-left: 1px solid #e3e8f0; }
+    .about-stat:nth-child(1), .about-stat:nth-child(2) { border-bottom: 1px solid #e3e8f0; }
   }
 
+  /* ── Mobile (≤600px) ── */
   @media (max-width: 600px) {
-    .about-hero { background: linear-gradient(180deg, #F0F8FD 0%, #E6F3FA 100%); padding-top: 100px; }
-    .about-inner { 
-      padding: 0 20px; 
-      min-height: auto; 
-      flex-direction: column; 
-      align-items: flex-start; 
+    .about-hero { padding-top: 100px; }
+    .about-inner {
+      padding: 0 20px;
+      min-height: auto;
+      flex-direction: column;
+      align-items: flex-start;
     }
     .about-trail-wrapper { display: none; }
-    .about-content {  padding-bottom: 20px; width: 100%; }
+    .about-content { padding-bottom: 20px; width: 100%; }
     .about-title { font-size: 26px; }
-    
+
     .about-btns { flex-direction: column; width: 100%; }
     .about-btn-orange, .about-btn-ghost { width: 100%; justify-content: center; }
 
@@ -332,23 +471,33 @@ const CSS = `
       width: 100%;
       text-align: center;
       margin-top: 20px;
-      padding-bottom: 140px; 
+      padding-bottom: 140px;
     }
     .about-mobile-visual img {
-      max-width: 100%;
+      width: 80%;
+      max-width: 300px;
+      max-height: 320px;
       height: auto;
       object-fit: contain;
     }
 
     .about-stats-bar { width: calc(100% - 32px); }
-    
-    .about-stats-inner {
-      grid-template-columns: 1fr;
-      padding: 24px 20px;
-      gap: 20px;
-      border-radius: 12px;
-    }
-    .about-stat { border-left: none !important; padding-left: 0 !important; border-bottom: 1px solid #e8ecf4; padding-bottom: 20px; }
-    .about-stat:last-child { border-bottom: none; padding-bottom: 0; }
+    .about-stats-inner { padding: 4px 12px; border-radius: 12px; }
+    .about-stat { padding: 16px 8px; gap: 10px; }
+    .about-stat-icon { width: 38px; height: 38px; border-radius: 8px; }
+    .about-stat-icon svg { width: 18px; height: 18px; }
+    .about-stat-value { font-size: 20px; }
+    .about-stat-label { font-size: 12px; }
+  }
+
+  /* ── Small phones (≤420px): single column ── */
+  @media (max-width: 420px) {
+    .about-stats-inner { grid-template-columns: 1fr; }
+    .about-stat { border-left: none !important; border-bottom: 1px solid #e3e8f0; }
+    .about-stat:last-child { border-bottom: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .about-stat-value { transition: none; }
   }
 `;
