@@ -19,13 +19,14 @@ export default function OurStory() {
       <style>{CSS}</style>
       <section className="our-story-section">
         <div className="our-story-container">
+
           {/* Badge */}
           <div className="our-story-badge">Our Story</div>
 
           {/* Heading */}
           <h2 className="our-story-heading">
-            <span className="heading-dark">Risk Management,</span>
-            <span className="heading-primary">Done Right</span>
+            <span className="heading-dark">Transindia Insurance Broking and </span>
+            <span className="heading-primary">Risk Management Pvt. Ltd</span>
           </h2>
 
           {/* Body paragraphs */}
@@ -40,7 +41,6 @@ export default function OurStory() {
              We specialize in Retail and Corporate Insurance, Risk Advisory, and Claims Management, providing end-to-end solutions tailored to the unique requirements of organizations across industries. Our experienced team works closely with clients to design efficient insurance programs, optimize coverage, support policy administration, and ensure smooth claims settlement.
             </p>
             <p>
-              
               At Transindia, we believe insurance is not just about policies but about protecting businesses, people, and assets. Through our expertise, industry relationships, and service-driven approach, we continue to deliver transparent, reliable, and value-based risk management solutions to our clients and partners.
             </p>
           </div>
@@ -213,10 +213,42 @@ const CSS = `
     padding: 0 60px;
   }
 
-  /* ── Top intro block, full width ── */
-  .core-values-intro {
-    max-width: 720px;
+  /* ── Top row: intro (left) + tagline (right) ── */
+  .core-values-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 40px;
     margin-bottom: 56px;
+  }
+
+  .core-values-intro {
+    flex: 1;
+    max-width: 720px;
+  }
+
+  .core-values-tagline {
+    flex-shrink: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    font-family: var(--font-sora), "Sora", sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    color: #111827;
+    padding-right: 20px;
+    border-right: 4px solid #00b8c4;
+  }
+
+  .tagline-orange {
+    color: #F15A40;
+  }
+
+  .tagline-teal {
+    color: #00b8c4;
   }
 
   .core-values-badge {
@@ -245,8 +277,6 @@ const CSS = `
   .core-values-heading span {
     color: #00b8c4;
   }
-
-
 
   .core-values-subtitle {
     font-size: 15px;
@@ -390,6 +420,9 @@ const CSS = `
     .core-values-heading {
       font-size: 32px;
     }
+    .core-values-tagline {
+      font-size: 32px;
+    }
   }
 
   @media (max-width: 1024px) {
@@ -399,6 +432,10 @@ const CSS = `
     .our-story-container {
       padding: 0 30px;
     }
+    .core-values-tagline {
+      font-size: 28px;
+      padding-right: 16px;
+    }
     .core-values-section {
       padding: 60px 0;
       border-radius: 16px;
@@ -406,7 +443,7 @@ const CSS = `
     .core-values-content {
       padding: 0 32px;
     }
-    .core-values-intro {
+    .core-values-top {
       margin-bottom: 40px;
     }
     .core-values-heading {
@@ -438,6 +475,19 @@ const CSS = `
     .our-story-container {
       padding: 0 20px;
     }
+    .core-values-top {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 24px;
+    }
+    .core-values-tagline {
+      text-align: left;
+      font-size: 24px;
+      padding-right: 0;
+      border-right: none;
+      padding-left: 16px;
+      border-left: 4px solid #00b8c4;
+    }
     .core-values-section {
       margin-top: 60px;
       padding: 50px 0;
@@ -446,7 +496,7 @@ const CSS = `
     .core-values-content {
       padding: 0 24px;
     }
-    .core-values-intro {
+    .core-values-top {
       margin-bottom: 32px;
     }
     .core-values-heading {
@@ -495,6 +545,9 @@ const CSS = `
     .our-story-container {
       padding: 0 16px;
     }
+    .core-values-tagline {
+      font-size: 22px;
+    }
     .core-values-section {
       margin-top: 40px;
       padding: 40px 0;
@@ -502,7 +555,7 @@ const CSS = `
     .core-values-content {
       padding: 0 16px;
     }
-    .core-values-intro {
+    .core-values-top {
       margin-bottom: 28px;
     }
     .core-values-heading {
@@ -624,16 +677,23 @@ function CoreValuesSection() {
     <div className="core-values-section" ref={containerRef}>
       <div className="core-values-content">
 
-        {/* ── Top: full-width intro ── */}
-        <div className="core-values-intro">
-          <div className="core-values-badge">Our Values</div>
+        {/* ── Top: intro (left) + tagline (right) ── */}
+        <div className="core-values-top">
+          <div className="core-values-intro">
+            <div className="core-values-badge">Our Values</div>
 
-          <h2 className="core-values-heading">
-            What We Stand <span>For</span>
-          </h2>
+            <h2 className="core-values-heading">
+              What We Stand <span>For</span>
+            </h2>
 
-          <p className="core-values-subtitle">
-            The principles that guide our decisions, shape our culture, and define our commitment to excellence.
+            <p className="core-values-subtitle">
+              The principles that guide our decisions, shape our culture, and define our commitment to excellence.
+            </p>
+          </div>
+
+          <p className="core-values-tagline">
+            <span>For Every <span className="tagline-orange">Life.</span></span>
+            <span>For Every <span className="tagline-teal">Tomorrow.</span></span>
           </p>
         </div>
 

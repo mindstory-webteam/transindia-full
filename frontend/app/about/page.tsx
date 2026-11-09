@@ -7,6 +7,7 @@ import AboutHero from "@/components/about/AboutHero";
 import TransindiaFooter from "@/components/Transindiafooter";
 import ConsultationCTA from "@/components/about/ConsultationCTA";
 import Preloader from "@/components/Preloader";
+import ProtectionCTA from "@/components/about/ProtectionCTA";
 
 export default function Home() {
   return (
@@ -14,6 +15,7 @@ export default function Home() {
       
     <Navbar />
     <AboutHero />
+    <ProtectionCTA/>
     <OurStory/>
     <WhyChooseUs/>
     {/* <OurMembers/> */}
