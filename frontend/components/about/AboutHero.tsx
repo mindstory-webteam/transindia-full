@@ -129,7 +129,9 @@ export default function AboutHero() {
               <span style={{ color: "#20BEC6" }}>Marketplace.</span>
             </h1>
             <p className="about-desc">
-              We exist to make insurance simple, honest, and accessible for every Indian family — whether you&apos;re planning for tomorrow or protecting what you&apos;ve built today.
+              We assist in providing the right insurance solutions, 
+honest and accessible for every India Family – 
+whether you’re planning for tomorrow or protecting what you’ve built today
             </p>
 
             <div className="about-btns">
