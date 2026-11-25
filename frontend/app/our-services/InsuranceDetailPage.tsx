@@ -4037,7 +4037,7 @@ export default function InsuranceDetailPage({data, slug}: Props) {
                   <img
                     src={data.whyImage}
                     alt={data.whyTitle || "illustration"}
-                    className="w-full h-auto object-contain rounded-3xl"
+                    className="w-[500px] h-auto object-contain rounded-3xl"
                   />
                 ) : data.benefits[0]?.emoji ? (
                   // eslint-disable-next-line @next/next/no-img-element

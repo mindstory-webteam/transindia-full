@@ -70,7 +70,7 @@ export default function ContactHero() {
             {/* ── Large-screen banner image ── */}
             <div className="contact-lg-banner">
               <img
-                src="/images/banner/trans12.png"
+                 src="/new-banners/contact.png"
                 alt="Contact us representative"
                 className="contact-lg-banner-img"
               />
@@ -79,7 +79,7 @@ export default function ContactHero() {
             {/* ── Small-screen banner image ── */}
             <div className="contact-sm-banner">
               <img
-                src="/images/contact-us/CONTACT/Contacts page - Hero banner.png"
+                src="/new-banners/contact.png"
                 alt="Contact us banner"
                 className="contact-sm-banner-img"
               />
@@ -192,7 +192,7 @@ const CSS = `
   /* Wide desktops: keep the mascot from drifting too far inward */
   @media (min-width: 1500px) {
     .contact-lg-banner {
-      right: 10%;
+     
       width: 680px;
     }
   }

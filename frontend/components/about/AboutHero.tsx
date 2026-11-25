@@ -142,7 +142,7 @@ whether you’re planning for tomorrow or protecting what you’ve built today
 
           <div className="about-mobile-visual">
             <Image
-              src="/images/about/ABOUT/About-banner-2.png"
+              src="/new-banners/about-page.png"
               alt="About TransIndia"
               width={1200}
               height={896}
@@ -153,7 +153,7 @@ whether you’re planning for tomorrow or protecting what you’ve built today
 
           <div className="about-lg-banner">
             <Image
-              src="/images/about/ABOUT/About-banner-1.png"
+               src="/new-banners/about-page.png"
               alt="About TransIndia Banner"
               width={1400}
               height={996}
@@ -302,7 +302,7 @@ const CSS = `
   .about-lg-banner img {
     width: 100%;
     height: auto;
-    max-height: 560px;
+    max-height: 760px;
     display: block;
     object-fit: contain;
     object-position: bottom right;

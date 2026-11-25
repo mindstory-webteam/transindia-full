@@ -183,7 +183,7 @@ export default function ServicesHero() {
               {/* RIGHT */}
               <div className="svc-right">
                 <img
-                  src="/images/banner/trans1.png"
+                  src="/new-banners/serv-main.png"
                   alt="Complete protection"
                   className="svc-visual-img"
                 />
