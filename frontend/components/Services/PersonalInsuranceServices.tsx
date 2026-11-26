@@ -8,23 +8,27 @@ import {
 } from "../../app/our-services/insuranceData";
 
 // ─── Resolve image URL ────────────────────────────────────────────────────────
-// Local paths like "/images/..." live in the Next.js /public folder and must be
-// served as-is. Only backend upload paths (e.g. "/uploads/...") need the API
-// server root prepended.
+// Only backend-uploaded files (e.g. "/uploads/...") get the API server root.
+// Everything else ("/images/...", "/new-banners/...") lives in the Next.js
+// /public folder and is served as-is.
 function resolveImageUrl(image: string): string {
   if (!image) return "";
   if (image.startsWith("http://") || image.startsWith("https://")) return image;
 
-  // Next.js public assets — serve directly, do NOT prefix with API server
-  if (image.startsWith("/images")) return image;
+  // Backend uploads — prepend API server root
+  if (image.startsWith("/uploads")) {
+    const API_BASE =
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.API_URL ||
+      "http://localhost:5000/api";
 
-  const API_BASE =
-    process.env.NEXT_PUBLIC_API_URL ||
-    process.env.API_URL ||
-    "http://localhost:5000/api";
+    const serverRoot = API_BASE.replace(/\/api\/?$/, "");
+    return `${serverRoot}${image}`;
+  }
 
-  const serverRoot = API_BASE.replace(/\/api\/?$/, "");
-  return `${serverRoot}${image.startsWith("/") ? "" : "/"}${image}`;
+  // Next.js public assets — serve directly (encodeURI handles spaces in folder names)
+  const path = image.startsWith("/") ? image : `/${image}`;
+  return encodeURI(path);
 }
 
 // Custom service card image mappings
